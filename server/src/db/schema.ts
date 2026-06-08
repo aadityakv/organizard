@@ -133,3 +133,14 @@ export const invites = sqliteTable('invites', {
   expiresAt: integer('expires_at').notNull(),
   acceptedBy: text('accepted_by'),
 });
+
+// Idempotency: a processed mutation's clientId is recorded so retries are no-ops.
+export const mutationLog = sqliteTable(
+  'mutation_log',
+  {
+    moveId: text('move_id').notNull().references(() => moves.id),
+    clientId: text('client_id').notNull(),
+    appliedAt: integer('applied_at').notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.moveId, t.clientId] }) }),
+);

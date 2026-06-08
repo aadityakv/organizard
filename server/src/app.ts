@@ -2,8 +2,10 @@ import { Hono } from 'hono';
 
 import { defaultDeps, type Deps } from './deps';
 import { authMiddleware, type AuthVars } from './middleware/auth';
+import { getUserMoves } from './repos/moves';
 import { toPublicUser } from './repos/users';
 import { authRoutes } from './routes/auth';
+import { moveRoutes } from './routes/moves';
 import type { Env } from './types';
 
 /**
@@ -17,11 +19,12 @@ export function createApp(overrides: Partial<Deps> = {}) {
   app.get('/v1/health', (c) => c.json({ ok: true, time: deps.now() }));
 
   app.route('/v1/auth', authRoutes(deps));
+  app.route('/v1/moves', moveRoutes(deps));
 
-  app.get('/v1/me', authMiddleware(deps), (c) =>
-    // moves arrive in Phase 3/5; the shape is stable from here.
-    c.json({ user: toPublicUser(c.get('user')), moves: [] }),
-  );
+  app.get('/v1/me', authMiddleware(deps), async (c) => {
+    const moves = await getUserMoves(deps.getDb(c.env), c.get('user').id);
+    return c.json({ user: toPublicUser(c.get('user')), moves });
+  });
 
   return app;
 }
