@@ -18,7 +18,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>
       {TABS.map((tab) => {
-        const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
+        const routeIndex = state.routes.findIndex((r: { name: string }) => r.name === tab.name);
         const focused = state.index === routeIndex;
         const onPress = () => {
           const event = navigation.emit({ type: 'tabPress', target: state.routes[routeIndex]?.key, canPreventDefault: true });

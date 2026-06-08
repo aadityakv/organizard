@@ -38,7 +38,11 @@
           "cameraPermission": "Organizard uses the camera to photograph your items and scan box QR labels."
         }
       ],
-      "./plugins/withFmtConstevalFix"
+      "./plugins/withFmtConstevalFix",
+      "expo-image",
+      "expo-secure-store",
+      "expo-splash-screen",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": false

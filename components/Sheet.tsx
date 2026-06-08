@@ -33,7 +33,7 @@ export function Sheet({ visible, onClose, title, children }: SheetProps) {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, justifyContent: 'flex-end' },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.scrim },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: colors.scrim },
   panel: {
     backgroundColor: colors.surfaceCard,
     borderTopLeftRadius: radius.xl,

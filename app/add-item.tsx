@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
 
   // ── Permission states (inside the camera card) ──────────────────────────────
   permStack: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: space[6],

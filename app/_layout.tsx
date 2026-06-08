@@ -16,6 +16,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { loadSession } from '@/lib/session';
@@ -58,25 +59,27 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.surfaceApp },
-          animation: 'slide_from_right',
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="moves" />
-        <Stack.Screen name="new-move" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="box/[id]" />
-        <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-        <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
-        <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
-        <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
-      </Stack>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.surfaceApp },
+            animation: 'slide_from_right',
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="moves" />
+          <Stack.Screen name="new-move" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="box/[id]" />
+          <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
+          <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
+          <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
+        </Stack>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

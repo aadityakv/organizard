@@ -352,7 +352,7 @@ const GREEN = palette.green400;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: VIEWFINDER_BG },
   loading: { flex: 1, backgroundColor: colors.surfaceApp },
-  dim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(13,15,14,0.45)' },
+  dim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(13,15,14,0.45)' },
   overlay: { flex: 1 },
 
   // Top bar

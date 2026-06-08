@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     overflow: 'hidden',
   },
-  coverImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  coverImage: { ...StyleSheet.absoluteFill, width: '100%', height: '100%' },
   coverHint: {
     position: 'absolute',
     bottom: 12,
