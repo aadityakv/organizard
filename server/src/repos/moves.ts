@@ -203,6 +203,10 @@ export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, sin
  * box/item ids, then leaf tables, then the move itself). Drizzle's D1 driver has
  * no interactive transaction here (and neither does the sql.js test driver), so
  * the deletes are issued in order — matching the rest of this repo.
+ *
+ * Known limitation: this removes the `photos` rows but NOT the underlying R2
+ * blobs under `moves/<moveId>/…` (there is no photo-deletion path anywhere yet).
+ * The move-id-prefixed keys make a future `R2.list({ prefix })` + bulk delete clean.
  */
 export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
   const boxIds = (await db.select({ id: s.boxes.id }).from(s.boxes).where(eq(s.boxes.moveId, moveId))).map((r) => r.id);

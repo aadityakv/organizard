@@ -448,7 +448,11 @@ export const useStore = create<Store>()(
           data.activeMode === 'shared' && data.serverMoveId &&
           roleFor('shared', data.members, s.account?.id ?? null) === 'owner';
         if (isOwnedShared && s.session && data.serverMoveId) {
-          try { await api.deleteMove(s.session, data.serverMoveId); } catch { /* fall through to local removal */ }
+          try {
+            await api.deleteMove(s.session, data.serverMoveId);
+          } catch (e) {
+            console.warn('deleteMove: server teardown failed; removing locally', e);
+          }
         }
         get().removeMoveLocal(id);
       },
