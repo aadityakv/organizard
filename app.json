@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Organizard",
+    "slug": "organizard",
+    "scheme": "organizard",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F7F6F2",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.organizard.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels."
+      }
+    },
+    "android": {
+      "package": "com.organizard.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Organizard uses the camera to photograph your items and scan box QR labels."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

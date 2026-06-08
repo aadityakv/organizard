@@ -1,0 +1,30 @@
+// Public component surface. Screens import from '@/components'.
+
+// Shared app chrome (foundation)
+export { Icon, type IconProps } from './Icon';
+export { GeckoMark } from './GeckoMark';
+export { Card } from './Card';
+export { Header, type HeaderProps } from './Header';
+export { LockNote } from './LockNote';
+export { Thumb, type ThumbProps } from './Thumb';
+export { Sheet, type SheetProps } from './Sheet';
+export { RoleSwitcher } from './RoleSwitcher';
+
+// Design-system primitives (core)
+export { Button, type ButtonProps } from './Button';
+export { IconButton, type IconButtonProps } from './IconButton';
+export { Badge, type BadgeProps } from './Badge';
+export { StatusChip, type StatusChipProps } from './StatusChip';
+export { Avatar, type AvatarProps } from './Avatar';
+
+// Design-system primitives (forms)
+export { Input, type InputProps } from './Input';
+export { Stepper, type StepperProps } from './Stepper';
+export { Segmented, type SegmentedProps } from './Segmented';
+
+// Design-system primitives (domain)
+export { BoxCard, type BoxCardProps } from './BoxCard';
+export { RoleBadge, type RoleBadgeProps } from './RoleBadge';
+export { MarkerChip, type MarkerChipProps } from './MarkerChip';
+export { ColorDot, type ColorDotProps } from './ColorDot';
+export { ValueStat, type ValueStatProps } from './ValueStat';

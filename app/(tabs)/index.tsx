@@ -1,0 +1,1032 @@
+// Dashboard (home) — totals, room/status/value grouping, color-coded box grid,
+// and Find. Role-aware: Owner/Editor get create affordances; Viewers see a LockNote.
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+
+import {
+  BoxCard,
+  ColorDot,
+  GeckoMark,
+  Header,
+  Icon,
+  IconButton,
+  Input,
+  LockNote,
+  RoleSwitcher,
+  Segmented,
+  Sheet,
+  Thumb,
+  ValueStat,
+} from '@/components';
+import type { Box, IndexedItem, Room } from '@/data/types';
+import { PERM } from '@/lib/permissions';
+import { money } from '@/lib/money';
+import {
+  allIndexedItems,
+  boxStats,
+  markerById,
+  moveProgress,
+  moveTotals,
+  roomById,
+  statusById,
+  useStore,
+} from '@/store/useStore';
+import {
+  BOX_COLORS,
+  boxColor,
+  colors,
+  fonts,
+  fontSize,
+  palette,
+  radius,
+  shadow,
+  space,
+} from '@/theme';
+
+type GroupView = 'room' | 'status' | 'value';
+
+const GROUP_OPTIONS: { value: GroupView; label: string }[] = [
+  { value: 'room', label: 'Room' },
+  { value: 'status', label: 'Status' },
+  { value: 'value', label: 'Value' },
+];
+
+// Status-order used when sorting boxes in the non-room views (in_transit first,
+// then packing, sealed, unpacked, anything custom last) — matches the design.
+const STATUS_ORDER: Record<string, number> = {
+  transit: 0,
+  packing: 1,
+  sealed: 2,
+  unpacked: 3,
+};
+
+const ROOM_ICONS = [
+  'box',
+  'cooking-pot',
+  'bed',
+  'bath',
+  'sofa',
+  'briefcase',
+  'shirt',
+  'baby',
+  'tv',
+  'flower-2',
+  'car',
+  'dumbbell',
+];
+
+// Quick search suggestions surfaced when the search field is empty.
+const SEARCH_SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];
+
+function openBox(id: string): void {
+  router.push(`/box/${id}`);
+}
+
+// ---------------------------------------------------------------------------
+// Card factory — resolves a box's status + markers + room for <BoxCard>.
+// ---------------------------------------------------------------------------
+function DashboardBoxCard({ box }: { box: Box }) {
+  const status = useStore((s) => statusById(s, box.status));
+  const room = useStore((s) => roomById(s, box.roomId));
+  const markerDefs = useStore((s) =>
+    box.markers.map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m)),
+  );
+  const { count, value } = useStore((s) => boxStats(s, box.id));
+
+  return (
+    <BoxCard
+      name={box.name}
+      number={box.number}
+      color={box.color}
+      room={room?.name}
+      itemCount={count}
+      value={value}
+      statusLabel={status?.label ?? '—'}
+      statusColor={status?.color ?? 'slate'}
+      markers={markerDefs.map((m) => ({ label: m.label, color: m.color, icon: m.icon }))}
+      cover={box.cover}
+      onPress={() => openBox(box.id)}
+      style={styles.gridCard}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Find — searches items + boxes across the whole move, with a Room › Box crumb.
+// ---------------------------------------------------------------------------
+function FindResults({ query }: { query: string }) {
+  const indexed = useStore(allIndexedItems);
+  const boxes = useStore((s) => s.boxes);
+  const rooms = useStore((s) => s.rooms);
+  const markers = useStore((s) => s.markers);
+
+  const q = query.trim().toLowerCase();
+
+  const markerLabel = (id: string): string =>
+    markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
+
+  const items = indexed.filter(
+    (it) =>
+      it.name.toLowerCase().includes(q) ||
+      (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
+  );
+  const matchedBoxes = boxes.filter((b) => b.name.toLowerCase().includes(q));
+  const roomFor = (id: string): Room | undefined => rooms.find((r) => r.id === id);
+
+  if (items.length === 0 && matchedBoxes.length === 0) {
+    return (
+      <View style={styles.empty}>
+        <Icon name="search-x" size={32} color={palette.ink400} />
+        <Text style={styles.emptyTitle}>Nothing found</Text>
+        <Text style={styles.emptyBody}>No items or boxes match “{query}”.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View>
+      {items.length > 0 && (
+        <View style={styles.findSection}>
+          <Text style={styles.findHeading}>Items · {items.length}</Text>
+          <View style={styles.findList}>
+            {items.map((it) => (
+              <ItemResultRow key={it.id} item={it} room={roomFor(it.roomId)} />
+            ))}
+          </View>
+        </View>
+      )}
+
+      {matchedBoxes.length > 0 && (
+        <View>
+          <Text style={styles.findHeading}>Boxes · {matchedBoxes.length}</Text>
+          <View style={styles.findList}>
+            {matchedBoxes.map((b) => (
+              <BoxResultRow key={b.id} box={b} room={roomFor(b.roomId)} />
+            ))}
+          </View>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function Breadcrumb({ room, boxNumber }: { room?: Room; boxNumber: number }) {
+  return (
+    <View style={styles.crumb}>
+      {room ? <Icon name={room.icon} size={13} color={palette.ink400} /> : null}
+      {room ? (
+        <Text style={styles.crumbText} numberOfLines={1}>
+          {room.name}
+        </Text>
+      ) : null}
+      <Icon name="chevron-right" size={13} color={palette.ink400} />
+      <Icon name="box" size={13} color={palette.ink400} />
+      <Text style={styles.crumbText}>Box #{boxNumber}</Text>
+    </View>
+  );
+}
+
+function ItemResultRow({ item, room }: { item: IndexedItem; room?: Room }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${item.name} in box ${item.boxNumber}`}
+      onPress={() => openBox(item.boxId)}
+      style={({ pressed }) => [styles.resultRow, pressed && styles.resultRowPressed]}
+    >
+      <Thumb color={item.boxColor} icon={item.icon ?? 'image'} size={48} />
+      <View style={styles.resultBody}>
+        <Text style={styles.resultName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Breadcrumb room={room} boxNumber={item.boxNumber} />
+      </View>
+      <Icon name="arrow-up-right" size={18} color={palette.ink400} />
+    </Pressable>
+  );
+}
+
+function BoxResultRow({ box, room }: { box: Box; room?: Room }) {
+  const { count } = useStore((s) => boxStats(s, box.id));
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open box ${box.number}, ${box.name}`}
+      onPress={() => openBox(box.id)}
+      style={({ pressed }) => [styles.resultRow, pressed && styles.resultRowPressed]}
+    >
+      <View style={[styles.boxBadge, { backgroundColor: boxColor(box.color) }]}>
+        <Text style={styles.boxBadgeText}>#{box.number}</Text>
+      </View>
+      <View style={styles.resultBody}>
+        <Text style={styles.resultName} numberOfLines={1}>
+          {box.name}
+        </Text>
+        <Text style={styles.resultMeta} numberOfLines={1}>
+          {room ? `${room.name} · ` : ''}
+          {count} {count === 1 ? 'item' : 'items'}
+        </Text>
+      </View>
+      <Icon name="arrow-up-right" size={18} color={palette.ink400} />
+    </Pressable>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Add box / Add room sheets — gated to Owner/Editor by the caller.
+// ---------------------------------------------------------------------------
+function AddBoxSheet({
+  visible,
+  onClose,
+  rooms,
+  defaultRoomId,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  rooms: Room[];
+  defaultRoomId: string | null;
+}) {
+  const addBox = useStore((s) => s.addBox);
+  const [name, setName] = useState('');
+  const [color, setColor] = useState<string>(BOX_COLORS[0]);
+  const [roomId, setRoomId] = useState<string | null>(defaultRoomId ?? rooms[0]?.id ?? null);
+
+  // Keep the picker in sync when the sheet reopens for a specific room.
+  React.useEffect(() => {
+    if (visible) {
+      setName('');
+      setColor(BOX_COLORS[0]);
+      setRoomId(defaultRoomId ?? rooms[0]?.id ?? null);
+    }
+  }, [visible, defaultRoomId, rooms]);
+
+  const canSave = name.trim().length > 0 && roomId !== null;
+
+  const create = (): void => {
+    if (!canSave || roomId === null) return;
+    const id = addBox({ name: name.trim(), color, roomId });
+    onClose();
+    openBox(id);
+  };
+
+  return (
+    <Sheet visible={visible} onClose={onClose} title="New box">
+      <Input
+        label="What's in it?"
+        value={name}
+        onChangeText={setName}
+        placeholder="e.g. Kitchen essentials"
+        autoFocus
+      />
+
+      <Text style={styles.fieldLabel}>Color</Text>
+      <View style={styles.colorRow}>
+        {BOX_COLORS.map((hue) => (
+          <ColorDot
+            key={hue}
+            color={hue}
+            size={28}
+            selected={hue === color}
+            onPress={() => setColor(hue)}
+          />
+        ))}
+      </View>
+
+      <Text style={styles.fieldLabel}>Room</Text>
+      <View style={styles.pickRow}>
+        {rooms.map((r) => {
+          const on = r.id === roomId;
+          return (
+            <Pressable
+              key={r.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              onPress={() => setRoomId(r.id)}
+              style={({ pressed }) => [
+                styles.roomPick,
+                on && styles.roomPickOn,
+                pressed && styles.pressedSoft,
+              ]}
+            >
+              <Icon name={r.icon} size={16} color={on ? palette.green700 : palette.ink500} />
+              <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
+                {r.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        disabled={!canSave}
+        onPress={create}
+        style={({ pressed }) => [
+          styles.cta,
+          !canSave && styles.ctaDisabled,
+          pressed && canSave && styles.ctaPressed,
+        ]}
+      >
+        <Icon name="plus" size={20} color={colors.textOnBrand} />
+        <Text style={styles.ctaText}>Add box</Text>
+      </Pressable>
+    </Sheet>
+  );
+}
+
+function AddRoomSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const addRoom = useStore((s) => s.addRoom);
+  const [name, setName] = useState('');
+  const [dest, setDest] = useState('');
+  const [icon, setIcon] = useState<string>('box');
+
+  React.useEffect(() => {
+    if (visible) {
+      setName('');
+      setDest('');
+      setIcon('box');
+    }
+  }, [visible]);
+
+  const canSave = name.trim().length > 0;
+
+  const create = (): void => {
+    if (!canSave) return;
+    addRoom({ name: name.trim(), dest: dest.trim() || null, icon });
+    onClose();
+  };
+
+  return (
+    <Sheet visible={visible} onClose={onClose} title="New room">
+      <Input
+        label="Room name"
+        value={name}
+        onChangeText={setName}
+        placeholder="e.g. Garage, Nursery, Office"
+        autoFocus
+      />
+      <View style={styles.fieldGap} />
+      <Input
+        label="Destination (optional)"
+        value={dest}
+        onChangeText={setDest}
+        placeholder="Where it lands — e.g. NYC bedroom"
+      />
+
+      <Text style={styles.fieldLabel}>Icon</Text>
+      <View style={styles.iconRow}>
+        {ROOM_ICONS.map((ic) => {
+          const on = ic === icon;
+          return (
+            <Pressable
+              key={ic}
+              accessibilityRole="button"
+              accessibilityLabel={`${ic} icon`}
+              accessibilityState={{ selected: on }}
+              onPress={() => setIcon(ic)}
+              style={({ pressed }) => [
+                styles.iconPick,
+                on && styles.iconPickOn,
+                pressed && styles.pressedSoft,
+              ]}
+            >
+              <Icon name={ic} size={20} color={on ? palette.green700 : palette.ink500} />
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        disabled={!canSave}
+        onPress={create}
+        style={({ pressed }) => [
+          styles.cta,
+          !canSave && styles.ctaDisabled,
+          pressed && canSave && styles.ctaPressed,
+        ]}
+      >
+        <Icon name="plus" size={20} color={colors.textOnBrand} />
+        <Text style={styles.ctaText}>Add room</Text>
+      </Pressable>
+    </Sheet>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard
+// ---------------------------------------------------------------------------
+export default function Dashboard() {
+  const role = useStore((s) => s.role);
+  const move = useStore((s) => s.move);
+  const rooms = useStore((s) => s.rooms);
+  const boxes = useStore((s) => s.boxes);
+  const progress = useStore(moveProgress);
+  const totals = useStore(moveTotals);
+
+  const [view, setView] = useState<GroupView>('room');
+  const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [addingBox, setAddingBox] = useState(false);
+  const [addingRoom, setAddingRoom] = useState(false);
+  const [addBoxRoomId, setAddBoxRoomId] = useState<string | null>(null);
+
+  const canEdit = PERM.canEdit(role);
+  const isSearching = query.trim().length > 0;
+  const pct = progress.total > 0 ? Math.round((progress.sealed / progress.total) * 100) : 0;
+
+  // Boxes sorted for the Status / Value views.
+  const sortedBoxes = useMemo<Box[]>(() => {
+    const next = [...boxes];
+    if (view === 'value') {
+      // Value is computed from items; sort by live value, descending.
+      return next; // sort handled below with stats injected via render
+    }
+    next.sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9));
+    return next;
+  }, [boxes, view]);
+
+  const openAddBox = (roomId: string | null): void => {
+    setAddBoxRoomId(roomId);
+    setAddingBox(true);
+  };
+
+  const toggleSearch = (): void => {
+    setSearching((prev) => {
+      if (prev) setQuery('');
+      return !prev;
+    });
+  };
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <RoleSwitcher />
+
+      <Header
+        leading={
+          <View style={styles.logoTile}>
+            <GeckoMark size={26} />
+          </View>
+        }
+        title={move.name}
+        subtitle={`${progress.sealed} of ${progress.total} boxes sealed`}
+        trailing={
+          <IconButton
+            icon={searching ? 'x' : 'search'}
+            variant="plain"
+            size="sm"
+            accessibilityLabel={searching ? 'Close search' : 'Find an item'}
+            onPress={toggleSearch}
+          />
+        }
+      />
+
+      {/* Move progress bar */}
+      <View style={styles.progressTrack}>
+        <View style={[styles.progressFill, { width: `${pct}%` }]} />
+      </View>
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {searching && (
+          <View style={styles.searchBlock}>
+            <View style={styles.searchField}>
+              <Icon name="search" size={18} color={palette.ink400} />
+              <Input
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Find an item — “Where's my…?”"
+                autoFocus
+                style={styles.searchInput}
+              />
+              {query.length > 0 && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search"
+                  onPress={() => setQuery('')}
+                  hitSlop={8}
+                >
+                  <Icon name="x" size={18} color={palette.ink400} />
+                </Pressable>
+              )}
+            </View>
+            {!isSearching && (
+              <View style={styles.suggestRow}>
+                {SEARCH_SUGGESTIONS.map((s) => (
+                  <Pressable
+                    key={s}
+                    accessibilityRole="button"
+                    onPress={() => setQuery(s)}
+                    style={({ pressed }) => [styles.suggestPill, pressed && styles.pressedSoft]}
+                  >
+                    <Text style={styles.suggestText}>{s}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        {isSearching ? (
+          <FindResults query={query} />
+        ) : (
+          <>
+            {/* Totals */}
+            <View style={styles.totalsCard}>
+              <ValueStat value={money(totals.value)} label="Estimated value" tone="brand" />
+              <View style={styles.totalsDivider} />
+              <ValueStat value={totals.boxes} label="Boxes" />
+              <ValueStat value={totals.items} label="Items" />
+            </View>
+
+            {/* Group control */}
+            <View style={styles.controlRow}>
+              <Segmented
+                options={GROUP_OPTIONS}
+                value={view}
+                onChange={(v) => setView(v as GroupView)}
+                size="sm"
+              />
+            </View>
+
+            {/* Grouped body */}
+            {view === 'room' ? (
+              <View>
+                {rooms.map((room) => {
+                  const roomBoxes = boxes.filter((b) => b.roomId === room.id);
+                  return (
+                    <View key={room.id} style={styles.group}>
+                      <View style={styles.groupHeader}>
+                        <Icon name={room.icon} size={17} color={palette.ink700} />
+                        <Text style={styles.groupTitle} numberOfLines={1}>
+                          {room.name}
+                        </Text>
+                        {room.dest ? (
+                          <Text style={styles.groupDest} numberOfLines={1}>
+                            → {room.dest}
+                          </Text>
+                        ) : null}
+                        <Text style={styles.groupCount}>
+                          {roomBoxes.length} {roomBoxes.length === 1 ? 'box' : 'boxes'}
+                        </Text>
+                      </View>
+
+                      {roomBoxes.length > 0 ? (
+                        <View style={styles.grid}>
+                          {roomBoxes.map((b) => (
+                            <DashboardBoxCard key={b.id} box={b} />
+                          ))}
+                        </View>
+                      ) : (
+                        <Pressable
+                          accessibilityRole={canEdit ? 'button' : undefined}
+                          disabled={!canEdit}
+                          onPress={canEdit ? () => openAddBox(room.id) : undefined}
+                          style={({ pressed }) => [
+                            styles.emptyRoom,
+                            pressed && canEdit && styles.pressedSoft,
+                          ]}
+                        >
+                          <Text style={styles.emptyRoomText}>
+                            {canEdit
+                              ? 'Empty room — add a box here'
+                              : 'No boxes in this room yet'}
+                          </Text>
+                        </Pressable>
+                      )}
+                    </View>
+                  );
+                })}
+
+                {/* Create affordances — Owner/Editor only; Viewer gets a LockNote. */}
+                {canEdit ? (
+                  <View style={styles.addRow}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Add box"
+                      onPress={() => openAddBox(null)}
+                      style={({ pressed }) => [
+                        styles.addBtn,
+                        styles.addBtnGrow,
+                        pressed && styles.pressedSoft,
+                      ]}
+                    >
+                      <Icon name="plus" size={20} color={palette.green600} />
+                      <Text style={styles.addBtnText}>Add box</Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Add room"
+                      onPress={() => setAddingRoom(true)}
+                      style={({ pressed }) => [styles.addBtn, pressed && styles.pressedSoft]}
+                    >
+                      <Icon name="plus" size={20} color={palette.green600} />
+                      <Text style={styles.addBtnText}>Add room</Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <LockNote>Viewers can browse and scan — ask the owner to add boxes.</LockNote>
+                )}
+              </View>
+            ) : view === 'status' ? (
+              <View style={styles.grid}>
+                {sortedBoxes.map((b) => (
+                  <DashboardBoxCard key={b.id} box={b} />
+                ))}
+              </View>
+            ) : (
+              <ValueSortedGrid boxes={boxes} />
+            )}
+          </>
+        )}
+      </ScrollView>
+
+      {canEdit && (
+        <>
+          <AddBoxSheet
+            visible={addingBox}
+            onClose={() => setAddingBox(false)}
+            rooms={rooms}
+            defaultRoomId={addBoxRoomId}
+          />
+          <AddRoomSheet visible={addingRoom} onClose={() => setAddingRoom(false)} />
+        </>
+      )}
+    </SafeAreaView>
+  );
+}
+
+// Value view needs live per-box value, which lives in the store; resolve it
+// here, then sort descending.
+function ValueSortedGrid({ boxes }: { boxes: Box[] }) {
+  const itemsByBox = useStore((s) => s.itemsByBox);
+  const sorted = useMemo<Box[]>(() => {
+    const valueOf = (b: Box): number =>
+      (itemsByBox[b.id] ?? []).reduce((sum, it) => sum + (it.value || 0), 0);
+    return [...boxes].sort((a, b) => valueOf(b) - valueOf(a));
+  }, [boxes, itemsByBox]);
+
+  return (
+    <View style={styles.grid}>
+      {sorted.map((b) => (
+        <DashboardBoxCard key={b.id} box={b} />
+      ))}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+const GRID_GAP = 14;
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: colors.surfaceApp,
+    paddingTop: space[2],
+  },
+
+  logoTile: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
+    backgroundColor: palette.green50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  progressTrack: {
+    height: 6,
+    marginHorizontal: 18,
+    marginBottom: space[2],
+    borderRadius: radius.pill,
+    backgroundColor: palette.cream200,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+    backgroundColor: colors.brand,
+  },
+
+  scroll: { flex: 1 },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: space[2],
+    paddingBottom: 120,
+  },
+
+  // ── Totals ──
+  totalsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[5],
+    backgroundColor: colors.surfaceCard,
+    borderRadius: radius.lg,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    marginBottom: 16,
+    ...shadow.sm,
+  },
+  totalsDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+    backgroundColor: palette.sand300,
+  },
+
+  // ── Group control ──
+  controlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+
+  // ── Room groups ──
+  group: { marginBottom: 18 },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginBottom: 10,
+    paddingHorizontal: 2,
+  },
+  groupTitle: {
+    fontFamily: fonts.display.bold,
+    fontSize: 16,
+    color: palette.ink900,
+    flexShrink: 1,
+  },
+  groupDest: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.xs,
+    color: palette.ink400,
+    flexShrink: 1,
+  },
+  groupCount: {
+    marginLeft: 'auto',
+    fontFamily: fonts.body.bold,
+    fontSize: 12.5,
+    color: palette.ink400,
+  },
+
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: GRID_GAP,
+  },
+  gridCard: {
+    width: `48%`,
+  },
+
+  emptyRoom: {
+    width: '100%',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: palette.sand400,
+    backgroundColor: palette.cream100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyRoomText: {
+    fontFamily: fonts.body.bold,
+    fontSize: 13.5,
+    color: palette.ink400,
+    textAlign: 'center',
+  },
+
+  // ── Add affordances ──
+  addRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: space[1],
+  },
+  addBtn: {
+    height: 52,
+    paddingHorizontal: 18,
+    borderRadius: radius.pill,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: palette.sand400,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  addBtnGrow: { flex: 1 },
+  addBtnText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.base,
+    color: palette.green700,
+  },
+
+  // ── Search ──
+  searchBlock: { marginBottom: 4 },
+  searchField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[2],
+    marginBottom: 10,
+  },
+  searchInput: { flex: 1 },
+  suggestRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  suggestPill: {
+    paddingVertical: 8,
+    paddingHorizontal: 13,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+    backgroundColor: colors.surfaceCard,
+  },
+  suggestText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.ink700,
+  },
+
+  // ── Find results ──
+  findSection: { marginBottom: 18 },
+  findHeading: {
+    fontFamily: fonts.body.extra,
+    fontSize: 11,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    color: palette.ink400,
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  findList: { gap: 8 },
+  resultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceCard,
+    borderRadius: radius.md,
+    padding: 10,
+    minHeight: 44,
+    ...shadow.xs,
+  },
+  resultRowPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.99 }],
+  },
+  resultBody: { flex: 1, minWidth: 0 },
+  resultName: {
+    fontFamily: fonts.body.bold,
+    fontSize: 15.5,
+    color: palette.ink900,
+  },
+  resultMeta: {
+    fontFamily: fonts.body.bold,
+    fontSize: 12.5,
+    color: palette.ink500,
+    marginTop: 2,
+  },
+  crumb: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 3,
+  },
+  crumbText: {
+    fontFamily: fonts.body.bold,
+    fontSize: 12.5,
+    color: palette.ink500,
+    flexShrink: 1,
+  },
+
+  boxBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxBadgeText: {
+    fontFamily: fonts.display.bold,
+    fontSize: 14,
+    color: colors.textOnBrand,
+  },
+
+  // ── Find empty ──
+  empty: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+    gap: 4,
+  },
+  emptyTitle: {
+    fontFamily: fonts.display.bold,
+    fontSize: 17,
+    color: palette.ink900,
+    marginTop: 12,
+  },
+  emptyBody: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 14,
+    color: palette.ink500,
+    textAlign: 'center',
+  },
+
+  // ── Sheet content ──
+  fieldLabel: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.ink700,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  fieldGap: { height: 14 },
+  colorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  pickRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  roomPick: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+    backgroundColor: colors.surfaceCard,
+  },
+  roomPickOn: {
+    borderColor: colors.brand,
+    backgroundColor: palette.green50,
+  },
+  roomPickText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.ink500,
+  },
+  roomPickTextOn: { color: palette.green700 },
+  iconRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 9,
+  },
+  iconPick: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+    backgroundColor: colors.surfaceCard,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconPickOn: {
+    borderColor: colors.brand,
+    backgroundColor: palette.green50,
+  },
+
+  cta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 52,
+    borderRadius: radius.pill,
+    backgroundColor: colors.brand,
+    marginTop: 24,
+    ...shadow.brand,
+  },
+  ctaDisabled: {
+    opacity: 0.45,
+    backgroundColor: palette.sand400,
+  },
+  ctaPressed: {
+    backgroundColor: colors.brandPressed,
+    transform: [{ scale: 0.98 }],
+  },
+  ctaText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.md,
+    color: colors.textOnBrand,
+  },
+
+  pressedSoft: { opacity: 0.7 },
+});

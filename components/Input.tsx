@@ -1,0 +1,182 @@
+import React, { useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  Animated,
+} from 'react-native';
+import { colors, radius, space, fonts, fontSize, type as typeTokens } from '@/theme';
+
+export type InputProps = {
+  value: string;
+  onChangeText: (t: string) => void;
+  label?: string;
+  placeholder?: string;
+  keyboardType?: 'default' | 'number-pad' | 'decimal-pad' | 'email-address';
+  multiline?: boolean;
+  prefix?: string;
+  autoFocus?: boolean;
+  style?: StyleProp<ViewStyle>;
+};
+
+export function Input({
+  value,
+  onChangeText,
+  label,
+  placeholder,
+  keyboardType = 'default',
+  multiline = false,
+  prefix,
+  autoFocus = false,
+  style,
+}: InputProps) {
+  const [focused, setFocused] = useState(false);
+
+  // Subtle press / focus ring via a border color animation
+  const animBorder = useRef(new Animated.Value(0)).current;
+
+  const handleFocus = () => {
+    setFocused(true);
+    Animated.timing(animBorder, {
+      toValue: 1,
+      duration: 120,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    Animated.timing(animBorder, {
+      toValue: 0,
+      duration: 120,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const borderColorInterp = animBorder.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.borderSubtle, colors.borderFocus],
+  });
+
+  return (
+    <View style={[styles.wrapper, style]}>
+      {label ? (
+        <Text style={styles.label}>{label}</Text>
+      ) : null}
+
+      <Animated.View
+        style={[
+          styles.field,
+          multiline ? styles.fieldMultiline : styles.fieldSingle,
+          { borderColor: borderColorInterp },
+          focused && styles.fieldFocused,
+        ]}
+      >
+        {prefix ? (
+          <Text style={styles.prefix}>{prefix}</Text>
+        ) : null}
+
+        <TextInput
+          style={[
+            styles.input,
+            multiline ? styles.inputMultiline : styles.inputSingle,
+            prefix ? styles.inputWithPrefix : null,
+          ]}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.textPlaceholder}
+          keyboardType={keyboardType}
+          multiline={multiline}
+          autoFocus={autoFocus}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          // Prevent iOS zoom: ensure font size >= 16 is set via style
+          textAlignVertical={multiline ? 'top' : 'center'}
+          autoCorrect={false}
+          autoCapitalize="sentences"
+          returnKeyType={multiline ? 'default' : 'done'}
+          scrollEnabled={multiline}
+          numberOfLines={multiline ? 4 : 1}
+        />
+      </Animated.View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrapper: {
+    gap: space[1] + 2, // 6px gap between label and field (4+2)
+  },
+
+  // Label — eyebrow style but slightly larger for legibility (13px bold Nunito = caption-bold)
+  label: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm, // 13
+    color: colors.textBody,
+    marginBottom: 6,
+  },
+
+  // Field wrapper
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceCard,
+    borderWidth: 1.5,
+    borderColor: colors.borderSubtle, // overridden by Animated.View borderColor
+    borderRadius: radius.md, // 14
+    paddingHorizontal: 14,
+    gap: space[2], // 8
+  },
+  fieldSingle: {
+    height: 48,
+  },
+  fieldMultiline: {
+    height: 120,
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+  },
+  fieldFocused: {
+    // Supplemental shadow ring for focus (green-tinted, subtle)
+    shadowColor: colors.borderFocus,
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 2,
+  },
+
+  // Prefix (e.g. "$")
+  prefix: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.md, // 17 — slightly larger to match input text
+    color: colors.textMuted,
+    flexShrink: 0,
+    // Ensure prefix is visually in-line with the text input
+    lineHeight: 20,
+  },
+
+  // Text input
+  input: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: fonts.body.semibold,
+    fontSize: 16, // 16px — iOS does NOT auto-zoom when font-size >= 16
+    color: colors.textStrong,
+    padding: 0, // remove default Android padding
+    margin: 0,
+  },
+  inputSingle: {
+    height: 48,
+  },
+  inputMultiline: {
+    height: 96,
+    textAlignVertical: 'top',
+    paddingTop: 2,
+  },
+  inputWithPrefix: {
+    // no extra style needed — flex:1 handles it
+  },
+});
