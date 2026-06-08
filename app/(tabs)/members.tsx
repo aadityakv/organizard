@@ -11,7 +11,7 @@ import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from
 import { createInviteLink, shareMove } from '@/lib/share';
 import { syncActiveMove } from '@/store/sync';
 import { useStore } from '@/store/useStore';
-import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
+import { colors, fonts, fontSize, palette, radius } from '@/theme';
 
 const FRIENDLY_ERROR: Record<string, string> = {
   ENTITLEMENT_REQUIRED: 'An Organizard subscription is required to share a move.',
@@ -28,7 +28,7 @@ function friendlyError(e: unknown): string {
   return e instanceof Error ? e.message : 'Something went wrong.';
 }
 
-export default function ShareScreen() {
+export default function Members() {
   const account = useStore((s) => s.account);
   const session = useStore((s) => s.session);
   const activeMode = useStore((s) => s.activeMode);
