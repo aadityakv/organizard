@@ -16,7 +16,7 @@ const FRIENDLY: Record<string, string> = {
 
 export default function InviteAccept() {
   const { token } = useLocalSearchParams<{ token?: string }>();
-  const [status, setStatus] = useState<'working' | 'need-signin' | 'error'>('working');
+  const [status, setStatus] = useState<'working' | 'error'>('working');
   const [message, setMessage] = useState('Joining…');
 
   const accept = async () => {
@@ -25,9 +25,11 @@ export default function InviteAccept() {
     try {
       let session = useStore.getState().session;
       if (!session) {
+        // Sign-in is required to join. This build is Apple-only; if Apple isn't
+        // available we surface a dead end with an escape rather than a loop.
         if (!(await appleSignInAvailable())) {
-          setStatus('need-signin');
-          setMessage('Sign in to join this move.');
+          setStatus('error');
+          setMessage('Sign in on the Moves screen, then reopen the link.');
           return;
         }
         await signInWithApple();
@@ -54,9 +56,7 @@ export default function InviteAccept() {
       {status === 'working' ? <ActivityIndicator color={colors.brand} /> : null}
       <Text style={styles.text}>{message}</Text>
       {status !== 'working' ? (
-        <Button onPress={status === 'need-signin' ? accept : () => router.replace('/moves')}>
-          {status === 'need-signin' ? 'Continue with Apple' : 'Back to moves'}
-        </Button>
+        <Button onPress={() => router.replace('/moves')}>Back to moves</Button>
       ) : null}
     </View>
   );
