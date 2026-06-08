@@ -1,0 +1,22 @@
+name = "organizard-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 — relational data. database_id is a placeholder for local dev; replace
+# with the real id from `wrangler d1 create organizard` before deploying.
+[[d1_databases]]
+binding = "DB"
+database_name = "organizard"
+database_id = "local-placeholder-0000-0000-000000000000"
+migrations_dir = "drizzle"
+
+# R2 — photo blobs (shared moves only).
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "organizard-photos"
+
+# KV — sessions + magic-link tokens.
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "local-placeholder-0000-0000-000000000000"
