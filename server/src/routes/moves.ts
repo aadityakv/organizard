@@ -9,6 +9,7 @@ import { createMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
 import { createPhotoRecord } from '../repos/photos';
 import { boxInMove, itemInMove } from '../repos/scope';
 import { changeMemberRole, createInvite, getMoveOwnerId, isOwnerEntitled, removeMember } from '../repos/sharing';
+import { isEntitledNow } from '../repos/users';
 import type { Env } from '../types';
 import { mutationsBodySchema } from '../validation';
 
@@ -18,7 +19,7 @@ export function moveRoutes(deps: Deps) {
 
   // Create a shared move — requires an active subscription ("owner pays to share").
   r.post('/', async (c) => {
-    if (!c.get('user').entitlementActive) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    if (!isEntitledNow(c.get('user'), deps.now())) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     type CreateBody = { name?: string; from?: string | null; to?: string | null; targetDate?: string | null; seed?: boolean };
     const body = await c.req.json<CreateBody>().catch(() => ({}) as CreateBody);
     if (!body.name || !body.name.trim()) return c.json({ error: 'INVALID_NAME' }, 400);
@@ -62,7 +63,7 @@ export function moveRoutes(deps: Deps) {
     }
 
     // Lapsed owner subscription -> the shared move is read-only (data retained).
-    if (!(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id')))) {
+    if (!(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now()))) {
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     }
 

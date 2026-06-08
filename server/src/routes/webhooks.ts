@@ -8,13 +8,22 @@ import type { Env } from '../types';
 const GRANT = new Set(['INITIAL_PURCHASE', 'RENEWAL', 'UNCANCELLATION', 'PRODUCT_CHANGE', 'NON_RENEWING_PURCHASE']);
 const REVOKE = new Set(['EXPIRATION', 'BILLING_ISSUE', 'SUBSCRIPTION_PAUSED']);
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 export function webhookRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env }>();
 
   r.post('/revenuecat', async (c) => {
     // Fail closed: if no secret is configured, reject (never an open entitlement endpoint).
     const secret = c.env.REVENUECAT_WEBHOOK_SECRET;
-    if (!secret || c.req.header('authorization') !== `Bearer ${secret}`) return c.json({ error: 'UNAUTHORIZED' }, 401);
+    if (!secret || !timingSafeEqual(c.req.header('authorization') ?? '', `Bearer ${secret}`)) {
+      return c.json({ error: 'UNAUTHORIZED' }, 401);
+    }
 
     const body = await c.req
       .json<{ event?: { type?: string; app_user_id?: string; expiration_at_ms?: number } }>()

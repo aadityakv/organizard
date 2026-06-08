@@ -4,14 +4,13 @@ import { and, eq } from 'drizzle-orm';
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
 import type { Deps } from '../deps';
-import { boxInMove, itemInMove, markersInMove, markerInMove, roomInMove, statusInMove } from '../repos/scope';
+import { boxInMove, itemInMove, markersInMove, markerInMove, photoInMove, roomInMove, statusInMove } from '../repos/scope';
 
 /**
- * Apply a batch of mutations to a move. Each applied mutation stamps its rows
- * with a strictly-increasing per-move logical clock (stored as moves.updatedAt),
- * so `updatedAt` is a total order — which makes the delta cursor sound for
- * pagination (no two rows share a timestamp, even within a batch). LWW = apply
- * order. Idempotent: a clientId already in mutation_log is skipped.
+ * Apply a batch of mutations to a move. `updatedAt = now` for the batch; the
+ * delta is unbounded (no pagination), so rows sharing a timestamp are fine — all
+ * are returned together and never split across a page boundary. LWW = apply order.
+ * Idempotent: a clientId already in mutation_log is skipped.
  */
 export async function applyMutations(
   db: AppDb,
@@ -19,8 +18,7 @@ export async function applyMutations(
   moveId: string,
   mutations: Mutation[],
 ): Promise<{ serverTime: number; applied: number }> {
-  const move = (await db.select({ u: s.moves.updatedAt }).from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
-  let clock = Math.max(deps.now(), (move?.u ?? 0) + 1);
+  const now = deps.now();
   let applied = 0;
 
   for (const m of mutations) {
@@ -33,14 +31,12 @@ export async function applyMutations(
     )[0];
     if (seen) continue;
 
-    await applyOne(db, moveId, m, clock);
-    await db.insert(s.mutationLog).values({ moveId, clientId: m.clientId, appliedAt: clock }).onConflictDoNothing();
-    clock += 1;
+    await applyOne(db, moveId, m, now);
+    await db.insert(s.mutationLog).values({ moveId, clientId: m.clientId, appliedAt: now }).onConflictDoNothing();
     applied += 1;
   }
 
-  await db.update(s.moves).set({ updatedAt: clock }).where(eq(s.moves.id, moveId));
-  return { serverTime: clock, applied };
+  return { serverTime: now, applied };
 }
 
 async function bumpBox(db: AppDb, moveId: string, boxId: string, now: number): Promise<void> {
@@ -98,6 +94,8 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
       return;
     }
     case 'setBoxCover':
+      // A non-null cover must reference a photo in THIS move (no cross-move/foreign ids).
+      if (m.payload.coverPhotoId && !(await photoInMove(db, moveId, m.payload.coverPhotoId))) return;
       await db.update(s.boxes).set({ coverPhotoId: m.payload.coverPhotoId, updatedAt: now }).where(and(eq(s.boxes.id, m.payload.id), eq(s.boxes.moveId, moveId)));
       return;
     case 'setBoxMarker': {

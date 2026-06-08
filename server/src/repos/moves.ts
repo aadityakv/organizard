@@ -1,5 +1,5 @@
 import type { Box, Item, Marker, Member, Move, Role, Room, Status } from '@shared/index';
-import { and, asc, eq, gt, inArray, isNull } from 'drizzle-orm';
+import { and, eq, gt, inArray, isNull } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
@@ -18,9 +18,8 @@ export type Snapshot = {
 };
 export type Changes = {
   serverTime: number;
-  /** Opaque cursor — pass back as `since` to continue. */
+  /** Opaque cursor — pass back as `since`. (Unbounded delta; hasMore is always false for now.) */
   cursor: number;
-  /** True if the delta was capped; pull again with `cursor`. */
   hasMore: boolean;
   rooms: Room[];
   statuses: Status[];
@@ -29,8 +28,6 @@ export type Changes = {
   items: Item[];
   members: Member[];
 };
-
-const PAGE_LIMIT = 200;
 
 export async function getMembership(db: AppDb, moveId: string, userId: string): Promise<Membership | null> {
   const row = (
@@ -166,43 +163,32 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
 }
 
 /**
- * Delta since a cursor — includes tombstoned rows so clients can remove them.
- * Each table is capped at PAGE_LIMIT (ordered by the logical clock); if any table
- * is capped, `hasMore` is true and the client pulls again from `cursor`.
+ * Delta since a cursor — all rows changed after `since` (incl. tombstones).
+ * Unbounded: moves are small (a two-person move), so a full delta is fine and
+ * avoids the correctness traps of timestamp pagination. `serverTime` is captured
+ * up front and returned as the next cursor. A periodic client full-resync (since=0)
+ * is the backstop for the rare cross-table read race under concurrent writers.
  */
 export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, since: number): Promise<Changes> {
-  const roomRows = await db.select().from(s.rooms).where(and(eq(s.rooms.moveId, moveId), gt(s.rooms.updatedAt, since))).orderBy(asc(s.rooms.updatedAt)).limit(PAGE_LIMIT);
-  const statusRows = await db.select().from(s.statuses).where(and(eq(s.statuses.moveId, moveId), gt(s.statuses.updatedAt, since))).orderBy(asc(s.statuses.updatedAt)).limit(PAGE_LIMIT);
-  const markerRows = await db.select().from(s.markers).where(and(eq(s.markers.moveId, moveId), gt(s.markers.updatedAt, since))).orderBy(asc(s.markers.updatedAt)).limit(PAGE_LIMIT);
-  const boxRows = await db.select().from(s.boxes).where(and(eq(s.boxes.moveId, moveId), gt(s.boxes.updatedAt, since))).orderBy(asc(s.boxes.updatedAt)).limit(PAGE_LIMIT);
-  const itemRows = await db.select().from(s.items).where(and(eq(s.items.moveId, moveId), gt(s.items.updatedAt, since))).orderBy(asc(s.items.updatedAt)).limit(PAGE_LIMIT);
+  const serverTime = deps.now();
 
-  // Advance the cursor only as far as every capped table is fully drained, so nothing is skipped.
-  const cappedMax: number[] = [];
-  const consider = (rows: { updatedAt: number }[]) => {
-    if (rows.length >= PAGE_LIMIT) cappedMax.push(rows[rows.length - 1].updatedAt);
-  };
-  consider(roomRows);
-  consider(statusRows);
-  consider(markerRows);
-  consider(boxRows);
-  consider(itemRows);
+  const rooms = (await db.select().from(s.rooms).where(and(eq(s.rooms.moveId, moveId), gt(s.rooms.updatedAt, since)))).map(toRoom);
+  const statuses = (await db.select().from(s.statuses).where(and(eq(s.statuses.moveId, moveId), gt(s.statuses.updatedAt, since)))).map(toStatus);
+  const markers = (await db.select().from(s.markers).where(and(eq(s.markers.moveId, moveId), gt(s.markers.updatedAt, since)))).map(toMarker);
 
-  const hasMore = cappedMax.length > 0;
-  const move = (await db.select({ u: s.moves.updatedAt }).from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
-  const cursor = hasMore ? Math.min(...cappedMax) : (move?.u ?? deps.now());
-
+  const boxRows = await db.select().from(s.boxes).where(and(eq(s.boxes.moveId, moveId), gt(s.boxes.updatedAt, since)));
+  const itemRows = await db.select().from(s.items).where(and(eq(s.items.moveId, moveId), gt(s.items.updatedAt, since)));
   const bm = await boxMarkerMap(db, boxRows.map((b) => b.id));
   const im = await itemMarkerMap(db, itemRows.map((i) => i.id));
   const ip = await itemPhotoMap(db, itemRows.map((i) => i.id));
 
   return {
-    serverTime: deps.now(),
-    cursor,
-    hasMore,
-    rooms: roomRows.map(toRoom),
-    statuses: statusRows.map(toStatus),
-    markers: markerRows.map(toMarker),
+    serverTime,
+    cursor: serverTime,
+    hasMore: false,
+    rooms,
+    statuses,
+    markers,
     boxes: boxRows.map((b) => toBox(b, bm.get(b.id) ?? [])),
     items: itemRows.map((i) => toItem(i, im.get(i.id) ?? [], ip.get(i.id) ?? [])),
     members: await getMembers(db, moveId), // full list each delta (small); covers invite/role/remove

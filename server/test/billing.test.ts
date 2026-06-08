@@ -32,4 +32,16 @@ describe('billing — owner pays to share', () => {
     const res = await h.json('/v1/webhooks/revenuecat', { event: { type: 'INITIAL_PURCHASE', app_user_id: 'x' } });
     expect(res.status).toBe(401);
   });
+
+  it('honors entitlement expiry (active flag alone is not enough)', async () => {
+    const h = await makeHarness();
+    const user = await h.login('u', 'u@x.com', { entitled: false });
+    // grant, but with an expiry already in the past
+    await h.json(
+      '/v1/webhooks/revenuecat',
+      { event: { type: 'INITIAL_PURCHASE', app_user_id: user.user.id, expiration_at_ms: 1 } },
+      { headers: { authorization: 'Bearer test-secret' } },
+    );
+    expect((await h.json('/v1/moves', { name: 'X' }, auth(user.session))).status).toBe(402); // expired -> blocked
+  });
 });

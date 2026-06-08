@@ -44,6 +44,8 @@ export type BoxCardProps = {
   statusColor: string;
   markers?: { label: string; color: string; icon: string }[];
   cover?: string | null;
+  /** Auth headers for a remote cover photo source. */
+  coverHeaders?: Record<string, string>;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 };
@@ -103,6 +105,7 @@ export function BoxCard({
   statusColor,
   markers = [],
   cover = null,
+  coverHeaders,
   onPress,
   style,
 }: BoxCardProps) {
@@ -145,7 +148,7 @@ export function BoxCard({
         <View style={[styles.band, { backgroundColor: tint }]}>
           {cover ? (
             <Image
-              source={{ uri: cover }}
+              source={{ uri: cover, headers: coverHeaders }}
               style={StyleSheet.absoluteFill}
               resizeMode="cover"
             />

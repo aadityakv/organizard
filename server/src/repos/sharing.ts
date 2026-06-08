@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
 import type { Deps } from '../deps';
+import { isEntitledNow } from './users';
 
 const INVITE_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
@@ -49,12 +50,12 @@ export async function getMoveOwnerId(db: AppDb, moveId: string): Promise<string 
   return move?.ownerId;
 }
 
-/** A shared move is editable only while its owner's subscription is active. */
-export async function isOwnerEntitled(db: AppDb, moveId: string): Promise<boolean> {
+/** A shared move is editable only while its owner's subscription is active (and unexpired). */
+export async function isOwnerEntitled(db: AppDb, moveId: string, now: number): Promise<boolean> {
   const move = (await db.select().from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
   if (!move) return false;
   const owner = (await db.select().from(s.users).where(eq(s.users.id, move.ownerId)).limit(1))[0];
-  return Boolean(owner?.entitlementActive);
+  return owner ? isEntitledNow(owner, now) : false;
 }
 
 export async function changeMemberRole(db: AppDb, args: { moveId: string; userId: string; role: Role }): Promise<void> {

@@ -25,8 +25,18 @@ export async function syncActiveMove(): Promise<void> {
   try {
     const pending = useStore.getState().outbox;
     if (pending.length) {
-      await api.mutations(session, serverMoveId, pending);
-      useStore.getState().clearOutbox(pending.map((m) => m.clientId));
+      try {
+        await api.mutations(session, serverMoveId, pending);
+        useStore.getState().clearOutbox(pending.map((m) => m.clientId));
+      } catch (e) {
+        // A 400 means the batch is structurally invalid (poison/legacy) — drop it so
+        // sync isn't wedged forever. Transient/401/402 fall through to the outer handler.
+        if (e instanceof ApiError && e.status === 400) {
+          useStore.getState().clearOutbox(pending.map((m) => m.clientId));
+        } else {
+          throw e;
+        }
+      }
     }
     // Upload local-uri photos to R2 before pulling, so the delta carries their ids.
     await uploadPendingPhotos();
@@ -53,6 +63,15 @@ export async function syncActiveMove(): Promise<void> {
   }
 }
 
+/** Force a full re-pull (resets the cursor). The backstop that heals any delta the
+ * unbounded sync could have missed under a rare concurrent-writer race. */
+export async function fullResync(): Promise<void> {
+  const st = useStore.getState();
+  if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session) return;
+  useStore.setState({ lastSyncTs: 0 });
+  await syncActiveMove();
+}
+
 /** Wire sync triggers for the lifetime of the component (mount it once, high up). */
 export function useSync(): void {
   const activeMode = useStore((s) => s.activeMode);
@@ -66,7 +85,7 @@ export function useSync(): void {
     void syncActiveMove();
     timer.current = setInterval(() => void syncActiveMove(), POLL_MS);
     const appSub = AppState.addEventListener('change', (s) => {
-      if (s === 'active') void syncActiveMove();
+      if (s === 'active') void fullResync(); // foreground = full re-pull (backstop)
     });
     const netUnsub = NetInfo.addEventListener((state) => {
       if (state.isConnected) void syncActiveMove();

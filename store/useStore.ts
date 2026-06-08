@@ -86,7 +86,16 @@ type Actions = {
   markActiveShared: (serverMoveId: string, snap: ServerSnapshot) => void;
   /** Flip the active (already-pushed) move to shared, keeping local data as-is. */
   goShared: (serverMoveId: string) => void;
+  /** Replace a local photo URI with its uploaded server id (local-only, no mutation). */
+  swapItemPhoto: (boxId: string, itemId: string, fromUri: string, toId: string) => void;
 };
+
+/** Mutation types this build understands — used to drop legacy/poison outbox entries. */
+const KNOWN_MUTATION_TYPES = new Set<string>([
+  'addRoom', 'updateRoom', 'deleteRoom', 'addBox', 'updateBox', 'deleteBox',
+  'setBoxStatus', 'setBoxCover', 'setBoxMarker', 'addStatus', 'addMarker',
+  'addItem', 'updateItem', 'deleteItem',
+]);
 
 export type Store = State & Actions;
 
@@ -282,21 +291,46 @@ export const useStore = create<Store>()(
 
       applyChanges: (ch) => {
         set((s) => {
-          // Rows with a pending outbox mutation are locally authoritative — the
-          // delta must not clobber them (the documented LWW exception).
-          const dirty = new Set<string>();
+          // A row with a pending outbox mutation is locally authoritative (the LWW
+          // exception). Track these per-collection so an item edit doesn't suppress an
+          // unrelated update to its box row, and vice-versa.
+          const dRoom = new Set<string>();
+          const dStatus = new Set<string>();
+          const dMarker = new Set<string>();
+          const dBox = new Set<string>();
+          const dItem = new Set<string>();
           for (const mm of s.outbox) {
-            const p = mm.payload as { id?: string; boxId?: string };
-            if (p.id) dirty.add(p.id);
-            if (p.boxId) dirty.add(p.boxId);
+            const p = mm.payload as Record<string, string>;
+            switch (mm.type) {
+              case 'addRoom': case 'updateRoom': case 'deleteRoom': dRoom.add(p.id); break;
+              case 'addStatus': dStatus.add(p.id); break;
+              case 'addMarker': dMarker.add(p.id); break;
+              case 'addBox': case 'updateBox': case 'deleteBox': case 'setBoxStatus': case 'setBoxCover': dBox.add(p.id); break;
+              case 'setBoxMarker': dBox.add(p.boxId); break;
+              case 'addItem': case 'updateItem': case 'deleteItem': dItem.add(p.id); break;
+            }
           }
-          const fresh = <T extends { id: string }>(rows: T[]) => rows.filter((r) => !dirty.has(r.id));
+
+          // Skipping a dirty row must NOT advance the cursor past it, or a concurrent
+          // server change to that row would be lost — hold the cursor back so it re-arrives.
+          let minSkipped = Infinity;
+          const fresh = <T extends { id: string; updatedAt: number }>(rows: T[], dirty: Set<string>) =>
+            rows.filter((r) => {
+              if (dirty.has(r.id)) {
+                minSkipped = Math.min(minSkipped, r.updatedAt);
+                return false;
+              }
+              return true;
+            });
 
           const itemsByBox = { ...s.itemsByBox };
-          const boxes = mergeList(s.boxes, fresh(ch.boxes), toClientBox);
+          const boxes = mergeList(s.boxes, fresh(ch.boxes, dBox), toClientBox);
           for (const b of boxes) if (!itemsByBox[b.id]) itemsByBox[b.id] = [];
           for (const it of ch.items) {
-            if (dirty.has(it.id)) continue; // pending local edit wins
+            if (dItem.has(it.id)) {
+              minSkipped = Math.min(minSkipped, it.updatedAt);
+              continue;
+            }
             // Preserve local (not-yet-uploaded) photo URIs so a pull can't drop a fresh capture.
             const existing = (itemsByBox[it.boxId] ?? []).find((x) => x.id === it.id);
             const localPhotos = (existing?.photos ?? []).filter(isLocalUri);
@@ -309,14 +343,16 @@ export const useStore = create<Store>()(
             }
             itemsByBox[it.boxId] = arr;
           }
+
+          const cursor = minSkipped === Infinity ? ch.cursor : Math.min(ch.cursor, minSkipped - 1);
           return {
-            rooms: mergeList(s.rooms, fresh(ch.rooms), toClientRoom),
-            statuses: mergeList(s.statuses, fresh(ch.statuses), toClientStatus),
-            markers: mergeList(s.markers, fresh(ch.markers), toClientMarker),
+            rooms: mergeList(s.rooms, fresh(ch.rooms, dRoom), toClientRoom),
+            statuses: mergeList(s.statuses, fresh(ch.statuses, dStatus), toClientStatus),
+            markers: mergeList(s.markers, fresh(ch.markers, dMarker), toClientMarker),
             boxes,
             itemsByBox,
             members: ch.members.map(toClientMember),
-            lastSyncTs: ch.cursor,
+            lastSyncTs: cursor,
           };
         });
       },
@@ -327,10 +363,30 @@ export const useStore = create<Store>()(
       },
 
       goShared: (serverMoveId) => set({ activeMode: 'shared', serverMoveId, lastSyncTs: 0, outbox: [] }),
+
+      swapItemPhoto: (boxId, itemId, fromUri, toId) =>
+        set((s) => ({
+          itemsByBox: {
+            ...s.itemsByBox,
+            [boxId]: (s.itemsByBox[boxId] ?? []).map((it) =>
+              it.id === itemId ? { ...it, photos: (it.photos ?? []).map((p) => (p === fromUri ? toId : p)) } : it,
+            ),
+          },
+        })),
     }),
     {
       name: 'organizard-store-v1',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 2,
+      // Drop any persisted outbox entries this build no longer understands (e.g. a
+      // legacy `toggleBoxMarker`), so a poison mutation can't wedge sync forever.
+      migrate: (persisted) => {
+        const st = persisted as Partial<State> | undefined;
+        if (st && Array.isArray(st.outbox)) {
+          st.outbox = (st.outbox as Mutation[]).filter((m) => KNOWN_MUTATION_TYPES.has(m.type));
+        }
+        return st as Store;
+      },
       partialize: (s) => ({
         onboarded: s.onboarded,
         role: s.role,

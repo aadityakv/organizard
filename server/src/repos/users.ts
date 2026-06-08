@@ -86,6 +86,12 @@ export async function setEntitlement(db: AppDb, userId: string, active: boolean,
   await db.update(users).set({ entitlementActive: active, entitlementExpiresAt: expiresAt }).where(eq(users.id, userId));
 }
 
+/** Entitlement counts only while active AND not past its expiry. */
+export const isEntitledNow = (
+  u: { entitlementActive: boolean; entitlementExpiresAt: number | null },
+  now: number,
+): boolean => u.entitlementActive && (u.entitlementExpiresAt == null || u.entitlementExpiresAt > now);
+
 /** Public shape returned to clients (no internal-only fields to hide yet, but a stable seam). */
 export function toPublicUser(u: UserRow) {
   return {

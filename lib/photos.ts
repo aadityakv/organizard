@@ -32,13 +32,14 @@ export async function uploadPendingPhotos(): Promise<void> {
   if (s.activeMode !== 'shared' || !s.session || !s.serverMoveId) return;
   const { session, serverMoveId } = s;
 
-  for (const items of Object.values(s.itemsByBox)) {
+  for (const [boxId, items] of Object.entries(s.itemsByBox)) {
     for (const it of items) {
       for (const photo of it.photos ?? []) {
         if (!isLocalUri(photo) || inFlight.has(photo)) continue;
         inFlight.add(photo);
         try {
-          await uploadPhoto(session, serverMoveId, photo, { itemId: it.id });
+          const photoId = await uploadPhoto(session, serverMoveId, photo, { itemId: it.id });
+          useStore.getState().swapItemPhoto(boxId, it.id, photo, photoId); // local uri -> server id (stops re-upload)
         } catch {
           // leave it; retried next sync tick
         } finally {

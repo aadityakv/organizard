@@ -22,5 +22,7 @@ export async function verifyAppleToken(
     audience: bundleId,
   });
   if (!payload.sub) throw new Error('Apple token missing sub');
-  return { sub: payload.sub, email: (payload.email as string | undefined) ?? null };
+  // Only trust the email for account-linking if Apple says it's verified.
+  const verified = payload.email_verified === true || payload.email_verified === 'true';
+  return { sub: payload.sub, email: verified ? ((payload.email as string | undefined) ?? null) : null };
 }

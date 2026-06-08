@@ -68,7 +68,7 @@ export function authRoutes(deps: Deps) {
 
     const raw = await c.env.SESSIONS.get(magicKey(token));
     if (!raw) return c.json({ error: 'INVALID_TOKEN' }, 400);
-    await c.env.SESSIONS.delete(magicKey(token)); // single use
+    await c.env.SESSIONS.delete(magicKey(token)); // single use (best-effort; KV get-then-delete)
 
     const { email } = JSON.parse(raw) as { email: string };
     const db = deps.getDb(c.env);

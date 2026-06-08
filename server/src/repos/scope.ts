@@ -21,6 +21,9 @@ export const markerInMove = async (db: AppDb, moveId: string, id: string): Promi
 export const itemInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean((await db.select({ i: s.items.id }).from(s.items).where(and(eq(s.items.id, id), eq(s.items.moveId, moveId))).limit(1))[0]);
 
+export const photoInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
+  Boolean((await db.select({ i: s.photos.id }).from(s.photos).where(and(eq(s.photos.id, id), eq(s.photos.moveId, moveId))).limit(1))[0]);
+
 /** Keep only marker ids that belong to the move. */
 export async function markersInMove(db: AppDb, moveId: string, ids: string[]): Promise<string[]> {
   const out: string[] = [];

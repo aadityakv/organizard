@@ -23,6 +23,7 @@ import {
 import type { Box, IndexedItem, Room } from '@/data/types';
 import { PERM } from '@/lib/permissions';
 import { money } from '@/lib/money';
+import { photoSource } from '@/lib/photos';
 import {
   allIndexedItems,
   boxStats,
@@ -94,6 +95,8 @@ function DashboardBoxCard({ box }: { box: Box }) {
     box.markers.map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m)),
   );
   const { count, value } = useStore((s) => boxStats(s, box.id));
+  const session = useStore((s) => s.session);
+  const coverSrc = box.cover ? photoSource(box.cover, session) : undefined;
 
   return (
     <BoxCard
@@ -106,7 +109,8 @@ function DashboardBoxCard({ box }: { box: Box }) {
       statusLabel={status?.label ?? '—'}
       statusColor={status?.color ?? 'slate'}
       markers={markerDefs.map((m) => ({ label: m.label, color: m.color, icon: m.icon }))}
-      cover={box.cover}
+      cover={coverSrc?.uri ?? null}
+      coverHeaders={coverSrc?.headers}
       onPress={() => openBox(box.id)}
       style={styles.gridCard}
     />
