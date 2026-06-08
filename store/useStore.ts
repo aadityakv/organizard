@@ -9,28 +9,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import {
-  boxes as seedBoxes,
-  itemsByBox as seedItems,
-  markers as seedMarkers,
-  members as seedMembers,
-  move as seedMove,
-  rooms as seedRooms,
-  statuses as seedStatuses,
-} from '@/data/mockData';
+import { STARTER_MARKERS, STARTER_STATUSES } from '@/data/defaults';
 import type { Box, IndexedItem, Item, Marker, Member, Move, Role, Room, Status } from '@/data/types';
 import type { ServerChanges, ServerSnapshot } from '@/lib/api';
 import { clearSession } from '@/lib/session';
 import { uid } from '@/lib/uid';
 import type { Mutation } from '@/shared';
+import {
+  newBundle, sliceFromBundle, snapshotInto, summarize, roleFor,
+  type MoveBundle, type MoveMode, type MoveSummary, type SliceData,
+} from './library';
 import { toClientBox, toClientItem, toClientMarker, toClientMember, toClientRoom, toClientStatus } from './mappers';
 
-export type MoveMode = 'local' | 'shared';
+export type { MoveMode } from './library';
 type Account = { id: string; name: string; email: string | null };
 
 type State = {
   onboarded: boolean;
-  role: Role;
 
   move: Move;
   rooms: Room[];
@@ -53,11 +48,15 @@ type State = {
   outbox: Mutation[];
   /** Server timestamp of the last successful delta pull. */
   lastSyncTs: number;
+
+  /** All moves you have, keyed by local id. */
+  library: Record<string, MoveBundle>;
+  /** Which move is mirrored into the live slice above (null = none open). */
+  currentMoveId: string | null;
 };
 
 type Actions = {
   setOnboarded: (v: boolean) => void;
-  setRole: (role: Role) => void;
 
   addRoom: (input: { name: string; dest?: string | null; icon?: string }) => string;
   addBox: (input: { name: string; color: string; roomId: string; status?: string }) => string;
@@ -88,6 +87,14 @@ type Actions = {
   goShared: (serverMoveId: string) => void;
   /** Replace a local photo URI with its uploaded server id (local-only, no mutation). */
   swapItemPhoto: (boxId: string, itemId: string, fromUri: string, toId: string) => void;
+
+  // --- library actions ---
+  createMove: (input: { name: string; from?: string; to?: string; target?: string }) => string;
+  switchMove: (id: string) => void;
+  archiveMove: (id: string) => void;
+  unarchiveMove: (id: string) => void;
+  removeMoveLocal: (id: string) => void;
+  addSharedMoveFromSnapshot: (serverMoveId: string, snap: ServerSnapshot) => string;
 };
 
 /** Mutation types this build understands — used to drop legacy/poison outbox entries. */
@@ -99,16 +106,17 @@ const KNOWN_MUTATION_TYPES = new Set<string>([
 
 export type Store = State & Actions;
 
+const EMPTY_MOVE: Move = { name: '', from: '', to: '', target: '' };
+
 const initialState: State = {
   onboarded: false,
-  role: 'owner',
-  move: seedMove,
-  rooms: seedRooms,
-  boxes: seedBoxes,
-  statuses: seedStatuses,
-  markers: seedMarkers,
-  members: seedMembers,
-  itemsByBox: seedItems,
+  move: EMPTY_MOVE,
+  rooms: [],
+  boxes: [],
+  statuses: [...STARTER_STATUSES],
+  markers: [...STARTER_MARKERS],
+  members: [],
+  itemsByBox: {},
 
   account: null,
   session: null,
@@ -116,6 +124,9 @@ const initialState: State = {
   serverMoveId: null,
   outbox: [],
   lastSyncTs: 0,
+
+  library: {},
+  currentMoveId: null,
 };
 
 const isLocalUri = (p: string): boolean =>
@@ -141,7 +152,6 @@ export const useStore = create<Store>()(
       ...initialState,
 
       setOnboarded: (v) => set({ onboarded: v }),
-      setRole: (role) => set({ role }),
 
       addRoom: ({ name, dest = null, icon = 'box' }) => {
         const id = uid('r');
@@ -378,39 +388,147 @@ export const useStore = create<Store>()(
             ),
           },
         })),
+
+      // --- library actions ---
+      createMove: ({ name, from = '', to = '', target = '' }) => {
+        const id = uid('mv');
+        const now = Date.now();
+        const bundle = newBundle(id, { name, from, to, target }, now);
+        set((s) => {
+          const library = { ...s.library };
+          if (s.currentMoveId && library[s.currentMoveId]) {
+            library[s.currentMoveId] = snapshotInto(library[s.currentMoveId], extractSlice(s), now);
+          }
+          library[id] = bundle;
+          return { library, currentMoveId: id, ...sliceFromBundle(bundle) };
+        });
+        return id;
+      },
+
+      switchMove: (id) =>
+        set((s) => {
+          if (id === s.currentMoveId) return {};
+          const target = s.library[id];
+          if (!target) return {};
+          const now = Date.now();
+          const library = { ...s.library };
+          if (s.currentMoveId && library[s.currentMoveId]) {
+            library[s.currentMoveId] = snapshotInto(library[s.currentMoveId], extractSlice(s), now);
+          }
+          const opened = { ...target, lastOpenedAt: now };
+          library[id] = opened;
+          return { library, currentMoveId: id, ...sliceFromBundle(opened) };
+        }),
+
+      archiveMove: (id) =>
+        set((s) => (s.library[id] ? { library: { ...s.library, [id]: { ...s.library[id], archived: true } } } : {})),
+      unarchiveMove: (id) =>
+        set((s) => (s.library[id] ? { library: { ...s.library, [id]: { ...s.library[id], archived: false } } } : {})),
+
+      removeMoveLocal: (id) =>
+        set((s) => {
+          const library = { ...s.library };
+          delete library[id];
+          if (s.currentMoveId !== id) return { library };
+          return { library, currentMoveId: null, ...sliceFromBundle(newBundle('__none__', EMPTY_MOVE, Date.now())) };
+        }),
+
+      addSharedMoveFromSnapshot: (serverMoveId, snap) => {
+        const id = uid('mv');
+        const now = Date.now();
+        set((s) => {
+          const library = { ...s.library };
+          if (s.currentMoveId && library[s.currentMoveId]) {
+            library[s.currentMoveId] = snapshotInto(library[s.currentMoveId], extractSlice(s), now);
+          }
+          const bundle: MoveBundle = {
+            ...newBundle(id, { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' }, now),
+            activeMode: 'shared',
+            serverMoveId,
+            statuses: snap.statuses.map(toClientStatus),
+            markers: snap.markers.map(toClientMarker),
+            members: snap.members.map(toClientMember),
+            rooms: snap.rooms.map(toClientRoom),
+            boxes: snap.boxes.map(toClientBox),
+            itemsByBox: snapItemsByBox(snap),
+            lastSyncTs: 0,
+            outbox: [],
+          };
+          library[id] = bundle;
+          return { library, currentMoveId: id, ...sliceFromBundle(bundle) };
+        });
+        return id;
+      },
     }),
     {
       name: 'organizard-store-v1',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 2,
+      version: 3,
+      // v2→v3 migrates the single flat active-move into the new library shape.
       // Drop any persisted outbox entries this build no longer understands (e.g. a
       // legacy `toggleBoxMarker`), so a poison mutation can't wedge sync forever.
-      migrate: (persisted) => {
-        const st = persisted as Partial<State> | undefined;
-        if (st && Array.isArray(st.outbox)) {
-          st.outbox = (st.outbox as Mutation[]).filter((m) => KNOWN_MUTATION_TYPES.has(m.type));
+      migrate: (persisted, version) => {
+        const st = persisted as (Partial<State> & Record<string, unknown>) | undefined;
+        if (!st) return st as unknown as Store;
+
+        if (version < 3) {
+          const known = (m: Mutation) => KNOWN_MUTATION_TYPES.has(m.type);
+          const outbox = Array.isArray(st.outbox) ? (st.outbox as Mutation[]).filter(known) : [];
+          const isRealShared = st.activeMode === 'shared' && Boolean(st.serverMoveId);
+          const now = Date.now();
+
+          if (isRealShared) {
+            const id = uid('mv');
+            const bundle: MoveBundle = {
+              id, archived: false, createdAt: now, lastOpenedAt: now,
+              move: st.move as Move, rooms: (st.rooms as Room[]) ?? [], boxes: (st.boxes as Box[]) ?? [],
+              statuses: (st.statuses as Status[]) ?? [...STARTER_STATUSES], markers: (st.markers as Marker[]) ?? [...STARTER_MARKERS],
+              members: (st.members as Member[]) ?? [], itemsByBox: (st.itemsByBox as Record<string, Item[]>) ?? {},
+              activeMode: 'shared', serverMoveId: st.serverMoveId as string, outbox, lastSyncTs: (st.lastSyncTs as number) ?? 0,
+            };
+            return { ...st, role: undefined, library: { [id]: bundle }, currentMoveId: id } as unknown as Store;
+          }
+
+          return {
+            ...st, role: undefined, onboarded: false, library: {}, currentMoveId: null,
+            move: { name: '', from: '', to: '', target: '' },
+            rooms: [], boxes: [], statuses: [...STARTER_STATUSES], markers: [...STARTER_MARKERS],
+            members: [], itemsByBox: {}, activeMode: 'local', serverMoveId: null, outbox: [], lastSyncTs: 0,
+          } as unknown as Store;
         }
         return st as Store;
       },
       partialize: (s) => ({
         onboarded: s.onboarded,
-        role: s.role,
-        move: s.move,
-        rooms: s.rooms,
-        boxes: s.boxes,
-        statuses: s.statuses,
-        markers: s.markers,
-        members: s.members,
-        itemsByBox: s.itemsByBox,
-        account: s.account,
-        activeMode: s.activeMode,
-        serverMoveId: s.serverMoveId,
-        outbox: s.outbox,
-        lastSyncTs: s.lastSyncTs,
+        move: s.move, rooms: s.rooms, boxes: s.boxes, statuses: s.statuses,
+        markers: s.markers, members: s.members, itemsByBox: s.itemsByBox,
+        account: s.account, activeMode: s.activeMode, serverMoveId: s.serverMoveId,
+        outbox: s.outbox, lastSyncTs: s.lastSyncTs,
+        library: s.library, currentMoveId: s.currentMoveId,
       }),
     },
   ),
 );
+
+// ============================================================
+// Library helpers
+// ============================================================
+
+/** Pull the live-slice fields off the full store state. */
+function extractSlice(s: State): SliceData {
+  return {
+    move: s.move, rooms: s.rooms, boxes: s.boxes, statuses: s.statuses, markers: s.markers,
+    members: s.members, itemsByBox: s.itemsByBox, activeMode: s.activeMode,
+    serverMoveId: s.serverMoveId, outbox: s.outbox, lastSyncTs: s.lastSyncTs,
+  };
+}
+
+function snapItemsByBox(snap: ServerSnapshot): Record<string, Item[]> {
+  const out: Record<string, Item[]> = {};
+  for (const b of snap.boxes) out[b.id] = [];
+  for (const it of snap.items) (out[it.boxId] ??= []).push(toClientItem(it));
+  return out;
+}
 
 // ============================================================
 // Hydration + selectors
@@ -475,4 +593,14 @@ export const allIndexedItems = (s: Store): IndexedItem[] => {
     }
   }
   return out;
+}
+
+export const moveSummaries = (s: Store): MoveSummary[] => {
+  const out: MoveSummary[] = [];
+  for (const b of Object.values(s.library)) {
+    out.push(b.id === s.currentMoveId ? summarize(snapshotInto(b, extractSlice(s), b.lastOpenedAt)) : summarize(b));
+  }
+  return out.sort((a, z) => z.lastOpenedAt - a.lastOpenedAt);
 };
+
+export const currentRole = (s: Store): Role => roleFor(s.activeMode, s.members, s.account?.id ?? null);;
