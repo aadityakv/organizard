@@ -6,11 +6,13 @@ import type { AppleIdentity } from '../../src/lib/apple';
 import type { Env } from '../../src/types';
 import { makeTestDb } from './db';
 import { makeMemoryKv } from './kv';
+import { makeMemoryR2 } from './r2';
 
-/** A wired app with in-memory DB/KV and stubbed Apple/email/time/ids. */
+/** A wired app with in-memory DB/KV/R2 and stubbed Apple/email/time/ids. */
 export async function makeHarness(opts: { now?: number } = {}) {
   const db = await makeTestDb();
   const kv = makeMemoryKv();
+  const r2 = makeMemoryR2();
   const sentEmails: { to: string; link: string }[] = [];
   let appleNext: AppleIdentity | null = null; // null => verify throws
 
@@ -20,7 +22,7 @@ export async function makeHarness(opts: { now?: number } = {}) {
 
   const env = {
     DB: undefined as unknown as D1Database,
-    PHOTOS: undefined as unknown as R2Bucket,
+    PHOTOS: r2,
     SESSIONS: kv,
     APP_URL: 'organizard://auth',
   } satisfies Env;

@@ -6,6 +6,7 @@ import { authMiddleware } from '../middleware/auth';
 import { membershipMiddleware, type MemberVars } from '../middleware/membership';
 import { applyMutations } from '../mutations/apply';
 import { createMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
+import { createPhotoRecord } from '../repos/photos';
 import { changeMemberRole, createInvite, getMoveOwnerId, removeMember } from '../repos/sharing';
 import type { Env } from '../types';
 
@@ -88,6 +89,19 @@ export function moveRoutes(deps: Deps) {
     if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_REMOVE_OWNER' }, 400);
     await removeMember(db, { moveId, userId });
     return c.json({ ok: true });
+  });
+
+  // --- photos: reserve a record (bytes uploaded via PUT /v1/photos/:photoId) ---
+  r.post('/:id/photos', membershipMiddleware(deps), async (c) => {
+    if (c.get('member').role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    const body = await c.req.json<{ itemId?: string; boxId?: string }>().catch(() => ({}) as { itemId?: string; boxId?: string });
+    const { photoId } = await createPhotoRecord(deps.getDb(c.env), deps, {
+      moveId: c.req.param('id'),
+      itemId: body.itemId ?? null,
+      boxId: body.boxId ?? null,
+      createdBy: c.get('user').id,
+    });
+    return c.json({ photoId, uploadPath: `/v1/photos/${photoId}` });
   });
 
   return r;

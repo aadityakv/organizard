@@ -94,4 +94,8 @@ export const api = {
     req<{ ok: true }>(`/v1/moves/${moveId}/members/${userId}`, { method: 'PATCH', body: JSON.stringify({ role }) }, session),
   removeMember: (session: string, moveId: string, userId: string) =>
     req<{ ok: true }>(`/v1/moves/${moveId}/members/${userId}`, { method: 'DELETE' }, session),
+
+  // --- photos ---
+  createPhoto: (session: string, moveId: string, link: { itemId?: string; boxId?: string }) =>
+    req<{ photoId: string; uploadPath: string }>(`/v1/moves/${moveId}/photos`, { method: 'POST', body: JSON.stringify(link) }, session),
 };

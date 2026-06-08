@@ -36,7 +36,7 @@ export const toClientItem = (i: SItem): Item => ({
   note: i.note ?? undefined,
   icon: i.icon ?? undefined,
   markers: i.markerIds,
-  photos: [], // server photo ids resolve to URLs in Phase 6
+  photos: i.photoIds, // server photo ids; resolve to URLs via photoSource()
 });
 
 export const toClientMember = (m: SMember): Member => ({ id: m.userId, name: m.name, role: m.role });

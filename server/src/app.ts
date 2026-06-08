@@ -7,6 +7,7 @@ import { toPublicUser } from './repos/users';
 import { authRoutes } from './routes/auth';
 import { inviteRoutes } from './routes/invites';
 import { moveRoutes } from './routes/moves';
+import { photoBlobRoutes } from './routes/photos';
 import type { Env } from './types';
 
 /**
@@ -22,6 +23,7 @@ export function createApp(overrides: Partial<Deps> = {}) {
   app.route('/v1/auth', authRoutes(deps));
   app.route('/v1/moves', moveRoutes(deps));
   app.route('/v1/invites', inviteRoutes(deps));
+  app.route('/v1/photos', photoBlobRoutes(deps));
 
   app.get('/v1/me', authMiddleware(deps), async (c) => {
     const moves = await getUserMoves(deps.getDb(c.env), c.get('user').id);

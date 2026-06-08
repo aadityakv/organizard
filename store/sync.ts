@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import { api, ApiError } from '@/lib/api';
+import { uploadPendingPhotos } from '@/lib/photos';
 import { useStore } from './useStore';
 
 const POLL_MS = 15_000;
@@ -23,6 +24,8 @@ export async function syncActiveMove(): Promise<void> {
       await api.mutations(session, serverMoveId, pending);
       useStore.getState().clearOutbox(pending.map((m) => m.clientId));
     }
+    // Upload local-uri photos to R2 before pulling, so the delta carries their ids.
+    await uploadPendingPhotos();
     const changes = await api.changes(session, serverMoveId, useStore.getState().lastSyncTs);
     useStore.getState().applyChanges(changes);
   } catch (e) {
