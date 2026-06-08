@@ -51,7 +51,7 @@ describe('moves — mutation batch', () => {
       m('addRoom', { id: 'room1', name: 'Kitchen', dest: 'NYC kitchen', icon: 'cooking-pot' }, 'c1'),
       m('addBox', { id: 'box1', roomId: 'room1', number: 1, name: 'Pots', color: 'amber', statusId }, 'c2'),
       m('addItem', { id: 'item1', boxId: 'box1', name: 'Skillet', qty: 1, valueCents: 8000, markerIds: [markerId] }, 'c3'),
-      m('toggleBoxMarker', { boxId: 'box1', markerId }, 'c4'),
+      m('setBoxMarker', { boxId: 'box1', markerId, on: true }, 'c4'),
     ];
     const res = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: muts }, auth(session));
     expect(res.status).toBe(200);

@@ -18,7 +18,7 @@ export function buildMigrationBatch(): Mutation[] {
   for (const r of s.rooms) out.push({ type: 'addRoom', clientId: cid(), ts, payload: { id: r.id, name: r.name, dest: r.dest ?? null, icon: r.icon } });
   for (const b of s.boxes) {
     out.push({ type: 'addBox', clientId: cid(), ts, payload: { id: b.id, roomId: b.roomId, number: b.number, name: b.name, color: b.color, statusId: b.status } });
-    for (const markerId of b.markers) out.push({ type: 'toggleBoxMarker', clientId: cid(), ts, payload: { boxId: b.id, markerId } });
+    for (const markerId of b.markers) out.push({ type: 'setBoxMarker', clientId: cid(), ts, payload: { boxId: b.id, markerId, on: true } });
   }
   for (const [boxId, items] of Object.entries(s.itemsByBox)) {
     for (const it of items) {

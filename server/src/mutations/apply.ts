@@ -7,9 +7,11 @@ import type { Deps } from '../deps';
 import { boxInMove, itemInMove, markersInMove, markerInMove, roomInMove, statusInMove } from '../repos/scope';
 
 /**
- * Apply a batch of mutations to a move. Server time is the source of truth for
- * `updatedAt` (so delta `since` is monotonic) and last-write-wins = apply order.
- * Idempotent: a clientId already in mutation_log is skipped.
+ * Apply a batch of mutations to a move. Each applied mutation stamps its rows
+ * with a strictly-increasing per-move logical clock (stored as moves.updatedAt),
+ * so `updatedAt` is a total order — which makes the delta cursor sound for
+ * pagination (no two rows share a timestamp, even within a batch). LWW = apply
+ * order. Idempotent: a clientId already in mutation_log is skipped.
  */
 export async function applyMutations(
   db: AppDb,
@@ -17,7 +19,8 @@ export async function applyMutations(
   moveId: string,
   mutations: Mutation[],
 ): Promise<{ serverTime: number; applied: number }> {
-  const now = deps.now();
+  const move = (await db.select({ u: s.moves.updatedAt }).from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
+  let clock = Math.max(deps.now(), (move?.u ?? 0) + 1);
   let applied = 0;
 
   for (const m of mutations) {
@@ -30,12 +33,14 @@ export async function applyMutations(
     )[0];
     if (seen) continue;
 
-    await applyOne(db, moveId, m, now);
-    await db.insert(s.mutationLog).values({ moveId, clientId: m.clientId, appliedAt: now }).onConflictDoNothing();
-    applied++;
+    await applyOne(db, moveId, m, clock);
+    await db.insert(s.mutationLog).values({ moveId, clientId: m.clientId, appliedAt: clock }).onConflictDoNothing();
+    clock += 1;
+    applied += 1;
   }
 
-  return { serverTime: now, applied };
+  await db.update(s.moves).set({ updatedAt: clock }).where(eq(s.moves.id, moveId));
+  return { serverTime: clock, applied };
 }
 
 async function bumpBox(db: AppDb, moveId: string, boxId: string, now: number): Promise<void> {
@@ -95,16 +100,14 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
     case 'setBoxCover':
       await db.update(s.boxes).set({ coverPhotoId: m.payload.coverPhotoId, updatedAt: now }).where(and(eq(s.boxes.id, m.payload.id), eq(s.boxes.moveId, moveId)));
       return;
-    case 'toggleBoxMarker': {
-      const { boxId, markerId } = m.payload;
+    case 'setBoxMarker': {
+      // Intent-based (on/off), so applying twice is idempotent (no double-apply flip).
+      const { boxId, markerId, on } = m.payload;
       if (!(await boxInMove(db, moveId, boxId)) || !(await markerInMove(db, moveId, markerId))) return;
-      const existing = (
-        await db.select().from(s.boxMarkers).where(and(eq(s.boxMarkers.boxId, boxId), eq(s.boxMarkers.markerId, markerId))).limit(1)
-      )[0];
-      if (existing) {
-        await db.delete(s.boxMarkers).where(and(eq(s.boxMarkers.boxId, boxId), eq(s.boxMarkers.markerId, markerId)));
-      } else {
+      if (on) {
         await db.insert(s.boxMarkers).values({ boxId, markerId }).onConflictDoNothing();
+      } else {
+        await db.delete(s.boxMarkers).where(and(eq(s.boxMarkers.boxId, boxId), eq(s.boxMarkers.markerId, markerId)));
       }
       await bumpBox(db, moveId, boxId, now); // so delta resends the box with new markerIds
       return;

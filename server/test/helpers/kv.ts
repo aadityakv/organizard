@@ -9,6 +9,10 @@ export function makeMemoryKv(): KVNamespace {
     delete: (async (k: string) => {
       store.delete(k);
     }),
-    list: (async () => ({ keys: [], list_complete: true, cacheStatus: null })),
+    list: (async (opts?: { prefix?: string }) => {
+      const prefix = opts?.prefix ?? '';
+      const keys = [...store.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name }));
+      return { keys, list_complete: true, cacheStatus: null };
+    }),
   } as unknown as KVNamespace;
 }

@@ -11,7 +11,7 @@ export type Mutation =
   | { type: 'deleteBox'; clientId: string; ts: number; payload: { id: string } }
   | { type: 'setBoxStatus'; clientId: string; ts: number; payload: { id: string; statusId: string } }
   | { type: 'setBoxCover'; clientId: string; ts: number; payload: { id: string; coverPhotoId: string | null } }
-  | { type: 'toggleBoxMarker'; clientId: string; ts: number; payload: { boxId: string; markerId: string } }
+  | { type: 'setBoxMarker'; clientId: string; ts: number; payload: { boxId: string; markerId: string; on: boolean } }
   | { type: 'addStatus'; clientId: string; ts: number; payload: { id: string; label: string; color: string } }
   | { type: 'addMarker'; clientId: string; ts: number; payload: { id: string; label: string; color: string; icon: string } }
   | { type: 'addItem'; clientId: string; ts: number; payload: { id: string; boxId: string; name: string; qty: number; valueCents: number; note?: string | null; icon?: string | null; markerIds?: string[]; photoIds?: string[] } }
@@ -32,7 +32,7 @@ export const ROLE_REQUIRED: Record<MutationType, RoleRequirement> = {
   deleteBox: 'owner',
   setBoxStatus: 'canEdit',
   setBoxCover: 'canEdit',
-  toggleBoxMarker: 'canEdit',
+  setBoxMarker: 'canEdit',
   addStatus: 'canEdit',
   addMarker: 'canEdit',
   addItem: 'canEdit',

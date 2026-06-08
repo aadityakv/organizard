@@ -1,5 +1,5 @@
 import type { Box, Item, Marker, Member, Move, Role, Room, Status } from '@shared/index';
-import { and, eq, gt, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNull } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
@@ -18,6 +18,10 @@ export type Snapshot = {
 };
 export type Changes = {
   serverTime: number;
+  /** Opaque cursor — pass back as `since` to continue. */
+  cursor: number;
+  /** True if the delta was capped; pull again with `cursor`. */
+  hasMore: boolean;
   rooms: Room[];
   statuses: Status[];
   markers: Marker[];
@@ -25,6 +29,8 @@ export type Changes = {
   items: Item[];
   members: Member[];
 };
+
+const PAGE_LIMIT = 200;
 
 export async function getMembership(db: AppDb, moveId: string, userId: string): Promise<Membership | null> {
   const row = (
@@ -159,23 +165,44 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
   };
 }
 
-/** Delta since a server timestamp — includes tombstoned rows so clients can remove them. */
+/**
+ * Delta since a cursor — includes tombstoned rows so clients can remove them.
+ * Each table is capped at PAGE_LIMIT (ordered by the logical clock); if any table
+ * is capped, `hasMore` is true and the client pulls again from `cursor`.
+ */
 export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, since: number): Promise<Changes> {
-  const rooms = (await db.select().from(s.rooms).where(and(eq(s.rooms.moveId, moveId), gt(s.rooms.updatedAt, since)))).map(toRoom);
-  const statuses = (await db.select().from(s.statuses).where(and(eq(s.statuses.moveId, moveId), gt(s.statuses.updatedAt, since)))).map(toStatus);
-  const markers = (await db.select().from(s.markers).where(and(eq(s.markers.moveId, moveId), gt(s.markers.updatedAt, since)))).map(toMarker);
+  const roomRows = await db.select().from(s.rooms).where(and(eq(s.rooms.moveId, moveId), gt(s.rooms.updatedAt, since))).orderBy(asc(s.rooms.updatedAt)).limit(PAGE_LIMIT);
+  const statusRows = await db.select().from(s.statuses).where(and(eq(s.statuses.moveId, moveId), gt(s.statuses.updatedAt, since))).orderBy(asc(s.statuses.updatedAt)).limit(PAGE_LIMIT);
+  const markerRows = await db.select().from(s.markers).where(and(eq(s.markers.moveId, moveId), gt(s.markers.updatedAt, since))).orderBy(asc(s.markers.updatedAt)).limit(PAGE_LIMIT);
+  const boxRows = await db.select().from(s.boxes).where(and(eq(s.boxes.moveId, moveId), gt(s.boxes.updatedAt, since))).orderBy(asc(s.boxes.updatedAt)).limit(PAGE_LIMIT);
+  const itemRows = await db.select().from(s.items).where(and(eq(s.items.moveId, moveId), gt(s.items.updatedAt, since))).orderBy(asc(s.items.updatedAt)).limit(PAGE_LIMIT);
 
-  const boxRows = await db.select().from(s.boxes).where(and(eq(s.boxes.moveId, moveId), gt(s.boxes.updatedAt, since)));
-  const itemRows = await db.select().from(s.items).where(and(eq(s.items.moveId, moveId), gt(s.items.updatedAt, since)));
+  // Advance the cursor only as far as every capped table is fully drained, so nothing is skipped.
+  const cappedMax: number[] = [];
+  const consider = (rows: { updatedAt: number }[]) => {
+    if (rows.length >= PAGE_LIMIT) cappedMax.push(rows[rows.length - 1].updatedAt);
+  };
+  consider(roomRows);
+  consider(statusRows);
+  consider(markerRows);
+  consider(boxRows);
+  consider(itemRows);
+
+  const hasMore = cappedMax.length > 0;
+  const move = (await db.select({ u: s.moves.updatedAt }).from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
+  const cursor = hasMore ? Math.min(...cappedMax) : (move?.u ?? deps.now());
+
   const bm = await boxMarkerMap(db, boxRows.map((b) => b.id));
   const im = await itemMarkerMap(db, itemRows.map((i) => i.id));
   const ip = await itemPhotoMap(db, itemRows.map((i) => i.id));
 
   return {
     serverTime: deps.now(),
-    rooms,
-    statuses,
-    markers,
+    cursor,
+    hasMore,
+    rooms: roomRows.map(toRoom),
+    statuses: statusRows.map(toStatus),
+    markers: markerRows.map(toMarker),
     boxes: boxRows.map((b) => toBox(b, bm.get(b.id) ?? [])),
     items: itemRows.map((i) => toItem(i, im.get(i.id) ?? [], ip.get(i.id) ?? [])),
     members: await getMembers(db, moveId), // full list each delta (small); covers invite/role/remove

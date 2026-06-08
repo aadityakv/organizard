@@ -10,6 +10,7 @@ import { createPhotoRecord } from '../repos/photos';
 import { boxInMove, itemInMove } from '../repos/scope';
 import { changeMemberRole, createInvite, getMoveOwnerId, isOwnerEntitled, removeMember } from '../repos/sharing';
 import type { Env } from '../types';
+import { mutationsBodySchema } from '../validation';
 
 export function moveRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: MemberVars }>();
@@ -47,14 +48,15 @@ export function moveRoutes(deps: Deps) {
   });
 
   r.post('/:id/mutations', membershipMiddleware(deps), async (c) => {
-    const body = await c.req.json<{ mutations?: Mutation[] }>().catch(() => ({ mutations: [] as Mutation[] }));
-    const mutations = body.mutations ?? [];
+    // Validate shape/types/bounds before anything is applied.
+    const parsed = mutationsBodySchema.safeParse(await c.req.json().catch(() => ({})));
+    if (!parsed.success) return c.json({ error: 'BAD_MUTATION' }, 400);
+    const mutations = parsed.data.mutations as Mutation[];
     const role = c.get('member').role;
 
-    // Reject unknown types + enforce role server-side per mutation (client gating is UX only).
+    // Enforce role server-side per mutation (client gating is UX only).
     for (const m of mutations) {
       const need = ROLE_REQUIRED[m.type];
-      if (!need) return c.json({ error: 'BAD_MUTATION', type: m.type }, 400);
       const ok = need === 'owner' ? role === 'owner' : role === 'owner' || role === 'editor';
       if (!ok) return c.json({ error: 'FORBIDDEN_ROLE', type: m.type }, 403);
     }

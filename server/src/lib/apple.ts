@@ -14,9 +14,12 @@ export async function verifyAppleToken(
   identityToken: string,
   bundleId: string | undefined,
 ): Promise<AppleIdentity> {
+  // Fail closed: without our bundle id the audience check would be skipped,
+  // accepting tokens minted for any other app.
+  if (!bundleId) throw new Error('APPLE_BUNDLE_ID not configured');
   const { payload } = await jwtVerify(identityToken, APPLE_JWKS, {
     issuer: 'https://appleid.apple.com',
-    audience: bundleId, // undefined => audience check skipped
+    audience: bundleId,
   });
   if (!payload.sub) throw new Error('Apple token missing sub');
   return { sub: payload.sub, email: (payload.email as string | undefined) ?? null };

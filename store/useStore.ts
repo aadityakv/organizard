@@ -178,6 +178,8 @@ export const useStore = create<Store>()(
       },
 
       toggleBoxMarker: (boxId, markerId) => {
+        const box = get().boxes.find((b) => b.id === boxId);
+        const on = box ? !box.markers.includes(markerId) : true; // desired state after the toggle
         set((s) => ({
           boxes: s.boxes.map((b) => {
             if (b.id !== boxId) return b;
@@ -185,7 +187,7 @@ export const useStore = create<Store>()(
             return { ...b, markers: has ? b.markers.filter((m) => m !== markerId) : [...b.markers, markerId] };
           }),
         }));
-        get().enqueue({ type: 'toggleBoxMarker', clientId: uid('c'), ts: Date.now(), payload: { boxId, markerId } });
+        get().enqueue({ type: 'setBoxMarker', clientId: uid('c'), ts: Date.now(), payload: { boxId, markerId, on } });
       },
 
       addStatus: ({ label, color }) => {
@@ -314,7 +316,7 @@ export const useStore = create<Store>()(
             boxes,
             itemsByBox,
             members: ch.members.map(toClientMember),
-            lastSyncTs: ch.serverTime,
+            lastSyncTs: ch.cursor,
           };
         });
       },

@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
 import { authMiddleware, type AuthVars } from '../middleware/auth';
-import { createSession, deleteSession } from '../lib/session';
+import { rateLimit } from '../lib/ratelimit';
+import { createSession, deleteAllSessions, deleteSession } from '../lib/session';
 import { toPublicUser, upsertAppleUser, upsertEmailUser } from '../repos/users';
 import type { Env } from '../types';
 
@@ -44,6 +45,12 @@ export function authRoutes(deps: Deps) {
     const normalized = email?.trim().toLowerCase();
     if (!normalized || !EMAIL_RE.test(normalized)) return c.json({ error: 'INVALID_EMAIL' }, 400);
 
+    // Throttle to curb abuse / email-relay spam (per address + per IP, 15-min window).
+    const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
+    const okEmail = await rateLimit(c.env.SESSIONS, `mail:${normalized}`, 5, 900);
+    const okIp = await rateLimit(c.env.SESSIONS, `mailip:${ip}`, 20, 900);
+    if (!okEmail || !okIp) return c.json({ error: 'RATE_LIMITED' }, 429);
+
     const token = deps.newToken();
     await c.env.SESSIONS.put(magicKey(token), JSON.stringify({ email: normalized }), {
       expirationTtl: MAGIC_TTL_SECONDS,
@@ -77,6 +84,12 @@ export function authRoutes(deps: Deps) {
     const header = c.req.header('Authorization');
     const token = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
     if (token) await deleteSession(c.env, token);
+    return c.json({ ok: true });
+  });
+
+  // Sign out everywhere — revoke all of the user's sessions.
+  r.post('/logout-all', authMiddleware(deps), async (c) => {
+    await deleteAllSessions(c.env, c.get('user').id);
     return c.json({ ok: true });
   });
 

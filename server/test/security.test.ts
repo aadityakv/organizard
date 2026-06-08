@@ -35,7 +35,7 @@ describe('security — cross-move isolation (IDOR)', () => {
     // From move A, try to: link B's marker onto B's box, and add an item into B's box.
     await h.json(`/v1/moves/${a.move.id}/mutations`, {
       mutations: [
-        m('toggleBoxMarker', { boxId: 'bB', markerId: bMarker }, 'a1'),
+        m('setBoxMarker', { boxId: 'bB', markerId: bMarker, on: true }, 'a1'),
         m('addItem', { id: 'iX', boxId: 'bB', name: 'sneaky', qty: 1, valueCents: 1 }, 'a2'),
       ],
     }, auth(owner.session));

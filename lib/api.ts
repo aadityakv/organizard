@@ -24,6 +24,8 @@ export type ServerSnapshot = {
 };
 export type ServerChanges = {
   serverTime: number;
+  cursor: number;
+  hasMore: boolean;
   rooms: Room[];
   statuses: Status[];
   markers: Marker[];

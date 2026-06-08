@@ -30,8 +30,14 @@ export async function syncActiveMove(): Promise<void> {
     }
     // Upload local-uri photos to R2 before pulling, so the delta carries their ids.
     await uploadPendingPhotos();
-    const changes = await api.changes(session, serverMoveId, useStore.getState().lastSyncTs);
-    useStore.getState().applyChanges(changes);
+    // Pull deltas, paging through if the change set was capped.
+    let guard = 0;
+    let more = true;
+    while (more && guard++ < 50) {
+      const changes = await api.changes(session, serverMoveId, useStore.getState().lastSyncTs);
+      useStore.getState().applyChanges(changes);
+      more = changes.hasMore;
+    }
     failures = 0;
     nextAllowedAt = 0;
   } catch (e) {
