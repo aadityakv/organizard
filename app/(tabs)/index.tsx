@@ -488,7 +488,7 @@ export default function Dashboard() {
               variant="plain"
               size="sm"
               accessibilityLabel="Share & members"
-              onPress={() => router.push('/share')}
+              onPress={() => router.navigate('/(tabs)/members')}
             />
             <IconButton
               icon={searching ? 'x' : 'search'}

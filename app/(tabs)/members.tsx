@@ -1,503 +1,251 @@
-// Members & sharing — the differentiator. Roster, invite with role, owner-only manage.
-// Member mutations (role change / remove) live in LOCAL component state only:
-// the store has no member mutators and we must not add any.
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
-import {
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  Header,
-  Icon,
-  LockNote,
-  RoleBadge,
-  Sheet,
-} from '@/components';
-import { PERM, ROLE_BLURB, ROLE_LABEL } from '@/lib/permissions';
-import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
+import { Avatar, Button, Card, Header, Icon, Input, LockNote, RoleBadge, Segmented } from '@/components';
 import type { Member, Role } from '@/data/types';
-import { currentRole, useStore } from '@/store/useStore';
+import { api, ApiError } from '@/lib/api';
+import { appleSignInAvailable, signInWithApple, startEmailSignIn } from '@/lib/auth';
+import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from '@/lib/billing';
+import { createInviteLink, shareMove } from '@/lib/share';
+import { syncActiveMove } from '@/store/sync';
+import { useStore } from '@/store/useStore';
+import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 
-// Roles a buddy can be invited / changed to (you can't demote/clone an owner here).
-const ASSIGNABLE_ROLES: Role[] = ['editor', 'viewer'];
-const INVITE_CODE = 'GECKO-4F2';
-const INVITE_LINK = 'organizard.app/join/GECKO-4F2';
+const FRIENDLY_ERROR: Record<string, string> = {
+  ENTITLEMENT_REQUIRED: 'An Organizard subscription is required to share a move.',
+  FORBIDDEN_ROLE: "You don't have permission to do that.",
+  INVITE_INVALID: "That invite link isn't valid.",
+  INVITE_USED: 'That invite has already been used.',
+  INVITE_EXPIRED: 'That invite link has expired.',
+  CANNOT_CHANGE_OWNER: "You can't change the owner's role.",
+  CANNOT_REMOVE_OWNER: "You can't remove the owner.",
+};
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Role picker — shared by the invite card and the manage sheet.
-// ─────────────────────────────────────────────────────────────────────────────
-function RolePicker({ value, onChange }: { value: Role; onChange: (r: Role) => void }) {
-  return (
-    <View style={styles.rolePicker}>
-      {ASSIGNABLE_ROLES.map((r) => {
-        const selected = value === r;
-        return (
-          <Pressable
-            key={r}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            accessibilityLabel={`${ROLE_LABEL[r]} — ${ROLE_BLURB[r]}`}
-            onPress={() => onChange(r)}
-            style={({ pressed }) => [
-              styles.roleOption,
-              selected && styles.roleOptionSelected,
-              pressed && styles.pressed,
-            ]}
-          >
-            <RoleBadge role={r} withBlurb style={styles.roleBadgeFill} />
-            {selected ? (
-              <Icon name="check-circle-2" size={22} color={palette.green600} />
-            ) : (
-              <View style={styles.radioEmpty} />
-            )}
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+function friendlyError(e: unknown): string {
+  if (e instanceof ApiError && FRIENDLY_ERROR[e.code]) return FRIENDLY_ERROR[e.code];
+  return e instanceof Error ? e.message : 'Something went wrong.';
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Invite sheet — visible to every role. Pick a role, copy the link / code.
-// ─────────────────────────────────────────────────────────────────────────────
-function InviteSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+export default function ShareScreen() {
+  const account = useStore((s) => s.account);
+  const session = useStore((s) => s.session);
+  const activeMode = useStore((s) => s.activeMode);
+  const serverMoveId = useStore((s) => s.serverMoveId);
+  const members = useStore((s) => s.members);
+  const moveName = useStore((s) => s.move.name);
+  const signOut = useStore((s) => s.signOut);
+
+  const [email, setEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [appleOk, setAppleOk] = useState(false);
   const [inviteRole, setInviteRole] = useState<Role>('editor');
-  const [copied, setCopied] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
 
-  const copyLink = () => {
-    // No real clipboard binding — a pressed confirmation is enough for the demo.
-    setCopied(true);
+  useEffect(() => {
+    appleSignInAvailable().then(setAppleOk).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (account?.id) configureBilling(account.id);
+  }, [account?.id]);
+
+  // Default to the least-privileged role until membership is known (avoids an owner-controls flash).
+  const myRole = members.find((m) => m.id === account?.id)?.role ?? 'viewer';
+  const canManage = myRole === 'owner';
+
+  const guard = async (fn: () => Promise<void>, label: string) => {
+    setBusy(true);
+    try {
+      await fn();
+    } catch (e) {
+      Alert.alert(label, friendlyError(e));
+    } finally {
+      setBusy(false);
+    }
   };
 
-  // Reset the confirmation whenever the sheet is dismissed.
-  const close = () => {
-    setCopied(false);
-    onClose();
-  };
+  const doShare = () => guard(async () => {
+    // Paywall: subscription required to own a shared move. Server enforces it too.
+    if (billingConfigured() && !(await isEntitled())) {
+      const ok = await purchaseSharing();
+      if (!ok) return;
+    }
+    await shareMove();
+    await syncActiveMove();
+  }, 'Could not share');
 
-  return (
-    <Sheet visible={visible} onClose={close} title="Invite a packing buddy">
-      <Text style={styles.sheetBlurb}>
-        They will join with the role you pick. You can change it anytime.
-      </Text>
+  const doInvite = () => guard(async () => {
+    setInviteLink(await createInviteLink(inviteRole));
+  }, 'Invite failed');
 
-      <RolePicker value={inviteRole} onChange={setInviteRole} />
+  const changeRole = (userId: string, role: Role) =>
+    guard(async () => {
+      if (session && serverMoveId) {
+        await api.changeRole(session, serverMoveId, userId, role);
+        await syncActiveMove();
+      }
+    }, 'Could not change role');
 
-      <Button
-        variant="primary"
-        size="lg"
-        fullWidth
-        iconLeft={copied ? 'check' : 'link'}
-        onPress={copyLink}
-        style={styles.sheetCta}
-      >
-        {copied ? 'Link copied' : 'Copy invite link'}
-      </Button>
-
-      <Text style={styles.inviteLink} numberOfLines={1}>
-        {INVITE_LINK}
-      </Text>
-
-      <View style={styles.codeRow}>
-        <Icon name="hash" size={16} color={palette.ink400} />
-        <Text style={styles.codeText}>{INVITE_CODE}</Text>
-        <Text style={styles.codeHint}>or share this code</Text>
-      </View>
-    </Sheet>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Manage sheet — owner only. Change a buddy's role or remove them (local state).
-// ─────────────────────────────────────────────────────────────────────────────
-function ManageSheet({
-  member,
-  onClose,
-  onChangeRole,
-  onRemove,
-}: {
-  member: Member | null;
-  onClose: () => void;
-  onChangeRole: (id: string, role: Role) => void;
-  onRemove: (id: string) => void;
-}) {
-  // Seed the picker from the member each time a sheet opens.
-  const initialRole: Role = member && member.role !== 'owner' ? member.role : 'editor';
-  const [role, setRole] = useState<Role>(initialRole);
-
-  // Keep local picker in sync when a different member is tapped.
-  React.useEffect(() => {
-    if (member) setRole(member.role === 'owner' ? 'editor' : member.role);
-  }, [member]);
-
-  return (
-    <Sheet visible={member !== null} onClose={onClose}>
-      {member ? (
-        <>
-          <View style={styles.manageHeader}>
-            <Avatar name={member.name} size={48} />
-            <View style={styles.manageHeaderText}>
-              <Text style={styles.manageName} numberOfLines={1}>
-                {member.name}
-              </Text>
-              <Text style={styles.manageSub}>Choose what they can do</Text>
-            </View>
-          </View>
-
-          <RolePicker value={role} onChange={setRole} />
-
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            onPress={() => {
-              onChangeRole(member.id, role);
-              onClose();
-            }}
-            style={styles.sheetCta}
-          >
-            Save role
-          </Button>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Remove ${member.name} from move`}
-            onPress={() => {
-              onRemove(member.id);
-              onClose();
-            }}
-            style={({ pressed }) => [styles.removeBtn, pressed && styles.pressed]}
-          >
-            <Text style={styles.removeText}>Remove from move</Text>
-          </Pressable>
-        </>
-      ) : null}
-    </Sheet>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────────────────────────────────────────
-export default function Members() {
-  const role = useStore(currentRole);
-  const storeMembers = useStore((s) => s.members);
-  const accountId = useStore((s) => s.account?.id);
-
-  // Member management is LOCAL UI state — the store has no member mutators.
-  const [members, setMembers] = useState<Member[]>(storeMembers);
-  // Re-seed when the synced roster changes (shared moves) so it doesn't go stale.
-  useEffect(() => setMembers(storeMembers), [storeMembers]);
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [manageMember, setManageMember] = useState<Member | null>(null);
-
-  const isOwner = PERM.canManage(role);
-  const ownerMember = useMemo(() => members.find((m) => m.role === 'owner'), [members]);
-  const ownerName = ownerMember?.name ?? 'the owner';
-  const solo = members.length <= 1;
-
-  const changeRole = (id: string, next: Role) =>
-    setMembers((ms) => ms.map((m) => (m.id === id ? { ...m, role: next } : m)));
-
-  const removeMember = (id: string) => setMembers((ms) => ms.filter((m) => m.id !== id));
+  const remove = (userId: string) =>
+    guard(async () => {
+      if (session && serverMoveId) {
+        await api.removeMember(session, serverMoveId, userId);
+        await syncActiveMove();
+      }
+    }, 'Could not remove');
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header
-        title="Members & sharing"
-        subtitle={`${members.length} on this move`}
-      />
+      <Header title="Share & members" subtitle={moveName} />
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {!session ? (
+          <Card style={styles.card}>
+            <Text style={styles.h}>Sign in to share</Text>
+            <Text style={styles.p}>Sharing a move keeps it in sync with your packing buddy. You stay the owner.</Text>
+            {appleOk ? (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={999}
+                style={styles.appleBtn}
+                onPress={() => guard(signInWithApple, 'Sign-in failed')}
+              />
+            ) : null}
+            <Text style={styles.or}>or use email</Text>
+            {emailSent ? (
+              <View style={styles.sent}>
+                <Icon name="mail-check" size={18} color={colors.success} />
+                <Text style={styles.p}>Check your email for a sign-in link.</Text>
+              </View>
+            ) : (
+              <>
+                <Input value={email} onChangeText={setEmail} placeholder="you@email.com" keyboardType="email-address" />
+                <Button onPress={() => guard(async () => { await startEmailSignIn(email.trim()); setEmailSent(true); }, 'Could not send link')} disabled={busy || !email.trim()} fullWidth style={styles.cta}>
+                  Send sign-in link
+                </Button>
+              </>
+            )}
+          </Card>
+        ) : activeMode === 'local' ? (
+          <>
+            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} />
+            <Card style={styles.card}>
+              <Text style={styles.h}>Share “{moveName}”</Text>
+              <Text style={styles.p}>This uploads the move so your partner can view and edit it in sync. You stay the owner.</Text>
+              <Button onPress={doShare} disabled={busy} fullWidth iconLeft="users" style={styles.cta}>
+                {busy ? 'Sharing…' : 'Share this move'}
+              </Button>
+            </Card>
+          </>
+        ) : (
+          <>
+            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} />
+            <Card style={styles.card}>
+              <Text style={styles.h}>Invite a packing buddy</Text>
+              {canManage ? (
+                <>
+                  <Text style={styles.label}>They join as</Text>
+                  <Segmented
+                    options={[{ value: 'editor', label: 'Editor' }, { value: 'viewer', label: 'Viewer' }]}
+                    value={inviteRole}
+                    onChange={(v) => setInviteRole(v as Role)}
+                  />
+                  <Button onPress={doInvite} disabled={busy} fullWidth iconLeft="user-plus" style={styles.cta}>
+                    Create invite link
+                  </Button>
+                  {inviteLink ? <Text selectable style={styles.link}>{inviteLink}</Text> : null}
+                </>
+              ) : (
+                <LockNote>Only the owner can invite people.</LockNote>
+              )}
+            </Card>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Roster */}
-        <Card style={styles.rosterCard}>
-          {members.map((m, i) => {
-            // Synced rosters (shared moves) don't carry `you`; derive it from the account.
-            const you = Boolean(m.you) || m.id === accountId;
-            const tappable = isOwner && !you;
-            return (
-              <Pressable
-                key={m.id}
-                disabled={!tappable}
-                accessibilityRole={tappable ? 'button' : undefined}
-                accessibilityLabel={tappable ? `Manage ${m.name}` : undefined}
-                onPress={tappable ? () => setManageMember(m) : undefined}
-                style={({ pressed }) => [
-                  styles.rosterRow,
-                  i > 0 && styles.rosterRowDivider,
-                  tappable && pressed && styles.pressed,
-                ]}
-              >
-                <Avatar name={m.name} size={44} />
-                <View style={styles.rosterBody}>
-                  <View style={styles.nameRow}>
-                    <Text style={styles.memberName} numberOfLines={1}>
-                      {m.name}
-                    </Text>
-                    {you ? <Badge label="You" tone="neutral" size="sm" /> : null}
-                  </View>
-                  <RoleBadge role={m.role} withBlurb size="sm" style={styles.rosterRole} />
-                </View>
-                {tappable ? (
-                  <Icon name="chevron-right" size={20} color={palette.ink400} />
-                ) : null}
-              </Pressable>
-            );
-          })}
-        </Card>
-
-        {/* Invite — available to every role */}
-        <Card style={styles.inviteCard}>
-          {solo ? (
-            <View style={styles.soloIcon}>
-              <Icon name="user-plus" size={22} color={palette.green700} />
-            </View>
-          ) : null}
-          <Text style={styles.inviteTitle}>
-            {solo ? 'You are packing solo' : 'Invite a packing buddy'}
-          </Text>
-          <Text style={styles.inviteBlurb}>
-            {solo
-              ? 'Bring in a partner or helper — they can add boxes, scan, and follow along.'
-              : 'Share a link and pick what each person can do. You can change it anytime.'}
-          </Text>
-          <Button
-            variant={solo ? 'primary' : 'secondary'}
-            size="lg"
-            fullWidth
-            iconLeft="user-plus"
-            onPress={() => setInviteOpen(true)}
-            style={styles.inviteBtn}
-          >
-            Invite someone
-          </Button>
-        </Card>
-
-        {/* Manage — owner only. Non-owners get the plain-language why. */}
-        {!isOwner ? (
-          <View style={styles.lockWrap}>
-            <LockNote>Only {ownerName} can change roles.</LockNote>
-          </View>
-        ) : null}
+            <Text style={styles.section}>Members</Text>
+            {members.map((mem) => (
+              <MemberRow
+                key={mem.id}
+                member={mem}
+                you={mem.id === account?.id}
+                canManage={canManage && mem.role !== 'owner'}
+                onRole={(r) => changeRole(mem.id, r)}
+                onRemove={() => remove(mem.id)}
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
-
-      <InviteSheet visible={inviteOpen} onClose={() => setInviteOpen(false)} />
-      <ManageSheet
-        member={manageMember}
-        onClose={() => setManageMember(null)}
-        onChangeRole={changeRole}
-        onRemove={removeMember}
-      />
     </SafeAreaView>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Styles
-// ─────────────────────────────────────────────────────────────────────────────
+function AccountChip({ name, email, onSignOut }: { name: string; email: string | null; onSignOut: () => void }) {
+  return (
+    <View style={styles.account}>
+      <Avatar name={name} size={36} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.accountName} numberOfLines={1}>{name}</Text>
+        {email ? <Text style={styles.accountEmail} numberOfLines={1}>{email}</Text> : null}
+      </View>
+      <Pressable onPress={onSignOut} hitSlop={8}>
+        <Text style={styles.signOut}>Sign out</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function MemberRow({ member, you, canManage, onRole, onRemove }: {
+  member: Member;
+  you: boolean;
+  canManage: boolean;
+  onRole: (r: Role) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <View style={styles.memberRow}>
+      <Avatar name={member.name} size={40} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.memberName} numberOfLines={1}>
+          {member.name}{you ? ' · You' : ''}
+        </Text>
+        <RoleBadge role={member.role} size="sm" />
+      </View>
+      {canManage ? (
+        <View style={styles.memberActions}>
+          <Segmented
+            size="sm"
+            options={[{ value: 'editor', label: 'Editor' }, { value: 'viewer', label: 'Viewer' }]}
+            value={member.role === 'viewer' ? 'viewer' : 'editor'}
+            onChange={(v) => onRole(v as Role)}
+          />
+          <Pressable onPress={onRemove} hitSlop={8} accessibilityLabel="Remove member">
+            <Icon name="trash-2" size={18} color={colors.danger} />
+          </Pressable>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.surfaceApp,
-  },
-  scroll: {
-    paddingHorizontal: space[4],
-    paddingTop: space[2],
-    paddingBottom: space[10],
-    gap: space[5],
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-
-  // Roster ------------------------------------------------------------------
-  rosterCard: {
-    overflow: 'hidden',
-  },
-  rosterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-    paddingVertical: space[3],
-    paddingHorizontal: space[4],
-    minHeight: 64,
-  },
-  rosterRowDivider: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: palette.sand300,
-  },
-  rosterBody: {
-    flex: 1,
-    minWidth: 0,
-    gap: space[1],
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  memberName: {
-    flexShrink: 1,
-    fontFamily: fonts.body.extra,
-    fontSize: fontSize.md,
-    color: palette.ink900,
-  },
-  rosterRole: {
-    alignSelf: 'flex-start',
-  },
-
-  // Invite card -------------------------------------------------------------
-  inviteCard: {
-    padding: space[4],
-  },
-  soloIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    backgroundColor: palette.green50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: space[3],
-  },
-  inviteTitle: {
-    fontFamily: fonts.display.bold,
-    fontSize: fontSize.lg,
-    color: palette.ink900,
-    marginBottom: space[1],
-  },
-  inviteBlurb: {
-    fontFamily: fonts.body.semibold,
-    fontSize: 13.5,
-    lineHeight: 19,
-    color: palette.ink500,
-    marginBottom: space[4],
-  },
-  inviteBtn: {
-    marginTop: space[1],
-  },
-
-  // Lock note ---------------------------------------------------------------
-  lockWrap: {
-    marginHorizontal: -space[4], // LockNote owns its own 16px gutter.
-  },
-
-  // Sheet shared ------------------------------------------------------------
-  sheetBlurb: {
-    fontFamily: fonts.body.semibold,
-    fontSize: 13.5,
-    lineHeight: 19,
-    color: palette.ink500,
-    marginBottom: space[4],
-  },
-  sheetCta: {
-    marginTop: space[1],
-  },
-
-  // Role picker -------------------------------------------------------------
-  rolePicker: {
-    gap: space[2],
-    marginBottom: space[4],
-  },
-  roleOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-    paddingVertical: space[3],
-    paddingHorizontal: space[3],
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    borderColor: palette.sand300,
-    backgroundColor: palette.white,
-  },
-  roleOptionSelected: {
-    borderColor: palette.green400,
-    backgroundColor: palette.green50,
-  },
-  roleBadgeFill: {
-    flex: 1,
-  },
-  radioEmpty: {
-    width: 22,
-    height: 22,
-    borderRadius: radius.pill,
-    borderWidth: 2,
-    borderColor: palette.sand400,
-  },
-
-  // Invite link + code ------------------------------------------------------
-  inviteLink: {
-    fontFamily: fonts.body.bold,
-    fontSize: fontSize.sm,
-    color: palette.green700,
-    textAlign: 'center',
-    marginTop: space[3],
-  },
-  codeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[2],
-    marginTop: space[3],
-    paddingVertical: space[2],
-    paddingHorizontal: space[4],
-    backgroundColor: palette.cream100,
-    borderRadius: radius.md,
-  },
-  codeText: {
-    fontFamily: fonts.body.extra,
-    fontSize: fontSize.md,
-    letterSpacing: 2,
-    color: palette.ink700,
-  },
-  codeHint: {
-    marginLeft: 'auto',
-    fontFamily: fonts.body.bold,
-    fontSize: fontSize.xs,
-    color: palette.ink400,
-  },
-
-  // Manage sheet ------------------------------------------------------------
-  manageHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-    marginBottom: space[4],
-  },
-  manageHeaderText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  manageName: {
-    fontFamily: fonts.display.bold,
-    fontSize: fontSize.lg,
-    color: palette.ink900,
-  },
-  manageSub: {
-    fontFamily: fonts.body.bold,
-    fontSize: fontSize.sm,
-    color: palette.ink500,
-    marginTop: 1,
-  },
-  removeBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 44,
-    marginTop: space[2],
-  },
-  removeText: {
-    fontFamily: fonts.body.bold,
-    fontSize: fontSize.base,
-    color: colors.danger,
-  },
+  safe: { flex: 1, backgroundColor: colors.surfaceApp },
+  content: { paddingHorizontal: 16, paddingBottom: 60, gap: 14 },
+  card: { padding: 18, gap: 8 },
+  h: { fontFamily: fonts.display.bold, fontSize: 20, color: palette.ink900 },
+  p: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20 },
+  label: { fontFamily: fonts.body.bold, fontSize: fontSize.sm, color: palette.ink700, marginTop: 8, marginBottom: 6 },
+  cta: { marginTop: 12 },
+  or: { fontFamily: fonts.body.bold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginVertical: 6 },
+  appleBtn: { height: 48, marginTop: 6 },
+  sent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  link: { fontFamily: fonts.body.bold, fontSize: 13, color: colors.textLink, marginTop: 12, padding: 12, backgroundColor: palette.green50, borderRadius: radius.md },
+  section: { fontFamily: fonts.body.extra, fontSize: 11, letterSpacing: 0.7, textTransform: 'uppercase', color: palette.ink400, marginTop: 8, marginLeft: 4 },
+  account: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surfaceCard, borderRadius: radius.lg, padding: 14 },
+  accountName: { fontFamily: fonts.body.bold, fontSize: 15, color: palette.ink900 },
+  accountEmail: { fontFamily: fonts.body.semibold, fontSize: 12.5, color: palette.ink500 },
+  signOut: { fontFamily: fonts.body.bold, fontSize: 13, color: colors.danger },
+  memberRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surfaceCard, borderRadius: radius.lg, padding: 12 },
+  memberName: { fontFamily: fonts.body.bold, fontSize: 15, color: palette.ink900, marginBottom: 4 },
+  memberActions: { alignItems: 'flex-end', gap: 8, flexDirection: 'row' },
 });
