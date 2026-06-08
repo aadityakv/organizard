@@ -34,7 +34,7 @@
       "typedRoutes": false
     },
     "extra": {
-      "apiUrl": "http://localhost:8787",
+      "apiUrl": "https://organizard-api.aaditya-kv.workers.dev",
       "revenueCatKey": ""
     }
   }
