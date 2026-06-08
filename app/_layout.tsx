@@ -77,6 +77,7 @@ export default function RootLayout() {
         <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
         <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
+        <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
       </Stack>
     </SafeAreaProvider>
   );
