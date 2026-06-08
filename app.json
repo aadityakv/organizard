@@ -28,7 +28,8 @@
         {
           "cameraPermission": "Organizard uses the camera to photograph your items and scan box QR labels."
         }
-      ]
+      ],
+      "./plugins/withFmtConstevalFix"
     ],
     "experiments": {
       "typedRoutes": false
