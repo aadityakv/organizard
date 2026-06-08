@@ -18,7 +18,9 @@ import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useHasHydrated } from '@/store/useStore';
+import { loadSession } from '@/lib/session';
+import { useSync } from '@/store/sync';
+import { useHasHydrated, useStore } from '@/store/useStore';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +38,14 @@ export default function RootLayout() {
   });
   const hydrated = useHasHydrated();
   const ready = fontsLoaded && hydrated;
+
+  // Sync engine (no-op for local moves) + restore the session token from the keychain.
+  useSync();
+  useEffect(() => {
+    loadSession().then((t) => {
+      if (t) useStore.setState({ session: t });
+    });
+  }, []);
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(colors.surfaceApp).catch(() => {});

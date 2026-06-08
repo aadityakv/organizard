@@ -1,6 +1,8 @@
 // ============================================================
-// Organizard store — the single source of truth for the move.
-// Zustand + AsyncStorage persistence. Seeds from the mock NYC Move.
+// Organizard store — single source of truth for the active move.
+// Zustand + AsyncStorage. Local moves work fully offline; when the active
+// move is `shared`, every mutating action also enqueues a Mutation to the
+// outbox, which the sync engine (store/sync.ts) flushes to the backend.
 // ============================================================
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,12 +19,17 @@ import {
   statuses as seedStatuses,
 } from '@/data/mockData';
 import type { Box, IndexedItem, Item, Marker, Member, Move, Role, Room, Status } from '@/data/types';
+import type { ServerChanges, ServerSnapshot } from '@/lib/api';
+import { clearSession } from '@/lib/session';
 import { uid } from '@/lib/uid';
+import type { Mutation } from '@/shared';
+import { toClientBox, toClientItem, toClientMarker, toClientMember, toClientRoom, toClientStatus } from './mappers';
+
+export type MoveMode = 'local' | 'shared';
+type Account = { id: string; name: string; email: string | null };
 
 type State = {
-  /** Has the user finished onboarding? */
   onboarded: boolean;
-  /** The role the user is currently "viewing as" (demo switcher). */
   role: Role;
 
   move: Move;
@@ -32,6 +39,20 @@ type State = {
   markers: Marker[];
   members: Member[];
   itemsByBox: Record<string, Item[]>;
+
+  // --- sync layer (dormant for local moves) ---
+  /** Signed-in account (null until the user authenticates to share). */
+  account: Account | null;
+  /** In-memory session token (loaded from secure-store at boot). */
+  session: string | null;
+  /** Mode of the active move. */
+  activeMode: MoveMode;
+  /** Server id of the active move when shared. */
+  serverMoveId: string | null;
+  /** Pending mutations awaiting flush. */
+  outbox: Mutation[];
+  /** Server timestamp of the last successful delta pull. */
+  lastSyncTs: number;
 };
 
 type Actions = {
@@ -39,25 +60,30 @@ type Actions = {
   setRole: (role: Role) => void;
 
   addRoom: (input: { name: string; dest?: string | null; icon?: string }) => string;
-
   addBox: (input: { name: string; color: string; roomId: string; status?: string }) => string;
   deleteBox: (boxId: string) => void;
   setBoxStatus: (boxId: string, statusId: string) => void;
   setBoxCover: (boxId: string, uri: string | null) => void;
   toggleBoxMarker: (boxId: string, markerId: string) => void;
-
   addStatus: (input: { label: string; color: string }) => string;
   addMarker: (input: { label: string; color: string; icon?: string }) => string;
-
   addItem: (
     boxId: string,
     input: { name: string; qty?: number; value?: number; note?: string; photos?: string[]; markers?: string[]; icon?: string },
   ) => string;
   updateItem: (boxId: string, itemId: string, patch: Partial<Item>) => void;
   deleteItem: (boxId: string, itemId: string) => void;
-
-  /** Re-seed everything back to the demo move. */
   reset: () => void;
+
+  // --- sync actions ---
+  setSession: (session: string, account: Account) => void;
+  signOut: () => void;
+  enqueue: (m: Mutation) => void;
+  clearOutbox: (clientIds: string[]) => void;
+  applySnapshot: (snap: ServerSnapshot) => void;
+  applyChanges: (ch: ServerChanges) => void;
+  /** Flip the active move to shared and seed it from a server snapshot. */
+  markActiveShared: (serverMoveId: string, snap: ServerSnapshot) => void;
 };
 
 export type Store = State & Actions;
@@ -72,7 +98,28 @@ const initialState: State = {
   markers: seedMarkers,
   members: seedMembers,
   itemsByBox: seedItems,
+
+  account: null,
+  session: null,
+  activeMode: 'local',
+  serverMoveId: null,
+  outbox: [],
+  lastSyncTs: 0,
 };
+
+/** Upsert by id, dropping tombstoned (deletedAt) rows — used by delta merge. */
+function mergeList<C extends { id: string }, S extends { id: string; deletedAt?: number | null }>(
+  current: C[],
+  incoming: S[],
+  map: (s: S) => C,
+): C[] {
+  const byId = new Map(current.map((x) => [x.id, x] as const));
+  for (const inc of incoming) {
+    if (inc.deletedAt) byId.delete(inc.id);
+    else byId.set(inc.id, map(inc));
+  }
+  return [...byId.values()];
+}
 
 export const useStore = create<Store>()(
   persist(
@@ -85,48 +132,64 @@ export const useStore = create<Store>()(
       addRoom: ({ name, dest = null, icon = 'box' }) => {
         const id = uid('r');
         set((s) => ({ rooms: [...s.rooms, { id, name, dest, icon }] }));
+        const m: Mutation = { type: 'addRoom', clientId: uid('c'), ts: Date.now(), payload: { id, name, dest, icon } };
+        get().enqueue(m);
         return id;
       },
 
       addBox: ({ name, color, roomId, status = 'packing' }) => {
         const id = uid('b');
         const number = get().boxes.reduce((max, b) => Math.max(max, b.number), 0) + 1;
-        const box: Box = { id, number, name, color, roomId, status, markers: [], cover: null };
-        set((s) => ({ boxes: [...s.boxes, box], itemsByBox: { ...s.itemsByBox, [id]: [] } }));
+        set((s) => ({
+          boxes: [...s.boxes, { id, number, name, color, roomId, status, markers: [], cover: null }],
+          itemsByBox: { ...s.itemsByBox, [id]: [] },
+        }));
+        const m: Mutation = { type: 'addBox', clientId: uid('c'), ts: Date.now(), payload: { id, roomId, number, name, color, statusId: status } };
+        get().enqueue(m);
         return id;
       },
 
-      deleteBox: (boxId) =>
+      deleteBox: (boxId) => {
         set((s) => {
           const rest = { ...s.itemsByBox };
           delete rest[boxId];
           return { boxes: s.boxes.filter((b) => b.id !== boxId), itemsByBox: rest };
-        }),
+        });
+        get().enqueue({ type: 'deleteBox', clientId: uid('c'), ts: Date.now(), payload: { id: boxId } });
+      },
 
-      setBoxStatus: (boxId, statusId) =>
-        set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, status: statusId } : b)) })),
+      setBoxStatus: (boxId, statusId) => {
+        set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, status: statusId } : b)) }));
+        get().enqueue({ type: 'setBoxStatus', clientId: uid('c'), ts: Date.now(), payload: { id: boxId, statusId } });
+      },
 
-      setBoxCover: (boxId, uri) =>
-        set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, cover: uri } : b)) })),
+      setBoxCover: (boxId, uri) => {
+        set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, cover: uri } : b)) }));
+        get().enqueue({ type: 'setBoxCover', clientId: uid('c'), ts: Date.now(), payload: { id: boxId, coverPhotoId: uri } });
+      },
 
-      toggleBoxMarker: (boxId, markerId) =>
+      toggleBoxMarker: (boxId, markerId) => {
         set((s) => ({
           boxes: s.boxes.map((b) => {
             if (b.id !== boxId) return b;
             const has = b.markers.includes(markerId);
             return { ...b, markers: has ? b.markers.filter((m) => m !== markerId) : [...b.markers, markerId] };
           }),
-        })),
+        }));
+        get().enqueue({ type: 'toggleBoxMarker', clientId: uid('c'), ts: Date.now(), payload: { boxId, markerId } });
+      },
 
       addStatus: ({ label, color }) => {
         const id = uid('st');
         set((s) => ({ statuses: [...s.statuses, { id, label, color, custom: true }] }));
+        get().enqueue({ type: 'addStatus', clientId: uid('c'), ts: Date.now(), payload: { id, label, color } });
         return id;
       },
 
       addMarker: ({ label, color, icon = 'tag' }) => {
         const id = uid('mk');
         set((s) => ({ markers: [...s.markers, { id, label, color, icon, custom: true }] }));
+        get().enqueue({ type: 'addMarker', clientId: uid('c'), ts: Date.now(), payload: { id, label, color, icon } });
         return id;
       },
 
@@ -144,31 +207,97 @@ export const useStore = create<Store>()(
           icon: input.icon,
         };
         set((s) => ({ itemsByBox: { ...s.itemsByBox, [boxId]: [...(s.itemsByBox[boxId] ?? []), item] } }));
+        const m: Mutation = {
+          type: 'addItem',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id, boxId, name: item.name, qty: item.qty, valueCents: Math.round(item.value * 100), note: input.note ?? null, icon: input.icon ?? null, markerIds: item.markers, photoIds: [] },
+        };
+        get().enqueue(m);
         return id;
       },
 
-      updateItem: (boxId, itemId, patch) =>
+      updateItem: (boxId, itemId, patch) => {
         set((s) => ({
           itemsByBox: {
             ...s.itemsByBox,
             [boxId]: (s.itemsByBox[boxId] ?? []).map((it) => (it.id === itemId ? { ...it, ...patch } : it)),
           },
-        })),
+        }));
+        const payload: Extract<Mutation, { type: 'updateItem' }>['payload'] = { id: itemId, boxId };
+        if (patch.name !== undefined) payload.name = patch.name;
+        if (patch.qty !== undefined) payload.qty = patch.qty;
+        if (patch.value !== undefined) payload.valueCents = Math.round(patch.value * 100);
+        if (patch.note !== undefined) payload.note = patch.note ?? null;
+        if (patch.markers !== undefined) payload.markerIds = patch.markers;
+        get().enqueue({ type: 'updateItem', clientId: uid('c'), ts: Date.now(), payload });
+      },
 
-      deleteItem: (boxId, itemId) =>
+      deleteItem: (boxId, itemId) => {
         set((s) => ({
           itemsByBox: {
             ...s.itemsByBox,
             [boxId]: (s.itemsByBox[boxId] ?? []).filter((it) => it.id !== itemId),
           },
-        })),
+        }));
+        get().enqueue({ type: 'deleteItem', clientId: uid('c'), ts: Date.now(), payload: { id: itemId, boxId } });
+      },
 
       reset: () => set({ ...initialState }),
+
+      // --- sync actions ---
+      setSession: (session, account) => set({ session, account }),
+      signOut: () => {
+        void clearSession();
+        set({ session: null, account: null });
+      },
+      enqueue: (m) => set((s) => (s.activeMode === 'shared' ? { outbox: [...s.outbox, m] } : {})),
+      clearOutbox: (clientIds) => set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),
+
+      applySnapshot: (snap) => {
+        const itemsByBox: Record<string, Item[]> = {};
+        for (const b of snap.boxes) itemsByBox[b.id] = [];
+        for (const it of snap.items) (itemsByBox[it.boxId] ??= []).push(toClientItem(it));
+        set({
+          move: { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' },
+          rooms: snap.rooms.map(toClientRoom),
+          statuses: snap.statuses.map(toClientStatus),
+          markers: snap.markers.map(toClientMarker),
+          members: snap.members.map(toClientMember),
+          boxes: snap.boxes.map(toClientBox),
+          itemsByBox,
+        });
+      },
+
+      applyChanges: (ch) => {
+        set((s) => {
+          const itemsByBox = { ...s.itemsByBox };
+          const boxes = mergeList(s.boxes, ch.boxes, toClientBox);
+          for (const b of boxes) if (!itemsByBox[b.id]) itemsByBox[b.id] = [];
+          for (const it of ch.items) {
+            const arr = (itemsByBox[it.boxId] ?? []).filter((x) => x.id !== it.id);
+            if (!it.deletedAt) arr.push(toClientItem(it));
+            itemsByBox[it.boxId] = arr;
+          }
+          return {
+            rooms: mergeList(s.rooms, ch.rooms, toClientRoom),
+            statuses: mergeList(s.statuses, ch.statuses, toClientStatus),
+            markers: mergeList(s.markers, ch.markers, toClientMarker),
+            boxes,
+            itemsByBox,
+            lastSyncTs: ch.serverTime,
+          };
+        });
+      },
+
+      markActiveShared: (serverMoveId, snap) => {
+        set({ activeMode: 'shared', serverMoveId, lastSyncTs: 0, outbox: [] });
+        get().applySnapshot(snap);
+      },
     }),
     {
       name: 'organizard-store-v1',
       storage: createJSONStorage(() => AsyncStorage),
-      // Persist data + onboarding + role. (role persists so the demo sticks.)
       partialize: (s) => ({
         onboarded: s.onboarded,
         role: s.role,
@@ -179,16 +308,20 @@ export const useStore = create<Store>()(
         markers: s.markers,
         members: s.members,
         itemsByBox: s.itemsByBox,
+        account: s.account,
+        activeMode: s.activeMode,
+        serverMoveId: s.serverMoveId,
+        outbox: s.outbox,
+        lastSyncTs: s.lastSyncTs,
       }),
     },
   ),
 );
 
 // ============================================================
-// Selectors / derived helpers (pure — call inside components).
+// Hydration + selectors
 // ============================================================
 
-/** True once AsyncStorage rehydration has finished — gate first navigation on this. */
 export function useHasHydrated(): boolean {
   const [hydrated, setHydrated] = useState<boolean>(() => useStore.persist.hasHydrated());
   useEffect(() => {
@@ -199,10 +332,8 @@ export function useHasHydrated(): boolean {
   return hydrated;
 }
 
-/** Items in a box. */
 export const selectBoxItems = (s: Store, boxId: string): Item[] => s.itemsByBox[boxId] ?? [];
 
-/** Live item count + total value for a box (computed from its items). */
 export const boxStats = (s: Store, boxId: string): { count: number; value: number } => {
   const items = s.itemsByBox[boxId] ?? [];
   return {
@@ -211,13 +342,11 @@ export const boxStats = (s: Store, boxId: string): { count: number; value: numbe
   };
 };
 
-/** Move progress — boxes sealed of total. */
 export const moveProgress = (s: Store): { sealed: number; total: number } => ({
   sealed: s.boxes.filter((b) => b.status === 'sealed').length,
   total: s.boxes.length,
 });
 
-/** Move totals — boxes / items / value. */
 export const moveTotals = (s: Store): { boxes: number; items: number; value: number } => {
   let items = 0;
   let value = 0;
@@ -234,7 +363,6 @@ export const markerById = (s: Store, id: string): Marker | undefined => s.marker
 export const roomById = (s: Store, id: string): Room | undefined => s.rooms.find((x) => x.id === id);
 export const boxById = (s: Store, id: string): Box | undefined => s.boxes.find((x) => x.id === id);
 
-/** Flattened, searchable item index with Room › Box breadcrumb — powers Find. */
 export const allIndexedItems = (s: Store): IndexedItem[] => {
   const out: IndexedItem[] = [];
   for (const b of s.boxes) {

@@ -30,6 +30,9 @@
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "extra": {
+      "apiUrl": "http://localhost:8787"
     }
   }
 }
