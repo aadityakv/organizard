@@ -53,6 +53,18 @@ describe('summarize', () => {
     expect(s.itemCount).toBe(2);  // sums qty
     expect(s.mode).toBe('local');
     expect(s.archived).toBe(false);
+    expect(s.role).toBe('owner'); // local ⇒ owner
+  });
+
+  it('derives the role from membership for a shared move', () => {
+    const b: MoveBundle = {
+      ...newBundle('mv_2', emptyMove, 1000),
+      activeMode: 'shared',
+      serverMoveId: 'srv_1',
+      members: [{ id: 'u1', name: 'Me', role: 'editor' }],
+    };
+    expect(summarize(b, 'u1').role).toBe('editor'); // your membership role
+    expect(summarize(b, 'u2').role).toBe('viewer'); // non-member ⇒ viewer
   });
 });
 

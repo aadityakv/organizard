@@ -11,7 +11,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { STARTER_MARKERS, STARTER_STATUSES } from '@/data/defaults';
 import type { Box, IndexedItem, Item, Marker, Member, Move, Role, Room, Status } from '@/data/types';
-import type { ServerChanges, ServerSnapshot } from '@/lib/api';
+import { api, type ServerChanges, type ServerSnapshot } from '@/lib/api';
 import { clearSession } from '@/lib/session';
 import { uid } from '@/lib/uid';
 import type { Mutation } from '@/shared';
@@ -100,6 +100,8 @@ type Actions = {
   archiveMove: (id: string) => void;
   unarchiveMove: (id: string) => void;
   removeMoveLocal: (id: string) => void;
+  /** Delete a move: tear down the server copy if you own a shared move, then drop it locally. */
+  deleteMove: (id: string) => Promise<void>;
   addSharedMoveFromSnapshot: (serverMoveId: string, snap: ServerSnapshot) => string;
 };
 
@@ -437,6 +439,20 @@ export const useStore = create<Store>()(
           return { library, currentMoveId: null, ...sliceFromBundle(newBundle('__none__', EMPTY_MOVE, Date.now())) };
         }),
 
+      deleteMove: async (id) => {
+        const s = get();
+        // For the open move the live slice is authoritative; for others read the bundle.
+        const data = id === s.currentMoveId ? extractSlice(s) : s.library[id];
+        if (!data) return;
+        const isOwnedShared =
+          data.activeMode === 'shared' && data.serverMoveId &&
+          roleFor('shared', data.members, s.account?.id ?? null) === 'owner';
+        if (isOwnedShared && s.session && data.serverMoveId) {
+          try { await api.deleteMove(s.session, data.serverMoveId); } catch { /* fall through to local removal */ }
+        }
+        get().removeMoveLocal(id);
+      },
+
       addSharedMoveFromSnapshot: (serverMoveId, snap) => {
         const id = uid('mv');
         const now = Date.now();
@@ -601,8 +617,13 @@ export const allIndexedItems = (s: Store): IndexedItem[] => {
 
 export const moveSummaries = (s: Store): MoveSummary[] => {
   const out: MoveSummary[] = [];
+  const accountId = s.account?.id ?? null;
   for (const b of Object.values(s.library)) {
-    out.push(b.id === s.currentMoveId ? summarize(snapshotInto(b, extractSlice(s), b.lastOpenedAt)) : summarize(b));
+    out.push(
+      b.id === s.currentMoveId
+        ? summarize(snapshotInto(b, extractSlice(s), b.lastOpenedAt), accountId)
+        : summarize(b, accountId),
+    );
   }
   return out.sort((a, z) => z.lastOpenedAt - a.lastOpenedAt);
 };

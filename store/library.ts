@@ -36,6 +36,7 @@ export type MoveSummary = {
   to: string;
   target: string;
   mode: MoveMode;
+  role: Role;
   archived: boolean;
   boxCount: number;
   itemCount: number;
@@ -80,7 +81,7 @@ export function snapshotInto(meta: MoveBundle, slice: SliceData, now: number): M
   return { ...meta, ...slice, lastOpenedAt: now };
 }
 
-export function summarize(b: MoveBundle): MoveSummary {
+export function summarize(b: MoveBundle, accountId: string | null = null): MoveSummary {
   let itemCount = 0;
   for (const items of Object.values(b.itemsByBox)) for (const it of items) itemCount += it.qty || 1;
   return {
@@ -90,6 +91,7 @@ export function summarize(b: MoveBundle): MoveSummary {
     to: b.move.to,
     target: b.move.target,
     mode: b.activeMode,
+    role: roleFor(b.activeMode, b.members, accountId),
     archived: b.archived,
     boxCount: b.boxes.length,
     itemCount,

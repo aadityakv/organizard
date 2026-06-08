@@ -2,7 +2,7 @@
 // collapsible archived section. Tapping a move switches into it; the ⋯ menu
 // archives / unarchives. A paste sheet routes invite links to /invite.
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';
@@ -87,6 +87,18 @@ export default function Moves() {
     }
   };
 
+  const confirmDelete = (move: MoveSummary) => {
+    setMenuFor(null); // close the sheet first
+    Alert.alert(
+      'Delete move?',
+      `“${move.name}” and its boxes will be permanently deleted.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => { void useStore.getState().deleteMove(move.id); } },
+      ],
+    );
+  };
+
   // ── Empty state ───────────────────────────────────────────
   if (summaries.length === 0) {
     return (
@@ -165,33 +177,47 @@ export default function Moves() {
         )}
       </ScrollView>
 
-      {/* Per-move menu — Archive / Unarchive */}
+      {/* Per-move menu — Archive / Unarchive + (owner) Delete */}
       <Sheet visible={menuFor !== null} onClose={() => setMenuFor(null)} title={menuFor?.name}>
-        {menuFor?.archived ? (
-          <Button
-            variant="secondary"
-            fullWidth
-            iconLeft="archive-restore"
-            onPress={() => {
-              useStore.getState().unarchiveMove(menuFor.id);
-              setMenuFor(null);
-            }}
-          >
-            Unarchive
-          </Button>
-        ) : (
-          <Button
-            variant="secondary"
-            fullWidth
-            iconLeft="archive"
-            onPress={() => {
-              if (menuFor) useStore.getState().archiveMove(menuFor.id);
-              setMenuFor(null);
-            }}
-          >
-            Archive
-          </Button>
-        )}
+        <View style={styles.menuActions}>
+          {menuFor?.archived ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              iconLeft="archive-restore"
+              onPress={() => {
+                if (menuFor) useStore.getState().unarchiveMove(menuFor.id);
+                setMenuFor(null);
+              }}
+            >
+              Unarchive
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              fullWidth
+              iconLeft="archive"
+              onPress={() => {
+                if (menuFor) useStore.getState().archiveMove(menuFor.id);
+                setMenuFor(null);
+              }}
+            >
+              Archive
+            </Button>
+          )}
+          {menuFor?.role === 'owner' && (
+            <Button
+              variant="danger"
+              fullWidth
+              iconLeft="trash"
+              onPress={() => {
+                if (menuFor) confirmDelete(menuFor);
+              }}
+            >
+              Delete
+            </Button>
+          )}
+        </View>
       </Sheet>
 
       <JoinSheet
@@ -297,6 +323,7 @@ const styles = StyleSheet.create({
   emptyActions: { gap: space[3], paddingBottom: space[5] },
 
   // ── Sheets ──
+  menuActions: { gap: space[3] },
   sheetBody: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20, marginBottom: 14 },
   sheetCta: { marginTop: 16 },
 

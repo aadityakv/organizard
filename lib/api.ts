@@ -86,6 +86,8 @@ export const api = {
     req<ServerChanges>(`/v1/moves/${moveId}/changes?since=${since}`, { method: 'GET' }, session),
   mutations: (session: string, moveId: string, mutations: Mutation[]) =>
     req<{ serverTime: number; applied: number }>(`/v1/moves/${moveId}/mutations`, { method: 'POST', body: JSON.stringify({ mutations }) }, session),
+  deleteMove: (session: string, moveId: string) =>
+    req<{ ok: true }>(`/v1/moves/${moveId}`, { method: 'DELETE' }, session),
 
   // --- sharing ---
   createInvite: (session: string, moveId: string, role: Role) =>
