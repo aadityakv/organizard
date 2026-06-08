@@ -12,4 +12,10 @@ export type Env = {
   APP_URL?: string;
   /** Shared secret for verifying the RevenueCat webhook. */
   REVENUECAT_WEBHOOK_SECRET?: string;
+  /**
+   * Gate the "owner pays to share" entitlement checks. Defaults OFF — when unset
+   * or anything other than the string "true", sharing/sync/photos are FREE (no
+   * subscription required). Set to "true" to enforce paid entitlement.
+   */
+  BILLING_ENABLED?: string;
 };

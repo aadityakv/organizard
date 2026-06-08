@@ -10,7 +10,7 @@ import { makeMemoryKv } from './kv';
 import { makeMemoryR2 } from './r2';
 
 /** A wired app with in-memory DB/KV/R2 and stubbed Apple/email/time/ids. */
-export async function makeHarness(opts: { now?: number } = {}) {
+export async function makeHarness(opts: { now?: number; billing?: boolean } = {}) {
   const db = await makeTestDb();
   const kv = makeMemoryKv();
   const r2 = makeMemoryR2();
@@ -27,6 +27,9 @@ export async function makeHarness(opts: { now?: number } = {}) {
     SESSIONS: kv,
     APP_URL: 'organizard://auth',
     REVENUECAT_WEBHOOK_SECRET: 'test-secret',
+    // Default billing ON in tests so entitlement paths stay exercised; flip off
+    // with makeHarness({ billing: false }) to test the free (default-prod) path.
+    BILLING_ENABLED: opts.billing === false ? undefined : 'true',
   };
 
   const app = createApp({

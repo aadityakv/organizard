@@ -3,6 +3,12 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Feature flags. Billing is OFF for now: sharing/sync/photos are free and no
+# subscription (RevenueCat) is required. Flip to "true" to enforce "owner pays
+# to share" once a paid tier ships.
+[vars]
+BILLING_ENABLED = "false"
+
 # D1 — relational data.
 [[d1_databases]]
 binding = "DB"
