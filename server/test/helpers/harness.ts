@@ -1,4 +1,5 @@
 import type { Role } from '@shared/index';
+import { eq } from 'drizzle-orm';
 
 import { createApp } from '../../src/app';
 import * as schema from '../../src/db/schema';
@@ -20,12 +21,12 @@ export async function makeHarness(opts: { now?: number } = {}) {
   let tokN = 0;
   let seedN = 0;
 
-  const env = {
+  const env: Env = {
     DB: undefined as unknown as D1Database,
     PHOTOS: r2,
     SESSIONS: kv,
     APP_URL: 'organizard://auth',
-  } satisfies Env;
+  };
 
   const app = createApp({
     getDb: () => db,
@@ -52,11 +53,17 @@ export async function makeHarness(opts: { now?: number } = {}) {
       env,
     );
 
-  /** Sign in via Apple and return the session + user. */
-  const login = async (sub: string, email: string) => {
+  const setEntitled = async (userId: string, on: boolean) => {
+    await db.update(schema.users).set({ entitlementActive: on }).where(eq(schema.users.id, userId));
+  };
+
+  /** Sign in via Apple and return the session + user. Entitled by default. */
+  const login = async (sub: string, email: string, opts: { entitled?: boolean } = {}) => {
     setAppleIdentity({ sub, email });
     const res = await json('/v1/auth/apple', { identityToken: 'x' });
-    return (await res.json()) as { session: string; user: { id: string; email: string } };
+    const body = (await res.json()) as { session: string; user: { id: string; email: string } };
+    if (opts.entitled !== false) await setEntitled(body.user.id, true);
+    return body;
   };
 
   /** Directly attach a user to a move with a role (member mgmt is Phase 5). */
@@ -64,5 +71,5 @@ export async function makeHarness(opts: { now?: number } = {}) {
     await db.insert(schema.members).values({ id: `seed_${seedN++}`, moveId, userId, role, createdAt: 1 });
   };
 
-  return { db, kv, env, sentEmails, setAppleIdentity, request, json, login, seedMember };
+  return { db, kv, env, sentEmails, setAppleIdentity, request, json, login, seedMember, setEntitled };
 }

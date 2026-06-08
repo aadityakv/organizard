@@ -14,8 +14,9 @@ export function moveRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: MemberVars }>();
   r.use('*', authMiddleware(deps));
 
-  // Create a shared move. (Entitlement gate is added in Phase 7.)
+  // Create a shared move — requires an active subscription ("owner pays to share").
   r.post('/', async (c) => {
+    if (!c.get('user').entitlementActive) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     type CreateBody = { name?: string; from?: string | null; to?: string | null; targetDate?: string | null; seed?: boolean };
     const body = await c.req.json<CreateBody>().catch(() => ({}) as CreateBody);
     if (!body.name || !body.name.trim()) return c.json({ error: 'INVALID_NAME' }, 400);

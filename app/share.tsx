@@ -8,6 +8,7 @@ import { Avatar, Button, Card, Header, Icon, Input, LockNote, RoleBadge, Segment
 import type { Member, Role } from '@/data/types';
 import { api } from '@/lib/api';
 import { appleSignInAvailable, signInWithApple, startEmailSignIn } from '@/lib/auth';
+import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from '@/lib/billing';
 import { createInviteLink, shareMove } from '@/lib/share';
 import { syncActiveMove } from '@/store/sync';
 import { useStore } from '@/store/useStore';
@@ -32,6 +33,9 @@ export default function ShareScreen() {
   useEffect(() => {
     appleSignInAvailable().then(setAppleOk).catch(() => {});
   }, []);
+  useEffect(() => {
+    if (account?.id) configureBilling(account.id);
+  }, [account?.id]);
 
   const myRole = members.find((m) => m.id === account?.id)?.role ?? 'owner';
   const canManage = myRole === 'owner';
@@ -48,6 +52,11 @@ export default function ShareScreen() {
   };
 
   const doShare = () => guard(async () => {
+    // Paywall: subscription required to own a shared move. Server enforces it too.
+    if (billingConfigured() && !(await isEntitled())) {
+      const ok = await purchaseSharing();
+      if (!ok) return;
+    }
     await shareMove();
     await syncActiveMove();
   }, 'Could not share');

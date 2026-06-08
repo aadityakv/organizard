@@ -81,6 +81,11 @@ export async function upsertEmailUser(
   return row;
 }
 
+/** Set a user's subscription entitlement (driven by the RevenueCat webhook). */
+export async function setEntitlement(db: AppDb, userId: string, active: boolean, expiresAt: number | null = null): Promise<void> {
+  await db.update(users).set({ entitlementActive: active, entitlementExpiresAt: expiresAt }).where(eq(users.id, userId));
+}
+
 /** Public shape returned to clients (no internal-only fields to hide yet, but a stable seam). */
 export function toPublicUser(u: UserRow) {
   return {
