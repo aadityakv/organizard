@@ -69,6 +69,8 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" />
+        <Stack.Screen name="moves" />
+        <Stack.Screen name="new-move" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="box/[id]" />
         <Stack.Screen name="share" />
