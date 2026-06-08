@@ -51,7 +51,13 @@ type State = {
 
   /** All moves you have, keyed by local id. */
   library: Record<string, MoveBundle>;
-  /** Which move is mirrored into the live slice above (null = none open). */
+  /**
+   * Which move is mirrored into the live slice above (null = none open).
+   * INVARIANT: for the CURRENT move the live slice is authoritative —
+   * `library[currentMoveId]` is a stale copy refreshed only when you leave
+   * (createMove/switchMove/addSharedMoveFromSnapshot) or via `moveSummaries`'
+   * on-the-fly re-snapshot. Read the live slice for the open move, never the bundle.
+   */
   currentMoveId: string | null;
 };
 
@@ -285,9 +291,7 @@ export const useStore = create<Store>()(
       clearOutbox: (clientIds) => set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),
 
       applySnapshot: (snap) => {
-        const itemsByBox: Record<string, Item[]> = {};
-        for (const b of snap.boxes) itemsByBox[b.id] = [];
-        for (const it of snap.items) (itemsByBox[it.boxId] ??= []).push(toClientItem(it));
+        const itemsByBox = snapItemsByBox(snap);
         set({
           move: { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' },
           rooms: snap.rooms.map(toClientRoom),
@@ -481,7 +485,7 @@ export const useStore = create<Store>()(
             const id = uid('mv');
             const bundle: MoveBundle = {
               id, archived: false, createdAt: now, lastOpenedAt: now,
-              move: st.move as Move, rooms: (st.rooms as Room[]) ?? [], boxes: (st.boxes as Box[]) ?? [],
+              move: (st.move as Move) ?? EMPTY_MOVE, rooms: (st.rooms as Room[]) ?? [], boxes: (st.boxes as Box[]) ?? [],
               statuses: (st.statuses as Status[]) ?? [...STARTER_STATUSES], markers: (st.markers as Marker[]) ?? [...STARTER_MARKERS],
               members: (st.members as Member[]) ?? [], itemsByBox: (st.itemsByBox as Record<string, Item[]>) ?? {},
               activeMode: 'shared', serverMoveId: st.serverMoveId as string, outbox, lastSyncTs: (st.lastSyncTs as number) ?? 0,
@@ -603,4 +607,4 @@ export const moveSummaries = (s: Store): MoveSummary[] => {
   return out.sort((a, z) => z.lastOpenedAt - a.lastOpenedAt);
 };
 
-export const currentRole = (s: Store): Role => roleFor(s.activeMode, s.members, s.account?.id ?? null);;
+export const currentRole = (s: Store): Role => roleFor(s.activeMode, s.members, s.account?.id ?? null);
