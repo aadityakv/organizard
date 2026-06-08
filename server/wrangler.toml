@@ -8,6 +8,9 @@ compatibility_flags = ["nodejs_compat"]
 # to share" once a paid tier ships.
 [vars]
 BILLING_ENABLED = "false"
+# Audience the Apple identity token is verified against (native Sign in with Apple
+# mints tokens with aud = the app bundle id). Without this, /v1/auth/apple 401s.
+APPLE_BUNDLE_ID = "com.organizard.app"
 
 # D1 — relational data.
 [[d1_databases]]

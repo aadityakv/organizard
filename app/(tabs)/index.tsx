@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 
 import {
   BoxCard,
+  Button,
   ColorDot,
   Header,
   Icon,
@@ -249,11 +250,13 @@ function AddBoxSheet({
   onClose,
   rooms,
   defaultRoomId,
+  onAddRoom,
 }: {
   visible: boolean;
   onClose: () => void;
   rooms: Room[];
   defaultRoomId: string | null;
+  onAddRoom: () => void;
 }) {
   const addBox = useStore((s) => s.addBox);
   const [name, setName] = useState('');
@@ -302,30 +305,40 @@ function AddBoxSheet({
       </View>
 
       <Text style={styles.fieldLabel}>Room</Text>
-      <View style={styles.pickRow}>
-        {rooms.map((r) => {
-          const on = r.id === roomId;
-          return (
-            <Pressable
-              key={r.id}
-              accessibilityRole="button"
-              accessibilityState={{ selected: on }}
-              onPress={() => setRoomId(r.id)}
-              style={({ pressed }) => [
-                styles.roomPick,
-                on && styles.roomPickOn,
-                pressed && styles.pressedSoft,
-              ]}
-            >
-              <Icon name={r.icon} size={16} color={on ? palette.green700 : palette.ink500} />
-              <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
-                {r.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      {rooms.length === 0 ? (
+        <View style={styles.noRoomsHint}>
+          <Text style={styles.noRoomsText}>Boxes live inside a room. Add your first room to start packing.</Text>
+          <Button variant="secondary" size="md" iconLeft="plus" onPress={onAddRoom}>
+            New room
+          </Button>
+        </View>
+      ) : (
+        <View style={styles.pickRow}>
+          {rooms.map((r) => {
+            const on = r.id === roomId;
+            return (
+              <Pressable
+                key={r.id}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                onPress={() => setRoomId(r.id)}
+                style={({ pressed }) => [
+                  styles.roomPick,
+                  on && styles.roomPickOn,
+                  pressed && styles.pressedSoft,
+                ]}
+              >
+                <Icon name={r.icon} size={16} color={on ? palette.green700 : palette.ink500} />
+                <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
+                  {r.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
 
+      {rooms.length > 0 && (
       <Pressable
         accessibilityRole="button"
         disabled={!canSave}
@@ -339,6 +352,7 @@ function AddBoxSheet({
         <Icon name="plus" size={20} color={colors.textOnBrand} />
         <Text style={styles.ctaText}>Add box</Text>
       </Pressable>
+      )}
     </Sheet>
   );
 }
@@ -476,7 +490,8 @@ export default function Dashboard() {
             variant="plain"
             size="sm"
             accessibilityLabel="Switch move"
-            onPress={() => router.push('/moves')}
+            // navigate() (not push) so moves⇄tabs never stacks duplicate navigators.
+            onPress={() => router.navigate('/moves')}
           />
         }
         title={move.name}
@@ -672,6 +687,10 @@ export default function Dashboard() {
             onClose={() => setAddingBox(false)}
             rooms={rooms}
             defaultRoomId={addBoxRoomId}
+            onAddRoom={() => {
+              setAddingBox(false);
+              setAddingRoom(true);
+            }}
           />
           <AddRoomSheet visible={addingRoom} onClose={() => setAddingRoom(false)} />
         </>
@@ -961,6 +980,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   fieldGap: { height: 14 },
+  noRoomsHint: {
+    gap: 12,
+    padding: 14,
+    borderRadius: radius.md,
+    backgroundColor: palette.cream100,
+    borderWidth: 1,
+    borderColor: palette.sand300,
+  },
+  noRoomsText: {
+    fontFamily: fonts.body.semibold,
+    fontSize: fontSize.sm,
+    lineHeight: 19,
+    color: palette.ink500,
+  },
   colorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',

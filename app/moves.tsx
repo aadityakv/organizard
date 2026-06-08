@@ -75,7 +75,10 @@ export default function Moves() {
 
   const openMove = (id: string) => {
     useStore.getState().switchMove(id);
-    router.replace('/(tabs)');
+    // navigate() de-dupes: it pops back to the existing tabs instance instead of
+    // stacking a new one (which corrupted touch/tab handling). See the chevron in
+    // the dashboard header — both sides of the moves⇄tabs switch must use navigate.
+    router.navigate('/(tabs)');
   };
 
   const submitJoin = () => {

@@ -258,7 +258,8 @@ export default function AddItem() {
                 <>
                   <Text style={styles.permTitle}>Snap a photo as you pack</Text>
                   <Text style={styles.permBody}>
-                    A quick picture makes every item easy to spot later. Mind sharing your camera?
+                    A quick picture makes items easy to spot later — but it's optional. Fill in the
+                    details below and save without one anytime.
                   </Text>
                   <Button
                     variant="secondary"

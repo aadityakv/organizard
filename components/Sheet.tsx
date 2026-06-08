@@ -1,7 +1,7 @@
 // Bottom sheet — the standard surface for creators & pickers
 // (new status, edit markers, invite, add room, print sheet).
 import React from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, fonts, palette, radius, space } from '@/theme';
@@ -17,7 +17,7 @@ export function Sheet({ visible, onClose, title, children }: SheetProps) {
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <View style={styles.fill}>
+      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Close" />
         <View style={[styles.panel, { paddingBottom: insets.bottom + space[5] }]}>
           <View style={styles.grabber} />
@@ -26,7 +26,7 @@ export function Sheet({ visible, onClose, title, children }: SheetProps) {
             {children}
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
