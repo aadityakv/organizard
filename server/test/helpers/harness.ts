@@ -26,6 +26,7 @@ export async function makeHarness(opts: { now?: number } = {}) {
     PHOTOS: r2,
     SESSIONS: kv,
     APP_URL: 'organizard://auth',
+    REVENUECAT_WEBHOOK_SECRET: 'test-secret',
   };
 
   const app = createApp({
@@ -71,5 +72,9 @@ export async function makeHarness(opts: { now?: number } = {}) {
     await db.insert(schema.members).values({ id: `seed_${seedN++}`, moveId, userId, role, createdAt: 1 });
   };
 
-  return { db, kv, env, sentEmails, setAppleIdentity, request, json, login, seedMember, setEntitled };
+  /** Post an authenticated RevenueCat webhook event. */
+  const webhook = (type: string, appUserId: string) =>
+    json('/v1/webhooks/revenuecat', { event: { type, app_user_id: appUserId } }, { headers: { authorization: 'Bearer test-secret' } });
+
+  return { db, kv, env, sentEmails, setAppleIdentity, request, json, login, seedMember, setEntitled, webhook };
 }

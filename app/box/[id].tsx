@@ -45,6 +45,7 @@ import {
   type as typeTokens,
 } from '@/theme';
 import { money } from '@/lib/money';
+import { photoSource } from '@/lib/photos';
 import { PERM } from '@/lib/permissions';
 import { encodeBoxQR } from '@/lib/qr';
 import {
@@ -64,6 +65,7 @@ export default function BoxDetail() {
 
   const role = useStore((s) => s.role);
   const box = useStore((s) => boxById(s, boxId));
+  const session = useStore((s) => s.session);
 
   // Store actions (grabbed individually so selectors stay stable).
   const setBoxStatus = useStore((s) => s.setBoxStatus);
@@ -194,7 +196,7 @@ export default function BoxDetail() {
         {/* Cover photo */}
         <View style={[styles.cover, { backgroundColor: boxTint(box.color) }]}>
           {box.cover ? (
-            <Image source={{ uri: box.cover }} style={styles.coverImage} resizeMode="cover" />
+            <Image source={photoSource(box.cover, session)} style={styles.coverImage} resizeMode="cover" />
           ) : (
             <Icon name="camera" size={34} color={hue} />
           )}
@@ -372,14 +374,16 @@ function ItemRow({
   boxColor: string;
   markers: Marker[];
 }) {
-  const photo = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
+  const session = useStore((s) => s.session);
+  const first = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
+  const src = first ? photoSource(first, session) : undefined;
   const itemMarkers = (item.markers ?? [])
     .map((mid) => markers.find((m) => m.id === mid))
     .filter(Boolean) as Marker[];
 
   return (
     <View style={styles.itemRow}>
-      <Thumb color={hueName} icon={item.icon ?? 'package'} size={52} uri={photo} />
+      <Thumb color={hueName} icon={item.icon ?? 'package'} size={52} uri={src?.uri} headers={src?.headers} />
       <View style={styles.itemMain}>
         <Text style={styles.itemName} numberOfLines={1}>
           {item.name}

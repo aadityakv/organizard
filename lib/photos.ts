@@ -9,9 +9,14 @@ const inFlight = new Set<string>();
 
 const isLocalUri = (p: string): boolean => p.startsWith('file://') || p.startsWith('content://') || p.startsWith('/');
 
-/** Upload one local photo, link it to its item, and return the server photo id. */
-export async function uploadPhoto(session: string, moveId: string, localUri: string, itemId: string): Promise<string> {
-  const { photoId, uploadPath } = await api.createPhoto(session, moveId, { itemId });
+/** Upload one local photo, link it to its item/box, and return the server photo id. */
+export async function uploadPhoto(
+  session: string,
+  moveId: string,
+  localUri: string,
+  link: { itemId?: string; boxId?: string },
+): Promise<string> {
+  const { photoId, uploadPath } = await api.createPhoto(session, moveId, link);
   const blob = await (await fetch(localUri)).blob();
   await fetch(`${API_URL}${uploadPath}`, {
     method: 'PUT',
@@ -21,7 +26,7 @@ export async function uploadPhoto(session: string, moveId: string, localUri: str
   return photoId;
 }
 
-/** Upload any not-yet-uploaded local item photos for the active shared move. */
+/** Upload any not-yet-uploaded local item photos AND box covers for the active shared move. */
 export async function uploadPendingPhotos(): Promise<void> {
   const s = useStore.getState();
   if (s.activeMode !== 'shared' || !s.session || !s.serverMoveId) return;
@@ -33,13 +38,26 @@ export async function uploadPendingPhotos(): Promise<void> {
         if (!isLocalUri(photo) || inFlight.has(photo)) continue;
         inFlight.add(photo);
         try {
-          await uploadPhoto(session, serverMoveId, photo, it.id);
+          await uploadPhoto(session, serverMoveId, photo, { itemId: it.id });
         } catch {
           // leave it; retried next sync tick
         } finally {
           inFlight.delete(photo);
         }
       }
+    }
+  }
+
+  for (const b of s.boxes) {
+    if (!b.cover || !isLocalUri(b.cover) || inFlight.has(b.cover)) continue;
+    inFlight.add(b.cover);
+    try {
+      const photoId = await uploadPhoto(session, serverMoveId, b.cover, { boxId: b.id });
+      useStore.getState().setBoxCover(b.id, photoId); // swap local uri -> server id (and enqueue)
+    } catch {
+      // retried next tick
+    } finally {
+      inFlight.delete(b.cover);
     }
   }
 }

@@ -109,6 +109,9 @@ const initialState: State = {
   lastSyncTs: 0,
 };
 
+const isLocalUri = (p: string): boolean =>
+  p.startsWith('file://') || p.startsWith('content://') || p.startsWith('/');
+
 /** Upsert by id, dropping tombstoned (deletedAt) rows — used by delta merge. */
 function mergeList<C extends { id: string }, S extends { id: string; deletedAt?: number | null }>(
   current: C[],
@@ -167,7 +170,11 @@ export const useStore = create<Store>()(
 
       setBoxCover: (boxId, uri) => {
         set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, cover: uri } : b)) }));
-        get().enqueue({ type: 'setBoxCover', clientId: uid('c'), ts: Date.now(), payload: { id: boxId, coverPhotoId: uri } });
+        // A local URI gets uploaded by the sync engine, which re-calls this with the
+        // server photo id; only sync a non-local value (a real id, or an explicit clear).
+        if (!uri || !isLocalUri(uri)) {
+          get().enqueue({ type: 'setBoxCover', clientId: uid('c'), ts: Date.now(), payload: { id: boxId, coverPhotoId: uri } });
+        }
       },
 
       toggleBoxMarker: (boxId, markerId) => {
@@ -273,18 +280,37 @@ export const useStore = create<Store>()(
 
       applyChanges: (ch) => {
         set((s) => {
+          // Rows with a pending outbox mutation are locally authoritative — the
+          // delta must not clobber them (the documented LWW exception).
+          const dirty = new Set<string>();
+          for (const mm of s.outbox) {
+            const p = mm.payload as { id?: string; boxId?: string };
+            if (p.id) dirty.add(p.id);
+            if (p.boxId) dirty.add(p.boxId);
+          }
+          const fresh = <T extends { id: string }>(rows: T[]) => rows.filter((r) => !dirty.has(r.id));
+
           const itemsByBox = { ...s.itemsByBox };
-          const boxes = mergeList(s.boxes, ch.boxes, toClientBox);
+          const boxes = mergeList(s.boxes, fresh(ch.boxes), toClientBox);
           for (const b of boxes) if (!itemsByBox[b.id]) itemsByBox[b.id] = [];
           for (const it of ch.items) {
+            if (dirty.has(it.id)) continue; // pending local edit wins
+            // Preserve local (not-yet-uploaded) photo URIs so a pull can't drop a fresh capture.
+            const existing = (itemsByBox[it.boxId] ?? []).find((x) => x.id === it.id);
+            const localPhotos = (existing?.photos ?? []).filter(isLocalUri);
             const arr = (itemsByBox[it.boxId] ?? []).filter((x) => x.id !== it.id);
-            if (!it.deletedAt) arr.push(toClientItem(it));
+            if (!it.deletedAt) {
+              const ci = toClientItem(it);
+              const base = ci.photos ?? [];
+              ci.photos = [...base, ...localPhotos.filter((p) => !base.includes(p))];
+              arr.push(ci);
+            }
             itemsByBox[it.boxId] = arr;
           }
           return {
-            rooms: mergeList(s.rooms, ch.rooms, toClientRoom),
-            statuses: mergeList(s.statuses, ch.statuses, toClientStatus),
-            markers: mergeList(s.markers, ch.markers, toClientMarker),
+            rooms: mergeList(s.rooms, fresh(ch.rooms), toClientRoom),
+            statuses: mergeList(s.statuses, fresh(ch.statuses), toClientStatus),
+            markers: mergeList(s.markers, fresh(ch.markers), toClientMarker),
             boxes,
             itemsByBox,
             members: ch.members.map(toClientMember),

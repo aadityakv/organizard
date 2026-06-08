@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
 import type { Deps } from '../deps';
+import { boxInMove, itemInMove, markersInMove, markerInMove, roomInMove, statusInMove } from '../repos/scope';
 
 /**
  * Apply a batch of mutations to a move. Server time is the source of truth for
@@ -63,6 +64,7 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
 
     case 'addBox': {
       const p = m.payload;
+      if (!(await roomInMove(db, moveId, p.roomId)) || !(await statusInMove(db, moveId, p.statusId))) return;
       await db.insert(s.boxes).values({ id: p.id, moveId, roomId: p.roomId, number: p.number, name: p.name, color: p.color, statusId: p.statusId, coverPhotoId: null, updatedAt: now, deletedAt: null }).onConflictDoNothing();
       return;
     }
@@ -71,7 +73,10 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
       const set: Partial<typeof s.boxes.$inferInsert> = { updatedAt: now };
       if (p.name !== undefined) set.name = p.name;
       if (p.color !== undefined) set.color = p.color;
-      if (p.roomId !== undefined) set.roomId = p.roomId;
+      if (p.roomId !== undefined) {
+        if (!(await roomInMove(db, moveId, p.roomId))) return;
+        set.roomId = p.roomId;
+      }
       await db.update(s.boxes).set(set).where(and(eq(s.boxes.id, p.id), eq(s.boxes.moveId, moveId)));
       return;
     }
@@ -82,14 +87,17 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
       await db.update(s.items).set({ deletedAt: now, updatedAt: now }).where(and(eq(s.items.boxId, id), eq(s.items.moveId, moveId)));
       return;
     }
-    case 'setBoxStatus':
+    case 'setBoxStatus': {
+      if (!(await statusInMove(db, moveId, m.payload.statusId))) return;
       await db.update(s.boxes).set({ statusId: m.payload.statusId, updatedAt: now }).where(and(eq(s.boxes.id, m.payload.id), eq(s.boxes.moveId, moveId)));
       return;
+    }
     case 'setBoxCover':
       await db.update(s.boxes).set({ coverPhotoId: m.payload.coverPhotoId, updatedAt: now }).where(and(eq(s.boxes.id, m.payload.id), eq(s.boxes.moveId, moveId)));
       return;
     case 'toggleBoxMarker': {
       const { boxId, markerId } = m.payload;
+      if (!(await boxInMove(db, moveId, boxId)) || !(await markerInMove(db, moveId, markerId))) return;
       const existing = (
         await db.select().from(s.boxMarkers).where(and(eq(s.boxMarkers.boxId, boxId), eq(s.boxMarkers.markerId, markerId))).limit(1)
       )[0];
@@ -115,14 +123,16 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
 
     case 'addItem': {
       const p = m.payload;
+      if (!(await boxInMove(db, moveId, p.boxId))) return;
       await db.insert(s.items).values({ id: p.id, moveId, boxId: p.boxId, name: p.name, qty: p.qty, valueCents: p.valueCents, note: p.note ?? null, icon: p.icon ?? null, updatedAt: now, deletedAt: null }).onConflictDoNothing();
-      for (const markerId of p.markerIds ?? []) {
+      for (const markerId of await markersInMove(db, moveId, p.markerIds ?? [])) {
         await db.insert(s.itemMarkers).values({ itemId: p.id, markerId }).onConflictDoNothing();
       }
       return;
     }
     case 'updateItem': {
       const p = m.payload;
+      if (!(await itemInMove(db, moveId, p.id))) return;
       const set: Partial<typeof s.items.$inferInsert> = { updatedAt: now };
       if (p.name !== undefined) set.name = p.name;
       if (p.qty !== undefined) set.qty = p.qty;
@@ -131,7 +141,7 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
       await db.update(s.items).set(set).where(and(eq(s.items.id, p.id), eq(s.items.moveId, moveId)));
       if (p.markerIds !== undefined) {
         await db.delete(s.itemMarkers).where(eq(s.itemMarkers.itemId, p.id));
-        for (const markerId of p.markerIds) {
+        for (const markerId of await markersInMove(db, moveId, p.markerIds)) {
           await db.insert(s.itemMarkers).values({ itemId: p.id, markerId }).onConflictDoNothing();
         }
       }

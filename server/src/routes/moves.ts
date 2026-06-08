@@ -7,6 +7,7 @@ import { membershipMiddleware, type MemberVars } from '../middleware/membership'
 import { applyMutations } from '../mutations/apply';
 import { createMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
 import { createPhotoRecord } from '../repos/photos';
+import { boxInMove, itemInMove } from '../repos/scope';
 import { changeMemberRole, createInvite, getMoveOwnerId, isOwnerEntitled, removeMember } from '../repos/sharing';
 import type { Env } from '../types';
 
@@ -50,9 +51,10 @@ export function moveRoutes(deps: Deps) {
     const mutations = body.mutations ?? [];
     const role = c.get('member').role;
 
-    // Enforce role server-side per mutation (client gating is UX only).
+    // Reject unknown types + enforce role server-side per mutation (client gating is UX only).
     for (const m of mutations) {
       const need = ROLE_REQUIRED[m.type];
+      if (!need) return c.json({ error: 'BAD_MUTATION', type: m.type }, 400);
       const ok = need === 'owner' ? role === 'owner' : role === 'owner' || role === 'editor';
       if (!ok) return c.json({ error: 'FORBIDDEN_ROLE', type: m.type }, 403);
     }
@@ -81,7 +83,8 @@ export function moveRoutes(deps: Deps) {
     const moveId = c.req.param('id');
     const userId = c.req.param('userId');
     const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
-    if (!body.role) return c.json({ error: 'INVALID_ROLE' }, 400);
+    // Only editor/viewer are assignable; ownership transfer is not a role change.
+    if (body.role !== 'editor' && body.role !== 'viewer') return c.json({ error: 'INVALID_ROLE' }, 400);
     if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_CHANGE_OWNER' }, 400);
     await changeMemberRole(db, { moveId, userId, role: body.role });
     return c.json({ ok: true });
@@ -100,9 +103,14 @@ export function moveRoutes(deps: Deps) {
   // --- photos: reserve a record (bytes uploaded via PUT /v1/photos/:photoId) ---
   r.post('/:id/photos', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    const db = deps.getDb(c.env);
+    const moveId = c.req.param('id');
     const body = await c.req.json<{ itemId?: string; boxId?: string }>().catch(() => ({}) as { itemId?: string; boxId?: string });
-    const { photoId } = await createPhotoRecord(deps.getDb(c.env), deps, {
-      moveId: c.req.param('id'),
+    // The linked item/box must belong to this move (no cross-move photo linking).
+    if (body.itemId && !(await itemInMove(db, moveId, body.itemId))) return c.json({ error: 'NOT_FOUND' }, 404);
+    if (body.boxId && !(await boxInMove(db, moveId, body.boxId))) return c.json({ error: 'NOT_FOUND' }, 404);
+    const { photoId } = await createPhotoRecord(db, deps, {
+      moveId,
       itemId: body.itemId ?? null,
       boxId: body.boxId ?? null,
       createdBy: c.get('user').id,

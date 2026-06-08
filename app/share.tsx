@@ -52,7 +52,8 @@ export default function ShareScreen() {
     if (account?.id) configureBilling(account.id);
   }, [account?.id]);
 
-  const myRole = members.find((m) => m.id === account?.id)?.role ?? 'owner';
+  // Default to the least-privileged role until membership is known (avoids an owner-controls flash).
+  const myRole = members.find((m) => m.id === account?.id)?.role ?? 'viewer';
   const canManage = myRole === 'owner';
 
   const guard = async (fn: () => Promise<void>, label: string) => {

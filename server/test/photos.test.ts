@@ -17,6 +17,7 @@ async function moveWithItem(h: Awaited<ReturnType<typeof makeHarness>>, session:
     `/v1/moves/${moveId}/mutations`,
     {
       mutations: [
+        m('addRoom', { id: 'r0', name: 'Kitchen', icon: 'box' }, 'c0'),
         m('addBox', { id: 'box1', roomId: 'r0', number: 1, name: 'Pots', color: 'amber', statusId: snap.statuses[0].id }, 'c1'),
         m('addItem', { id: 'item1', boxId: 'box1', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c2'),
       ],

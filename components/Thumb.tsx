@@ -13,11 +13,13 @@ export type ThumbProps = {
   radius?: number;
   /** Real captured photo URI (overrides the tinted glyph). */
   uri?: string | null;
+  /** Request headers (e.g. auth) for a remote photo source. */
+  headers?: Record<string, string>;
 };
 
-export function Thumb({ color = 'green', icon = 'image', size = 56, radius = radii.md, uri }: ThumbProps) {
+export function Thumb({ color = 'green', icon = 'image', size = 56, radius = radii.md, uri, headers }: ThumbProps) {
   if (uri) {
-    return <Image source={{ uri }} style={{ width: size, height: size, borderRadius: radius }} />;
+    return <Image source={{ uri, headers }} style={{ width: size, height: size, borderRadius: radius }} />;
   }
   return (
     <View

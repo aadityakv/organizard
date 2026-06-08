@@ -29,6 +29,7 @@ describe('e2e — subscribe → share → collaborate → lapse → renew', () =
     expect(
       (await h.json(`/v1/moves/${moveId}/mutations`, {
         mutations: [
+          m('addRoom', { id: 'r0', name: 'Kitchen', icon: 'cooking-pot' }, 'c0'),
           m('addBox', { id: 'b1', roomId: 'r0', number: 1, name: 'Kitchen', color: 'amber', statusId }, 'c1'),
           m('addItem', { id: 'i1', boxId: 'b1', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c2'),
         ],
@@ -46,12 +47,12 @@ describe('e2e — subscribe → share → collaborate → lapse → renew', () =
     expect(changes.members).toHaveLength(2);
 
     // owner's subscription lapses -> the shared move goes read-only
-    await h.json('/v1/webhooks/revenuecat', { event: { type: 'EXPIRATION', app_user_id: owner.user.id } });
+    await h.webhook('EXPIRATION', owner.user.id);
     expect((await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r9', name: 'No', icon: 'box' }, 'c3')] }, auth(ed.session))).status).toBe(402);
     expect((await h.request(`/v1/moves/${moveId}`, auth(ed.session))).status).toBe(200); // reading still works
 
     // renew -> editing restored
-    await h.json('/v1/webhooks/revenuecat', { event: { type: 'RENEWAL', app_user_id: owner.user.id } });
+    await h.webhook('RENEWAL', owner.user.id);
     expect((await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r9', name: 'Yes', icon: 'box' }, 'c4')] }, auth(ed.session))).status).toBe(200);
   });
 });

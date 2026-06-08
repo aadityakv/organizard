@@ -12,8 +12,9 @@ export function webhookRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env }>();
 
   r.post('/revenuecat', async (c) => {
+    // Fail closed: if no secret is configured, reject (never an open entitlement endpoint).
     const secret = c.env.REVENUECAT_WEBHOOK_SECRET;
-    if (secret && c.req.header('authorization') !== `Bearer ${secret}`) return c.json({ error: 'UNAUTHORIZED' }, 401);
+    if (!secret || c.req.header('authorization') !== `Bearer ${secret}`) return c.json({ error: 'UNAUTHORIZED' }, 401);
 
     const body = await c.req
       .json<{ event?: { type?: string; app_user_id?: string; expiration_at_ms?: number } }>()
