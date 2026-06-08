@@ -23,6 +23,7 @@ export type Changes = {
   markers: Marker[];
   boxes: Box[];
   items: Item[];
+  members: Member[];
 };
 
 export async function getMembership(db: AppDb, moveId: string, userId: string): Promise<Membership | null> {
@@ -32,11 +33,15 @@ export async function getMembership(db: AppDb, moveId: string, userId: string): 
   return row ? { role: row.role } : null;
 }
 
-/** Create a shared move with the owner membership + seeded statuses/markers. */
+/**
+ * Create a shared move with the owner membership. Seeds default statuses/markers
+ * unless `seed: false` — migration from a local move replays its OWN statuses/markers
+ * (keeping their ids), so it skips seeding to avoid duplicates.
+ */
 export async function createMove(
   db: AppDb,
   deps: Deps,
-  args: { name: string; from?: string | null; to?: string | null; targetDate?: string | null; ownerId: string },
+  args: { name: string; from?: string | null; to?: string | null; targetDate?: string | null; ownerId: string; seed?: boolean },
 ): Promise<string> {
   const now = deps.now();
   const moveId = deps.newId();
@@ -53,13 +58,24 @@ export async function createMove(
   });
   await db.insert(s.members).values({ id: deps.newId(), moveId, userId: args.ownerId, role: 'owner', createdAt: now });
 
-  for (const st of DEFAULT_STATUSES) {
-    await db.insert(s.statuses).values({ id: deps.newId(), moveId, label: st.label, color: st.color, custom: false, updatedAt: now, deletedAt: null });
-  }
-  for (const mk of DEFAULT_MARKERS) {
-    await db.insert(s.markers).values({ id: deps.newId(), moveId, label: mk.label, color: mk.color, icon: mk.icon, custom: false, updatedAt: now, deletedAt: null });
+  if (args.seed !== false) {
+    for (const st of DEFAULT_STATUSES) {
+      await db.insert(s.statuses).values({ id: deps.newId(), moveId, label: st.label, color: st.color, custom: false, updatedAt: now, deletedAt: null });
+    }
+    for (const mk of DEFAULT_MARKERS) {
+      await db.insert(s.markers).values({ id: deps.newId(), moveId, label: mk.label, color: mk.color, icon: mk.icon, custom: false, updatedAt: now, deletedAt: null });
+    }
   }
   return moveId;
+}
+
+/** Members of a move with display names (small list — returned in full on each delta). */
+export async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
+  const memberRows = await db.select().from(s.members).where(eq(s.members.moveId, moveId));
+  const userIds = memberRows.map((m) => m.userId);
+  const userRows = userIds.length ? await db.select().from(s.users).where(inArray(s.users.id, userIds)) : [];
+  const nameById = new Map(userRows.map((u) => [u.id, u.name]));
+  return memberRows.map((m) => ({ id: m.id, moveId: m.moveId, userId: m.userId, role: m.role, name: nameById.get(m.userId) ?? 'Friend' }));
 }
 
 // --- DTO mappers -----------------------------------------------------------
@@ -162,6 +178,7 @@ export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, sin
     markers,
     boxes: boxRows.map((b) => toBox(b, bm.get(b.id) ?? [])),
     items: itemRows.map((i) => toItem(i, im.get(i.id) ?? [], ip.get(i.id) ?? [])),
+    members: await getMembers(db, moveId), // full list each delta (small); covers invite/role/remove
   };
 }
 

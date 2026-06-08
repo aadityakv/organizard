@@ -84,6 +84,8 @@ type Actions = {
   applyChanges: (ch: ServerChanges) => void;
   /** Flip the active move to shared and seed it from a server snapshot. */
   markActiveShared: (serverMoveId: string, snap: ServerSnapshot) => void;
+  /** Flip the active (already-pushed) move to shared, keeping local data as-is. */
+  goShared: (serverMoveId: string) => void;
 };
 
 export type Store = State & Actions;
@@ -285,6 +287,7 @@ export const useStore = create<Store>()(
             markers: mergeList(s.markers, ch.markers, toClientMarker),
             boxes,
             itemsByBox,
+            members: ch.members.map(toClientMember),
             lastSyncTs: ch.serverTime,
           };
         });
@@ -294,6 +297,8 @@ export const useStore = create<Store>()(
         set({ activeMode: 'shared', serverMoveId, lastSyncTs: 0, outbox: [] });
         get().applySnapshot(snap);
       },
+
+      goShared: (serverMoveId) => set({ activeMode: 'shared', serverMoveId, lastSyncTs: 0, outbox: [] }),
     }),
     {
       name: 'organizard-store-v1',

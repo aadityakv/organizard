@@ -29,7 +29,9 @@ export type ServerChanges = {
   markers: Marker[];
   boxes: Box[];
   items: Item[];
+  members: Member[];
 };
+export type InviteResult = { token: string; role: Role; expiresAt: number; url: string };
 
 export class ApiError extends Error {
   constructor(
@@ -75,11 +77,21 @@ export const api = {
   logout: (session: string) => req<{ ok: true }>('/v1/auth/logout', { method: 'POST' }, session),
 
   // --- moves / sync ---
-  createMove: (session: string, body: { name: string; from?: string | null; to?: string | null; targetDate?: string | null }) =>
+  createMove: (session: string, body: { name: string; from?: string | null; to?: string | null; targetDate?: string | null; seed?: boolean }) =>
     req<ServerSnapshot>('/v1/moves', { method: 'POST', body: JSON.stringify(body) }, session),
   snapshot: (session: string, moveId: string) => req<ServerSnapshot>(`/v1/moves/${moveId}`, { method: 'GET' }, session),
   changes: (session: string, moveId: string, since: number) =>
     req<ServerChanges>(`/v1/moves/${moveId}/changes?since=${since}`, { method: 'GET' }, session),
   mutations: (session: string, moveId: string, mutations: Mutation[]) =>
     req<{ serverTime: number; applied: number }>(`/v1/moves/${moveId}/mutations`, { method: 'POST', body: JSON.stringify({ mutations }) }, session),
+
+  // --- sharing ---
+  createInvite: (session: string, moveId: string, role: Role) =>
+    req<InviteResult>(`/v1/moves/${moveId}/invites`, { method: 'POST', body: JSON.stringify({ role }) }, session),
+  acceptInvite: (session: string, token: string) =>
+    req<ServerSnapshot>(`/v1/invites/${token}/accept`, { method: 'POST', body: '{}' }, session),
+  changeRole: (session: string, moveId: string, userId: string, role: Role) =>
+    req<{ ok: true }>(`/v1/moves/${moveId}/members/${userId}`, { method: 'PATCH', body: JSON.stringify({ role }) }, session),
+  removeMember: (session: string, moveId: string, userId: string) =>
+    req<{ ok: true }>(`/v1/moves/${moveId}/members/${userId}`, { method: 'DELETE' }, session),
 };

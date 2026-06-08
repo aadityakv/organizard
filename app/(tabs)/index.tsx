@@ -473,13 +473,22 @@ export default function Dashboard() {
         title={move.name}
         subtitle={`${progress.sealed} of ${progress.total} boxes sealed`}
         trailing={
-          <IconButton
-            icon={searching ? 'x' : 'search'}
-            variant="plain"
-            size="sm"
-            accessibilityLabel={searching ? 'Close search' : 'Find an item'}
-            onPress={toggleSearch}
-          />
+          <>
+            <IconButton
+              icon="user-plus"
+              variant="plain"
+              size="sm"
+              accessibilityLabel="Share & members"
+              onPress={() => router.push('/share')}
+            />
+            <IconButton
+              icon={searching ? 'x' : 'search'}
+              variant="plain"
+              size="sm"
+              accessibilityLabel={searching ? 'Close search' : 'Find an item'}
+              onPress={toggleSearch}
+            />
+          </>
         }
       />
 

@@ -1,4 +1,4 @@
-import { ROLE_REQUIRED, type Mutation } from '@shared/index';
+import { ROLE_REQUIRED, type Mutation, type Role } from '@shared/index';
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
@@ -6,6 +6,7 @@ import { authMiddleware } from '../middleware/auth';
 import { membershipMiddleware, type MemberVars } from '../middleware/membership';
 import { applyMutations } from '../mutations/apply';
 import { createMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
+import { changeMemberRole, createInvite, getMoveOwnerId, removeMember } from '../repos/sharing';
 import type { Env } from '../types';
 
 export function moveRoutes(deps: Deps) {
@@ -14,7 +15,7 @@ export function moveRoutes(deps: Deps) {
 
   // Create a shared move. (Entitlement gate is added in Phase 7.)
   r.post('/', async (c) => {
-    type CreateBody = { name?: string; from?: string | null; to?: string | null; targetDate?: string | null };
+    type CreateBody = { name?: string; from?: string | null; to?: string | null; targetDate?: string | null; seed?: boolean };
     const body = await c.req.json<CreateBody>().catch(() => ({}) as CreateBody);
     if (!body.name || !body.name.trim()) return c.json({ error: 'INVALID_NAME' }, 400);
 
@@ -25,6 +26,7 @@ export function moveRoutes(deps: Deps) {
       to: body.to,
       targetDate: body.targetDate,
       ownerId: c.get('user').id,
+      seed: body.seed,
     });
     return c.json(await getMoveSnapshot(db, moveId), 201);
   });
@@ -55,6 +57,37 @@ export function moveRoutes(deps: Deps) {
 
     const res = await applyMutations(deps.getDb(c.env), deps, c.req.param('id'), mutations);
     return c.json(res);
+  });
+
+  // --- sharing: invites + member management (owner only) ---
+  r.post('/:id/invites', membershipMiddleware(deps), async (c) => {
+    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
+    const role: Role = body.role ?? 'viewer';
+    const invite = await createInvite(deps.getDb(c.env), deps, { moveId: c.req.param('id'), role, createdBy: c.get('user').id });
+    return c.json({ ...invite, url: `organizard://invite?token=${invite.token}` });
+  });
+
+  r.patch('/:id/members/:userId', membershipMiddleware(deps), async (c) => {
+    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    const db = deps.getDb(c.env);
+    const moveId = c.req.param('id');
+    const userId = c.req.param('userId');
+    const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
+    if (!body.role) return c.json({ error: 'INVALID_ROLE' }, 400);
+    if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_CHANGE_OWNER' }, 400);
+    await changeMemberRole(db, { moveId, userId, role: body.role });
+    return c.json({ ok: true });
+  });
+
+  r.delete('/:id/members/:userId', membershipMiddleware(deps), async (c) => {
+    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    const db = deps.getDb(c.env);
+    const moveId = c.req.param('id');
+    const userId = c.req.param('userId');
+    if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_REMOVE_OWNER' }, 400);
+    await removeMember(db, { moveId, userId });
+    return c.json({ ok: true });
   });
 
   return r;

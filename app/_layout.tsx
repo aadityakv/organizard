@@ -71,8 +71,10 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="box/[id]" />
+        <Stack.Screen name="share" />
         <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
+        <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
       </Stack>
     </SafeAreaProvider>
   );
