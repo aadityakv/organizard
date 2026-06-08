@@ -17,7 +17,8 @@
       "buildNumber": "1",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels."
+        "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
