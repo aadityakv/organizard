@@ -49,6 +49,14 @@ export async function getMoveOwnerId(db: AppDb, moveId: string): Promise<string 
   return move?.ownerId;
 }
 
+/** A shared move is editable only while its owner's subscription is active. */
+export async function isOwnerEntitled(db: AppDb, moveId: string): Promise<boolean> {
+  const move = (await db.select().from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
+  if (!move) return false;
+  const owner = (await db.select().from(s.users).where(eq(s.users.id, move.ownerId)).limit(1))[0];
+  return Boolean(owner?.entitlementActive);
+}
+
 export async function changeMemberRole(db: AppDb, args: { moveId: string; userId: string; role: Role }): Promise<void> {
   await db.update(s.members).set({ role: args.role }).where(and(eq(s.members.moveId, args.moveId), eq(s.members.userId, args.userId)));
 }

@@ -6,13 +6,28 @@ import { router } from 'expo-router';
 
 import { Avatar, Button, Card, Header, Icon, Input, LockNote, RoleBadge, Segmented } from '@/components';
 import type { Member, Role } from '@/data/types';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { appleSignInAvailable, signInWithApple, startEmailSignIn } from '@/lib/auth';
 import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from '@/lib/billing';
 import { createInviteLink, shareMove } from '@/lib/share';
 import { syncActiveMove } from '@/store/sync';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
+
+const FRIENDLY_ERROR: Record<string, string> = {
+  ENTITLEMENT_REQUIRED: 'An Organizard subscription is required to share a move.',
+  FORBIDDEN_ROLE: "You don't have permission to do that.",
+  INVITE_INVALID: "That invite link isn't valid.",
+  INVITE_USED: 'That invite has already been used.',
+  INVITE_EXPIRED: 'That invite link has expired.',
+  CANNOT_CHANGE_OWNER: "You can't change the owner's role.",
+  CANNOT_REMOVE_OWNER: "You can't remove the owner.",
+};
+
+function friendlyError(e: unknown): string {
+  if (e instanceof ApiError && FRIENDLY_ERROR[e.code]) return FRIENDLY_ERROR[e.code];
+  return e instanceof Error ? e.message : 'Something went wrong.';
+}
 
 export default function ShareScreen() {
   const account = useStore((s) => s.account);
@@ -45,7 +60,7 @@ export default function ShareScreen() {
     try {
       await fn();
     } catch (e) {
-      Alert.alert(label, e instanceof Error ? e.message : 'Something went wrong.');
+      Alert.alert(label, friendlyError(e));
     } finally {
       setBusy(false);
     }

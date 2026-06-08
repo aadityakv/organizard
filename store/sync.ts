@@ -9,12 +9,16 @@ import { uploadPendingPhotos } from '@/lib/photos';
 import { useStore } from './useStore';
 
 const POLL_MS = 15_000;
+const MAX_BACKOFF_MS = 60_000;
 let syncing = false;
+let failures = 0;
+let nextAllowedAt = 0;
 
 /** One sync pass: flush pending mutations (in order), then merge the delta. */
 export async function syncActiveMove(): Promise<void> {
   const st = useStore.getState();
   if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session || syncing) return;
+  if (Date.now() < nextAllowedAt) return; // backing off after repeated failures
 
   syncing = true;
   const { session, serverMoveId } = st;
@@ -28,9 +32,16 @@ export async function syncActiveMove(): Promise<void> {
     await uploadPendingPhotos();
     const changes = await api.changes(session, serverMoveId, useStore.getState().lastSyncTs);
     useStore.getState().applyChanges(changes);
+    failures = 0;
+    nextAllowedAt = 0;
   } catch (e) {
-    // Transient/network: keep the outbox and retry next tick.
-    if (e instanceof ApiError && e.status === 401) useStore.getState().signOut();
+    if (e instanceof ApiError && e.status === 401) {
+      useStore.getState().signOut(); // session gone — stop syncing
+    } else {
+      // Transient/network: keep the outbox and back off exponentially (with jitter).
+      failures += 1;
+      nextAllowedAt = Date.now() + Math.min(MAX_BACKOFF_MS, 1000 * 2 ** failures) + Math.floor(Math.random() * 1000);
+    }
   } finally {
     syncing = false;
   }

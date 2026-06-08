@@ -7,7 +7,7 @@ import { membershipMiddleware, type MemberVars } from '../middleware/membership'
 import { applyMutations } from '../mutations/apply';
 import { createMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
 import { createPhotoRecord } from '../repos/photos';
-import { changeMemberRole, createInvite, getMoveOwnerId, removeMember } from '../repos/sharing';
+import { changeMemberRole, createInvite, getMoveOwnerId, isOwnerEntitled, removeMember } from '../repos/sharing';
 import type { Env } from '../types';
 
 export function moveRoutes(deps: Deps) {
@@ -55,6 +55,11 @@ export function moveRoutes(deps: Deps) {
       const need = ROLE_REQUIRED[m.type];
       const ok = need === 'owner' ? role === 'owner' : role === 'owner' || role === 'editor';
       if (!ok) return c.json({ error: 'FORBIDDEN_ROLE', type: m.type }, 403);
+    }
+
+    // Lapsed owner subscription -> the shared move is read-only (data retained).
+    if (!(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id')))) {
+      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     }
 
     const res = await applyMutations(deps.getDb(c.env), deps, c.req.param('id'), mutations);
