@@ -14,7 +14,6 @@ import {
   IconButton,
   Input,
   LockNote,
-  RoleSwitcher,
   Segmented,
   Sheet,
   Thumb,
@@ -27,6 +26,7 @@ import { photoSource } from '@/lib/photos';
 import {
   allIndexedItems,
   boxStats,
+  currentRole,
   markerById,
   moveProgress,
   moveTotals,
@@ -427,7 +427,7 @@ function AddRoomSheet({ visible, onClose }: { visible: boolean; onClose: () => v
 // Dashboard
 // ---------------------------------------------------------------------------
 export default function Dashboard() {
-  const role = useStore((s) => s.role);
+  const role = useStore(currentRole);
   const move = useStore((s) => s.move);
   const rooms = useStore((s) => s.rooms);
   const boxes = useStore((s) => s.boxes);
@@ -470,8 +470,6 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <RoleSwitcher />
-
       <Header
         leading={
           <View style={styles.logoTile}>

@@ -25,7 +25,7 @@ import {
 import { PERM, ROLE_BLURB, ROLE_LABEL } from '@/lib/permissions';
 import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 import type { Member, Role } from '@/data/types';
-import { useStore } from '@/store/useStore';
+import { currentRole, useStore } from '@/store/useStore';
 
 // Roles a buddy can be invited / changed to (you can't demote/clone an owner here).
 const ASSIGNABLE_ROLES: Role[] = ['editor', 'viewer'];
@@ -189,7 +189,7 @@ function ManageSheet({
 // Screen
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Members() {
-  const role = useStore((s) => s.role);
+  const role = useStore(currentRole);
   const storeMembers = useStore((s) => s.members);
   const accountId = useStore((s) => s.account?.id);
 

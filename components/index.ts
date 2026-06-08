@@ -8,7 +8,6 @@ export { Header, type HeaderProps } from './Header';
 export { LockNote } from './LockNote';
 export { Thumb, type ThumbProps } from './Thumb';
 export { Sheet, type SheetProps } from './Sheet';
-export { RoleSwitcher } from './RoleSwitcher';
 
 // Design-system primitives (core)
 export { Button, type ButtonProps } from './Button';

@@ -51,6 +51,7 @@ import { encodeBoxQR } from '@/lib/qr';
 import {
   boxById,
   boxStats,
+  currentRole,
   markerById,
   roomById,
   selectBoxItems,
@@ -64,7 +65,7 @@ export default function BoxDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const boxId = id ?? '';
 
-  const role = useStore((s) => s.role);
+  const role = useStore(currentRole);
   const box = useStore((s) => boxById(s, boxId));
   const session = useStore((s) => s.session);
 

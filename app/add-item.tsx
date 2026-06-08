@@ -32,6 +32,7 @@ import {
 import {
   useStore,
   boxById,
+  currentRole,
   markerById,
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -64,7 +65,7 @@ export default function AddItem() {
 
   // ── Store: box context, markers, role, the add action ──────────────────────
   const box = useStore((s) => (boxId ? boxById(s, boxId) : undefined));
-  const role = useStore((s) => s.role);
+  const role = useStore(currentRole);
   const allMarkers = useStore((s) => s.markers);
   const boxMarkerDefs = useStore(
     useShallow((s) => (box?.markers ?? []).map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m))),
