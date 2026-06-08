@@ -197,6 +197,30 @@ export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, sin
   };
 }
 
+/**
+ * Hard-delete a move and all its children. No `onDelete: cascade` FKs exist, so
+ * we remove rows in FK-safe order (join tables first, keyed off this move's
+ * box/item ids, then leaf tables, then the move itself). Drizzle's D1 driver has
+ * no interactive transaction here (and neither does the sql.js test driver), so
+ * the deletes are issued in order — matching the rest of this repo.
+ */
+export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
+  const boxIds = (await db.select({ id: s.boxes.id }).from(s.boxes).where(eq(s.boxes.moveId, moveId))).map((r) => r.id);
+  const itemIds = (await db.select({ id: s.items.id }).from(s.items).where(eq(s.items.moveId, moveId))).map((r) => r.id);
+  if (itemIds.length) await db.delete(s.itemMarkers).where(inArray(s.itemMarkers.itemId, itemIds));
+  if (boxIds.length) await db.delete(s.boxMarkers).where(inArray(s.boxMarkers.boxId, boxIds));
+  await db.delete(s.items).where(eq(s.items.moveId, moveId));
+  await db.delete(s.boxes).where(eq(s.boxes.moveId, moveId));
+  await db.delete(s.rooms).where(eq(s.rooms.moveId, moveId));
+  await db.delete(s.statuses).where(eq(s.statuses.moveId, moveId));
+  await db.delete(s.markers).where(eq(s.markers.moveId, moveId));
+  await db.delete(s.photos).where(eq(s.photos.moveId, moveId));
+  await db.delete(s.invites).where(eq(s.invites.moveId, moveId));
+  await db.delete(s.members).where(eq(s.members.moveId, moveId));
+  await db.delete(s.mutationLog).where(eq(s.mutationLog.moveId, moveId));
+  await db.delete(s.moves).where(eq(s.moves.id, moveId));
+}
+
 /** Moves the user belongs to, with their role. */
 export async function getUserMoves(db: AppDb, userId: string): Promise<(Move & { role: Role })[]> {
   const memberRows = await db.select().from(s.members).where(eq(s.members.userId, userId));

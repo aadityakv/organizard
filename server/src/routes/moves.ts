@@ -6,7 +6,7 @@ import { authMiddleware } from '../middleware/auth';
 import { membershipMiddleware, type MemberVars } from '../middleware/membership';
 import { billingEnabled } from '../lib/flags';
 import { applyMutations } from '../mutations/apply';
-import { createMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
+import { createMove, deleteMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
 import { createPhotoRecord } from '../repos/photos';
 import { boxInMove, itemInMove } from '../repos/scope';
 import { changeMemberRole, createInvite, getMoveOwnerId, isOwnerEntitled, removeMember } from '../repos/sharing';
@@ -71,6 +71,14 @@ export function moveRoutes(deps: Deps) {
 
     const res = await applyMutations(deps.getDb(c.env), deps, c.req.param('id'), mutations);
     return c.json(res);
+  });
+
+  // Owner-only: hard-delete the move and all its data. membershipMiddleware
+  // returns 404 for non-members so move existence isn't leaked.
+  r.delete('/:id', membershipMiddleware(deps), async (c) => {
+    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    await deleteMove(deps.getDb(c.env), c.req.param('id'));
+    return c.json({ ok: true });
   });
 
   // --- sharing: invites + member management (owner only) ---
