@@ -22,6 +22,9 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Apple credentials (App Store Connect API key, certs) — never commit
+/credentials/
+
 # Metro
 .metro-health-check*
 

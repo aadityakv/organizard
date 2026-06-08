@@ -7,17 +7,25 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "backgroundColor": "#F7F6F2",
-    "assetBundlePatterns": ["**/*"],
+    "icon": "./assets/icon.png",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.organizard.app",
+      "buildNumber": "1",
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels."
       }
     },
     "android": {
-      "package": "com.organizard.app"
+      "package": "com.organizard.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -36,7 +44,14 @@
     },
     "extra": {
       "apiUrl": "https://organizard-api.aaditya-kv.workers.dev",
-      "revenueCatKey": ""
-    }
+      "revenueCatKey": "",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0ec495c8-dd4d-4f5b-8ce2-5aad385abad6"
+      }
+    },
+    "owner": "aadityakv"
   }
 }

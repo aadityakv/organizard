@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 20.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": { "simulator": true }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": { "simulator": false }
+    },
+    "production": {
+      "ios": {
+        "autoIncrement": false
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascApiKeyPath": "./credentials/asc_api_key.p8",
+        "ascApiKeyId": "4CA82K93F5",
+        "ascApiKeyIssuerId": "5415282d-e1b2-4ea0-88a2-19b5201e76af"
+      }
+    }
+  }
+}
