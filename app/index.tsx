@@ -2,8 +2,8 @@ import { Redirect } from 'expo-router';
 
 import { useStore } from '@/store/useStore';
 
-// Entry route — send first-run users to onboarding, returning users to the app.
+// Entry route — open your current move if you have one, else the Moves library.
 export default function Index() {
-  const onboarded = useStore((s) => s.onboarded);
-  return <Redirect href={onboarded ? '/(tabs)' : '/onboarding'} />;
+  const currentMoveId = useStore((s) => s.currentMoveId);
+  return <Redirect href={currentMoveId ? '/(tabs)' : '/moves'} />;
 }

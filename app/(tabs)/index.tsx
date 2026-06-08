@@ -8,7 +8,6 @@ import { router } from 'expo-router';
 import {
   BoxCard,
   ColorDot,
-  GeckoMark,
   Header,
   Icon,
   IconButton,
@@ -472,9 +471,13 @@ export default function Dashboard() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
         leading={
-          <View style={styles.logoTile}>
-            <GeckoMark size={26} />
-          </View>
+          <IconButton
+            icon="chevron-left"
+            variant="plain"
+            size="sm"
+            accessibilityLabel="Switch move"
+            onPress={() => router.push('/moves')}
+          />
         }
         title={move.name}
         subtitle={`${progress.sealed} of ${progress.total} boxes sealed`}
@@ -706,15 +709,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surfaceApp,
     paddingTop: space[2],
-  },
-
-  logoTile: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.md,
-    backgroundColor: palette.green50,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   progressTrack: {
