@@ -49,6 +49,9 @@ describe('e2e — subscribe → share → collaborate → lapse → renew', () =
     // owner's subscription lapses -> the shared move goes read-only
     await h.webhook('EXPIRATION', owner.user.id);
     expect((await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r9', name: 'No', icon: 'box' }, 'c3')] }, auth(ed.session))).status).toBe(402);
+    // read-only also blocks the photo + invite write paths
+    expect((await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'i1' }, auth(ed.session))).status).toBe(402);
+    expect((await h.json(`/v1/moves/${moveId}/invites`, { role: 'viewer' }, auth(owner.session))).status).toBe(402);
     expect((await h.request(`/v1/moves/${moveId}`, auth(ed.session))).status).toBe(200); // reading still works
 
     // renew -> editing restored

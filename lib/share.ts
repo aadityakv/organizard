@@ -4,6 +4,7 @@ import type { Mutation, Role } from '@/shared';
 
 import { api } from '@/lib/api';
 import { uid } from '@/lib/uid';
+import { setMigrating, syncActiveMove } from '@/store/sync';
 import { useStore } from '@/store/useStore';
 
 /** Mutations that recreate the active local move on the server (ids preserved). */
@@ -48,10 +49,17 @@ export async function shareMove(): Promise<{ moveId: string }> {
   });
   const serverMoveId = snap.move.id;
 
-  const batch = buildMigrationBatch();
-  if (batch.length) await api.mutations(s.session, serverMoveId, batch);
-
-  useStore.getState().goShared(serverMoveId);
+  // Hold sync during the migration so concurrent edits can't flush before the batch
+  // creates their rooms/boxes. Flip to shared FIRST so those edits enqueue (not no-op'd).
+  setMigrating(true);
+  try {
+    useStore.getState().goShared(serverMoveId);
+    const batch = buildMigrationBatch();
+    if (batch.length) await api.mutations(s.session, serverMoveId, batch);
+  } finally {
+    setMigrating(false);
+  }
+  void syncActiveMove(); // flush anything captured during the migration
   return { moveId: serverMoveId };
 }
 

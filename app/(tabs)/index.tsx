@@ -33,7 +33,9 @@ import {
   roomById,
   statusById,
   useStore,
+  type Store,
 } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import {
   BOX_COLORS,
   boxColor,
@@ -91,10 +93,10 @@ function openBox(id: string): void {
 function DashboardBoxCard({ box }: { box: Box }) {
   const status = useStore((s) => statusById(s, box.status));
   const room = useStore((s) => roomById(s, box.roomId));
-  const markerDefs = useStore((s) =>
-    box.markers.map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m)),
+  const markerDefs = useStore(
+    useShallow((s) => box.markers.map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m))),
   );
-  const { count, value } = useStore((s) => boxStats(s, box.id));
+  const { count, value } = useStore(useShallow((s) => boxStats(s, box.id)));
   const session = useStore((s) => s.session);
   const coverSrc = box.cover ? photoSource(box.cover, session) : undefined;
 
@@ -121,10 +123,12 @@ function DashboardBoxCard({ box }: { box: Box }) {
 // Find — searches items + boxes across the whole move, with a Room › Box crumb.
 // ---------------------------------------------------------------------------
 function FindResults({ query }: { query: string }) {
-  const indexed = useStore(allIndexedItems);
   const boxes = useStore((s) => s.boxes);
   const rooms = useStore((s) => s.rooms);
   const markers = useStore((s) => s.markers);
+  const itemsByBox = useStore((s) => s.itemsByBox);
+  // Derive off stable slices (allIndexedItems builds new objects, so it can't be a live selector).
+  const indexed = useMemo(() => allIndexedItems({ boxes, rooms, itemsByBox } as Store), [boxes, rooms, itemsByBox]);
 
   const q = query.trim().toLowerCase();
 
@@ -213,7 +217,7 @@ function ItemResultRow({ item, room }: { item: IndexedItem; room?: Room }) {
 }
 
 function BoxResultRow({ box, room }: { box: Box; room?: Room }) {
-  const { count } = useStore((s) => boxStats(s, box.id));
+  const { count } = useStore(useShallow((s) => boxStats(s, box.id)));
   return (
     <Pressable
       accessibilityRole="button"
@@ -427,8 +431,8 @@ export default function Dashboard() {
   const move = useStore((s) => s.move);
   const rooms = useStore((s) => s.rooms);
   const boxes = useStore((s) => s.boxes);
-  const progress = useStore(moveProgress);
-  const totals = useStore(moveTotals);
+  const progress = useStore(useShallow(moveProgress));
+  const totals = useStore(useShallow(moveTotals));
 
   const [view, setView] = useState<GroupView>('room');
   const [query, setQuery] = useState('');

@@ -57,6 +57,7 @@ import {
   statusById,
   useStore,
 } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { Item, Marker, Status } from '@/data/types';
 
 export default function BoxDetail() {
@@ -80,11 +81,11 @@ export default function BoxDetail() {
   const room = useStore((s) => (box ? roomById(s, box.roomId) : undefined));
   const allStatuses = useStore((s) => s.statuses);
   const allMarkers = useStore((s) => s.markers);
-  const boxMarkerDefs = useStore((s) =>
-    box ? (box.markers.map((mid) => markerById(s, mid)).filter(Boolean) as Marker[]) : [],
+  const boxMarkerDefs = useStore(
+    useShallow((s) => (box ? (box.markers.map((mid) => markerById(s, mid)).filter(Boolean) as Marker[]) : [])),
   );
   const items = useStore((s) => selectBoxItems(s, boxId));
-  const stats = useStore((s) => (box ? boxStats(s, boxId) : { count: 0, value: 0 }));
+  const stats = useStore(useShallow((s) => (box ? boxStats(s, boxId) : { count: 0, value: 0 })));
 
   // Which sheet is open ('status' | 'markers' | 'cover' | null).
   const [sheet, setSheet] = useState<'status' | 'markers' | 'cover' | null>(null);

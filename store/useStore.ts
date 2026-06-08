@@ -344,11 +344,16 @@ export const useStore = create<Store>()(
             itemsByBox[it.boxId] = arr;
           }
 
+          // Run every fresh() (which records minSkipped) BEFORE computing the cursor,
+          // so a skipped room/status/marker also holds the cursor back.
+          const rooms = mergeList(s.rooms, fresh(ch.rooms, dRoom), toClientRoom);
+          const statuses = mergeList(s.statuses, fresh(ch.statuses, dStatus), toClientStatus);
+          const markers = mergeList(s.markers, fresh(ch.markers, dMarker), toClientMarker);
           const cursor = minSkipped === Infinity ? ch.cursor : Math.min(ch.cursor, minSkipped - 1);
           return {
-            rooms: mergeList(s.rooms, fresh(ch.rooms, dRoom), toClientRoom),
-            statuses: mergeList(s.statuses, fresh(ch.statuses, dStatus), toClientStatus),
-            markers: mergeList(s.markers, fresh(ch.markers, dMarker), toClientMarker),
+            rooms,
+            statuses,
+            markers,
             boxes,
             itemsByBox,
             members: ch.members.map(toClientMember),
@@ -421,7 +426,9 @@ export function useHasHydrated(): boolean {
   return hydrated;
 }
 
-export const selectBoxItems = (s: Store, boxId: string): Item[] => s.itemsByBox[boxId] ?? [];
+// Stable empty reference so the selector keeps a stable identity (Zustand v5 / useSyncExternalStore).
+const EMPTY_ITEMS: Item[] = [];
+export const selectBoxItems = (s: Store, boxId: string): Item[] => s.itemsByBox[boxId] ?? EMPTY_ITEMS;
 
 export const boxStats = (s: Store, boxId: string): { count: number; value: number } => {
   const items = s.itemsByBox[boxId] ?? [];

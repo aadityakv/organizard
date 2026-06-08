@@ -74,6 +74,7 @@ export function moveRoutes(deps: Deps) {
   // --- sharing: invites + member management (owner only) ---
   r.post('/:id/invites', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (!(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now()))) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
     const role: Role = body.role ?? 'viewer';
     const invite = await createInvite(deps.getDb(c.env), deps, { moveId: c.req.param('id'), role, createdBy: c.get('user').id });
@@ -108,6 +109,7 @@ export function moveRoutes(deps: Deps) {
     if (c.get('member').role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
+    if (!(await isOwnerEntitled(db, moveId, deps.now()))) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     const body = await c.req.json<{ itemId?: string; boxId?: string }>().catch(() => ({}) as { itemId?: string; boxId?: string });
     // The linked item/box must belong to this move (no cross-move photo linking).
     if (body.itemId && !(await itemInMove(db, moveId, body.itemId))) return c.json({ error: 'NOT_FOUND' }, 404);

@@ -1,7 +1,7 @@
 // Members & sharing — the differentiator. Roster, invite with role, owner-only manage.
 // Member mutations (role change / remove) live in LOCAL component state only:
 // the store has no member mutators and we must not add any.
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -191,9 +191,12 @@ function ManageSheet({
 export default function Members() {
   const role = useStore((s) => s.role);
   const storeMembers = useStore((s) => s.members);
+  const accountId = useStore((s) => s.account?.id);
 
   // Member management is LOCAL UI state — the store has no member mutators.
   const [members, setMembers] = useState<Member[]>(storeMembers);
+  // Re-seed when the synced roster changes (shared moves) so it doesn't go stale.
+  useEffect(() => setMembers(storeMembers), [storeMembers]);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [manageMember, setManageMember] = useState<Member | null>(null);
 
@@ -221,7 +224,9 @@ export default function Members() {
         {/* Roster */}
         <Card style={styles.rosterCard}>
           {members.map((m, i) => {
-            const tappable = isOwner && !m.you;
+            // Synced rosters (shared moves) don't carry `you`; derive it from the account.
+            const you = Boolean(m.you) || m.id === accountId;
+            const tappable = isOwner && !you;
             return (
               <Pressable
                 key={m.id}
@@ -241,7 +246,7 @@ export default function Members() {
                     <Text style={styles.memberName} numberOfLines={1}>
                       {m.name}
                     </Text>
-                    {m.you ? <Badge label="You" tone="neutral" size="sm" /> : null}
+                    {you ? <Badge label="You" tone="neutral" size="sm" /> : null}
                   </View>
                   <RoleBadge role={m.role} withBlurb size="sm" style={styles.rosterRole} />
                 </View>

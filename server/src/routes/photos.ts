@@ -4,6 +4,7 @@ import type { Deps } from '../deps';
 import { authMiddleware, type AuthVars } from '../middleware/auth';
 import { getMembership } from '../repos/moves';
 import { getPhoto } from '../repos/photos';
+import { isOwnerEntitled } from '../repos/sharing';
 import type { Env } from '../types';
 
 // Blob upload/download for photos. Membership is checked via the photo's move
@@ -20,6 +21,7 @@ export function photoBlobRoutes(deps: Deps) {
     const member = await getMembership(db, photo.moveId, c.get('user').id);
     if (!member) return c.json({ error: 'NOT_FOUND' }, 404);
     if (member.role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (!(await isOwnerEntitled(db, photo.moveId, deps.now()))) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
 
     const body = await c.req.arrayBuffer();
     await c.env.PHOTOS.put(photo.r2Key, body, {

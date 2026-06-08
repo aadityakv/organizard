@@ -184,7 +184,9 @@ export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, sin
 
   return {
     serverTime,
-    cursor: serverTime,
+    // serverTime-1 so a row written in the same ms as this read is re-included on the
+    // next poll (healed by the regular 15s poll, not only the foreground full-resync).
+    cursor: serverTime - 1,
     hasMore: false,
     rooms,
     statuses,

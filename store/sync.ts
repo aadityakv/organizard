@@ -10,31 +10,44 @@ import { useStore } from './useStore';
 
 const POLL_MS = 15_000;
 const MAX_BACKOFF_MS = 60_000;
+const FLUSH_CHUNK = 200; // well under the server's 500/batch cap
 let syncing = false;
+let migrating = false; // share-upgrade in progress: hold sync so it can't flush before the migration batch
+let pendingFull = false; // a full-resync was requested; consumed at the start of the next pass
 let failures = 0;
 let nextAllowedAt = 0;
+
+/** Pause/resume sync around the local→shared migration (so edits aren't flushed before their entities exist). */
+export const setMigrating = (v: boolean): void => {
+  migrating = v;
+};
 
 /** One sync pass: flush pending mutations (in order), then merge the delta. */
 export async function syncActiveMove(): Promise<void> {
   const st = useStore.getState();
-  if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session || syncing) return;
+  if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session || syncing || migrating) return;
   if (Date.now() < nextAllowedAt) return; // backing off after repeated failures
 
   syncing = true;
+  if (pendingFull) {
+    pendingFull = false;
+    useStore.setState({ lastSyncTs: 0 }); // consumed inside the mutex, so it can't be clobbered
+  }
   const { session, serverMoveId } = st;
   try {
+    // Flush in chunks so one request never hits the 500/batch cap, and a 400 only
+    // ever drops ONE chunk (poison/legacy) instead of the whole offline session.
     const pending = useStore.getState().outbox;
-    if (pending.length) {
+    for (let i = 0; i < pending.length; i += FLUSH_CHUNK) {
+      const chunk = pending.slice(i, i + FLUSH_CHUNK);
       try {
-        await api.mutations(session, serverMoveId, pending);
-        useStore.getState().clearOutbox(pending.map((m) => m.clientId));
+        await api.mutations(session, serverMoveId, chunk);
+        useStore.getState().clearOutbox(chunk.map((m) => m.clientId));
       } catch (e) {
-        // A 400 means the batch is structurally invalid (poison/legacy) — drop it so
-        // sync isn't wedged forever. Transient/401/402 fall through to the outer handler.
         if (e instanceof ApiError && e.status === 400) {
-          useStore.getState().clearOutbox(pending.map((m) => m.clientId));
+          useStore.getState().clearOutbox(chunk.map((m) => m.clientId)); // drop the bad chunk; don't wedge
         } else {
-          throw e;
+          throw e; // transient/401/402 -> outer handler; remaining chunks retry next pass
         }
       }
     }
@@ -68,7 +81,7 @@ export async function syncActiveMove(): Promise<void> {
 export async function fullResync(): Promise<void> {
   const st = useStore.getState();
   if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session) return;
-  useStore.setState({ lastSyncTs: 0 });
+  pendingFull = true; // consumed by syncActiveMove inside its mutex (survives an in-flight pass)
   await syncActiveMove();
 }
 

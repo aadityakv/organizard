@@ -34,6 +34,7 @@ import {
   boxById,
   markerById,
 } from '@/store/useStore';
+import { useShallow } from 'zustand/react/shallow';
 import { PERM } from '@/lib/permissions';
 import {
   colors,
@@ -65,8 +66,8 @@ export default function AddItem() {
   const box = useStore((s) => (boxId ? boxById(s, boxId) : undefined));
   const role = useStore((s) => s.role);
   const allMarkers = useStore((s) => s.markers);
-  const boxMarkerDefs = useStore((s) =>
-    (box?.markers ?? []).map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m)),
+  const boxMarkerDefs = useStore(
+    useShallow((s) => (box?.markers ?? []).map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m))),
   );
   const addItem = useStore((s) => s.addItem);
 
@@ -233,7 +234,9 @@ export default function AddItem() {
               <View style={styles.permGlyph}>
                 <Icon name="camera" size={26} color={palette.white} />
               </View>
-              {permissionDenied ? (
+              {permission == null ? (
+                <Text style={styles.permTitle}>Getting the camera ready…</Text>
+              ) : permissionDenied ? (
                 <>
                   <Text style={styles.permTitle}>Camera access is off</Text>
                   <Text style={styles.permBody}>
