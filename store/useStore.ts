@@ -65,7 +65,10 @@ type Actions = {
   setOnboarded: (v: boolean) => void;
 
   addRoom: (input: { name: string; dest?: string | null; icon?: string; color?: string }) => string;
+  updateRoom: (id: string, patch: Partial<Pick<Room, 'name' | 'dest' | 'icon' | 'color'>>) => void;
+  deleteRoom: (id: string) => void;
   addBox: (input: { name: string; color: string; roomId: string; status?: string }) => string;
+  updateBox: (id: string, patch: Partial<Pick<Box, 'name' | 'color' | 'roomId'>>) => void;
   deleteBox: (boxId: string) => void;
   setBoxStatus: (boxId: string, statusId: string) => void;
   setBoxCover: (boxId: string, uri: string | null) => void;
@@ -169,6 +172,26 @@ export const useStore = create<Store>()(
         return id;
       },
 
+      updateRoom: (id, patch) => {
+        set((s) => ({ rooms: s.rooms.map((r) => (r.id === id ? { ...r, ...patch } : r)) }));
+        get().enqueue({ type: 'updateRoom', clientId: uid('c'), ts: Date.now(), payload: { id, ...patch } });
+      },
+
+      deleteRoom: (id) => {
+        const boxIds = get().boxes.filter((b) => b.roomId === id).map((b) => b.id);
+        set((s) => {
+          const itemsByBox = { ...s.itemsByBox };
+          for (const bId of boxIds) delete itemsByBox[bId];
+          return {
+            rooms: s.rooms.filter((r) => r.id !== id),
+            boxes: s.boxes.filter((b) => b.roomId !== id),
+            itemsByBox,
+          };
+        });
+        for (const bId of boxIds) get().enqueue({ type: 'deleteBox', clientId: uid('c'), ts: Date.now(), payload: { id: bId } });
+        get().enqueue({ type: 'deleteRoom', clientId: uid('c'), ts: Date.now(), payload: { id } });
+      },
+
       addBox: ({ name, color, roomId, status = 'packing' }) => {
         const id = uid('b');
         const number = get().boxes.reduce((max, b) => Math.max(max, b.number), 0) + 1;
@@ -179,6 +202,11 @@ export const useStore = create<Store>()(
         const m: Mutation = { type: 'addBox', clientId: uid('c'), ts: Date.now(), payload: { id, roomId, number, name, color, statusId: status } };
         get().enqueue(m);
         return id;
+      },
+
+      updateBox: (id, patch) => {
+        set((s) => ({ boxes: s.boxes.map((b) => (b.id === id ? { ...b, ...patch } : b)) }));
+        get().enqueue({ type: 'updateBox', clientId: uid('c'), ts: Date.now(), payload: { id, ...patch } });
       },
 
       deleteBox: (boxId) => {
