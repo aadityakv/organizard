@@ -20,6 +20,8 @@ export interface Room {
   dest: string | null;
   /** Lucide icon name (kebab-case). */
   icon: string;
+  /** Box-palette hue name. */
+  color: string;
 }
 
 /** A box's single lifecycle state. Four ship as starters; users add their own. */

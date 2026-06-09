@@ -20,6 +20,7 @@ export interface Room {
   name: string;
   dest?: string | null;
   icon: string;
+  color: string;
   updatedAt: number;
   deletedAt?: number | null;
 }

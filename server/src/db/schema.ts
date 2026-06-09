@@ -43,6 +43,7 @@ export const rooms = sqliteTable('rooms', {
   name: text('name').notNull(),
   dest: text('dest'),
   icon: text('icon').notNull().default('box'),
+  color: text('color').notNull().default('slate'),
   updatedAt: integer('updated_at').notNull(),
   deletedAt: integer('deleted_at'),
 });

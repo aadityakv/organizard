@@ -13,11 +13,11 @@ export const move: Move = {
 
 // Rooms group boxes. `dest` (where it lands at the new place) is optional.
 export const rooms: Room[] = [
-  { id: 'r_kitchen', name: 'Kitchen', dest: 'NYC kitchen', icon: 'cooking-pot' },
-  { id: 'r_office', name: 'Office', dest: 'Study', icon: 'briefcase' },
-  { id: 'r_bedroom', name: 'Bedroom', dest: 'Closet', icon: 'bed' },
-  { id: 'r_bath', name: 'Bathroom', dest: null, icon: 'bath' },
-  { id: 'r_living', name: 'Living room', dest: 'Living room', icon: 'sofa' },
+  { id: 'r_kitchen', name: 'Kitchen', dest: 'NYC kitchen', icon: 'cooking-pot', color: 'amber' },
+  { id: 'r_office', name: 'Office', dest: 'Study', icon: 'briefcase', color: 'sky' },
+  { id: 'r_bedroom', name: 'Bedroom', dest: 'Closet', icon: 'bed', color: 'rose' },
+  { id: 'r_bath', name: 'Bathroom', dest: null, icon: 'bath', color: 'teal' },
+  { id: 'r_living', name: 'Living room', dest: 'Living room', icon: 'sofa', color: 'slate' },
 ];
 
 // Statuses (lifecycle) — four starters + a couple of custom examples.

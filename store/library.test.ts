@@ -26,7 +26,7 @@ describe('sliceFromBundle / snapshotInto round-trip', () => {
     const withBox: MoveBundle = {
       ...b,
       boxes: [{ id: 'b1', number: 1, name: 'Books', color: 'amber', roomId: 'r1', status: 'packing', markers: [], cover: null }],
-      rooms: [{ id: 'r1', name: 'Office', dest: null, icon: 'briefcase' }],
+      rooms: [{ id: 'r1', name: 'Office', dest: null, icon: 'briefcase', color: 'slate' }],
       itemsByBox: { b1: [{ id: 'i1', boxId: 'b1', name: 'Novel', qty: 1, value: 0 }] },
     };
     const slice = sliceFromBundle(withBox);

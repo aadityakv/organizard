@@ -64,7 +64,7 @@ type State = {
 type Actions = {
   setOnboarded: (v: boolean) => void;
 
-  addRoom: (input: { name: string; dest?: string | null; icon?: string }) => string;
+  addRoom: (input: { name: string; dest?: string | null; icon?: string; color?: string }) => string;
   addBox: (input: { name: string; color: string; roomId: string; status?: string }) => string;
   deleteBox: (boxId: string) => void;
   setBoxStatus: (boxId: string, statusId: string) => void;
@@ -161,10 +161,10 @@ export const useStore = create<Store>()(
 
       setOnboarded: (v) => set({ onboarded: v }),
 
-      addRoom: ({ name, dest = null, icon = 'box' }) => {
+      addRoom: ({ name, dest = null, icon = 'box', color = 'slate' }) => {
         const id = uid('r');
-        set((s) => ({ rooms: [...s.rooms, { id, name, dest, icon }] }));
-        const m: Mutation = { type: 'addRoom', clientId: uid('c'), ts: Date.now(), payload: { id, name, dest, icon } };
+        set((s) => ({ rooms: [...s.rooms, { id, name, dest, icon, color }] }));
+        const m: Mutation = { type: 'addRoom', clientId: uid('c'), ts: Date.now(), payload: { id, name, dest, icon, color } };
         get().enqueue(m);
         return id;
       },

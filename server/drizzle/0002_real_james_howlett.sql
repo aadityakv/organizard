@@ -1,0 +1,1 @@
+ALTER TABLE `rooms` ADD `color` text DEFAULT 'slate' NOT NULL;

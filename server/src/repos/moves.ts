@@ -84,7 +84,7 @@ export async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
 // --- DTO mappers -----------------------------------------------------------
 
 const toRoom = (r: typeof s.rooms.$inferSelect): Room => ({
-  id: r.id, moveId: r.moveId, name: r.name, dest: r.dest, icon: r.icon, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
+  id: r.id, moveId: r.moveId, name: r.name, dest: r.dest, icon: r.icon, color: r.color, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
 });
 const toStatus = (r: typeof s.statuses.$inferSelect): Status => ({
   id: r.id, moveId: r.moveId, label: r.label, color: r.color, custom: r.custom, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
