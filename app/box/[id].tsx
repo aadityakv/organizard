@@ -50,6 +50,7 @@ import { money } from '@/lib/money';
 import { photoSource, persistCapture } from '@/lib/photos';
 import { PERM } from '@/lib/permissions';
 import { encodeBoxQR } from '@/lib/qr';
+import { printLabels } from '@/lib/labels';
 import {
   type BoxPhoto,
   boxById,
@@ -292,10 +293,12 @@ export default function BoxDetail() {
               iconLeft="printer"
               style={styles.qrPrint}
               onPress={() =>
-                Alert.alert('Added to print sheet', `Box #${box.number}’s label is queued to print.`)
+                void printLabels([
+                  { boxId: box.id, number: box.number, name: box.name, room: room?.name },
+                ])
               }
             >
-              Add to print sheet
+              Print label
             </Button>
           </View>
         </View>

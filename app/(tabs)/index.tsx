@@ -698,6 +698,13 @@ export default function Dashboard() {
               onPress={() => router.navigate('/(tabs)/members')}
             />
             <IconButton
+              icon="printer"
+              variant="plain"
+              size="sm"
+              accessibilityLabel="Print box labels"
+              onPress={() => router.push('/print-labels')}
+            />
+            <IconButton
               icon={searching ? 'x' : 'search'}
               variant="plain"
               size="sm"

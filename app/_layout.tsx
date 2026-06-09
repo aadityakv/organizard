@@ -85,6 +85,7 @@ export default function RootLayout() {
           <Stack.Screen name="box/[id]" />
           <Stack.Screen name="item/[id]" />
           <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="print-labels" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
           <Stack.Screen name="gallery/[boxId]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
           <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
