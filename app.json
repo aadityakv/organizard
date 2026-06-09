@@ -19,6 +19,7 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels.",
+        "NSLocationWhenInUseUsageDescription": "Organizard uses your location to fill in the move's from/to addresses.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -43,7 +44,8 @@
       "expo-image",
       "expo-secure-store",
       "expo-splash-screen",
-      "expo-status-bar"
+      "expo-status-bar",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": false

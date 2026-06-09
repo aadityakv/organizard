@@ -1,0 +1,7 @@
+{
+  "name": "address-autocomplete",
+  "version": "1.0.0",
+  "description": "Apple Maps (MKLocalSearchCompleter) address autocomplete — local Expo module, iOS only.",
+  "main": "index.ts",
+  "private": true
+}
