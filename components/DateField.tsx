@@ -48,6 +48,16 @@ export function DateField({ label, value, onChange, placeholder = 'Pick a date' 
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
+  // Chunk into explicit weeks of exactly 7. (A single flex-wrap row of
+  // width:14.285% cells rounds up and wraps to 6 columns, mis-aligning the grid
+  // against the 7-column header — so today lands under the wrong weekday.)
+  const padded: (number | null)[] = [
+    ...cells,
+    ...Array.from({ length: (7 - (cells.length % 7)) % 7 }, () => null),
+  ];
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < padded.length; i += 7) weeks.push(padded.slice(i, i + 7));
+
   const shiftMonth = (delta: number) => setView(new Date(year, month + delta, 1));
   const pick = (day: number) => {
     onChange(new Date(year, month, day));
@@ -103,27 +113,31 @@ export function DateField({ label, value, onChange, placeholder = 'Pick a date' 
         </View>
 
         <View style={styles.grid}>
-          {cells.map((day, i) => {
-            if (day === null) return <View key={`b${i}`} style={styles.cell} />;
-            const date = new Date(year, month, day);
-            const selected = value != null && sameDay(date, value);
-            const isToday = sameDay(date, today);
-            return (
-              <Pressable
-                key={day}
-                accessibilityRole="button"
-                accessibilityLabel={formatTargetDate(date)}
-                onPress={() => pick(day)}
-                style={({ pressed }) => [styles.cell, pressed && styles.cellPressed]}
-              >
-                <View style={[styles.dayDot, selected && styles.daySelected]}>
-                  <Text style={[styles.dayText, selected && styles.dayTextSelected, isToday && !selected && styles.dayToday]}>
-                    {day}
-                  </Text>
-                </View>
-              </Pressable>
-            );
-          })}
+          {weeks.map((week, wi) => (
+            <View key={wi} style={styles.week}>
+              {week.map((day, di) => {
+                if (day === null) return <View key={di} style={styles.cell} />;
+                const date = new Date(year, month, day);
+                const selected = value != null && sameDay(date, value);
+                const isToday = sameDay(date, today);
+                return (
+                  <Pressable
+                    key={di}
+                    accessibilityRole="button"
+                    accessibilityLabel={formatTargetDate(date)}
+                    onPress={() => pick(day)}
+                    style={({ pressed }) => [styles.cell, pressed && styles.cellPressed]}
+                  >
+                    <View style={[styles.dayDot, selected && styles.daySelected]}>
+                      <Text style={[styles.dayText, selected && styles.dayTextSelected, isToday && !selected && styles.dayToday]}>
+                        {day}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
         </View>
       </Sheet>
     </View>
@@ -176,9 +190,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: palette.ink400,
   },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingBottom: space[3] },
+  grid: { paddingBottom: space[3] },
+  week: { flexDirection: 'row' },
   cell: {
-    width: `${100 / 7}%`,
+    flex: 1,
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
