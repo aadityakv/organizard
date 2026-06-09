@@ -14,7 +14,7 @@ import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'ex
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, GeckoMark, Icon } from '@/components';
+import { Button, Icon, SlothMark } from '@/components';
 import { classifyScan, type ScanResult } from '@/lib/qr';
 import { useStore, boxById, roomById, boxStats, statusById } from '@/store/useStore';
 import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
@@ -96,11 +96,11 @@ function PermissionGate({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.permIconWrap}>
-          <GeckoMark size={56} color={colors.brand} />
+          <SlothMark size={56} />
         </View>
         <Text style={styles.permTitle}>Point your camera at a box</Text>
         <Text style={styles.permBody}>
-          Organizard needs your camera so you can scan a box&apos;s QR label and jump
+          Tuck needs your camera so you can scan a box&apos;s QR label and jump
           straight to what&apos;s inside.
         </Text>
         {denied ? (
@@ -306,7 +306,7 @@ function buildView(
     iconWash: colors.warningWash,
     iconColor: colors.warning,
     title: "That code isn't part of this move",
-    body: "Double-check you're scanning an Organizard label, then try again.",
+    body: "Double-check you're scanning a Tuck label, then try again.",
     actionLabel: 'Scan again',
     actionIcon: 'scan-line',
     actionVariant: 'secondary',

@@ -14,7 +14,7 @@ import { useStore } from '@/store/useStore';
 import { colors, fonts, fontSize, palette, radius } from '@/theme';
 
 const FRIENDLY_ERROR: Record<string, string> = {
-  ENTITLEMENT_REQUIRED: 'An Organizard subscription is required to share a move.',
+  ENTITLEMENT_REQUIRED: 'A Tuck subscription is required to share a move.',
   FORBIDDEN_ROLE: "You don't have permission to do that.",
   INVITE_INVALID: "That invite link isn't valid.",
   INVITE_USED: 'That invite has already been used.',
