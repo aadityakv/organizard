@@ -23,6 +23,7 @@ export { Segmented, type SegmentedProps } from './Segmented';
 
 // Design-system primitives (domain)
 export { BoxCard, type BoxCardProps } from './BoxCard';
+export { RoomGlyph, type RoomGlyphProps } from './RoomGlyph';
 export { RoleBadge, type RoleBadgeProps } from './RoleBadge';
 export { MarkerChip, type MarkerChipProps } from './MarkerChip';
 export { ColorDot, type ColorDotProps } from './ColorDot';

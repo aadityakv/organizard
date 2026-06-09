@@ -14,6 +14,7 @@ import {
   IconButton,
   Input,
   LockNote,
+  RoomGlyph,
   Segmented,
   Sheet,
   Thumb,
@@ -183,7 +184,7 @@ function FindResults({ query }: { query: string }) {
 function Breadcrumb({ room, boxNumber }: { room?: Room; boxNumber: number }) {
   return (
     <View style={styles.crumb}>
-      {room ? <Icon name={room.icon} size={13} color={palette.ink400} /> : null}
+      {room ? <RoomGlyph icon={room.icon} color={room.color} size={18} /> : null}
       {room ? (
         <Text style={styles.crumbText} numberOfLines={1}>
           {room.name}
@@ -328,7 +329,7 @@ function AddBoxSheet({
                   pressed && styles.pressedSoft,
                 ]}
               >
-                <Icon name={r.icon} size={16} color={on ? palette.green700 : palette.ink500} />
+                <RoomGlyph icon={r.icon} color={r.color} size={22} />
                 <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
                   {r.name}
                 </Text>
@@ -596,7 +597,7 @@ export default function Dashboard() {
                   return (
                     <View key={room.id} style={styles.group}>
                       <View style={styles.groupHeader}>
-                        <Icon name={room.icon} size={17} color={palette.ink700} />
+                        <RoomGlyph icon={room.icon} color={room.color} size={28} />
                         <Text style={styles.groupTitle} numberOfLines={1}>
                           {room.name}
                         </Text>

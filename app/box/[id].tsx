@@ -27,6 +27,7 @@ import {
   Input,
   LockNote,
   MarkerChip,
+  RoomGlyph,
   Sheet,
   StatusChip,
   Thumb,
@@ -152,11 +153,7 @@ export default function BoxDetail() {
           subtitle={subtitle}
           onBack={() => router.back()}
           leading={
-            room ? (
-              <View style={styles.roomGlyph}>
-                <Icon name={room.icon} size={16} color={palette.ink500} />
-              </View>
-            ) : undefined
+            room ? <RoomGlyph icon={room.icon} color={room.color} size={28} /> : undefined
           }
           trailing={
             canDelete ? (
@@ -727,14 +724,6 @@ const styles = StyleSheet.create({
   hero: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: palette.sand300,
-  },
-  roomGlyph: {
-    width: 28,
-    height: 28,
-    borderRadius: radius.pill,
-    backgroundColor: palette.cream100,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   heroStrip: {
     flexDirection: 'row',
