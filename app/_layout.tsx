@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Fredoka_400Regular,
   Fredoka_500Medium,
@@ -38,14 +38,23 @@ export default function RootLayout() {
     Nunito_800ExtraBold,
   });
   const hydrated = useHasHydrated();
-  const ready = fontsLoaded && hydrated;
+  const [sessionRestored, setSessionRestored] = useState(false);
+  const ready = fontsLoaded && hydrated && sessionRestored;
 
   // Sync engine (no-op for local moves) + restore the session token from the keychain.
+  // The session MUST be in the store before the first screen renders: shared-move
+  // photos are server URLs that need this token in their Authorization header. If a
+  // photo <Image> renders before the token is restored it gets a 401, and iOS caches
+  // that failure so it never recovers once the token loads — the photo appears to
+  // "vanish" on reopen. Gating `ready` on the restore closes that window. (loadSession
+  // resolves fast — null for local-only users — so this adds no perceptible delay.)
   useSync();
   useEffect(() => {
-    loadSession().then((t) => {
-      if (t) useStore.setState({ session: t });
-    });
+    loadSession()
+      .then((t) => {
+        if (t) useStore.setState({ session: t });
+      })
+      .finally(() => setSessionRestored(true));
   }, []);
 
   useEffect(() => {
