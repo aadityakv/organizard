@@ -19,6 +19,8 @@ export type InputProps = {
   multiline?: boolean;
   prefix?: string;
   autoFocus?: boolean;
+  /** iOS: attach a keyboard accessory (e.g. a Done bar) by nativeID. */
+  inputAccessoryViewID?: string;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -31,6 +33,7 @@ export function Input({
   multiline = false,
   prefix,
   autoFocus = false,
+  inputAccessoryViewID,
   style,
 }: InputProps) {
   const [focused, setFocused] = useState(false);
@@ -92,6 +95,7 @@ export function Input({
           keyboardType={keyboardType}
           multiline={multiline}
           autoFocus={autoFocus}
+          inputAccessoryViewID={inputAccessoryViewID}
           onFocus={handleFocus}
           onBlur={handleBlur}
           // Prevent iOS zoom: ensure font size >= 16 is set via style

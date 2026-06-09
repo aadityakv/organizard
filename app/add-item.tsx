@@ -9,6 +9,8 @@ import {
   ScrollView,
   StyleSheet,
   KeyboardAvoidingView,
+  Keyboard,
+  InputAccessoryView,
   Platform,
   Linking,
   Image,
@@ -17,6 +19,10 @@ import {
   LayoutAnimation,
   UIManager,
 } from 'react-native';
+
+// iOS keyboard "Done" bar — lets you dismiss the keyboard (which otherwise covers
+// Save) from fields that have no usable return key (number pad, multiline notes).
+const KBD_ACCESSORY_ID = 'add-item-kbd';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
@@ -343,7 +349,9 @@ export default function AddItem() {
             value={name}
             onChangeText={setName}
             placeholder="e.g. Cast iron skillet"
-            autoFocus
+            // Only pop the keyboard when CREATING a new item. When editing an
+            // existing one you're usually just glancing/tweaking — don't hijack focus.
+            autoFocus={!isEdit}
           />
 
           <View style={styles.fieldRow}>
@@ -354,6 +362,7 @@ export default function AddItem() {
               placeholder="0"
               keyboardType="decimal-pad"
               prefix="$"
+              inputAccessoryViewID={Platform.OS === 'ios' ? KBD_ACCESSORY_ID : undefined}
               style={styles.valueField}
             />
             <View style={styles.qtyField}>
@@ -369,6 +378,7 @@ export default function AddItem() {
             value={note}
             onChangeText={setNote}
             placeholder="Fragile, which towel it's wrapped in…"
+            inputAccessoryViewID={Platform.OS === 'ios' ? KBD_ACCESSORY_ID : undefined}
             multiline
           />
 
@@ -631,6 +641,24 @@ export default function AddItem() {
           )}
         </View>
       </KeyboardAvoidingView>
+
+      {/* iOS-only keyboard accessory: a Done button above the keyboard so the notes /
+          value keyboard can be dismissed to reach Save. */}
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={KBD_ACCESSORY_ID}>
+          <View style={styles.kbdBar}>
+            <Pressable
+              onPress={() => Keyboard.dismiss()}
+              accessibilityRole="button"
+              accessibilityLabel="Done"
+              hitSlop={8}
+              style={({ pressed }) => [styles.kbdDone, pressed && styles.kbdDonePressed]}
+            >
+              <Text style={styles.kbdDoneText}>Done</Text>
+            </Pressable>
+          </View>
+        </InputAccessoryView>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -1027,5 +1055,27 @@ const styles = StyleSheet.create({
   },
   saveAnotherBtn: {
     flex: 1.5,
+  },
+
+  // Keyboard "Done" accessory bar
+  kbdBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    backgroundColor: palette.cream100,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: palette.sand300,
+    paddingHorizontal: gutter,
+    paddingVertical: space[1] + 2,
+  },
+  kbdDone: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  kbdDonePressed: { opacity: 0.6 },
+  kbdDoneText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.base,
+    color: colors.brand,
   },
 });
