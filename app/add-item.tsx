@@ -368,7 +368,11 @@ export default function AddItem() {
             <View style={styles.qtyField}>
               <Text style={styles.qtyLabel}>Quantity</Text>
               <View style={styles.qtyBox}>
-                <Stepper value={qty} onChange={setQty} />
+                <Stepper
+                  value={qty}
+                  onChange={setQty}
+                  inputAccessoryViewID={Platform.OS === 'ios' ? KBD_ACCESSORY_ID : undefined}
+                />
               </View>
             </View>
           </View>

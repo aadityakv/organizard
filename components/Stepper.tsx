@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { colors, palette, space, radius, fonts, fontSize, tap } from '@/theme';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { colors, palette, space, radius, fonts, fontSize } from '@/theme';
 
 export type StepperProps = {
   value: number;
@@ -8,12 +8,41 @@ export type StepperProps = {
   min?: number;
   max?: number;
   step?: number;
+  /** iOS: attach a keyboard accessory (e.g. a Done bar) to the typable field. */
+  inputAccessoryViewID?: string;
 };
 
-export function Stepper({ value, onChange, min = 1, max = 999, step = 1 }: StepperProps) {
+export function Stepper({
+  value,
+  onChange,
+  min = 1,
+  max = 999,
+  step = 1,
+  inputAccessoryViewID,
+}: StepperProps) {
   const set = (next: number) => {
-    const clamped = Math.max(min, Math.min(max, next));
-    onChange(clamped);
+    onChange(Math.max(min, Math.min(max, next)));
+  };
+
+  // Local text so you can clear and retype the number (e.g. type "80" directly
+  // instead of tapping + eighty times). Kept in sync when value changes via +/-.
+  const [text, setText] = useState(String(value));
+  useEffect(() => {
+    setText(String(value));
+  }, [value]);
+
+  const onText = (t: string) => {
+    const digits = t.replace(/[^0-9]/g, '');
+    setText(digits);
+    if (digits.length === 0) return; // allow an empty field mid-edit
+    set(parseInt(digits, 10));
+  };
+
+  const onBlur = () => {
+    const n = parseInt(text, 10);
+    const clamped = Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : value;
+    setText(String(clamped));
+    if (clamped !== value) onChange(clamped);
   };
 
   const atMin = value <= min;
@@ -35,20 +64,23 @@ export function Stepper({ value, onChange, min = 1, max = 999, step = 1 }: Stepp
         ]}
         hitSlop={4}
       >
-        <Text
-          style={[
-            styles.btnLabel,
-            atMin ? styles.btnLabelDisabled : styles.btnLabelEnabled,
-          ]}
-        >
+        <Text style={[styles.btnLabel, atMin ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>
           {'−'}
         </Text>
       </Pressable>
 
-      {/* Value display */}
-      <View style={styles.valueWrap} pointerEvents="none">
-        <Text style={styles.valueText}>{value}</Text>
-      </View>
+      {/* Editable value — type a number directly, or use the buttons */}
+      <TextInput
+        value={text}
+        onChangeText={onText}
+        onBlur={onBlur}
+        keyboardType="number-pad"
+        selectTextOnFocus
+        maxLength={String(max).length}
+        inputAccessoryViewID={inputAccessoryViewID}
+        accessibilityLabel="Quantity"
+        style={styles.valueInput}
+      />
 
       {/* Increment button */}
       <Pressable
@@ -64,12 +96,7 @@ export function Stepper({ value, onChange, min = 1, max = 999, step = 1 }: Stepp
         ]}
         hitSlop={4}
       >
-        <Text
-          style={[
-            styles.btnLabel,
-            atMax ? styles.btnLabelDisabled : styles.btnLabelEnabled,
-          ]}
-        >
+        <Text style={[styles.btnLabel, atMax ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>
           {'+'}
         </Text>
       </Pressable>
@@ -116,13 +143,12 @@ const styles = StyleSheet.create({
   btnLabelDisabled: {
     color: palette.sand400,
   },
-  valueWrap: {
-    minWidth: 36,
-    alignItems: 'center',
-  },
-  valueText: {
+  valueInput: {
+    minWidth: 44,
+    paddingHorizontal: 4,
+    paddingVertical: 0,
     fontFamily: fonts.display.semibold,
-    fontSize: fontSize.lg, // 20 — close to design's 22px
+    fontSize: fontSize.lg, // 20
     lineHeight: 26,
     color: colors.textStrong,
     textAlign: 'center',
