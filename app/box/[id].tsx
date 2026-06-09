@@ -294,7 +294,17 @@ export default function BoxDetail() {
         ) : (
           <View style={styles.itemList}>
             {items.map((it) => (
-              <ItemRow key={it.id} item={it} boxColor={box.color} markers={allMarkers} />
+              <ItemRow
+                key={it.id}
+                item={it}
+                boxColor={box.color}
+                markers={allMarkers}
+                onPress={
+                  canEdit
+                    ? () => router.push({ pathname: '/add-item', params: { boxId: box.id, itemId: it.id } })
+                    : undefined
+                }
+              />
             ))}
           </View>
         )}
@@ -385,10 +395,12 @@ function ItemRow({
   item,
   boxColor: hueName,
   markers,
+  onPress,
 }: {
   item: Item;
   boxColor: string;
   markers: Marker[];
+  onPress?: () => void;
 }) {
   const session = useStore((s) => s.session);
   const first = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
@@ -397,8 +409,8 @@ function ItemRow({
     .map((mid) => markers.find((m) => m.id === mid))
     .filter(Boolean) as Marker[];
 
-  return (
-    <View style={styles.itemRow}>
+  const inner = (
+    <>
       <Thumb color={hueName} icon={item.icon ?? 'package'} size={52} uri={src?.uri} headers={src?.headers} />
       <View style={styles.itemMain}>
         <Text style={styles.itemName} numberOfLines={1}>
@@ -412,8 +424,23 @@ function ItemRow({
         </View>
       </View>
       <Text style={styles.itemValue}>{money(item.value)}</Text>
-    </View>
+    </>
   );
+
+  if (onPress) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Edit ${item.name}`}
+        onPress={onPress}
+        style={({ pressed }) => [styles.itemRow, pressed && styles.pressed]}
+      >
+        {inner}
+      </Pressable>
+    );
+  }
+
+  return <View style={styles.itemRow}>{inner}</View>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

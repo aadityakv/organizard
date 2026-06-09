@@ -1,7 +1,7 @@
 // Add item — form-first, photo optional.
 // Modal route. params: { boxId }. The highest-frequency flow in the app.
 // Leads with the item form; a photo can be captured inline but is never required.
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Platform,
   Linking,
   Image,
+  Alert,
   type LayoutAnimationConfig,
   LayoutAnimation,
   UIManager,
@@ -62,7 +63,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 export default function AddItem() {
-  const { boxId } = useLocalSearchParams<{ boxId: string }>();
+  const { boxId, itemId } = useLocalSearchParams<{ boxId: string; itemId?: string }>();
+  const isEdit = !!itemId;
 
   // ── Store: box context, markers, role, the add action ──────────────────────
   const box = useStore((s) => (boxId ? boxById(s, boxId) : undefined));
@@ -73,6 +75,15 @@ export default function AddItem() {
   );
   const addItem = useStore((s) => s.addItem);
   const session = useStore((s) => s.session);
+
+  // ── Edit mode: the item being edited + actions and the move picker ──────────
+  const editing = useStore((s) =>
+    itemId ? (s.itemsByBox[boxId] ?? []).find((it) => it.id === itemId) : undefined,
+  );
+  const boxes = useStore((s) => s.boxes);
+  const updateItem = useStore((s) => s.updateItem);
+  const deleteItem = useStore((s) => s.deleteItem);
+  const moveItem = useStore((s) => s.moveItem);
 
   const canEdit = PERM.canEdit(role);
 
@@ -91,6 +102,23 @@ export default function AddItem() {
   const [note, setNote] = useState('');
   const [selectedMarkers, setSelectedMarkers] = useState<string[]>([]);
   const [addedCount, setAddedCount] = useState(0);
+  // Destination box for the move picker (edit mode). Defaults to the current box.
+  const [targetBoxId, setTargetBoxId] = useState(boxId);
+
+  // ── One-time prefill when editing ────────────────────────────────────────────
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (!itemId || !editing || prefilled.current) return;
+    prefilled.current = true;
+    setName(editing.name);
+    setValue(editing.value ? String(editing.value) : '');
+    setQty(editing.qty);
+    setNote(editing.note ?? '');
+    setSelectedMarkers(editing.markers ?? []);
+    setPhotos(editing.photos ?? []);
+    setTargetBoxId(boxId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemId]);
 
   const hueName = box?.color ?? 'green';
 
@@ -177,8 +205,51 @@ export default function AddItem() {
     }
   };
 
+  // Edit mode: persist the patch, then move the (already-edited) item if needed.
+  const saveEdit = () => {
+    if (!boxId || !itemId || !canEdit) return;
+    updateItem(boxId, itemId, {
+      name: name.trim() || 'Untitled item',
+      qty,
+      value: parsedValue,
+      note: note.trim() || undefined,
+      markers: selectedMarkers,
+      photos,
+    });
+    if (targetBoxId !== boxId) {
+      moveItem(boxId, targetBoxId, itemId);
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    close();
+  };
+
+  const confirmDelete = () => {
+    if (!boxId || !itemId) return;
+    Alert.alert(
+      `Delete "${name.trim() || 'this item'}"?`,
+      "This removes the item from the box. This can't be undone.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteItem(boxId, itemId);
+            close();
+          },
+        },
+      ],
+    );
+  };
+
   // ── Box subtitle line (header) ───────────────────────────────────────────────
-  const boxLabel = box ? `Box #${box.number} · ${box.name}` : 'Add to your box';
+  const boxLabel = box
+    ? isEdit
+      ? `Edit item · Box #${box.number}`
+      : `Box #${box.number} · ${box.name}`
+    : isEdit
+      ? 'Edit item'
+      : 'Add to your box';
 
   const permissionGranted = permission?.granted ?? false;
   const permissionDenied = permission != null && !permission.granted && !permission.canAskAgain;
@@ -433,6 +504,55 @@ export default function AddItem() {
               </View>
             </View>
           ) : null}
+
+          {/* ── Move to box + delete (edit mode only) ─────────────────────── */}
+          {isEdit && canEdit ? (
+            <>
+              {boxes.length > 1 ? (
+                <View style={styles.markerSection}>
+                  <Text style={styles.sectionHeading}>Move to box</Text>
+                  <View style={styles.markerWrap}>
+                    {boxes.map((b) => {
+                      const on = b.id === targetBoxId;
+                      return (
+                        <Pressable
+                          key={b.id}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: on }}
+                          onPress={() => setTargetBoxId(b.id)}
+                          style={({ pressed }) => [
+                            styles.boxChip,
+                            on && styles.boxChipOn,
+                            pressed && styles.boxChipPressed,
+                          ]}
+                        >
+                          <View style={[styles.boxChipBadge, { backgroundColor: boxColor(b.color) }]}>
+                            <Text style={styles.boxChipBadgeText}>#{b.number}</Text>
+                          </View>
+                          <Text
+                            style={[styles.boxChipText, on && styles.boxChipTextOn]}
+                            numberOfLines={1}
+                          >
+                            {b.name}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ) : null}
+
+              <Pressable
+                onPress={confirmDelete}
+                accessibilityRole="button"
+                accessibilityLabel="Delete item"
+                style={({ pressed }) => [styles.deleteBtn, pressed && styles.deleteBtnPressed]}
+              >
+                <Icon name="trash-2" size={18} color={colors.danger} />
+                <Text style={styles.deleteText}>Delete item</Text>
+              </Pressable>
+            </>
+          ) : null}
         </ScrollView>
 
         {/* ── Bottom actions ────────────────────────────────────────────────── */}
@@ -447,25 +567,31 @@ export default function AddItem() {
           ) : null}
 
           {canEdit ? (
-            <View style={styles.actionRow}>
-              <Button
-                variant="secondary"
-                size="lg"
-                onPress={() => save(false)}
-                style={styles.saveBtn}
-              >
-                Save
+            isEdit ? (
+              <Button variant="primary" size="lg" fullWidth onPress={saveEdit}>
+                Save changes
               </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                iconLeft="plus"
-                onPress={() => save(true)}
-                style={styles.saveAnotherBtn}
-              >
-                Save & add another
-              </Button>
-            </View>
+            ) : (
+              <View style={styles.actionRow}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onPress={() => save(false)}
+                  style={styles.saveBtn}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  iconLeft="plus"
+                  onPress={() => save(true)}
+                  style={styles.saveAnotherBtn}
+                >
+                  Save & add another
+                </Button>
+              </View>
+            )
           ) : (
             <LockNote>You can view and scan, but only an editor can add items.</LockNote>
           )}
@@ -764,6 +890,67 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: space[2],
+  },
+
+  // ── Move-to-box chips (edit mode) ───────────────────────────────────────────
+  boxChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    minHeight: 40,
+    paddingLeft: 6,
+    paddingRight: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+    backgroundColor: palette.white,
+  },
+  boxChipOn: {
+    borderColor: colors.brand,
+    backgroundColor: palette.green50,
+  },
+  boxChipPressed: {
+    opacity: 0.8,
+  },
+  boxChipBadge: {
+    minWidth: 30,
+    height: 28,
+    paddingHorizontal: 7,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxChipBadgeText: {
+    fontFamily: fonts.body.extra,
+    fontSize: 11,
+    color: palette.white,
+  },
+  boxChipText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: colors.textBody,
+    maxWidth: 140,
+  },
+  boxChipTextOn: {
+    color: palette.green700,
+  },
+
+  // ── Delete item (edit mode) ─────────────────────────────────────────────────
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    marginTop: space[1],
+  },
+  deleteBtnPressed: {
+    opacity: 0.7,
+  },
+  deleteText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.base,
+    color: colors.danger,
   },
 
   // ── Footer ─────────────────────────────────────────────────────────────────
