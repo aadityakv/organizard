@@ -62,6 +62,53 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+// A single photo in the strip: framed thumbnail, a clear "Cover" label on the
+// first one, and an obvious remove button. Falls back to a placeholder glyph if
+// the image can't load (e.g. a not-yet-resolved server photo) so the tile never
+// renders as floating badges over a blank box.
+function PhotoThumb({
+  photoRef,
+  session,
+  isCover,
+  onRemove,
+}: {
+  photoRef: string;
+  session: string | null;
+  isCover: boolean;
+  onRemove: () => void;
+}) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <View style={styles.thumbWrap}>
+      {failed ? (
+        <View style={[styles.thumbImg, styles.thumbFailed]}>
+          <Icon name="image-off" size={22} color={palette.ink400} />
+        </View>
+      ) : (
+        <Image
+          source={photoSource(photoRef, session)}
+          style={styles.thumbImg}
+          onError={() => setFailed(true)}
+        />
+      )}
+      {isCover ? (
+        <View style={styles.coverBadge}>
+          <Text style={styles.coverBadgeText}>Cover</Text>
+        </View>
+      ) : null}
+      <Pressable
+        onPress={onRemove}
+        accessibilityRole="button"
+        accessibilityLabel="Remove photo"
+        hitSlop={10}
+        style={({ pressed }) => [styles.thumbRemove, pressed && styles.thumbRemovePressed]}
+      >
+        <Icon name="x" size={16} color={palette.white} />
+      </Pressable>
+    </View>
+  );
+}
+
 export default function AddItem() {
   const { boxId, itemId } = useLocalSearchParams<{ boxId: string; itemId?: string }>();
   const isEdit = !!itemId;
@@ -337,26 +384,13 @@ export default function AddItem() {
                 keyboardShouldPersistTaps="handled"
               >
                 {photos.map((ref, i) => (
-                  <View key={`${ref}-${i}`} style={styles.thumbWrap}>
-                    <Image source={photoSource(ref, session)} style={styles.thumbImg} />
-                    {i === 0 ? (
-                      <View style={styles.coverBadge}>
-                        <Text style={styles.coverBadgeText}>1</Text>
-                      </View>
-                    ) : null}
-                    <Pressable
-                      onPress={() => removePhoto(ref, i)}
-                      accessibilityRole="button"
-                      accessibilityLabel="Remove photo"
-                      hitSlop={6}
-                      style={({ pressed }) => [
-                        styles.thumbRemove,
-                        pressed && styles.thumbRemovePressed,
-                      ]}
-                    >
-                      <Icon name="x" size={13} color={palette.white} />
-                    </Pressable>
-                  </View>
+                  <PhotoThumb
+                    key={`${ref}-${i}`}
+                    photoRef={ref}
+                    session={session}
+                    isCover={i === 0}
+                    onRemove={() => removePhoto(ref, i)}
+                  />
                 ))}
               </ScrollView>
             ) : null}
@@ -714,44 +748,54 @@ const styles = StyleSheet.create({
   },
   thumbWrap: {
     position: 'relative',
+    paddingTop: 8,
+    paddingRight: 8,
   },
   thumbImg: {
-    width: 64,
-    height: 64,
+    width: 76,
+    height: 76,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: palette.sand300,
+    backgroundColor: palette.cream100,
+  },
+  thumbFailed: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.cream200,
   },
   coverBadge: {
     position: 'absolute',
-    top: -5,
-    left: -5,
-    minWidth: 18,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
+    bottom: 5,
+    left: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
     borderRadius: radius.pill,
-    backgroundColor: colors.brand,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(20,22,21,0.62)',
   },
   coverBadgeText: {
     fontFamily: fonts.body.extra,
-    fontSize: 10,
+    fontSize: 9.5,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
     color: palette.white,
   },
   thumbRemove: {
     position: 'absolute',
-    top: -6,
-    right: -6,
-    width: 22,
-    height: 22,
+    top: 0,
+    right: 0,
+    width: 26,
+    height: 26,
     borderRadius: radius.pill,
-    backgroundColor: colors.textStrong,
-    borderWidth: 1.5,
+    backgroundColor: colors.danger,
+    borderWidth: 2,
     borderColor: palette.white,
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadow.sm,
   },
   thumbRemovePressed: {
-    opacity: 0.7,
+    opacity: 0.8,
     transform: [{ scale: 0.9 }],
   },
 
