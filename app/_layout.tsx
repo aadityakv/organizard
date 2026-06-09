@@ -87,7 +87,11 @@ export default function RootLayout() {
           <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="print-labels" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
-          <Stack.Screen name="gallery/[boxId]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
+          {/* Card modal (NOT fullScreenModal): a fullScreenModal is dead to touch on
+              iOS 26 — its close X never fired, trapping the user (force-quit). A card
+              modal reliably receives taps AND has a native swipe-down-to-dismiss, so the
+              user can always get out (swipe down · tap the photo · the X). */}
+          <Stack.Screen name="gallery/[boxId]" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
           <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
         </Stack>

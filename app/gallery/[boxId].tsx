@@ -84,9 +84,17 @@ export default function GalleryScreen() {
         {photos.map((p, i) => {
           const src = photoSource(p.ref, session);
           return (
-            <View key={`${p.ref}-${i}`} style={[styles.page, { width }]}>
+            // Tap the photo to close — a guaranteed exit (swiping still pages between
+            // photos; only a clean tap dismisses). The X stays as the obvious control.
+            <Pressable
+              key={`${p.ref}-${i}`}
+              accessibilityRole="button"
+              accessibilityLabel="Close photo viewer"
+              onPress={() => router.back()}
+              style={[styles.page, { width }]}
+            >
               <Image source={src} style={styles.image} resizeMode="contain" />
-            </View>
+            </Pressable>
           );
         })}
       </ScrollView>
