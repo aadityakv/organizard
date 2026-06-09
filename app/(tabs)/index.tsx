@@ -828,6 +828,21 @@ export default function Dashboard() {
                           {roomBoxes.map((b) => (
                             <DashboardBoxCard key={b.id} box={b} />
                           ))}
+                          {canEdit ? (
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel={`Add a box to ${room.name}`}
+                              onPress={() => openAddBox(room.id)}
+                              style={({ pressed }) => [
+                                styles.gridCard,
+                                styles.addBoxTile,
+                                pressed && styles.pressedSoft,
+                              ]}
+                            >
+                              <Icon name="plus" size={22} color={palette.green600} />
+                              <Text style={styles.addBoxTileText}>Add box</Text>
+                            </Pressable>
+                          ) : null}
                         </View>
                       ) : (
                         <Pressable
@@ -853,24 +868,17 @@ export default function Dashboard() {
                 {/* Create affordances — Owner/Editor only; Viewer gets a LockNote. */}
                 {canEdit ? (
                   <View style={styles.addRow}>
+                    {/* Boxes are added per-room (the "+ Add box" tile in each room).
+                        The bottom row is just for adding a whole new room. */}
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Add box"
-                      onPress={() => openAddBox(null)}
+                      accessibilityLabel="Add room"
+                      onPress={() => setAddingRoom(true)}
                       style={({ pressed }) => [
                         styles.addBtn,
                         styles.addBtnGrow,
                         pressed && styles.pressedSoft,
                       ]}
-                    >
-                      <Icon name="plus" size={20} color={palette.green600} />
-                      <Text style={styles.addBtnText}>Add box</Text>
-                    </Pressable>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Add room"
-                      onPress={() => setAddingRoom(true)}
-                      style={({ pressed }) => [styles.addBtn, pressed && styles.pressedSoft]}
                     >
                       <Icon name="plus" size={20} color={palette.green600} />
                       <Text style={styles.addBtnText}>Add room</Text>
@@ -1034,6 +1042,22 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     width: `48%`,
+  },
+  addBoxTile: {
+    minHeight: 96,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: palette.sand400,
+    backgroundColor: palette.cream100,
+  },
+  addBoxTileText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.green700,
   },
 
   emptyRoom: {
