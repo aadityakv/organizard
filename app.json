@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Organizard",
+    "name": "Tuck",
     "slug": "organizard",
     "scheme": "organizard",
     "version": "1.0.0",
@@ -15,11 +15,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.organizard.app",
-      "buildNumber": "11",
+      "buildNumber": "12",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels.",
-        "NSLocationWhenInUseUsageDescription": "Organizard uses your location to fill in the move's from/to addresses.",
+        "NSCameraUsageDescription": "Tuck uses the camera to photograph your items and scan box QR labels.",
+        "NSLocationWhenInUseUsageDescription": "Tuck uses your location to fill in the move's from/to addresses.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -37,7 +37,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Organizard uses the camera to photograph your items and scan box QR labels."
+          "cameraPermission": "Tuck uses the camera to photograph your items and scan box QR labels."
         }
       ],
       "./plugins/withFmtConstevalFix",

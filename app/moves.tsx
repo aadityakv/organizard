@@ -13,12 +13,12 @@ import {
   Button,
   DateField,
   formatTargetDate,
-  GeckoMark,
   Header,
   Icon,
   IconButton,
   Input,
   Sheet,
+  SlothMark,
 } from '@/components';
 import { moveSummaries, useStore } from '@/store/useStore';
 import type { MoveSummary } from '@/store/library';
@@ -149,12 +149,11 @@ export default function Moves() {
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <View style={styles.emptyShell}>
           <View style={styles.hero}>
-            <View style={styles.geckoGlow}>
-              <GeckoMark size={96} />
+            <View style={styles.markGlow}>
+              <SlothMark size={96} />
             </View>
             <Text style={styles.wordmark}>
-              <Text style={styles.wordmarkAccent}>Organi</Text>
-              <Text style={styles.wordmarkInk}>zard</Text>
+              <Text style={styles.wordmarkInk}>Tuck</Text>
             </Text>
             <Text style={styles.tagline}>Pack fast. Find anything. Share the load.</Text>
           </View>
@@ -404,7 +403,7 @@ const styles = StyleSheet.create({
   // ── Empty state ──
   emptyShell: { flex: 1, paddingHorizontal: space[6] },
   hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  geckoGlow: {
+  markGlow: {
     shadowColor: colors.brand,
     shadowOpacity: 0.32,
     shadowRadius: 18,
@@ -419,7 +418,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
     textAlign: 'center',
   },
-  wordmarkAccent: { fontFamily: fonts.display.bold, color: palette.green600 },
   wordmarkInk: { fontFamily: fonts.display.bold, color: palette.ink900 },
   tagline: {
     marginTop: 6,

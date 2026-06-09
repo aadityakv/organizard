@@ -2,7 +2,7 @@
 
 // Shared app chrome (foundation)
 export { Icon, type IconProps } from './Icon';
-export { GeckoMark } from './GeckoMark';
+export { SlothMark } from './SlothMark';
 export { Card } from './Card';
 export { Header, type HeaderProps } from './Header';
 export { LockNote } from './LockNote';
