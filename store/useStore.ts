@@ -645,6 +645,18 @@ export const markerById = (s: Store, id: string): Marker | undefined => s.marker
 export const roomById = (s: Store, id: string): Room | undefined => s.rooms.find((x) => x.id === id);
 export const boxById = (s: Store, id: string): Box | undefined => s.boxes.find((x) => x.id === id);
 
+/** Resolve an item by id across all boxes, returning it with its owning box. */
+export const findItem = (s: Store, itemId: string): { item: Item; box: Box } | undefined => {
+  for (const [boxId, items] of Object.entries(s.itemsByBox)) {
+    const item = items.find((it) => it.id === itemId);
+    if (item) {
+      const box = s.boxes.find((b) => b.id === boxId);
+      if (box) return { item, box };
+    }
+  }
+  return undefined;
+};
+
 export const allIndexedItems = (s: Store): IndexedItem[] => {
   const out: IndexedItem[] = [];
   for (const b of s.boxes) {

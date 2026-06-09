@@ -299,11 +299,7 @@ export default function BoxDetail() {
                 item={it}
                 boxColor={box.color}
                 markers={allMarkers}
-                onPress={
-                  canEdit
-                    ? () => router.push({ pathname: '/add-item', params: { boxId: box.id, itemId: it.id } })
-                    : undefined
-                }
+                onPress={() => router.push(`/item/${it.id}`)}
               />
             ))}
           </View>
@@ -431,7 +427,7 @@ function ItemRow({
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Edit ${item.name}`}
+        accessibilityLabel={`Open ${item.name}`}
         onPress={onPress}
         style={({ pressed }) => [styles.itemRow, pressed && styles.pressed]}
       >
