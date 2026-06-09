@@ -44,16 +44,21 @@ export async function uploadPhoto(
   link: { itemId?: string; boxId?: string },
 ): Promise<string> {
   const { photoId, uploadPath } = await api.createPhoto(session, moveId, link);
-  const blob = await (await fetch(localUri)).blob();
-  const put = await fetch(`${API_URL}${uploadPath}`, {
-    method: 'PUT',
+  // Upload the file's bytes DIRECTLY via expo-file-system. The old path —
+  // `(await fetch(localUri)).blob()` — THROWS on RN 0.85 ("Creating blobs from
+  // 'ArrayBuffer' and 'ArrayBufferView' are not supported"), so every shared-move
+  // photo upload failed: createPhoto had already reserved a server row, which then
+  // synced back as an orphaned photo id (no R2 bytes) and rendered as a blank cover.
+  const result = await FileSystem.uploadAsync(`${API_URL}${uploadPath}`, localUri, {
+    httpMethod: 'PUT',
+    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
     headers: { Authorization: `Bearer ${session}`, 'content-type': 'image/jpeg' },
-    body: blob,
   });
-  // If the R2 upload failed, do NOT report success — otherwise the caller swaps the
-  // local ref for a server id whose blob doesn't exist (a permanently broken image).
-  // Throwing keeps the local ref so the next sync tick retries the upload.
-  if (!put.ok) throw new Error(`photo upload failed (${put.status})`);
+  // Don't report success on a non-2xx — otherwise the caller swaps the local ref for
+  // a server id whose blob doesn't exist. Throwing keeps the local ref; sync retries.
+  if (result.status < 200 || result.status >= 300) {
+    throw new Error(`photo upload failed (${result.status})`);
+  }
   return photoId;
 }
 
