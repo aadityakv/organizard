@@ -1,7 +1,7 @@
 // JS surface for the native Apple Maps address autocomplete (iOS only).
 // On Android the native module is absent, so `requireOptionalNativeModule`
 // returns null and callers fall back to plain text + geocoding.
-import { requireOptionalNativeModule } from 'expo-modules-core';
+import { requireOptionalNativeModule } from 'expo';
 
 export type AddressSuggestion = { title: string; subtitle: string };
 

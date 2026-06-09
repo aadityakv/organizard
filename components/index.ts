@@ -20,6 +20,8 @@ export { Avatar, type AvatarProps } from './Avatar';
 export { Input, type InputProps } from './Input';
 export { Stepper, type StepperProps } from './Stepper';
 export { Segmented, type SegmentedProps } from './Segmented';
+export { AddressField, type AddressFieldProps } from './AddressField';
+export { DateField, formatTargetDate, type DateFieldProps } from './DateField';
 
 // Design-system primitives (domain)
 export { BoxCard, type BoxCardProps } from './BoxCard';
