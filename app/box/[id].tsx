@@ -45,7 +45,7 @@ import {
   type as typeTokens,
 } from '@/theme';
 import { money } from '@/lib/money';
-import { photoSource } from '@/lib/photos';
+import { photoSource, persistCapture } from '@/lib/photos';
 import { PERM } from '@/lib/permissions';
 import { encodeBoxQR } from '@/lib/qr';
 import {
@@ -654,7 +654,10 @@ function CoverSheet({
     setBusy(true);
     try {
       const pic = await cameraRef.current?.takePictureAsync({ quality: 0.6 });
-      if (pic?.uri) onCapture(pic.uri);
+      if (pic?.uri) {
+        const ref = await persistCapture(pic.uri);
+        onCapture(ref);
+      }
     } finally {
       setBusy(false);
     }

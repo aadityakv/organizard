@@ -37,6 +37,7 @@ import {
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import { PERM } from '@/lib/permissions';
+import { photoSource, persistCapture } from '@/lib/photos';
 import {
   colors,
   palette,
@@ -71,6 +72,7 @@ export default function AddItem() {
     useShallow((s) => (box?.markers ?? []).map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m))),
   );
   const addItem = useStore((s) => s.addItem);
+  const session = useStore((s) => s.session);
 
   const canEdit = PERM.canEdit(role);
 
@@ -138,8 +140,9 @@ export default function AddItem() {
     try {
       const pic = await cameraRef.current.takePictureAsync({ quality: 0.6 });
       if (pic?.uri) {
+        const ref = await persistCapture(pic.uri); // copy to doc dir → stable `local:` ref
         LayoutAnimation.configureNext(FLASH_CONFIG);
-        setPhotos((prev) => [...prev, pic.uri]);
+        setPhotos((prev) => [...prev, ref]);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       }
     } catch {
@@ -262,16 +265,16 @@ export default function AddItem() {
                 contentContainerStyle={styles.stripContent}
                 keyboardShouldPersistTaps="handled"
               >
-                {photos.map((uri, i) => (
-                  <View key={`${uri}-${i}`} style={styles.thumbWrap}>
-                    <Image source={{ uri }} style={styles.thumbImg} />
+                {photos.map((ref, i) => (
+                  <View key={`${ref}-${i}`} style={styles.thumbWrap}>
+                    <Image source={photoSource(ref, session)} style={styles.thumbImg} />
                     {i === 0 ? (
                       <View style={styles.coverBadge}>
                         <Text style={styles.coverBadgeText}>1</Text>
                       </View>
                     ) : null}
                     <Pressable
-                      onPress={() => removePhoto(uri, i)}
+                      onPress={() => removePhoto(ref, i)}
                       accessibilityRole="button"
                       accessibilityLabel="Remove photo"
                       hitSlop={6}
