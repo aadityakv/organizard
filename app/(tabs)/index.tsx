@@ -1,7 +1,7 @@
 // Dashboard (home) — totals, room/status/value grouping, color-coded box grid,
 // and Find. Role-aware: Owner/Editor get create affordances; Viewers see a LockNote.
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
@@ -358,30 +358,101 @@ function AddBoxSheet({
   );
 }
 
-function AddRoomSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+// Dual-mode room sheet. No `room` prop → CREATE; with `room` → EDIT (prefilled,
+// "Save changes" CTA, plus a Delete control gated by role/cascade size).
+function RoomSheet({
+  visible,
+  onClose,
+  room,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  room?: Room;
+}) {
   const addRoom = useStore((s) => s.addRoom);
+  const updateRoom = useStore((s) => s.updateRoom);
+  const deleteRoom = useStore((s) => s.deleteRoom);
+  const role = useStore(currentRole);
+  // Read for the cascade-delete copy + gating (counts boxes & items in this room).
+  const boxes = useStore((s) => s.boxes);
+  const itemsByBox = useStore((s) => s.itemsByBox);
+
+  const isEdit = !!room;
   const [name, setName] = useState('');
   const [dest, setDest] = useState('');
   const [icon, setIcon] = useState<string>('box');
+  const [color, setColor] = useState<string>('slate');
 
   React.useEffect(() => {
-    if (visible) {
-      setName('');
-      setDest('');
-      setIcon('box');
-    }
-  }, [visible]);
+    if (!visible) return;
+    setName(room?.name ?? '');
+    setDest(room?.dest ?? '');
+    setIcon(room?.icon ?? 'box');
+    setColor(room?.color ?? 'slate');
+  }, [visible, room]);
 
   const canSave = name.trim().length > 0;
 
-  const create = (): void => {
+  const save = (): void => {
     if (!canSave) return;
-    addRoom({ name: name.trim(), dest: dest.trim() || null, icon });
+    const patch = { name: name.trim(), dest: dest.trim() || null, icon, color };
+    if (room) updateRoom(room.id, patch);
+    else addRoom(patch);
     onClose();
   };
 
+  const confirmDeleteRoom = (): void => {
+    if (!room) return;
+    const roomBoxes = boxes.filter((b) => b.roomId === room.id);
+    const itemCount = roomBoxes.reduce((sum, b) => sum + (itemsByBox[b.id]?.length ?? 0), 0);
+
+    // Empty room — a simple, low-stakes delete any editor may perform.
+    if (roomBoxes.length === 0) {
+      Alert.alert(`Delete “${room.name}”?`, "This removes the room. This can't be undone.", [
+        { text: 'Keep it', style: 'cancel' },
+        {
+          text: 'Delete room',
+          style: 'destructive',
+          onPress: () => {
+            deleteRoom(room.id);
+            onClose();
+          },
+        },
+      ]);
+      return;
+    }
+
+    // Cascade — destroys boxes + items. Owner-only.
+    if (!PERM.canDelete(role)) {
+      Alert.alert(
+        'Only the owner can delete a room with boxes',
+        'Ask the move owner, or move/empty its boxes first.',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
+
+    const boxWord = roomBoxes.length === 1 ? 'box' : 'boxes';
+    const itemWord = itemCount === 1 ? 'item' : 'items';
+    Alert.alert(
+      `Delete “${room.name}” and everything in it?`,
+      `This permanently removes the room, its ${roomBoxes.length} ${boxWord}, and ${itemCount} ${itemWord}. This can't be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete all',
+          style: 'destructive',
+          onPress: () => {
+            deleteRoom(room.id);
+            onClose();
+          },
+        },
+      ],
+    );
+  };
+
   return (
-    <Sheet visible={visible} onClose={onClose} title="New room">
+    <Sheet visible={visible} onClose={onClose} title={isEdit ? 'Edit room' : 'New room'}>
       <Input
         label="Room name"
         value={name}
@@ -420,19 +491,44 @@ function AddRoomSheet({ visible, onClose }: { visible: boolean; onClose: () => v
         })}
       </View>
 
+      <Text style={styles.fieldLabel}>Color</Text>
+      <View style={styles.colorRow}>
+        {BOX_COLORS.map((hue) => (
+          <ColorDot
+            key={hue}
+            color={hue}
+            size={28}
+            selected={hue === color}
+            onPress={() => setColor(hue)}
+          />
+        ))}
+      </View>
+
       <Pressable
         accessibilityRole="button"
         disabled={!canSave}
-        onPress={create}
+        onPress={save}
         style={({ pressed }) => [
           styles.cta,
           !canSave && styles.ctaDisabled,
           pressed && canSave && styles.ctaPressed,
         ]}
       >
-        <Icon name="plus" size={20} color={colors.textOnBrand} />
-        <Text style={styles.ctaText}>Add room</Text>
+        <Icon name={isEdit ? 'check' : 'plus'} size={20} color={colors.textOnBrand} />
+        <Text style={styles.ctaText}>{isEdit ? 'Save changes' : 'Add room'}</Text>
       </Pressable>
+
+      {isEdit && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Delete room"
+          onPress={confirmDeleteRoom}
+          style={({ pressed }) => [styles.deleteRow, pressed && styles.pressedSoft]}
+        >
+          <Icon name="trash-2" size={18} color={colors.danger} />
+          <Text style={styles.deleteText}>Delete room</Text>
+        </Pressable>
+      )}
     </Sheet>
   );
 }
@@ -453,6 +549,7 @@ export default function Dashboard() {
   const [searching, setSearching] = useState(false);
   const [addingBox, setAddingBox] = useState(false);
   const [addingRoom, setAddingRoom] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [addBoxRoomId, setAddBoxRoomId] = useState<string | null>(null);
 
   const canEdit = PERM.canEdit(role);
@@ -596,7 +693,16 @@ export default function Dashboard() {
                   const roomBoxes = boxes.filter((b) => b.roomId === room.id);
                   return (
                     <View key={room.id} style={styles.group}>
-                      <View style={styles.groupHeader}>
+                      <Pressable
+                        accessibilityRole={canEdit ? 'button' : undefined}
+                        accessibilityLabel={canEdit ? `Edit ${room.name}` : undefined}
+                        disabled={!canEdit}
+                        onPress={canEdit ? () => setEditingRoom(room) : undefined}
+                        style={({ pressed }) => [
+                          styles.groupHeader,
+                          pressed && canEdit && styles.pressedSoft,
+                        ]}
+                      >
                         <RoomGlyph icon={room.icon} color={room.color} size={28} />
                         <Text style={styles.groupTitle} numberOfLines={1}>
                           {room.name}
@@ -609,7 +715,12 @@ export default function Dashboard() {
                         <Text style={styles.groupCount}>
                           {roomBoxes.length} {roomBoxes.length === 1 ? 'box' : 'boxes'}
                         </Text>
-                      </View>
+                        {canEdit ? (
+                          <View style={styles.groupEditIcon}>
+                            <Icon name="pencil" size={15} color={palette.ink400} />
+                          </View>
+                        ) : null}
+                      </Pressable>
 
                       {roomBoxes.length > 0 ? (
                         <View style={styles.grid}>
@@ -693,7 +804,12 @@ export default function Dashboard() {
               setAddingRoom(true);
             }}
           />
-          <AddRoomSheet visible={addingRoom} onClose={() => setAddingRoom(false)} />
+          <RoomSheet visible={addingRoom} onClose={() => setAddingRoom(false)} />
+          <RoomSheet
+            visible={!!editingRoom}
+            room={editingRoom ?? undefined}
+            onClose={() => setEditingRoom(null)}
+          />
         </>
       )}
     </SafeAreaView>
@@ -804,6 +920,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body.bold,
     fontSize: 12.5,
     color: palette.ink400,
+  },
+  groupEditIcon: {
+    marginLeft: 1,
   },
 
   grid: {
@@ -1069,6 +1188,19 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body.bold,
     fontSize: fontSize.md,
     color: colors.textOnBrand,
+  },
+  deleteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    marginTop: space[2],
+  },
+  deleteText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.base,
+    color: colors.danger,
   },
 
   pressedSoft: { opacity: 0.7 },
