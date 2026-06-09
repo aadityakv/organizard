@@ -45,11 +45,15 @@ export async function uploadPhoto(
 ): Promise<string> {
   const { photoId, uploadPath } = await api.createPhoto(session, moveId, link);
   const blob = await (await fetch(localUri)).blob();
-  await fetch(`${API_URL}${uploadPath}`, {
+  const put = await fetch(`${API_URL}${uploadPath}`, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${session}`, 'content-type': 'image/jpeg' },
     body: blob,
   });
+  // If the R2 upload failed, do NOT report success — otherwise the caller swaps the
+  // local ref for a server id whose blob doesn't exist (a permanently broken image).
+  // Throwing keeps the local ref so the next sync tick retries the upload.
+  if (!put.ok) throw new Error(`photo upload failed (${put.status})`);
   return photoId;
 }
 
