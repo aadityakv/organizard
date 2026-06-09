@@ -3,8 +3,8 @@
 // last-write-wins) when the outbox flushes. clientId makes retries idempotent.
 
 export type Mutation =
-  | { type: 'addRoom'; clientId: string; ts: number; payload: { id: string; name: string; dest?: string | null; icon: string } }
-  | { type: 'updateRoom'; clientId: string; ts: number; payload: { id: string; name?: string; dest?: string | null; icon?: string } }
+  | { type: 'addRoom'; clientId: string; ts: number; payload: { id: string; name: string; dest?: string | null; icon: string; color?: string } }
+  | { type: 'updateRoom'; clientId: string; ts: number; payload: { id: string; name?: string; dest?: string | null; icon?: string; color?: string } }
   | { type: 'deleteRoom'; clientId: string; ts: number; payload: { id: string } }
   | { type: 'addBox'; clientId: string; ts: number; payload: { id: string; roomId: string; number: number; name: string; color: string; statusId: string } }
   | { type: 'updateBox'; clientId: string; ts: number; payload: { id: string; name?: string; color?: string; roomId?: string } }

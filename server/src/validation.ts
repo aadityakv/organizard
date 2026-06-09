@@ -7,8 +7,8 @@ const str = z.string().min(1);
 const nstr = z.string().nullable();
 
 const mutationSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('addRoom'), clientId: str, ts: z.number(), payload: z.object({ id: str, name: str, dest: nstr.optional(), icon: str }) }),
-  z.object({ type: z.literal('updateRoom'), clientId: str, ts: z.number(), payload: z.object({ id: str, name: str.optional(), dest: nstr.optional(), icon: str.optional() }) }),
+  z.object({ type: z.literal('addRoom'), clientId: str, ts: z.number(), payload: z.object({ id: str, name: str, dest: nstr.optional(), icon: str, color: str.optional() }) }),
+  z.object({ type: z.literal('updateRoom'), clientId: str, ts: z.number(), payload: z.object({ id: str, name: str.optional(), dest: nstr.optional(), icon: str.optional(), color: str.optional() }) }),
   z.object({ type: z.literal('deleteRoom'), clientId: str, ts: z.number(), payload: z.object({ id: str }) }),
   z.object({ type: z.literal('addBox'), clientId: str, ts: z.number(), payload: z.object({ id: str, roomId: str, number: z.number().int().nonnegative(), name: str, color: str, statusId: str }) }),
   z.object({ type: z.literal('updateBox'), clientId: str, ts: z.number(), payload: z.object({ id: str, name: str.optional(), color: str.optional(), roomId: str.optional() }) }),

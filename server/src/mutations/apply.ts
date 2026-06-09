@@ -47,7 +47,7 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
   switch (m.type) {
     case 'addRoom': {
       const p = m.payload;
-      await db.insert(s.rooms).values({ id: p.id, moveId, name: p.name, dest: p.dest ?? null, icon: p.icon, updatedAt: now, deletedAt: null }).onConflictDoNothing();
+      await db.insert(s.rooms).values({ id: p.id, moveId, name: p.name, dest: p.dest ?? null, icon: p.icon, color: p.color ?? 'slate', updatedAt: now, deletedAt: null }).onConflictDoNothing();
       return;
     }
     case 'updateRoom': {
@@ -56,6 +56,7 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
       if (p.name !== undefined) set.name = p.name;
       if (p.dest !== undefined) set.dest = p.dest;
       if (p.icon !== undefined) set.icon = p.icon;
+      if (p.color !== undefined) set.color = p.color;
       await db.update(s.rooms).set(set).where(and(eq(s.rooms.id, p.id), eq(s.rooms.moveId, moveId)));
       return;
     }
