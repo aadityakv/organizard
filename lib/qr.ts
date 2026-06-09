@@ -14,11 +14,6 @@ export const parseBoxQR = (value: string): string | null => {
   return null;
 };
 
-// Demo payloads so the Scan screen can surface every result state
-// even without a second real move / revoked box on hand.
-export const DEMO_OTHER_MOVE = encodeBoxQR('OTHERMOVE');
-export const DEMO_NO_ACCESS = encodeBoxQR('NOACCESS');
-
 export type ScanResult =
   | { kind: 'thisMove'; boxId: string }
   | { kind: 'otherMove'; boxId: string; moveName: string }

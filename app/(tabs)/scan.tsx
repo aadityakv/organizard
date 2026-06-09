@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, GeckoMark, Icon } from '@/components';
-import { classifyScan, DEMO_NO_ACCESS, DEMO_OTHER_MOVE, type ScanResult } from '@/lib/qr';
+import { classifyScan, type ScanResult } from '@/lib/qr';
 import { useStore, boxById, roomById, boxStats, statusById } from '@/store/useStore';
 import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
 import { money } from '@/lib/money';
@@ -230,38 +230,10 @@ export default function Scan() {
           </View>
           {!result && <Text style={styles.windowHint}>Line up a box&apos;s QR label</Text>}
         </View>
-
-        {/* Demo controls — reach every result state without a second code. */}
-        {!result && (
-          <View style={styles.demoWrap}>
-            <Text style={styles.demoEyebrow}>Demo · tap a result</Text>
-            <View style={styles.demoRow}>
-              <DemoChip label="Another move" onPress={() => handleValue(DEMO_OTHER_MOVE)} />
-              <DemoChip label="No access" onPress={() => handleValue(DEMO_NO_ACCESS)} />
-              <DemoChip label="Unknown code" onPress={() => handleValue('not-organizard')} />
-            </View>
-          </View>
-        )}
       </SafeAreaView>
 
       {view && <ResultSheet view={view} onRescan={rescan} />}
     </View>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Demo chip — a translucent pill over the viewfinder.
-// ─────────────────────────────────────────────────────────────
-
-function DemoChip({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => [styles.demoChip, pressed && styles.demoChipPressed]}
-    >
-      <Text style={styles.demoChipText}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -410,43 +382,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.72)',
     fontFamily: fonts.body.bold,
     fontSize: 14,
-  },
-
-  // Demo controls
-  demoWrap: {
-    paddingHorizontal: space[4],
-    paddingBottom: space[2],
-    alignItems: 'center',
-    gap: space[2] + 2,
-  },
-  demoEyebrow: {
-    color: 'rgba(255,255,255,0.5)',
-    fontFamily: fonts.body.extra,
-    fontSize: 11,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
-  },
-  demoRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: space[2],
-  },
-  demoChip: {
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    minHeight: 44,
-    justifyContent: 'center',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  demoChipPressed: { backgroundColor: 'rgba(255,255,255,0.22)', transform: [{ scale: 0.97 }] },
-  demoChipText: {
-    color: palette.white,
-    fontFamily: fonts.body.bold,
-    fontSize: 13,
   },
 
   // Result sheet
