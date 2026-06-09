@@ -158,5 +158,17 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
       await db.update(s.items).set({ boxId: p.toBoxId, updatedAt: now }).where(and(eq(s.items.id, p.id), eq(s.items.moveId, moveId)));
       return;
     }
+    case 'updateMove': {
+      // One move per moveId — update its row in place. `target` maps to the
+      // `targetDate` column; `from`/`to` to `fromAddr`/`toAddr`.
+      const p = m.payload;
+      const set: Partial<typeof s.moves.$inferInsert> = { updatedAt: now };
+      if (p.name !== undefined) set.name = p.name;
+      if (p.from !== undefined) set.fromAddr = p.from;
+      if (p.to !== undefined) set.toAddr = p.to;
+      if (p.target !== undefined) set.targetDate = p.target;
+      await db.update(s.moves).set(set).where(eq(s.moves.id, moveId));
+      return;
+    }
   }
 }

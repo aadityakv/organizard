@@ -22,6 +22,8 @@ const mutationSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('updateItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, boxId: str, name: str.optional(), qty: z.number().int().min(1).optional(), valueCents: z.number().int().min(0).optional(), note: nstr.optional(), markerIds: z.array(str).optional(), photoIds: z.array(str).optional() }) }),
   z.object({ type: z.literal('deleteItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, boxId: str }) }),
   z.object({ type: z.literal('moveItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, fromBoxId: str, toBoxId: str }) }),
+  // updateMove: all fields optional. Allow empty strings so the user can clear a field (e.g. unset the target date).
+  z.object({ type: z.literal('updateMove'), clientId: str, ts: z.number(), payload: z.object({ name: z.string().optional(), from: z.string().optional(), to: z.string().optional(), target: z.string().optional() }) }),
 ]);
 
 /** Validate a mutations request body. Caps batch size to bound work. */

@@ -82,6 +82,7 @@ type Actions = {
   updateItem: (boxId: string, itemId: string, patch: Partial<Item>) => void;
   deleteItem: (boxId: string, itemId: string) => void;
   moveItem: (fromBoxId: string, toBoxId: string, itemId: string) => void;
+  updateMove: (patch: { name?: string; from?: string; to?: string; target?: string }) => void;
   reset: () => void;
 
   // --- sync actions ---
@@ -113,7 +114,7 @@ type Actions = {
 const KNOWN_MUTATION_TYPES = new Set<string>([
   'addRoom', 'updateRoom', 'deleteRoom', 'addBox', 'updateBox', 'deleteBox',
   'setBoxStatus', 'setBoxCover', 'setBoxMarker', 'addStatus', 'addMarker',
-  'addItem', 'updateItem', 'deleteItem', 'moveItem',
+  'addItem', 'updateItem', 'deleteItem', 'moveItem', 'updateMove',
 ]);
 
 export type Store = State & Actions;
@@ -323,6 +324,11 @@ export const useStore = create<Store>()(
           };
         });
         get().enqueue({ type: 'moveItem', clientId: uid('c'), ts: Date.now(), payload: { id: itemId, fromBoxId, toBoxId } });
+      },
+
+      updateMove: (patch) => {
+        set((s) => ({ move: { ...s.move, ...patch } }));
+        get().enqueue({ type: 'updateMove', clientId: uid('c'), ts: Date.now(), payload: { ...patch } });
       },
 
       reset: () => set({ ...initialState }),
