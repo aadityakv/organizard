@@ -92,6 +92,14 @@ GitHub remote. Commit/push when the work is real and verified.
 
 ## Known gotchas (so we don't relearn them)
 
+- **Zustand selector render-loops (has bitten 3×).** A `useStore((s) => ...)` selector
+  that builds a **fresh object/array each call** (e.g. `findItem`, `moveSummaries`,
+  `boxPhotos`, `allIndexedItems`) hands `useSyncExternalStore` a new reference every
+  render → React 19 throws **"Maximum update depth exceeded"** and the screen crashes.
+  Typecheck and code review do NOT catch this — only running it does. Fix: wrap in
+  `useShallow` when the inner values are stable store refs, OR compute via `useMemo`
+  over the stable slices it derives from (`useStore((s) => s.boxes)` etc.). This is the
+  #1 reason to verify new screens on the simulator before shipping.
 - `newArchEnabled: false` is ignored — New Arch is always on (see above).
 - `@react-native-community/datetimepicker` is **ABI-incompatible** with SDK 56's
   prebuilt RN (undefined Fabric symbols at link). We use a self-contained JS date
