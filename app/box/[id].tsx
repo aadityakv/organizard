@@ -1,7 +1,7 @@
 // Box detail — cover photo, QR label, status, markers, and the items packed inside.
 // Role-aware: Owner/Editor get every create/edit/delete affordance; Viewers are
 // read-only but can still scan, view the QR, and print the label.
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -60,7 +60,7 @@ import {
   useStore,
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import type { Item, Marker, Status } from '@/data/types';
+import type { Box, Item, Marker, Room, Status } from '@/data/types';
 
 export default function BoxDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,6 +77,8 @@ export default function BoxDetail() {
   const toggleBoxMarker = useStore((s) => s.toggleBoxMarker);
   const addMarker = useStore((s) => s.addMarker);
   const deleteBox = useStore((s) => s.deleteBox);
+  const updateBox = useStore((s) => s.updateBox);
+  const rooms = useStore((s) => s.rooms);
 
   // Resolve recipe — turn the box's ids into display data.
   const status = useStore((s) => (box ? statusById(s, box.status) : undefined));
@@ -89,8 +91,8 @@ export default function BoxDetail() {
   const items = useStore((s) => selectBoxItems(s, boxId));
   const stats = useStore(useShallow((s) => (box ? boxStats(s, boxId) : { count: 0, value: 0 })));
 
-  // Which sheet is open ('status' | 'markers' | 'cover' | null).
-  const [sheet, setSheet] = useState<'status' | 'markers' | 'cover' | null>(null);
+  // Which sheet is open ('status' | 'markers' | 'cover' | 'edit' | null).
+  const [sheet, setSheet] = useState<'status' | 'markers' | 'cover' | 'edit' | null>(null);
 
   const canEdit = box ? PERM.canEdit(role) : false;
   const canDelete = box ? PERM.canDelete(role) : false;
@@ -136,12 +138,15 @@ export default function BoxDetail() {
   };
 
   const onMore = () => {
-    if (canDelete) {
-      Alert.alert(box.name, undefined, [
-        { text: 'Delete box', style: 'destructive', onPress: confirmDelete },
-        { text: 'Cancel', style: 'cancel' },
-      ]);
+    const options: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
+    if (canEdit) {
+      options.push({ text: 'Edit box', onPress: () => setSheet('edit') });
     }
+    if (canDelete) {
+      options.push({ text: 'Delete box', style: 'destructive', onPress: confirmDelete });
+    }
+    options.push({ text: 'Cancel', style: 'cancel' });
+    Alert.alert(box.name, undefined, options);
   };
 
   return (
@@ -156,7 +161,7 @@ export default function BoxDetail() {
             room ? <RoomGlyph icon={room.icon} color={room.color} size={28} /> : undefined
           }
           trailing={
-            canDelete ? (
+            canEdit || canDelete ? (
               <IconButton
                 icon="more-horizontal"
                 variant="plain"
@@ -353,6 +358,18 @@ export default function BoxDetail() {
         }}
         onRemove={() => {
           setBoxCover(box.id, null);
+          setSheet(null);
+        }}
+      />
+
+      {/* ── Edit box sheet ── */}
+      <EditBoxSheet
+        visible={sheet === 'edit'}
+        box={box}
+        rooms={rooms}
+        onClose={() => setSheet(null)}
+        onSave={(patch) => {
+          updateBox(box.id, patch);
           setSheet(null);
         }}
       />
@@ -714,6 +731,85 @@ function CoverSheet({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Edit box sheet — rename, recolor, and move the box to another room.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function EditBoxSheet({
+  visible,
+  box,
+  rooms,
+  onSave,
+  onClose,
+}: {
+  visible: boolean;
+  box: Box;
+  rooms: Room[];
+  onSave: (patch: { name: string; color: string; roomId: string }) => void;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState(box.name);
+  const [color, setColor] = useState(box.color);
+  const [roomId, setRoomId] = useState(box.roomId);
+
+  // Reflect the box's current values whenever the sheet (re)opens.
+  useEffect(() => {
+    setName(box.name);
+    setColor(box.color);
+    setRoomId(box.roomId);
+  }, [visible, box]);
+
+  return (
+    <Sheet visible={visible} onClose={onClose} title="Edit box">
+      <Input label="Box name" value={name} onChangeText={setName} autoFocus />
+
+      <Text style={styles.fieldLabel}>Color</Text>
+      <View style={styles.palette}>
+        {BOX_COLORS.map((c) => (
+          <ColorDot key={c} color={c} size={28} selected={c === color} onPress={() => setColor(c)} />
+        ))}
+      </View>
+
+      <Text style={styles.fieldLabel}>Room</Text>
+      <View style={styles.roomPickRow}>
+        {rooms.map((r) => {
+          const on = r.id === roomId;
+          return (
+            <Pressable
+              key={r.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              onPress={() => setRoomId(r.id)}
+              style={({ pressed }) => [
+                styles.roomPick,
+                on && styles.roomPickOn,
+                pressed && styles.pressed,
+              ]}
+            >
+              <RoomGlyph icon={r.icon} color={r.color} size={22} />
+              <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
+                {r.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <View style={styles.doneButton}>
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          disabled={!name.trim()}
+          onPress={() => onSave({ name: name.trim(), color, roomId })}
+        >
+          Save
+        </Button>
+      </View>
+    </Sheet>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Styles
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -870,6 +966,28 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   palette: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  roomPickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  roomPick: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+    backgroundColor: colors.surfaceCard,
+  },
+  roomPickOn: {
+    borderColor: colors.brand,
+    backgroundColor: palette.green50,
+  },
+  roomPickText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.ink500,
+  },
+  roomPickTextOn: { color: palette.green700 },
   sheetActions: { flexDirection: 'row', gap: 10, marginTop: 18 },
   flex1: { flex: 1 },
   doneButton: { marginTop: 16 },
