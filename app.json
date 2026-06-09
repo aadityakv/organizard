@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.organizard.app",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Organizard uses the camera to photograph your items and scan box QR labels.",
