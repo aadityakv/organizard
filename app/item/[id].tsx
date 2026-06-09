@@ -30,7 +30,11 @@ export default function ItemDetail() {
   const itemId = id ?? '';
 
   const role = useStore(currentRole);
-  const found = useStore((s) => findItem(s, itemId));
+  // findItem builds a fresh { item, box } object each call; a bare selector would
+  // hand useSyncExternalStore a new reference every render → "Maximum update depth
+  // exceeded" (React 19 infinite loop). useShallow stabilizes it: item/box are stable
+  // store refs, so the one-level compare returns the cached object until they change.
+  const found = useStore(useShallow((s) => findItem(s, itemId)));
   const session = useStore((s) => s.session);
   const room = useStore((s) => (found ? roomById(s, found.box.roomId) : undefined));
   const itemMarkers = useStore(
