@@ -1,7 +1,7 @@
 // Item detail — read-only hub for a single item. Tapping an item row opens this
 // instead of the edit form; editing is a secondary action (Owner/Editor only).
 // This view is where the photo gallery and in-box search will later link in.
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -21,7 +21,7 @@ import {
 import { money } from '@/lib/money';
 import { photoSource } from '@/lib/photos';
 import { PERM } from '@/lib/permissions';
-import { currentRole, findItem, markerById, roomById, useStore } from '@/store/useStore';
+import { boxPhotos, currentRole, findItem, markerById, roomById, useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import type { Marker } from '@/data/types';
 
@@ -43,6 +43,16 @@ export default function ItemDetail() {
     ),
   );
   const deleteItem = useStore((s) => s.deleteItem);
+
+  // The box's full photo list, so tapping an item photo opens the viewer at the
+  // right spot in the box-wide gallery. Derive off stable slices (fresh array).
+  const allBoxes = useStore((s) => s.boxes);
+  const itemsByBox = useStore((s) => s.itemsByBox);
+  const galleryBoxId = found?.box.id ?? '';
+  const galleryPhotos = useMemo(
+    () => boxPhotos({ boxes: allBoxes, itemsByBox } as Parameters<typeof boxPhotos>[0], galleryBoxId),
+    [allBoxes, itemsByBox, galleryBoxId],
+  );
 
   const canEdit = found ? PERM.canEdit(role) : false;
   const canDelete = found ? PERM.canDelete(role) : false;
@@ -145,13 +155,24 @@ export default function ItemDetail() {
           >
             {photos.map((photo, i) => {
               const src = photoSource(photo, session);
+              // Open the box-wide viewer at this photo's spot in the box gallery.
+              // Falls back to the first occurrence of this ref, else 0.
+              const start = Math.max(
+                0,
+                galleryPhotos.findIndex((p) => p.kind === 'item' && p.itemId === item.id && p.ref === photo),
+              );
               return (
-                <Image
+                <Pressable
                   key={`${photo}-${i}`}
-                  source={src}
-                  style={styles.photo}
-                  resizeMode="cover"
-                />
+                  accessibilityRole="imagebutton"
+                  accessibilityLabel={`View photo ${i + 1} of ${photos.length}`}
+                  onPress={() =>
+                    router.push({ pathname: `/gallery/${box.id}`, params: { start: String(start) } })
+                  }
+                  style={({ pressed }) => [styles.photo, pressed && styles.pressed]}
+                >
+                  <Image source={src} style={styles.photoImage} resizeMode="cover" />
+                </Pressable>
               );
             })}
           </ScrollView>
@@ -263,8 +284,10 @@ const styles = StyleSheet.create({
     width: 220,
     height: 220,
     borderRadius: radius.lg,
+    overflow: 'hidden',
     backgroundColor: palette.cream100,
   },
+  photoImage: { width: '100%', height: '100%' },
   photoEmpty: {
     alignItems: 'center',
     justifyContent: 'center',

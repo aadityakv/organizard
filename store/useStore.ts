@@ -657,6 +657,24 @@ export const findItem = (s: Store, itemId: string): { item: Item; box: Box } | u
   return undefined;
 };
 
+/** One photo in a box's combined gallery — the cover, then each item's photos in order. */
+export type BoxPhoto = { ref: string; kind: 'box' | 'item'; itemId?: string; itemName?: string };
+
+/**
+ * Assemble a box's photo list: the cover first, then every item's photos in item order.
+ * Builds a FRESH array each call — callers must memoize (useMemo over stable slices),
+ * never feed this straight to useShallow or it loops.
+ */
+export const boxPhotos = (s: Store, boxId: string): BoxPhoto[] => {
+  const out: BoxPhoto[] = [];
+  const box = s.boxes.find((b) => b.id === boxId);
+  if (box?.cover) out.push({ ref: box.cover, kind: 'box' });
+  for (const it of s.itemsByBox[boxId] ?? []) {
+    for (const ph of it.photos ?? []) out.push({ ref: ph, kind: 'item', itemId: it.id, itemName: it.name });
+  }
+  return out;
+};
+
 export const allIndexedItems = (s: Store): IndexedItem[] => {
   const out: IndexedItem[] = [];
   for (const b of s.boxes) {

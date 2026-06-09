@@ -1,7 +1,7 @@
 // Box detail — cover photo, QR label, status, markers, and the items packed inside.
 // Role-aware: Owner/Editor get every create/edit/delete affordance; Viewers are
 // read-only but can still scan, view the QR, and print the label.
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -50,7 +50,9 @@ import { photoSource, persistCapture } from '@/lib/photos';
 import { PERM } from '@/lib/permissions';
 import { encodeBoxQR } from '@/lib/qr';
 import {
+  type BoxPhoto,
   boxById,
+  boxPhotos,
   boxStats,
   currentRole,
   markerById,
@@ -91,8 +93,19 @@ export default function BoxDetail() {
   const items = useStore((s) => selectBoxItems(s, boxId));
   const stats = useStore(useShallow((s) => (box ? boxStats(s, boxId) : { count: 0, value: 0 })));
 
+  // Combined photo gallery (cover + item photos). Derive off stable slices —
+  // boxPhotos builds a fresh array, so it can't be a live selector.
+  const allBoxes = useStore((s) => s.boxes);
+  const itemsByBox = useStore((s) => s.itemsByBox);
+  const photos = useMemo<BoxPhoto[]>(
+    () => boxPhotos({ boxes: allBoxes, itemsByBox } as Parameters<typeof boxPhotos>[0], boxId),
+    [allBoxes, itemsByBox, boxId],
+  );
+
   // Which sheet is open ('status' | 'markers' | 'cover' | 'edit' | null).
   const [sheet, setSheet] = useState<'status' | 'markers' | 'cover' | 'edit' | null>(null);
+  // Photo gallery starts collapsed; tapping the header chevron expands it.
+  const [photosExpanded, setPhotosExpanded] = useState(false);
 
   const canEdit = box ? PERM.canEdit(role) : false;
   const canDelete = box ? PERM.canDelete(role) : false;
@@ -247,6 +260,18 @@ export default function BoxDetail() {
             </Button>
           </View>
         </View>
+
+        {/* Photo gallery — cover + all item photos, collapsed by default */}
+        {photos.length > 0 && (
+          <PhotoGallery
+            photos={photos}
+            expanded={photosExpanded}
+            onToggle={() => setPhotosExpanded((v) => !v)}
+            onOpen={(i) =>
+              router.push({ pathname: `/gallery/${box.id}`, params: { start: String(i) } })
+            }
+          />
+        )}
 
         {/* Markers */}
         <View style={styles.sectionHead}>
@@ -437,6 +462,96 @@ function ItemRow({
   }
 
   return <View style={styles.itemRow}>{inner}</View>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Photo gallery — collapsible strip/grid of the box cover + every item photo.
+// Collapsed: a peek of the first few thumbs with a "+K" overlay on the last.
+// Expanded: every thumb in a wrapping grid. Tapping any opens the full viewer.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GALLERY_PEEK = 4;
+
+function PhotoGallery({
+  photos,
+  expanded,
+  onToggle,
+  onOpen,
+}: {
+  photos: BoxPhoto[];
+  expanded: boolean;
+  onToggle: () => void;
+  onOpen: (index: number) => void;
+}) {
+  const session = useStore((s) => s.session);
+  const extra = photos.length - GALLERY_PEEK;
+
+  return (
+    <View style={styles.gallerySection}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        accessibilityLabel={expanded ? 'Collapse photos' : 'Expand photos'}
+        onPress={onToggle}
+        style={({ pressed }) => [styles.sectionHead, pressed && styles.pressed]}
+      >
+        <Text style={styles.sectionTitle}>Photos · {photos.length}</Text>
+        <Icon name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={palette.ink500} />
+      </Pressable>
+
+      {expanded ? (
+        <View style={styles.galleryGrid}>
+          {photos.map((p, i) => {
+            const src = photoSource(p.ref, session);
+            return (
+              <Pressable
+                key={`${p.ref}-${i}`}
+                accessibilityRole="imagebutton"
+                accessibilityLabel={p.kind === 'box' ? 'Box photo' : `Photo from ${p.itemName ?? 'item'}`}
+                onPress={() => onOpen(i)}
+                style={({ pressed }) => [styles.galleryGridCell, pressed && styles.pressed]}
+              >
+                <Image source={src} style={styles.galleryThumb} resizeMode="cover" />
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.galleryStrip}
+        >
+          {photos.slice(0, GALLERY_PEEK).map((p, i) => {
+            const src = photoSource(p.ref, session);
+            const isLast = i === GALLERY_PEEK - 1 && extra > 0;
+            return (
+              <Pressable
+                key={`${p.ref}-${i}`}
+                accessibilityRole="imagebutton"
+                accessibilityLabel={
+                  isLast
+                    ? `View all ${photos.length} photos`
+                    : p.kind === 'box'
+                      ? 'Box photo'
+                      : `Photo from ${p.itemName ?? 'item'}`
+                }
+                onPress={() => (isLast ? onToggle() : onOpen(i))}
+                style={({ pressed }) => [styles.galleryStripCell, pressed && styles.pressed]}
+              >
+                <Image source={src} style={styles.galleryThumb} resizeMode="cover" />
+                {isLast ? (
+                  <View style={styles.galleryMore}>
+                    <Text style={styles.galleryMoreText}>+{extra}</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
+    </View>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -918,6 +1033,33 @@ const styles = StyleSheet.create({
   qrBody: { flex: 1, justifyContent: 'center', gap: 8 },
   qrEyebrow: { fontFamily: fonts.body.extra, fontSize: 13, color: palette.ink500 },
   qrPrint: { alignSelf: 'flex-start' },
+
+  // Photo gallery
+  gallerySection: { marginBottom: 18 },
+  galleryStrip: { gap: 8, paddingVertical: 2 },
+  galleryStripCell: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    backgroundColor: palette.cream100,
+  },
+  galleryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  galleryGridCell: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    backgroundColor: palette.cream100,
+  },
+  galleryThumb: { width: '100%', height: '100%' },
+  galleryMore: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(42,39,34,0.55)',
+  },
+  galleryMoreText: { fontFamily: fonts.display.bold, fontSize: 18, color: palette.white },
 
   // Sections
   sectionHead: {
