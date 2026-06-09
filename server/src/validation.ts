@@ -21,6 +21,7 @@ const mutationSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('addItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, boxId: str, name: str, qty: z.number().int().min(1), valueCents: z.number().int().min(0), note: nstr.optional(), icon: nstr.optional(), markerIds: z.array(str).optional(), photoIds: z.array(str).optional() }) }),
   z.object({ type: z.literal('updateItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, boxId: str, name: str.optional(), qty: z.number().int().min(1).optional(), valueCents: z.number().int().min(0).optional(), note: nstr.optional(), markerIds: z.array(str).optional(), photoIds: z.array(str).optional() }) }),
   z.object({ type: z.literal('deleteItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, boxId: str }) }),
+  z.object({ type: z.literal('moveItem'), clientId: str, ts: z.number(), payload: z.object({ id: str, fromBoxId: str, toBoxId: str }) }),
 ]);
 
 /** Validate a mutations request body. Caps batch size to bound work. */

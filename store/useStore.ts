@@ -81,6 +81,7 @@ type Actions = {
   ) => string;
   updateItem: (boxId: string, itemId: string, patch: Partial<Item>) => void;
   deleteItem: (boxId: string, itemId: string) => void;
+  moveItem: (fromBoxId: string, toBoxId: string, itemId: string) => void;
   reset: () => void;
 
   // --- sync actions ---
@@ -112,7 +113,7 @@ type Actions = {
 const KNOWN_MUTATION_TYPES = new Set<string>([
   'addRoom', 'updateRoom', 'deleteRoom', 'addBox', 'updateBox', 'deleteBox',
   'setBoxStatus', 'setBoxCover', 'setBoxMarker', 'addStatus', 'addMarker',
-  'addItem', 'updateItem', 'deleteItem',
+  'addItem', 'updateItem', 'deleteItem', 'moveItem',
 ]);
 
 export type Store = State & Actions;
@@ -309,6 +310,21 @@ export const useStore = create<Store>()(
         get().enqueue({ type: 'deleteItem', clientId: uid('c'), ts: Date.now(), payload: { id: itemId, boxId } });
       },
 
+      moveItem: (fromBoxId, toBoxId, itemId) => {
+        set((s) => {
+          const item = (s.itemsByBox[fromBoxId] ?? []).find((it) => it.id === itemId);
+          if (!item) return {};
+          return {
+            itemsByBox: {
+              ...s.itemsByBox,
+              [fromBoxId]: (s.itemsByBox[fromBoxId] ?? []).filter((it) => it.id !== itemId),
+              [toBoxId]: [...(s.itemsByBox[toBoxId] ?? []), { ...item, boxId: toBoxId }],
+            },
+          };
+        });
+        get().enqueue({ type: 'moveItem', clientId: uid('c'), ts: Date.now(), payload: { id: itemId, fromBoxId, toBoxId } });
+      },
+
       reset: () => set({ ...initialState }),
 
       // --- sync actions ---
@@ -351,7 +367,7 @@ export const useStore = create<Store>()(
               case 'addMarker': dMarker.add(p.id); break;
               case 'addBox': case 'updateBox': case 'deleteBox': case 'setBoxStatus': case 'setBoxCover': dBox.add(p.id); break;
               case 'setBoxMarker': dBox.add(p.boxId); break;
-              case 'addItem': case 'updateItem': case 'deleteItem': dItem.add(p.id); break;
+              case 'addItem': case 'updateItem': case 'deleteItem': case 'moveItem': dItem.add(p.id); break;
             }
           }
 

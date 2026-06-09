@@ -152,5 +152,11 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
     case 'deleteItem':
       await db.update(s.items).set({ deletedAt: now, updatedAt: now }).where(and(eq(s.items.id, m.payload.id), eq(s.items.moveId, moveId)));
       return;
+    case 'moveItem': {
+      const p = m.payload;
+      if (!(await itemInMove(db, moveId, p.id)) || !(await boxInMove(db, moveId, p.toBoxId))) return;
+      await db.update(s.items).set({ boxId: p.toBoxId, updatedAt: now }).where(and(eq(s.items.id, p.id), eq(s.items.moveId, moveId)));
+      return;
+    }
   }
 }

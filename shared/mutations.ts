@@ -16,7 +16,8 @@ export type Mutation =
   | { type: 'addMarker'; clientId: string; ts: number; payload: { id: string; label: string; color: string; icon: string } }
   | { type: 'addItem'; clientId: string; ts: number; payload: { id: string; boxId: string; name: string; qty: number; valueCents: number; note?: string | null; icon?: string | null; markerIds?: string[]; photoIds?: string[] } }
   | { type: 'updateItem'; clientId: string; ts: number; payload: { id: string; boxId: string; name?: string; qty?: number; valueCents?: number; note?: string | null; markerIds?: string[]; photoIds?: string[] } }
-  | { type: 'deleteItem'; clientId: string; ts: number; payload: { id: string; boxId: string } };
+  | { type: 'deleteItem'; clientId: string; ts: number; payload: { id: string; boxId: string } }
+  | { type: 'moveItem'; clientId: string; ts: number; payload: { id: string; fromBoxId: string; toBoxId: string } };
 
 export type MutationType = Mutation['type'];
 
@@ -38,4 +39,5 @@ export const ROLE_REQUIRED: Record<MutationType, RoleRequirement> = {
   addItem: 'canEdit',
   updateItem: 'canEdit',
   deleteItem: 'canEdit',
+  moveItem: 'canEdit',
 };
