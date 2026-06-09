@@ -28,6 +28,7 @@ import {
   LockNote,
   MarkerChip,
   RoomGlyph,
+  Segmented,
   Sheet,
   StatusChip,
   Thumb,
@@ -63,6 +64,17 @@ import {
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import type { Box, Item, Marker, Room, Status } from '@/data/types';
+
+// In-box item sort. "Added" keeps the stored insertion order (today's default);
+// the others are display-only re-orderings derived with useMemo.
+type SortMode = 'added' | 'recent' | 'az' | 'value';
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: 'added', label: 'Added' },
+  { value: 'recent', label: 'Recent' },
+  { value: 'az', label: 'A–Z' },
+  { value: 'value', label: 'Value' },
+];
 
 export default function BoxDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -106,6 +118,33 @@ export default function BoxDetail() {
   const [sheet, setSheet] = useState<'status' | 'markers' | 'cover' | 'edit' | null>(null);
   // Photo gallery starts collapsed; tapping the header chevron expands it.
   const [photosExpanded, setPhotosExpanded] = useState(false);
+
+  // In-box item controls — sort mode + a toggleable search field (scoped to THIS box).
+  const [sortMode, setSortMode] = useState<SortMode>('added');
+  const [searching, setSearching] = useState(false);
+  const [query, setQuery] = useState('');
+
+  // The list actually rendered: filter THIS box's items by name + marker label,
+  // then sort. Display-only — never mutates the stored array.
+  const visibleItems = useMemo<Item[]>(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? items.filter(
+          (it) =>
+            it.name.toLowerCase().includes(q) ||
+            (it.markers ?? []).some((mid) =>
+              (allMarkers.find((m) => m.id === mid)?.label.toLowerCase() ?? '').includes(q),
+            ),
+        )
+      : items;
+
+    if (sortMode === 'added') return filtered;
+    const next = [...filtered];
+    if (sortMode === 'recent') return next.reverse();
+    if (sortMode === 'az') return next.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    // 'value' — by the item's displayed value, high → low.
+    return next.sort((a, b) => (b.value || 0) - (a.value || 0));
+  }, [items, query, sortMode, allMarkers]);
 
   const canEdit = box ? PERM.canEdit(role) : false;
   const canDelete = box ? PERM.canDelete(role) : false;
@@ -302,9 +341,66 @@ export default function BoxDetail() {
 
         {/* Items */}
         <View style={styles.sectionHead}>
-          <Text style={styles.itemsTitle}>Items</Text>
-          <Badge label={String(items.length)} tone="neutral" />
+          <View style={styles.itemsTitleRow}>
+            <Text style={styles.itemsTitle}>Items</Text>
+            <Badge
+              label={
+                query.trim().length > 0
+                  ? `${visibleItems.length} of ${items.length}`
+                  : String(items.length)
+              }
+              tone="neutral"
+            />
+          </View>
+          {items.length > 0 && (
+            <IconButton
+              icon={searching ? 'x' : 'search'}
+              variant="plain"
+              size="sm"
+              accessibilityLabel={searching ? 'Close item search' : 'Search items in this box'}
+              onPress={() =>
+                setSearching((prev) => {
+                  if (prev) setQuery('');
+                  return !prev;
+                })
+              }
+            />
+          )}
         </View>
+
+        {/* Sort + search controls — only when there are items to act on. */}
+        {items.length > 0 && (
+          <View style={styles.itemControls}>
+            {searching && (
+              <View style={styles.searchField}>
+                <Icon name="search" size={18} color={palette.ink400} />
+                <Input
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="Search items in this box…"
+                  autoFocus
+                  style={styles.searchInput}
+                />
+                {query.length > 0 && (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear search"
+                    onPress={() => setQuery('')}
+                    hitSlop={8}
+                  >
+                    <Icon name="x" size={18} color={palette.ink400} />
+                  </Pressable>
+                )}
+              </View>
+            )}
+            <Segmented
+              options={SORT_OPTIONS}
+              value={sortMode}
+              onChange={(v) => setSortMode(v as SortMode)}
+              size="sm"
+            />
+          </View>
+        )}
 
         {items.length === 0 ? (
           <View style={styles.empty}>
@@ -316,9 +412,15 @@ export default function BoxDetail() {
                 : 'Nothing packed in here yet.'}
             </Text>
           </View>
+        ) : visibleItems.length === 0 ? (
+          <View style={styles.empty}>
+            <Icon name="search-x" size={32} color={palette.ink400} />
+            <Text style={styles.emptyTitle}>No items match</Text>
+            <Text style={styles.emptyBody}>Nothing in this box matches “{query.trim()}”.</Text>
+          </View>
         ) : (
           <View style={styles.itemList}>
-            {items.map((it) => (
+            {visibleItems.map((it) => (
               <ItemRow
                 key={it.id}
                 item={it}
@@ -1078,6 +1180,14 @@ const styles = StyleSheet.create({
   markerEmpty: { fontFamily: fonts.body.semibold, fontSize: 13.5, color: palette.ink400 },
 
   // Items
+  itemsTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  itemControls: { gap: 10, marginBottom: 12 },
+  searchField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[2],
+  },
+  searchInput: { flex: 1 },
   itemList: { gap: 8 },
   itemRow: {
     flexDirection: 'row',
