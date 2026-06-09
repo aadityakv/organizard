@@ -1,7 +1,7 @@
 // Moves home — your library of moves. Empty state hero, an active list, and a
 // collapsible archived section. Tapping a move switches into it; the ⋯ menu
 // archives / unarchives. A paste sheet routes invite links to /invite.
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -63,7 +63,26 @@ function MoveRow({ move, onOpen, onMenu }: { move: MoveSummary; onOpen: () => vo
 // Screen
 // ─────────────────────────────────────────────────────────────
 export default function Moves() {
-  const summaries = useStore(useShallow(moveSummaries));
+  // moveSummaries builds a fresh array of fresh objects every call, so feeding it to
+  // useShallow infinite-loops (useShallow's one-level compare can't stabilize nested
+  // objects → "Maximum update depth exceeded", which crashes on React 19). Instead,
+  // subscribe to the stable inputs it derives from and compute it once via useMemo.
+  const library = useStore((s) => s.library);
+  const currentMoveId = useStore((s) => s.currentMoveId);
+  const accountId = useStore((s) => s.account?.id ?? null);
+  const liveSlice = useStore(
+    useShallow((s) => ({
+      move: s.move,
+      boxes: s.boxes,
+      itemsByBox: s.itemsByBox,
+      members: s.members,
+      activeMode: s.activeMode,
+    })),
+  );
+  const summaries = useMemo(
+    () => moveSummaries(useStore.getState()),
+    [library, currentMoveId, accountId, liveSlice],
+  );
 
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
