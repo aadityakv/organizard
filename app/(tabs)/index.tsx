@@ -6,9 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import {
+  AddressField,
   BoxCard,
   Button,
   ColorDot,
+  DateField,
+  formatTargetDate,
   Header,
   Icon,
   IconButton,
@@ -20,7 +23,7 @@ import {
   Thumb,
   ValueStat,
 } from '@/components';
-import type { Box, IndexedItem, Room } from '@/data/types';
+import type { Box, IndexedItem, Move, Room } from '@/data/types';
 import { PERM } from '@/lib/permissions';
 import { money } from '@/lib/money';
 import { photoSource } from '@/lib/photos';
@@ -533,6 +536,83 @@ function RoomSheet({
   );
 }
 
+// Edit-move sheet — name / from / to / target date. Prefilled from the live
+// `move`. The date string round-trips via formatTargetDate: parse move.target to
+// a Date for the picker, write the formatted label (or '' to clear) back on save.
+function EditMoveSheet({
+  visible,
+  onClose,
+  move,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  move: Move;
+}) {
+  const updateMove = useStore((s) => s.updateMove);
+
+  const [name, setName] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [date, setDate] = useState<Date | null>(null);
+
+  React.useEffect(() => {
+    if (!visible) return;
+    setName(move.name ?? '');
+    setFrom(move.from ?? '');
+    setTo(move.to ?? '');
+    const d = move.target ? new Date(move.target) : null;
+    setDate(d && !isNaN(d.getTime()) ? d : null);
+  }, [visible, move]);
+
+  const canSave = name.trim().length > 0;
+
+  const save = (): void => {
+    if (!canSave) return;
+    updateMove({
+      name: name.trim(),
+      from: from.trim(),
+      to: to.trim(),
+      target: date ? formatTargetDate(date) : '',
+    });
+    onClose();
+  };
+
+  return (
+    <Sheet visible={visible} onClose={onClose} title="Edit move">
+      <Input
+        label="Move name"
+        value={name}
+        onChangeText={setName}
+        placeholder="e.g. NYC Move"
+        autoFocus
+      />
+      <View style={styles.fieldGap} />
+      <Text style={styles.fieldLabel}>From</Text>
+      <AddressField value={from} onChangeText={setFrom} placeholder="Current address" />
+      <View style={styles.fieldGap} />
+      <Text style={styles.fieldLabel}>To</Text>
+      <AddressField value={to} onChangeText={setTo} placeholder="New address" />
+      <View style={styles.fieldGap} />
+      <Text style={styles.fieldLabel}>Target date</Text>
+      <DateField value={date} onChange={setDate} placeholder="Pick a move date" />
+
+      <Pressable
+        accessibilityRole="button"
+        disabled={!canSave}
+        onPress={save}
+        style={({ pressed }) => [
+          styles.cta,
+          !canSave && styles.ctaDisabled,
+          pressed && canSave && styles.ctaPressed,
+        ]}
+      >
+        <Icon name="check" size={20} color={colors.textOnBrand} />
+        <Text style={styles.ctaText}>Save changes</Text>
+      </Pressable>
+    </Sheet>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------------------------
@@ -550,6 +630,7 @@ export default function Dashboard() {
   const [addingBox, setAddingBox] = useState(false);
   const [addingRoom, setAddingRoom] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [editingMove, setEditingMove] = useState(false);
   const [addBoxRoomId, setAddBoxRoomId] = useState<string | null>(null);
 
   const canEdit = PERM.canEdit(role);
@@ -593,9 +674,22 @@ export default function Dashboard() {
           />
         }
         title={move.name}
-        subtitle={`${progress.sealed} of ${progress.total} boxes sealed`}
+        subtitle={
+          move.target
+            ? `${progress.sealed} of ${progress.total} sealed · 🗓 ${move.target}`
+            : `${progress.sealed} of ${progress.total} boxes sealed`
+        }
         trailing={
           <>
+            {canEdit ? (
+              <IconButton
+                icon="pencil"
+                variant="plain"
+                size="sm"
+                accessibilityLabel="Edit move details"
+                onPress={() => setEditingMove(true)}
+              />
+            ) : null}
             <IconButton
               icon="user-plus"
               variant="plain"
@@ -810,6 +904,7 @@ export default function Dashboard() {
             room={editingRoom ?? undefined}
             onClose={() => setEditingRoom(null)}
           />
+          <EditMoveSheet visible={editingMove} onClose={() => setEditingMove(false)} move={move} />
         </>
       )}
     </SafeAreaView>

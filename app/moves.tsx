@@ -7,9 +7,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Badge, Button, GeckoMark, Header, Icon, IconButton, Input, Sheet } from '@/components';
+import {
+  AddressField,
+  Badge,
+  Button,
+  DateField,
+  formatTargetDate,
+  GeckoMark,
+  Header,
+  Icon,
+  IconButton,
+  Input,
+  Sheet,
+} from '@/components';
 import { moveSummaries, useStore } from '@/store/useStore';
 import type { MoveSummary } from '@/store/library';
+import { PERM } from '@/lib/permissions';
 import { colors, fonts, palette, radius, shadow, space } from '@/theme';
 
 // ─────────────────────────────────────────────────────────────
@@ -88,6 +101,7 @@ export default function Moves() {
   const [joinOpen, setJoinOpen] = useState(false);
   const [pasted, setPasted] = useState('');
   const [menuFor, setMenuFor] = useState<MoveSummary | null>(null);
+  const [editFor, setEditFor] = useState<MoveSummary | null>(null);
 
   const active = summaries.filter((s) => !s.archived);
   const archived = summaries.filter((s) => s.archived);
@@ -107,6 +121,14 @@ export default function Moves() {
       setPasted('');
       router.push(`/invite?token=${encodeURIComponent(t)}`);
     }
+  };
+
+  // Editing targets the live slice (the current move), so switch into the move
+  // first; then open the edit sheet. The summary refreshes via the live-slice sub.
+  const openEdit = (move: MoveSummary) => {
+    setMenuFor(null);
+    if (move.id !== currentMoveId) useStore.getState().switchMove(move.id);
+    setEditFor(move);
   };
 
   const confirmDelete = (move: MoveSummary) => {
@@ -202,6 +224,18 @@ export default function Moves() {
       {/* Per-move menu — Archive / Unarchive + (owner) Delete */}
       <Sheet visible={menuFor !== null} onClose={() => setMenuFor(null)} title={menuFor?.name}>
         <View style={styles.menuActions}>
+          {menuFor && PERM.canEdit(menuFor.role) && (
+            <Button
+              variant="secondary"
+              fullWidth
+              iconLeft="pencil"
+              onPress={() => {
+                if (menuFor) openEdit(menuFor);
+              }}
+            >
+              Edit move details
+            </Button>
+          )}
           {menuFor?.archived ? (
             <Button
               variant="secondary"
@@ -242,6 +276,8 @@ export default function Moves() {
         </View>
       </Sheet>
 
+      <EditMoveSheet move={editFor} onClose={() => setEditFor(null)} />
+
       <JoinSheet
         visible={joinOpen}
         onClose={() => setJoinOpen(false)}
@@ -250,6 +286,58 @@ export default function Moves() {
         onSubmit={submitJoin}
       />
     </SafeAreaView>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Edit-move sheet — name / from / to / target date. We switch into the move
+// before opening this (see openEdit), so updateMove targets the live slice.
+// ─────────────────────────────────────────────────────────────
+function EditMoveSheet({ move, onClose }: { move: MoveSummary | null; onClose: () => void }) {
+  const updateMove = useStore((s) => s.updateMove);
+  const [name, setName] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [date, setDate] = useState<Date | null>(null);
+
+  React.useEffect(() => {
+    if (!move) return;
+    setName(move.name ?? '');
+    setFrom(move.from ?? '');
+    setTo(move.to ?? '');
+    const d = move.target ? new Date(move.target) : null;
+    setDate(d && !isNaN(d.getTime()) ? d : null);
+  }, [move]);
+
+  const canSave = name.trim().length > 0;
+
+  const save = () => {
+    if (!canSave) return;
+    updateMove({
+      name: name.trim(),
+      from: from.trim(),
+      to: to.trim(),
+      target: date ? formatTargetDate(date) : '',
+    });
+    onClose();
+  };
+
+  return (
+    <Sheet visible={move !== null} onClose={onClose} title="Edit move">
+      <Input label="Move name" value={name} onChangeText={setName} placeholder="e.g. NYC Move" autoFocus />
+      <View style={styles.fieldGap} />
+      <Text style={styles.editLabel}>From</Text>
+      <AddressField value={from} onChangeText={setFrom} placeholder="Current address" />
+      <View style={styles.fieldGap} />
+      <Text style={styles.editLabel}>To</Text>
+      <AddressField value={to} onChangeText={setTo} placeholder="New address" />
+      <View style={styles.fieldGap} />
+      <Text style={styles.editLabel}>Target date</Text>
+      <DateField value={date} onChange={setDate} placeholder="Pick a move date" />
+      <Button fullWidth iconLeft="check" onPress={save} disabled={!canSave} style={styles.sheetCta}>
+        Save changes
+      </Button>
+    </Sheet>
   );
 }
 
@@ -348,6 +436,8 @@ const styles = StyleSheet.create({
   menuActions: { gap: space[3] },
   sheetBody: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20, marginBottom: 14 },
   sheetCta: { marginTop: 16 },
+  fieldGap: { height: 14 },
+  editLabel: { fontFamily: fonts.body.bold, fontSize: 14, color: palette.ink700, marginBottom: 8 },
 
   pressedSoft: { opacity: 0.7 },
 });
