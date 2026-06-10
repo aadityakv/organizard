@@ -6,6 +6,7 @@ import { getUserMoves } from './repos/moves';
 import { toPublicUser } from './repos/users';
 import { authRoutes } from './routes/auth';
 import { inviteRoutes } from './routes/invites';
+import { legalRoutes } from './routes/legal';
 import { moveRoutes } from './routes/moves';
 import { photoBlobRoutes } from './routes/photos';
 import { webhookRoutes } from './routes/webhooks';
@@ -20,6 +21,9 @@ export function createApp(overrides: Partial<Deps> = {}) {
   const app = new Hono<{ Bindings: Env; Variables: AuthVars }>();
 
   app.get('/v1/health', (c) => c.json({ ok: true, time: deps.now() }));
+
+  // Public legal/support pages (App Store requires a privacy + support URL).
+  app.route('/', legalRoutes());
 
   app.route('/v1/auth', authRoutes(deps));
   app.route('/v1/moves', moveRoutes(deps));
