@@ -626,7 +626,8 @@ export const boxStats = (s: Store, boxId: string): { count: number; value: numbe
   const items = s.itemsByBox[boxId] ?? [];
   return {
     count: items.reduce((n, it) => n + (it.qty || 1), 0),
-    value: items.reduce((n, it) => n + (it.value || 0), 0),
+    // `value` is the per-unit price, so a line's worth is price × quantity.
+    value: items.reduce((n, it) => n + (it.value || 0) * (it.qty || 1), 0),
   };
 };
 
