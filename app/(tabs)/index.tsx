@@ -205,7 +205,7 @@ function ItemResultRow({ item, room }: { item: IndexedItem; room?: Room }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Open ${item.name} in box ${item.boxNumber}`}
-      onPress={() => openBox(item.boxId)}
+      onPress={() => router.push(`/item/${item.id}`)}
       style={({ pressed }) => [styles.resultRow, pressed && styles.resultRowPressed]}
     >
       <Thumb color={item.boxColor} icon={item.icon ?? 'image'} size={48} />

@@ -43,6 +43,7 @@ import {
   markerById,
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
+import { money } from '@/lib/money';
 import { PERM } from '@/lib/permissions';
 import { photoSource, persistCapture } from '@/lib/photos';
 import {
@@ -356,7 +357,7 @@ export default function AddItem() {
 
           <View style={styles.fieldRow}>
             <Input
-              label="Value"
+              label="Price (each)"
               value={value}
               onChangeText={setValue}
               placeholder="0"
@@ -376,6 +377,13 @@ export default function AddItem() {
               </View>
             </View>
           </View>
+
+          {parsedValue > 0 && qty > 1 ? (
+            <Text style={styles.totalNote}>
+              Total: <Text style={styles.totalStrong}>{money(parsedValue * qty)}</Text>
+              {`  ·  ${qty} × ${money(parsedValue)}`}
+            </Text>
+          ) : null}
 
           <Input
             label="Notes (optional)"
@@ -740,6 +748,16 @@ const styles = StyleSheet.create({
   },
   valueField: {
     flex: 1,
+  },
+  totalNote: {
+    marginTop: -2,
+    fontFamily: fonts.body.semibold,
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+  },
+  totalStrong: {
+    fontFamily: fonts.display.bold,
+    color: palette.green600,
   },
   qtyField: {
     gap: 6,

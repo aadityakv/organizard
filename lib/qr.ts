@@ -3,14 +3,17 @@
 // scanning resolves it against the current move.
 // ============================================================
 
-export const QR_PREFIX = 'organizard://box/';
+export const QR_PREFIX = 'tuck://box/';
+// Pre-rebrand labels were printed with the old scheme — keep scanning them.
+const LEGACY_QR_PREFIX = 'organizard://box/';
 
 /** Encode a box id into its scannable QR payload. */
 export const encodeBoxQR = (boxId: string): string => `${QR_PREFIX}${boxId}`;
 
-/** Pull a box id out of a scanned value, or null if it isn't an Organizard code. */
+/** Pull a box id out of a scanned value, or null if it isn't a Tuck code. */
 export const parseBoxQR = (value: string): string | null => {
   if (value.startsWith(QR_PREFIX)) return value.slice(QR_PREFIX.length);
+  if (value.startsWith(LEGACY_QR_PREFIX)) return value.slice(LEGACY_QR_PREFIX.length);
   return null;
 };
 

@@ -88,7 +88,7 @@ export function moveRoutes(deps: Deps) {
     const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
     const role: Role = body.role ?? 'viewer';
     const invite = await createInvite(deps.getDb(c.env), deps, { moveId: c.req.param('id'), role, createdBy: c.get('user').id });
-    return c.json({ ...invite, url: `organizard://invite?token=${invite.token}` });
+    return c.json({ ...invite, url: `tuck://invite?token=${invite.token}` });
   });
 
   r.patch('/:id/members/:userId', membershipMiddleware(deps), async (c) => {

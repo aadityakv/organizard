@@ -56,7 +56,7 @@ export function authRoutes(deps: Deps) {
       expirationTtl: MAGIC_TTL_SECONDS,
     });
 
-    const base = c.env.APP_URL ?? 'organizard://auth';
+    const base = c.env.APP_URL ?? 'tuck://auth';
     await deps.sendEmail(c.env, normalized, `${base}?token=${token}`);
     return c.json({ ok: true });
   });

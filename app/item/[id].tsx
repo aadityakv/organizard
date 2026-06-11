@@ -145,7 +145,7 @@ export default function ItemDetail() {
         <View style={styles.heroStrip}>
           <View style={[styles.heroDot, { backgroundColor: hue }]} />
           <Text style={styles.heroQty}>{item.qty > 1 ? `Qty ${item.qty}` : 'Qty 1'}</Text>
-          <Text style={styles.heroValue}>{money(item.value)}</Text>
+          <Text style={styles.heroValue}>{money(item.value * item.qty)}</Text>
         </View>
       </View>
 
@@ -190,13 +190,18 @@ export default function ItemDetail() {
         {/* Fields */}
         <View style={styles.fieldCard}>
           <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Value</Text>
-            <Text style={styles.fieldValueStrong}>{money(item.value)}</Text>
+            <Text style={styles.fieldLabel}>Price (each)</Text>
+            <Text style={styles.fieldValue}>{money(item.value)}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.fieldRow}>
             <Text style={styles.fieldLabel}>Quantity</Text>
             <Text style={styles.fieldValue}>{item.qty}</Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.fieldRow}>
+            <Text style={styles.fieldLabel}>Total</Text>
+            <Text style={styles.fieldValueStrong}>{money(item.value * item.qty)}</Text>
           </View>
           {item.note ? (
             <>

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tuck",
     "slug": "organizard",
-    "scheme": "organizard",
+    "scheme": "tuck",
     "version": "1.0.0",
     "newArchEnabled": false,
     "orientation": "portrait",
