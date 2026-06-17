@@ -32,7 +32,12 @@ let listIdx = -1;
 // fallback note can still surface.
 let permissionDenied = false;
 
-export type DictationSession = { cancel: () => void };
+export type DictationSession = {
+  /** Discard the utterance (no onFinal). */
+  cancel: () => void;
+  /** Finish now — stop the mic and fire onFinal with whatever's been heard. */
+  stop: () => void;
+};
 export type DictationCallbacks = {
   onInterim?: (text: string) => void;
   onFinal: (text: string) => void;
@@ -51,24 +56,28 @@ function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): Dictati
   const text = pool[idx];
 
   let cancelled = false;
+  let done = false;
   let i = 0;
   let finishTimer: ReturnType<typeof setTimeout> | undefined;
+  const fire = () => {
+    if (done || cancelled) return;
+    done = true;
+    cb.onFinal(text);
+  };
   const iv = setInterval(() => {
-    if (cancelled) return;
+    if (cancelled || done) return;
     i += 2;
     cb.onInterim?.(text.slice(0, i));
     if (i >= text.length) {
       clearInterval(iv);
-      finishTimer = setTimeout(() => { if (!cancelled) cb.onFinal(text); }, 420);
+      finishTimer = setTimeout(fire, 420);
     }
   }, 48);
+  const clear = () => { clearInterval(iv); if (finishTimer) clearTimeout(finishTimer); };
 
   return {
-    cancel: () => {
-      cancelled = true;
-      clearInterval(iv);
-      if (finishTimer) clearTimeout(finishTimer);
-    },
+    cancel: () => { cancelled = true; clear(); },
+    stop: () => { clear(); fire(); }, // finalize immediately with the full sample
   };
 }
 
@@ -83,42 +92,72 @@ export function listen(opts: { listMode?: boolean }, cb: DictationCallbacks): Di
   let done = false;
   let lastTranscript = '';
   let speech: { stop: () => void } | null = null;
-  let inner: DictationSession | null = null; // simulate fallback if permission denied
-  let timeout: ReturnType<typeof setTimeout> | undefined;
+  let hardTimeout: ReturnType<typeof setTimeout> | undefined;
+  let silenceTimer: ReturnType<typeof setTimeout> | undefined;
 
+  const clearTimers = () => {
+    if (hardTimeout) clearTimeout(hardTimeout);
+    if (silenceTimer) clearTimeout(silenceTimer);
+  };
   const finalize = () => {
     if (done || cancelled) return;
     done = true;
-    if (timeout) clearTimeout(timeout);
-    cb.onFinal(lastTranscript);
+    clearTimers();
+    cb.onFinal(lastTranscript.trim());
+  };
+  // Auto-finish a short pause after the user stops talking — but only once we've
+  // actually heard something, so it never fires on dead air.
+  const resetSilence = () => {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      if (lastTranscript.trim()) speech?.stop();
+    }, opts.listMode ? 1800 : 1300);
   };
 
   requestSpeechPermissions()
     .then((granted) => {
       if (cancelled) return;
       if (!granted) {
+        // Real device, mic/speech denied — surface it instead of faking items.
+        // (Simulated dictation only makes sense where the native module is absent.)
         permissionDenied = true;
-        inner = simulate(opts, cb);
+        done = true;
+        clearTimers();
+        cb.onError?.(new Error('PERMISSION'));
         return;
       }
       permissionDenied = false;
       speech = startSpeech(
-        (transcript) => { if (!cancelled) { lastTranscript = transcript; cb.onInterim?.(transcript); } },
+        (transcript) => {
+          if (cancelled) return;
+          lastTranscript = transcript;
+          cb.onInterim?.(transcript);
+          resetSilence();
+        },
         () => finalize(), // onEnd → treat the last transcript as final
         (msg) => cb.onError?.(msg),
       );
-      // Backstop: stop the mic after a window so the utterance finalizes even without
-      // the recognizer's own endpointing (single item vs. a whole-box list).
-      timeout = setTimeout(() => speech?.stop(), opts.listMode ? 12000 : 6000);
+      resetSilence();
+      // Safety backstop only — manual stop + silence detection handle the normal case.
+      hardTimeout = setTimeout(() => speech?.stop(), opts.listMode ? 25000 : 12000);
     })
-    .catch(() => { if (!cancelled) inner = simulate(opts, cb); });
+    .catch((e) => {
+      if (cancelled) return;
+      done = true;
+      clearTimers();
+      cb.onError?.(e);
+    });
 
   return {
     cancel: () => {
       cancelled = true;
-      if (timeout) clearTimeout(timeout);
+      clearTimers();
       speech?.stop();
-      inner?.cancel();
+    },
+    stop: () => {
+      // User tapped "done": finish now with whatever's been heard.
+      clearTimers();
+      speech?.stop();
     },
   };
 }

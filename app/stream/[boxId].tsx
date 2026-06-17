@@ -3,19 +3,21 @@
 // Dictation is simulated for now (lib/dictation); the on-device mic swaps in later.
 // Items captured into a local session, committed to their boxes on "Done".
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 import { Button, Icon, Sheet } from '@/components';
 import { listen, isDictationSimulated, type DictationSession } from '@/lib/dictation';
 import { money } from '@/lib/money';
+import { persistCapture } from '@/lib/photos';
 import { iconFor, parseList, parseUtterance } from '@/lib/streamParse';
 import { uid } from '@/lib/uid';
 import { useStore } from '@/store/useStore';
 import { boxColor, boxTint, colors, fonts, palette } from '@/theme';
 
-type SItem = { id: string; name: string; qty: number | null; value: number | null; icon: string; needsFix: boolean; boxId: string };
+type SItem = { id: string; name: string; qty: number | null; value: number | null; icon: string; needsFix: boolean; boxId: string; photo?: string | null };
 type Mic = 'ready' | 'listening' | 'gotit' | 'fail';
 
 export default function StreamSession() {
@@ -41,13 +43,38 @@ export default function StreamSession() {
   const lastBatchIds = useRef<string[]>([]);
   const targetRef = useRef<string | null>(null);
   const listModeRef = useRef(false);
+  const cameraRef = useRef<CameraView>(null);
+  const pendingPhoto = useRef<string | null>(null);
+  const captureSeq = useRef(0); // matches an async photo to the capture that started it
+  const [camPerm, requestCamPerm] = useCameraPermissions();
   const simulated = isDictationSimulated();
+
+  useEffect(() => {
+    if (!camPerm?.granted && camPerm?.canAskAgain) void requestCamPerm();
+  }, [camPerm?.granted, camPerm?.canAskAgain, requestCamPerm]);
 
   useEffect(() => () => {
     dictRef.current?.cancel();
     if (gotitTmo.current) clearTimeout(gotitTmo.current);
     if (flashTmo.current) clearTimeout(flashTmo.current);
   }, []);
+
+  // Take a photo (best-effort) and stash it for the item the next utterance creates.
+  // The seq guard ensures a slow capture can't attach to a later item.
+  const capturePhoto = async (seq: number) => {
+    try {
+      const pic = await cameraRef.current?.takePictureAsync({ quality: 0.6 });
+      if (pic?.uri) {
+        const ref = await persistCapture(pic.uri);
+        if (seq === captureSeq.current) pendingPhoto.current = ref;
+      }
+    } catch (e) {
+      console.warn('stream: photo capture failed', e); // item is still captured by voice
+    }
+  };
+
+  // Dropping out of photo mode invalidates any in-flight / pending photo.
+  useEffect(() => { pendingPhoto.current = null; captureSeq.current += 1; }, [voiceMode]);
 
   const photoMode = !voiceMode;
   const box = boxes.find((b) => b.id === boxId) ?? boxes[0];
@@ -82,6 +109,22 @@ export default function StreamSession() {
       {
         onInterim: (t) => setTranscript(t),
         onFinal: (t) => { dictRef.current = null; finalize(t); },
+        onError: (e) => {
+          // Only the mic/speech-permission denial needs special handling — it must NOT
+          // create a fake item. Genuine recognition errors are followed by onEnd →
+          // finalize, which captures whatever was heard, so we let those fall through.
+          if (!(e instanceof Error && e.message === 'PERMISSION')) return;
+          dictRef.current = null;
+          if (gotitTmo.current) clearTimeout(gotitTmo.current);
+          targetRef.current = null;
+          listModeRef.current = false;
+          setTranscript('');
+          setMic('ready');
+          Alert.alert(
+            'Microphone access needed',
+            'Tuck needs microphone and speech access to add items by voice. Turn them on in Settings › Tuck, then try again.',
+          );
+        },
       },
     );
   };
@@ -126,7 +169,8 @@ export default function StreamSession() {
       setMic(p.name ? 'gotit' : 'fail');
     } else {
       const needsFix = !p.name;
-      const it: SItem = { id: uid('s'), name: p.name || 'Untitled item', qty: p.qty, value: p.value, icon: iconFor(p.name), needsFix, boxId };
+      const it: SItem = { id: uid('s'), name: p.name || 'Untitled item', qty: p.qty, value: p.value, icon: iconFor(p.name), needsFix, boxId, photo: pendingPhoto.current };
+      pendingPhoto.current = null;
       setSession((prev) => [...prev, it]);
       setLastId(it.id);
       setMic(needsFix ? 'fail' : 'gotit');
@@ -135,12 +179,22 @@ export default function StreamSession() {
     scheduleReady();
   };
 
-  const onShutter = () => {
-    if (mic === 'listening') return;
-    setFlash(true);
-    if (flashTmo.current) clearTimeout(flashTmo.current);
-    flashTmo.current = setTimeout(() => setFlash(false), 200);
-    setTimeout(() => beginListen(null, false), 230);
+  // The big button: tap to capture, tap again to stop (finish the utterance now).
+  const onCapture = () => {
+    if (mic === 'listening') {
+      dictRef.current?.stop();
+      return;
+    }
+    if (voiceMode) {
+      beginListen(null, true);
+    } else {
+      setFlash(true);
+      if (flashTmo.current) clearTimeout(flashTmo.current);
+      flashTmo.current = setTimeout(() => setFlash(false), 200);
+      pendingPhoto.current = null;
+      void capturePhoto((captureSeq.current += 1));
+      setTimeout(() => beginListen(null, false), 230);
+    }
   };
 
   const onResay = () => {
@@ -182,6 +236,7 @@ export default function StreamSession() {
         qty: it.qty ?? undefined,
         value: it.value ?? undefined,
         icon: it.icon,
+        photos: it.photo ? [it.photo] : undefined,
       });
     }
     setSummaryOpen(false);
@@ -194,6 +249,11 @@ export default function StreamSession() {
 
   return (
     <View style={styles.root}>
+      {/* Live camera behind the photo-mode UI; dark backdrop in voice mode / no permission. */}
+      {photoMode && camPerm?.granted ? (
+        <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />
+      ) : null}
+      {photoMode && camPerm?.granted ? <View style={styles.camScrim} /> : null}
       <SafeAreaView style={styles.safe} edges={['top']}>
         {/* top bar */}
         <View style={styles.topBar}>
@@ -238,7 +298,7 @@ export default function StreamSession() {
               <Icon name="list-music" size={52} color="rgba(255,255,255,0.5)" />
             </View>
           )}
-          <Text style={styles.hint}>{voiceMode ? 'Tap, then name everything in the box' : 'Snap, then say what it is'}</Text>
+          <Text style={styles.hint}>{mic === 'listening' ? 'Listening… tap the button when you’re done' : voiceMode ? 'Tap, then name everything in the box' : 'Snap, then say what it is'}</Text>
           {simulated ? <Text style={styles.simNote}>Mic unavailable here — simulating dictation</Text> : null}
         </View>
 
@@ -301,8 +361,8 @@ export default function StreamSession() {
               <Text style={[styles.countPill, session.length ? { marginLeft: 18 } : null]}>{session.length}</Text>
             </Pressable>
           </View>
-          <Pressable onPress={voiceMode ? () => mic !== 'listening' && beginListen(null, true) : onShutter} style={styles.shutter} accessibilityLabel={voiceMode ? 'Say items' : 'Capture'}>
-            <Icon name={voiceMode ? 'mic' : 'camera'} size={voiceMode ? 32 : 30} color="#fff" />
+          <Pressable onPress={onCapture} style={[styles.shutter, mic === 'listening' && styles.shutterStop]} accessibilityLabel={mic === 'listening' ? 'Stop' : voiceMode ? 'Say items' : 'Capture'}>
+            <Icon name={mic === 'listening' ? 'square' : voiceMode ? 'mic' : 'camera'} size={mic === 'listening' ? 26 : voiceMode ? 32 : 30} color="#fff" />
           </Pressable>
           <View style={[styles.bottomSide, { alignItems: 'flex-end' }]}>
             <Pressable onPress={onResay} style={styles.redo} accessibilityLabel="Redo last">
@@ -394,7 +454,7 @@ export default function StreamSession() {
             </View>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
               <Button variant="danger" iconLeft="trash-2" onPress={() => { setSession((prev) => prev.filter((it) => it.id !== editId)); if (lastId === editId) setLastId(null); setEditId(null); }}>Remove</Button>
-              <Button fullWidth onPress={() => { patchEdit({ name: editIt.name.trim() || 'Untitled item', needsFix: !editIt.name.trim() }); setEditId(null); }}>Done</Button>
+              <View style={{ flex: 1 }}><Button fullWidth onPress={() => { patchEdit({ name: editIt.name.trim() || 'Untitled item', needsFix: !editIt.name.trim() }); setEditId(null); }}>Done</Button></View>
             </View>
           </View>
         ) : null}
@@ -408,8 +468,8 @@ export default function StreamSession() {
             <Text style={styles.summaryTitle}>Nice streak!</Text>
             <Text style={styles.summaryLabel}>{summaryLabel}</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 10, width: '100%' }}>
-              <Button variant="secondary" fullWidth onPress={() => setSummaryOpen(false)}>Keep going</Button>
-              <Button fullWidth onPress={finish}>Done</Button>
+              <View style={{ flex: 1 }}><Button variant="secondary" fullWidth onPress={() => setSummaryOpen(false)}>Keep going</Button></View>
+              <View style={{ flex: 1 }}><Button fullWidth onPress={finish}>Done</Button></View>
             </View>
           </View>
         </View>
@@ -429,7 +489,9 @@ function SlothGlyph() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#161817' },
+  camScrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,22,21,0.32)' },
   safe: { flex: 1 },
+  shutterStop: { backgroundColor: palette.red500, borderColor: 'rgba(255,255,255,0.85)' },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 8, gap: 8 },
   iconBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' },
   boxChip: { flexDirection: 'row', alignItems: 'center', gap: 7, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.16)', maxWidth: 220 },

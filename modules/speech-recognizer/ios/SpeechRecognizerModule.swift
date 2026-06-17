@@ -12,6 +12,8 @@ public class SpeechRecognizerModule: Module {
   private var audioEngine: AVAudioEngine?
   private var request: SFSpeechAudioBufferRecognitionRequest?
   private var task: SFSpeechRecognitionTask?
+  private var ended = false       // guards onEnd so it fires at most once per session
+  private var isDestroyed = false // don't resolve promises after teardown
 
   public func definition() -> ModuleDefinition {
     Name("SpeechRecognizer")
@@ -28,7 +30,10 @@ public class SpeechRecognizerModule: Module {
       SFSpeechRecognizer.requestAuthorization { speechStatus in
         let speechOK = speechStatus == .authorized
         AVAudioSession.sharedInstance().requestRecordPermission { micOK in
-          DispatchQueue.main.async { promise.resolve(speechOK && micOK) }
+          DispatchQueue.main.async {
+            if self.isDestroyed { return }
+            promise.resolve(speechOK && micOK)
+          }
         }
       }
     }
@@ -52,12 +57,14 @@ public class SpeechRecognizerModule: Module {
     }
 
     OnDestroy {
+      self.isDestroyed = true
       self.teardown(emitEnd: false)
     }
   }
 
   private func startRecognition() throws {
     teardown(emitEnd: false)
+    ended = false
 
     guard let recognizer = recognizer, recognizer.isAvailable else {
       throw NSError(domain: "SpeechRecognizer", code: 1, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer unavailable"])
@@ -69,9 +76,10 @@ public class SpeechRecognizerModule: Module {
 
     let req = SFSpeechAudioBufferRecognitionRequest()
     req.shouldReportPartialResults = true
-    if recognizer.supportsOnDeviceRecognition {
-      req.requiresOnDeviceRecognition = true
-    }
+    // Leave requiresOnDeviceRecognition = false: the system uses on-device recognition
+    // automatically when its model is ready, and falls back to Apple's (free) server
+    // transcription otherwise — forcing on-device silently fails before the model
+    // downloads, which reads as "didn't catch that". Either path is free, no API key.
     request = req
 
     let engine = AVAudioEngine()
@@ -128,7 +136,8 @@ public class SpeechRecognizerModule: Module {
     request = nil
     task = nil
     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-    if emitEnd {
+    if emitEnd && !ended {
+      ended = true
       sendEvent("onEnd", [:])
     }
   }
