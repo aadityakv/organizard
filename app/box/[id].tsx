@@ -438,15 +438,30 @@ export default function BoxDetail() {
         {/* Bottom action */}
         <View style={styles.bottom}>
           {canEdit ? (
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              iconLeft="camera"
-              onPress={() => router.push({ pathname: '/add-item', params: { boxId: box.id } })}
-            >
-              Add item
-            </Button>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  iconLeft="plus"
+                  onPress={() => router.push({ pathname: '/add-item', params: { boxId: box.id } })}
+                >
+                  Add item
+                </Button>
+              </View>
+              <View style={{ flex: 1.25 }}>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  iconLeft="audio-lines"
+                  onPress={() => router.push(`/stream/${box.id}`)}
+                >
+                  Stream items
+                </Button>
+              </View>
+            </View>
           ) : (
             <LockNote>You&apos;re viewing as a guest. Ask the owner to invite you to add items.</LockNote>
           )}
