@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.organizard.app",
-      "buildNumber": "16",
+      "buildNumber": "17",
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Tuck uses the camera to photograph your items and scan box QR labels.",
