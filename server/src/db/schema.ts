@@ -7,6 +7,8 @@ export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   appleSub: text('apple_sub').unique(),
   email: text('email').unique(),
+  // Set only for email/password accounts; null for Sign-in-with-Apple users.
+  passwordHash: text('password_hash'),
   name: text('name').notNull(),
   avatarColor: text('avatar_color').notNull().default('green'),
   entitlementActive: integer('entitlement_active', { mode: 'boolean' }).notNull().default(false),

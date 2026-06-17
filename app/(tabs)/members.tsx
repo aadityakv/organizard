@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as AppleAuthentication from 'expo-apple-authentication';
 
-import { Avatar, Button, Card, Header, Icon, Input, LockNote, RoleBadge, Segmented } from '@/components';
+import { Avatar, AuthPanel, Button, Card, Header, Icon, LockNote, RoleBadge, Segmented } from '@/components';
 import type { Member, Role } from '@/data/types';
 import { api, ApiError } from '@/lib/api';
-import { appleSignInAvailable, signInWithApple, startEmailSignIn } from '@/lib/auth';
+import { deleteAccount } from '@/lib/auth';
 import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from '@/lib/billing';
 import { createInviteLink, shareMove } from '@/lib/share';
 import { syncActiveMove } from '@/store/sync';
@@ -37,16 +36,10 @@ export default function Members() {
   const moveName = useStore((s) => s.move.name);
   const signOut = useStore((s) => s.signOut);
 
-  const [email, setEmail] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [appleOk, setAppleOk] = useState(false);
   const [inviteRole, setInviteRole] = useState<Role>('editor');
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
-  useEffect(() => {
-    appleSignInAvailable().then(setAppleOk).catch(() => {});
-  }, []);
   useEffect(() => {
     if (account?.id) configureBilling(account.id);
   }, [account?.id]);
@@ -65,6 +58,16 @@ export default function Members() {
       setBusy(false);
     }
   };
+
+  const doDeleteAccount = () =>
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your account and any moves you’ve shared to the server. Moves saved only on this device are not affected. This can’t be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => guard(deleteAccount, 'Could not delete account') },
+      ],
+    );
 
   const doShare = () => guard(async () => {
     // Paywall: subscription required to own a shared move. Server enforces it too.
@@ -101,36 +104,10 @@ export default function Members() {
       <Header title="Share & members" subtitle={moveName} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {!session ? (
-          <Card style={styles.card}>
-            <Text style={styles.h}>Sign in to share</Text>
-            <Text style={styles.p}>Sharing a move keeps it in sync with your packing buddy. You stay the owner.</Text>
-            {appleOk ? (
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                cornerRadius={999}
-                style={styles.appleBtn}
-                onPress={() => guard(signInWithApple, 'Sign-in failed')}
-              />
-            ) : null}
-            <Text style={styles.or}>or use email</Text>
-            {emailSent ? (
-              <View style={styles.sent}>
-                <Icon name="mail-check" size={18} color={colors.success} />
-                <Text style={styles.p}>Check your email for a sign-in link.</Text>
-              </View>
-            ) : (
-              <>
-                <Input value={email} onChangeText={setEmail} placeholder="you@email.com" keyboardType="email-address" />
-                <Button onPress={() => guard(async () => { await startEmailSignIn(email.trim()); setEmailSent(true); }, 'Could not send link')} disabled={busy || !email.trim()} fullWidth style={styles.cta}>
-                  Send sign-in link
-                </Button>
-              </>
-            )}
-          </Card>
+          <AuthPanel title="Sign in to share" subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner." />
         ) : activeMode === 'local' ? (
           <>
-            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} />
+            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} onDelete={doDeleteAccount} />
             <Card style={styles.card}>
               <Text style={styles.h}>Share “{moveName}”</Text>
               <Text style={styles.p}>This uploads the move so your partner can view and edit it in sync. You stay the owner.</Text>
@@ -141,7 +118,7 @@ export default function Members() {
           </>
         ) : (
           <>
-            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} />
+            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} onDelete={doDeleteAccount} />
             <Card style={styles.card}>
               <Text style={styles.h}>Invite a packing buddy</Text>
               {canManage ? (
@@ -180,16 +157,21 @@ export default function Members() {
   );
 }
 
-function AccountChip({ name, email, onSignOut }: { name: string; email: string | null; onSignOut: () => void }) {
+function AccountChip({ name, email, onSignOut, onDelete }: { name: string; email: string | null; onSignOut: () => void; onDelete: () => void }) {
   return (
-    <View style={styles.account}>
-      <Avatar name={name} size={36} />
-      <View style={{ flex: 1 }}>
-        <Text style={styles.accountName} numberOfLines={1}>{name}</Text>
-        {email ? <Text style={styles.accountEmail} numberOfLines={1}>{email}</Text> : null}
+    <View style={styles.accountWrap}>
+      <View style={styles.account}>
+        <Avatar name={name} size={36} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.accountName} numberOfLines={1}>{name}</Text>
+          {email ? <Text style={styles.accountEmail} numberOfLines={1}>{email}</Text> : null}
+        </View>
+        <Pressable onPress={onSignOut} hitSlop={8}>
+          <Text style={styles.signOut}>Sign out</Text>
+        </Pressable>
       </View>
-      <Pressable onPress={onSignOut} hitSlop={8}>
-        <Text style={styles.signOut}>Sign out</Text>
+      <Pressable onPress={onDelete} hitSlop={6} accessibilityLabel="Delete account">
+        <Text style={styles.deleteAccount}>Delete account</Text>
       </Pressable>
     </View>
   );
@@ -238,10 +220,13 @@ const styles = StyleSheet.create({
   cta: { marginTop: 12 },
   or: { fontFamily: fonts.body.bold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginVertical: 6 },
   appleBtn: { height: 48, marginTop: 6 },
-  sent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  emailFields: { gap: 8, marginTop: 8 },
+  hint: { fontFamily: fonts.body.semibold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginTop: 6 },
   link: { fontFamily: fonts.body.bold, fontSize: 13, color: colors.textLink, marginTop: 12, padding: 12, backgroundColor: palette.green50, borderRadius: radius.md },
   section: { fontFamily: fonts.body.extra, fontSize: 11, letterSpacing: 0.7, textTransform: 'uppercase', color: palette.ink400, marginTop: 8, marginLeft: 4 },
+  accountWrap: { gap: 8 },
   account: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surfaceCard, borderRadius: radius.lg, padding: 14 },
+  deleteAccount: { fontFamily: fonts.body.bold, fontSize: 12.5, color: colors.danger, marginLeft: 6 },
   accountName: { fontFamily: fonts.body.bold, fontSize: 15, color: palette.ink900 },
   accountEmail: { fontFamily: fonts.body.semibold, fontSize: 12.5, color: palette.ink500 },
   signOut: { fontFamily: fonts.body.bold, fontSize: 13, color: colors.danger },

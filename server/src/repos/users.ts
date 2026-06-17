@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
-import { users } from '../db/schema';
+import { members, moves, users } from '../db/schema';
+import { deleteMove } from './moves';
 
 export type UserRow = typeof users.$inferSelect;
 
@@ -49,6 +50,7 @@ export async function upsertAppleUser(
     id: args.id,
     appleSub: args.sub,
     email: args.email ?? null,
+    passwordHash: null,
     name: deriveName(args.email),
     avatarColor: pickColor(args.id),
     entitlementActive: false,
@@ -71,6 +73,7 @@ export async function upsertEmailUser(
     id: args.id,
     appleSub: null,
     email: args.email,
+    passwordHash: null,
     name: deriveName(args.email),
     avatarColor: pickColor(args.id),
     entitlementActive: false,
@@ -79,6 +82,42 @@ export async function upsertEmailUser(
   };
   await db.insert(users).values(row);
   return row;
+}
+
+export async function getUserByEmail(db: AppDb, email: string): Promise<UserRow | undefined> {
+  return (await db.select().from(users).where(eq(users.email, email)).limit(1))[0];
+}
+
+/** Create an email/password account. Caller hashes the password (lib/password). */
+export async function createPasswordUser(
+  db: AppDb,
+  args: { email: string; passwordHash: string; id: string; now: number },
+): Promise<UserRow> {
+  const row: UserRow = {
+    id: args.id,
+    appleSub: null,
+    email: args.email,
+    passwordHash: args.passwordHash,
+    name: deriveName(args.email),
+    avatarColor: pickColor(args.id),
+    entitlementActive: false,
+    entitlementExpiresAt: null,
+    createdAt: args.now,
+  };
+  await db.insert(users).values(row);
+  return row;
+}
+
+/**
+ * Delete a user and everything they own (App Store Guideline 5.1.1(v)): their
+ * moves are cascade-deleted, their memberships in others' moves are removed, then
+ * the account row goes. Sessions live in KV and are revoked separately by the caller.
+ */
+export async function deleteUserAndData(db: AppDb, userId: string): Promise<void> {
+  const owned = await db.select({ id: moves.id }).from(moves).where(eq(moves.ownerId, userId));
+  for (const m of owned) await deleteMove(db, m.id);
+  await db.delete(members).where(eq(members.userId, userId));
+  await db.delete(users).where(eq(users.id, userId));
 }
 
 /** Set a user's subscription entitlement (driven by the RevenueCat webhook). */

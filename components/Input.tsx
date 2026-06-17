@@ -19,6 +19,10 @@ export type InputProps = {
   multiline?: boolean;
   prefix?: string;
   autoFocus?: boolean;
+  secureTextEntry?: boolean;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  /** iOS autofill hint (e.g. 'emailAddress', 'password', 'newPassword'). */
+  textContentType?: 'none' | 'emailAddress' | 'password' | 'newPassword' | 'username';
   /** iOS: attach a keyboard accessory (e.g. a Done bar) by nativeID. */
   inputAccessoryViewID?: string;
   style?: StyleProp<ViewStyle>;
@@ -33,6 +37,9 @@ export function Input({
   multiline = false,
   prefix,
   autoFocus = false,
+  secureTextEntry = false,
+  autoCapitalize = 'sentences',
+  textContentType,
   inputAccessoryViewID,
   style,
 }: InputProps) {
@@ -95,13 +102,15 @@ export function Input({
           keyboardType={keyboardType}
           multiline={multiline}
           autoFocus={autoFocus}
+          secureTextEntry={secureTextEntry}
+          textContentType={textContentType}
           inputAccessoryViewID={inputAccessoryViewID}
           onFocus={handleFocus}
           onBlur={handleBlur}
           // Prevent iOS zoom: ensure font size >= 16 is set via style
           textAlignVertical={multiline ? 'top' : 'center'}
           autoCorrect={false}
-          autoCapitalize="sentences"
+          autoCapitalize={autoCapitalize}
           returnKeyType={multiline ? 'default' : 'done'}
           scrollEnabled={multiline}
           numberOfLines={multiline ? 4 : 1}
