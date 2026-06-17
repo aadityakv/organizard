@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { Avatar, AuthPanel, Button, Card, Header, Icon, LockNote, RoleBadge, Segmented } from '@/components';
 import type { Member, Role } from '@/data/types';
@@ -89,7 +90,7 @@ export default function Members() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="Share & members" subtitle={moveName} />
+      <Header title="Share & members" subtitle={moveName} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {!session ? (
           <AuthPanel title="Sign in to share" subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner." />

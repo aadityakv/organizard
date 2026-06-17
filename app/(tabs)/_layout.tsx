@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -6,11 +6,13 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Icon } from '@/components/Icon';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
-// Bottom nav: Boxes · Scan (center, raised) · Share — matches the design chrome.
+// Bottom nav: Boxes · Capture (center, raised verb) · Find. The center button is a
+// VERB (free single-item capture → /capture picker), not a tab. Scan folds into Find;
+// Share lives in the Boxes header. (Claude Design "Nav Rethink" — Option A.)
 const TABS: { name: string; icon: string; label: string; center?: boolean }[] = [
   { name: 'index', icon: 'package', label: 'Boxes' },
-  { name: 'scan', icon: 'scan-line', label: 'Scan', center: true },
-  { name: 'members', icon: 'users', label: 'Share' },
+  { name: 'capture', icon: 'camera', label: 'Capture', center: true },
+  { name: 'find', icon: 'search', label: 'Find' },
 ];
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
@@ -18,23 +20,24 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>
       {TABS.map((tab) => {
+        if (tab.center) {
+          // Verb: capture is an action screen, not a tab destination.
+          return (
+            <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={() => router.push('/capture')} style={styles.centerWrap}>
+              <View style={styles.centerBtn}>
+                <Icon name={tab.icon} size={26} color="#fff" />
+              </View>
+              <Text style={styles.centerLabel}>{tab.label}</Text>
+            </Pressable>
+          );
+        }
+
         const routeIndex = state.routes.findIndex((r: { name: string }) => r.name === tab.name);
         const focused = state.index === routeIndex;
         const onPress = () => {
           const event = navigation.emit({ type: 'tabPress', target: state.routes[routeIndex]?.key, canPreventDefault: true });
           if (!focused && !event.defaultPrevented) navigation.navigate(tab.name);
         };
-
-        if (tab.center) {
-          return (
-            <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={onPress} style={styles.centerWrap}>
-              <View style={styles.centerBtn}>
-                <Icon name={tab.icon} size={26} color="#fff" />
-              </View>
-            </Pressable>
-          );
-        }
-
         return (
           <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={onPress} style={styles.tab}>
             <Icon name={tab.icon} size={24} color={focused ? palette.green700 : palette.ink400} />
@@ -50,8 +53,7 @@ export default function TabsLayout() {
   return (
     <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="scan" />
-      <Tabs.Screen name="members" />
+      <Tabs.Screen name="find" />
     </Tabs>
   );
 }
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
   },
   tab: { alignItems: 'center', gap: 3, minWidth: 56 },
   label: { fontFamily: fonts.body.extra, fontSize: 11 },
-  centerWrap: { alignItems: 'center', justifyContent: 'flex-end', minWidth: 56 },
+  centerWrap: { alignItems: 'center', justifyContent: 'flex-end', minWidth: 56, gap: 2 },
   centerBtn: {
     width: 56,
     height: 56,
@@ -80,4 +82,5 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -6 }],
     ...shadow.brand,
   },
+  centerLabel: { fontFamily: fonts.body.extra, fontSize: 11, color: palette.green700, marginTop: -4 },
 });
