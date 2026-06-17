@@ -15,11 +15,13 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.organizard.app",
-      "buildNumber": "17",
+      "buildNumber": "18",
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Tuck uses the camera to photograph your items and scan box QR labels.",
         "NSLocationWhenInUseUsageDescription": "Tuck uses your location to fill in the move's from/to addresses.",
+        "NSMicrophoneUsageDescription": "Tuck uses the microphone for hands-free Streaming Mode — say an item and it's added to the box.",
+        "NSSpeechRecognitionUsageDescription": "Tuck transcribes your voice on-device in Streaming Mode to fill in item names, quantities and values.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
