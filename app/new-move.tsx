@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { AddressField, Button, Card, DateField, formatTargetDate, Header, Input } from '@/components';
+import { shareMove } from '@/lib/share';
 import { useStore } from '@/store/useStore';
 import { colors } from '@/theme';
 
@@ -24,6 +25,11 @@ export default function NewMove() {
       to: to.trim(),
       target: targetDate ? formatTargetDate(targetDate) : '',
     });
+    // Synced by default: a signed-in user's new move is pushed to the server right away
+    // (offline → it stays local and is migrated up on the next sign-in / sync).
+    if (useStore.getState().session) {
+      void shareMove().catch((e) => console.warn('new move: server sync failed (stays local)', e));
+    }
     router.replace('/(tabs)');
   };
 

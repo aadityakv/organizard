@@ -9,6 +9,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import {
   AddressField,
+  Avatar,
   Badge,
   Button,
   DateField,
@@ -22,6 +23,8 @@ import {
 } from '@/components';
 import { moveSummaries, useStore } from '@/store/useStore';
 import type { MoveSummary } from '@/store/library';
+import { deleteAccount } from '@/lib/auth';
+import { flushAndSignOut } from '@/lib/share';
 import { PERM } from '@/lib/permissions';
 import { colors, fonts, palette, radius, shadow, space } from '@/theme';
 
@@ -97,11 +100,77 @@ export default function Moves() {
     [library, currentMoveId, accountId, liveSlice],
   );
 
+  const account = useStore((s) => s.account);
+  const session = useStore((s) => s.session);
+
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
   const [pasted, setPasted] = useState('');
   const [menuFor, setMenuFor] = useState<MoveSummary | null>(null);
   const [editFor, setEditFor] = useState<MoveSummary | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  const accountButton = (
+    <Pressable onPress={() => setAccountOpen(true)} hitSlop={8} accessibilityLabel="Account">
+      {account ? (
+        <Avatar name={account.name} size={32} />
+      ) : (
+        <View style={styles.guestAvatar}>
+          <Icon name="user" size={18} color={palette.ink500} />
+        </View>
+      )}
+    </Pressable>
+  );
+
+  const onDeleteAccount = () =>
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your account and any moves saved to it. This can’t be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setAccountOpen(false);
+            deleteAccount().catch((e) => Alert.alert('Could not delete account', e instanceof Error ? e.message : 'Something went wrong.'));
+          },
+        },
+      ],
+    );
+
+  const accountSheet = (
+    <Sheet visible={accountOpen} onClose={() => setAccountOpen(false)} title="Account">
+      <View style={styles.accountSheet}>
+        {session ? (
+          <>
+            <View style={styles.accountRow}>
+              <Avatar name={account?.name ?? 'You'} size={44} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.accountSheetName} numberOfLines={1}>{account?.name ?? 'You'}</Text>
+                {account?.email ? <Text style={styles.accountSheetEmail} numberOfLines={1}>{account.email}</Text> : null}
+              </View>
+            </View>
+            <Button variant="secondary" fullWidth iconLeft="log-out" onPress={() => { setAccountOpen(false); void flushAndSignOut(); }}>
+              Sign out
+            </Button>
+            <Button variant="danger" fullWidth iconLeft="trash-2" onPress={onDeleteAccount}>
+              Delete account
+            </Button>
+          </>
+        ) : (
+          <>
+            <Text style={styles.guestNote}>
+              You’re using Tuck as a guest — your moves are saved on this device only. Sign in to back them up and sync across your devices.
+            </Text>
+            <Button fullWidth iconLeft="log-in" onPress={() => { setAccountOpen(false); router.push('/sign-in'); }}>
+              Log in or sign up
+            </Button>
+          </>
+        )}
+      </View>
+    </Sheet>
+  );
 
   const active = summaries.filter((s) => !s.archived);
   const archived = summaries.filter((s) => s.archived);
@@ -147,6 +216,7 @@ export default function Moves() {
   if (summaries.length === 0) {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <View style={styles.topBar}>{accountButton}</View>
         <View style={styles.emptyShell}>
           <View style={styles.hero}>
             <View style={styles.markGlow}>
@@ -173,6 +243,7 @@ export default function Moves() {
           onChange={setPasted}
           onSubmit={submitJoin}
         />
+        {accountSheet}
       </SafeAreaView>
     );
   }
@@ -182,6 +253,7 @@ export default function Moves() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
         title="Your moves"
+        leading={accountButton}
         trailing={
           <IconButton
             icon="plus"
@@ -284,6 +356,7 @@ export default function Moves() {
         onChange={setPasted}
         onSubmit={submitJoin}
       />
+      {accountSheet}
     </SafeAreaView>
   );
 }
@@ -373,6 +446,13 @@ function JoinSheet({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.surfaceApp },
   content: { paddingHorizontal: 16, paddingBottom: 60, gap: 12 },
+  topBar: { flexDirection: 'row', justifyContent: 'flex-start', paddingHorizontal: 16, paddingTop: 8 },
+  guestAvatar: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceCard, borderWidth: 1, borderColor: colors.borderSubtle },
+  accountSheet: { gap: 12, paddingBottom: 8 },
+  accountRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingBottom: 4 },
+  accountSheetName: { fontFamily: fonts.body.bold, fontSize: 16, color: palette.ink900 },
+  accountSheetEmail: { fontFamily: fonts.body.semibold, fontSize: 13, color: palette.ink500 },
+  guestNote: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20 },
 
   // ── Move row ──
   row: {
