@@ -13,10 +13,20 @@ during a stressful move.
 
 Data hierarchy: **Move › Room › Box › Item**.
 
-**Product model:** local-first and free. Every move works fully offline on the
-device. *Sharing* a move is the paid/optional surface — it pushes the move to the
-server so others can join and collaborate. Billing is currently **OFF** (sharing is
-free for now). Sign-in is **Sign in with Apple** only.
+**Product model (as of build 16):** account-based sync, Spotify-style. First launch
+shows onboarding: **log in / sign up**, or **continue as guest**.
+- **Guest** → moves are **local-only** on the device (fully offline, free).
+- **Signed in** → every move is **synced to the account** (pushed to the server,
+  cached locally for offline use, available across devices). Creating a move while
+  signed in pushes it up; signing in **migrates** a guest's local moves up; signing
+  **out drops the synced moves** from the device (re-pulled on next sign-in) and keeps
+  local-only moves. *Sharing* is no longer what puts a move on the server — for a
+  signed-in user the move is already synced, so "Share" just **invites** collaborators.
+- Sign-in is **Sign in with Apple OR email/password** (account deletion in-app, per
+  5.1.1(v)). Billing is **OFF** (everything free for now). Account UI lives on the
+  Moves library (profile button → account sheet). Key code: `lib/share.ts`
+  (`shareMove`/`syncLocalMovesUp`/`flushAndSignOut`), `store/sync.ts` (`pullServerMoves`),
+  store `signOut` (drops synced moves). See the email-auth auto-memory.
 
 Currently iOS-only (shipped via TestFlight). Android targets exist in config but
 aren't shipped; cross-platform code should degrade gracefully on Android, not break.
