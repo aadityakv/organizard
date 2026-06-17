@@ -19,6 +19,7 @@ export { Avatar, type AvatarProps } from './Avatar';
 // Design-system primitives (forms)
 export { Input, type InputProps } from './Input';
 export { AuthPanel } from './AuthPanel';
+export { StreamUpsell } from './StreamUpsell';
 export { Stepper, type StepperProps } from './Stepper';
 export { Segmented, type SegmentedProps } from './Segmented';
 export { AddressField, type AddressFieldProps } from './AddressField';

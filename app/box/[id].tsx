@@ -31,6 +31,7 @@ import {
   Segmented,
   Sheet,
   StatusChip,
+  StreamUpsell,
   Thumb,
 } from '@/components';
 import {
@@ -57,6 +58,7 @@ import {
   boxPhotos,
   boxStats,
   currentRole,
+  isProNow,
   markerById,
   roomById,
   selectBoxItems,
@@ -84,6 +86,9 @@ export default function BoxDetail() {
   const role = useStore(currentRole);
   const box = useStore((s) => boxById(s, boxId));
   const session = useStore((s) => s.session);
+  const isPro = useStore(isProNow);
+  const startProTrial = useStore((s) => s.startProTrial);
+  const [streamUpsell, setStreamUpsell] = useState(false);
 
   // Store actions (grabbed individually so selectors stay stable).
   const setBoxStatus = useStore((s) => s.setBoxStatus);
@@ -456,10 +461,13 @@ export default function BoxDetail() {
                   size="lg"
                   fullWidth
                   iconLeft="audio-lines"
-                  onPress={() => router.push(`/stream/${box.id}`)}
+                  onPress={() => (isPro ? router.push(`/stream/${box.id}`) : setStreamUpsell(true))}
                 >
                   Stream items
                 </Button>
+                {!isPro ? (
+                  <View style={styles.proBadge}><Text style={styles.proBadgeText}>PRO</Text></View>
+                ) : null}
               </View>
             </View>
           ) : (
@@ -467,6 +475,13 @@ export default function BoxDetail() {
           )}
         </View>
       </ScrollView>
+
+      {/* ── Streaming Pro upsell ── */}
+      <StreamUpsell
+        visible={streamUpsell}
+        onClose={() => setStreamUpsell(false)}
+        onTryPro={() => { startProTrial(); setStreamUpsell(false); router.push(`/stream/${box.id}`); }}
+      />
 
       {/* ── Status sheet ── */}
       <StatusSheet
@@ -1242,6 +1257,8 @@ const styles = StyleSheet.create({
 
   // Bottom
   bottom: { marginTop: 20 },
+  proBadge: { position: 'absolute', top: -7, right: 8, backgroundColor: palette.amber400, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
+  proBadgeText: { fontSize: 10, fontFamily: fonts.body.extra, color: palette.ink900, letterSpacing: 0.3 },
 
   // Sheet — shared
   sheetBlurb: {
