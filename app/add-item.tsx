@@ -117,7 +117,7 @@ function PhotoThumb({
 }
 
 export default function AddItem() {
-  const { boxId, itemId } = useLocalSearchParams<{ boxId: string; itemId?: string }>();
+  const { boxId, itemId, photo } = useLocalSearchParams<{ boxId: string; itemId?: string; photo?: string }>();
   const isEdit = !!itemId;
 
   // ── Store: box context, markers, role, the add action ──────────────────────
@@ -173,6 +173,14 @@ export default function AddItem() {
     setTargetBoxId(boxId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemId]);
+
+  // Prefill a photo captured in the quick single-capture flow (create mode only).
+  const photoPrefilled = useRef(false);
+  useEffect(() => {
+    if (isEdit || !photo || photoPrefilled.current) return;
+    photoPrefilled.current = true;
+    setPhotos((prev) => (prev.length ? prev : [photo]));
+  }, [isEdit, photo]);
 
   const hueName = box?.color ?? 'green';
 
