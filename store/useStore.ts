@@ -26,6 +26,8 @@ type Account = { id: string; name: string; email: string | null };
 
 type State = {
   onboarded: boolean;
+  /** Local Pro entitlement: a 7-day trial expiry (ms). Real billing sets this later. */
+  proTrialUntil: number | null;
 
   move: Move;
   rooms: Room[];
@@ -63,6 +65,8 @@ type State = {
 
 type Actions = {
   setOnboarded: (v: boolean) => void;
+  /** Start the Pro free trial (gate-UI-now; real RevenueCat billing wires in later). */
+  startProTrial: () => void;
 
   addRoom: (input: { name: string; dest?: string | null; icon?: string; color?: string }) => string;
   updateRoom: (id: string, patch: Partial<Pick<Room, 'name' | 'dest' | 'icon' | 'color'>>) => void;
@@ -126,6 +130,7 @@ const EMPTY_MOVE: Move = { name: '', from: '', to: '', target: '' };
 
 const initialState: State = {
   onboarded: false,
+  proTrialUntil: null,
   move: EMPTY_MOVE,
   rooms: [],
   boxes: [],
@@ -168,6 +173,7 @@ export const useStore = create<Store>()(
       ...initialState,
 
       setOnboarded: (v) => set({ onboarded: v }),
+      startProTrial: () => set({ proTrialUntil: Date.now() + 7 * 24 * 60 * 60 * 1000 }),
 
       addRoom: ({ name, dest = null, icon = 'box', color = 'slate' }) => {
         const id = uid('r');
@@ -617,6 +623,7 @@ export const useStore = create<Store>()(
       },
       partialize: (s) => ({
         onboarded: s.onboarded,
+        proTrialUntil: s.proTrialUntil,
         move: s.move, rooms: s.rooms, boxes: s.boxes, statuses: s.statuses,
         markers: s.markers, members: s.members, itemsByBox: s.itemsByBox,
         account: s.account, activeMode: s.activeMode, serverMoveId: s.serverMoveId,
@@ -742,6 +749,10 @@ export const allIndexedItems = (s: Store): IndexedItem[] => {
   }
   return out;
 }
+
+/** Pro entitlement = an active local trial (real billing will also set this later). */
+export const isProNow = (s: { proTrialUntil: number | null }): boolean =>
+  s.proTrialUntil != null && s.proTrialUntil > Date.now();
 
 export const moveSummaries = (s: Store): MoveSummary[] => {
   const out: MoveSummary[] = [];
