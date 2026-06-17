@@ -17,7 +17,7 @@ export default function AuthVerify() {
       } catch {
         setFailed(true);
       }
-      router.replace('/(tabs)/members');
+      router.replace('/members');
     })();
   }, [token]);
 

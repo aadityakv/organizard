@@ -88,6 +88,9 @@ export default function RootLayout() {
           <Stack.Screen name="item/[id]" />
           <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="stream/[boxId]" options={{ animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="capture" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="members" />
+          <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom' }} />
           <Stack.Screen name="print-labels" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
           {/* Card modal (NOT fullScreenModal): a fullScreenModal is dead to touch on
