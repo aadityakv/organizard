@@ -63,6 +63,42 @@ export async function shareMove(): Promise<{ moveId: string }> {
   return { moveId: serverMoveId };
 }
 
+/**
+ * Push every local (guest) move up to the server so a signed-in user's moves are all
+ * synced/backed up ("synced by default"). Reuses shareMove by briefly switching to each
+ * local move; the original move is restored afterward. A push that fails (offline) leaves
+ * that move local and it retries on the next call. No-op when signed out.
+ */
+export async function syncLocalMovesUp(): Promise<void> {
+  if (!useStore.getState().session) return;
+  const startId = useStore.getState().currentMoveId;
+  const localIds = Object.values(useStore.getState().library)
+    .filter((b) => b.activeMode === 'local')
+    .map((b) => b.id);
+  for (const id of localIds) {
+    try {
+      useStore.getState().switchMove(id);
+      await shareMove();
+    } catch (e) {
+      console.warn('syncLocalMovesUp: failed for', id, e); // stays local; retried later
+    }
+  }
+  if (startId && useStore.getState().library[startId]) useStore.getState().switchMove(startId);
+}
+
+/**
+ * Sign out safely: flush the open move's pending edits while still authenticated, then
+ * clear the session (which drops synced moves from the device — they live in the cloud).
+ */
+export async function flushAndSignOut(): Promise<void> {
+  try {
+    await syncActiveMove();
+  } catch (e) {
+    console.warn('signOut: final sync failed; recent offline edits may not have saved', e);
+  }
+  useStore.getState().signOut();
+}
+
 /** Owner creates a shareable invite link for the active shared move. */
 export async function createInviteLink(role: Role): Promise<string> {
   const s = useStore.getState();

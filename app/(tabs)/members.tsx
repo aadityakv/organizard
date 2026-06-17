@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar, AuthPanel, Button, Card, Header, Icon, LockNote, RoleBadge, Segmented } from '@/components';
 import type { Member, Role } from '@/data/types';
 import { api, ApiError } from '@/lib/api';
-import { deleteAccount } from '@/lib/auth';
 import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from '@/lib/billing';
 import { createInviteLink, shareMove } from '@/lib/share';
 import { syncActiveMove } from '@/store/sync';
@@ -34,7 +33,6 @@ export default function Members() {
   const serverMoveId = useStore((s) => s.serverMoveId);
   const members = useStore((s) => s.members);
   const moveName = useStore((s) => s.move.name);
-  const signOut = useStore((s) => s.signOut);
 
   const [busy, setBusy] = useState(false);
   const [inviteRole, setInviteRole] = useState<Role>('editor');
@@ -58,16 +56,6 @@ export default function Members() {
       setBusy(false);
     }
   };
-
-  const doDeleteAccount = () =>
-    Alert.alert(
-      'Delete account?',
-      'This permanently deletes your account and any moves you’ve shared to the server. Moves saved only on this device are not affected. This can’t be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => guard(deleteAccount, 'Could not delete account') },
-      ],
-    );
 
   const doShare = () => guard(async () => {
     // Paywall: subscription required to own a shared move. Server enforces it too.
@@ -107,7 +95,6 @@ export default function Members() {
           <AuthPanel title="Sign in to share" subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner." />
         ) : activeMode === 'local' ? (
           <>
-            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} onDelete={doDeleteAccount} />
             <Card style={styles.card}>
               <Text style={styles.h}>Share “{moveName}”</Text>
               <Text style={styles.p}>This uploads the move so your partner can view and edit it in sync. You stay the owner.</Text>
@@ -118,7 +105,6 @@ export default function Members() {
           </>
         ) : (
           <>
-            <AccountChip name={account?.name ?? 'You'} email={account?.email ?? null} onSignOut={signOut} onDelete={doDeleteAccount} />
             <Card style={styles.card}>
               <Text style={styles.h}>Invite a packing buddy</Text>
               {canManage ? (
@@ -154,26 +140,6 @@ export default function Members() {
         )}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function AccountChip({ name, email, onSignOut, onDelete }: { name: string; email: string | null; onSignOut: () => void; onDelete: () => void }) {
-  return (
-    <View style={styles.accountWrap}>
-      <View style={styles.account}>
-        <Avatar name={name} size={36} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.accountName} numberOfLines={1}>{name}</Text>
-          {email ? <Text style={styles.accountEmail} numberOfLines={1}>{email}</Text> : null}
-        </View>
-        <Pressable onPress={onSignOut} hitSlop={8}>
-          <Text style={styles.signOut}>Sign out</Text>
-        </Pressable>
-      </View>
-      <Pressable onPress={onDelete} hitSlop={6} accessibilityLabel="Delete account">
-        <Text style={styles.deleteAccount}>Delete account</Text>
-      </Pressable>
-    </View>
   );
 }
 

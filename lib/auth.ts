@@ -4,6 +4,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { api } from '@/lib/api';
 import { saveSession } from '@/lib/session';
+import { syncLocalMovesUp } from '@/lib/share';
 import { pullServerMoves } from '@/store/sync';
 import { useStore } from '@/store/useStore';
 
@@ -11,8 +12,10 @@ async function adoptSession(session: string, user: { id: string; name: string; e
   await saveSession(session);
   useStore.getState().setSession(session, { id: user.id, name: user.name, email: user.email });
   useStore.getState().setOnboarded(true); // signing in completes onboarding
-  // Bring this account's shared moves onto the device (best-effort, non-blocking failures).
+  // Pull this account's existing moves onto the device, then push up any local (guest)
+  // moves so everything is synced/backed up ("synced by default"). Failures are non-fatal.
   await pullServerMoves();
+  await syncLocalMovesUp();
 }
 
 export const appleSignInAvailable = (): Promise<boolean> => AppleAuthentication.isAvailableAsync();

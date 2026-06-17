@@ -340,7 +340,24 @@ export const useStore = create<Store>()(
       setSession: (session, account) => set({ session, account }),
       signOut: () => {
         void clearSession();
-        set({ session: null, account: null });
+        set((s) => {
+          const now = Date.now();
+          // Reflect the open move's live state into its bundle before we filter.
+          const library = { ...s.library };
+          if (s.currentMoveId && library[s.currentMoveId]) {
+            library[s.currentMoveId] = snapshotInto(library[s.currentMoveId], extractSlice(s), now);
+          }
+          // Spotify model: account (synced) moves live in the cloud — drop them from this
+          // device on sign-out (re-pulled on next sign-in); keep guest/local-only moves.
+          const kept: Record<string, MoveBundle> = {};
+          for (const [id, b] of Object.entries(library)) {
+            if (!b.serverMoveId) kept[id] = b;
+          }
+          const base = { session: null, account: null, library: kept };
+          if (s.currentMoveId && kept[s.currentMoveId]) return base; // open move survived (local)
+          // Open move was a synced one we dropped (or none) — reset the live slice.
+          return { ...base, currentMoveId: null, ...sliceFromBundle(newBundle('__none__', EMPTY_MOVE, now)) };
+        });
       },
       enqueue: (m) => set((s) => (s.activeMode === 'shared' ? { outbox: [...s.outbox, m] } : {})),
       clearOutbox: (clientIds) => set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),
