@@ -1,0 +1,7 @@
+{
+  "name": "speech-recognizer",
+  "version": "1.0.0",
+  "description": "On-device speech-to-text (SFSpeechRecognizer + AVAudioEngine) — local Expo module, iOS only.",
+  "main": "index.ts",
+  "private": true
+}
