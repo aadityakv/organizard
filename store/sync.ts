@@ -85,6 +85,32 @@ export async function fullResync(): Promise<void> {
   await syncActiveMove();
 }
 
+/**
+ * After sign-in, pull the account's shared moves into the local library so they
+ * appear on this device (without disturbing the currently-open move). Best-effort:
+ * a failed snapshot for one move just skips it.
+ */
+export async function pullServerMoves(): Promise<void> {
+  const { session } = useStore.getState();
+  if (!session) return;
+  let moves: { id: string }[];
+  try {
+    ({ moves } = await api.me(session));
+  } catch {
+    return; // offline / transient — the move will still appear next sync trigger
+  }
+  for (const m of moves) {
+    const lib = useStore.getState().library;
+    if (Object.values(lib).some((b) => b.serverMoveId === m.id)) continue;
+    try {
+      const snap = await api.snapshot(session, m.id);
+      useStore.getState().importSharedMove(m.id, snap);
+    } catch (e) {
+      console.warn('pullServerMoves: snapshot failed', m.id, e);
+    }
+  }
+}
+
 /** Wire sync triggers for the lifetime of the component (mount it once, high up). */
 export function useSync(): void {
   const activeMode = useStore((s) => s.activeMode);

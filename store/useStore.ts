@@ -108,6 +108,9 @@ type Actions = {
   /** Delete a move: tear down the server copy if you own a shared move, then drop it locally. */
   deleteMove: (id: string) => Promise<void>;
   addSharedMoveFromSnapshot: (serverMoveId: string, snap: ServerSnapshot) => string;
+  /** Add a shared move to the library from a snapshot WITHOUT switching to it (used when
+   * pulling your moves after sign-in). No-op if a bundle for serverMoveId already exists. */
+  importSharedMove: (serverMoveId: string, snap: ServerSnapshot) => void;
 };
 
 /** Mutation types this build understands — used to drop legacy/poison outbox entries. */
@@ -532,6 +535,29 @@ export const useStore = create<Store>()(
           return { library, currentMoveId: id, ...sliceFromBundle(bundle) };
         });
         return id;
+      },
+
+      importSharedMove: (serverMoveId, snap) => {
+        set((s) => {
+          // Already in the library (by server id) — don't duplicate.
+          if (Object.values(s.library).some((b) => b.serverMoveId === serverMoveId)) return {};
+          const id = uid('mv');
+          const now = Date.now();
+          const bundle: MoveBundle = {
+            ...newBundle(id, { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' }, now),
+            activeMode: 'shared',
+            serverMoveId,
+            statuses: snap.statuses.map(toClientStatus),
+            markers: snap.markers.map(toClientMarker),
+            members: snap.members.map(toClientMember),
+            rooms: snap.rooms.map(toClientRoom),
+            boxes: snap.boxes.map(toClientBox),
+            itemsByBox: snapItemsByBox(snap),
+            lastSyncTs: 0,
+            outbox: [],
+          };
+          return { library: { ...s.library, [id]: bundle } };
+        });
       },
     }),
     {

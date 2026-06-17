@@ -75,8 +75,13 @@ export const api = {
     req<{ ok: true }>('/v1/auth/email/start', { method: 'POST', body: JSON.stringify({ email }) }, null),
   emailVerify: (token: string) =>
     req<AuthResult>(`/v1/auth/email/verify?token=${encodeURIComponent(token)}`, { method: 'GET' }, null),
+  emailRegister: (email: string, password: string) =>
+    req<AuthResult>('/v1/auth/email/register', { method: 'POST', body: JSON.stringify({ email, password }) }, null),
+  emailLogin: (email: string, password: string) =>
+    req<AuthResult>('/v1/auth/email/login', { method: 'POST', body: JSON.stringify({ email, password }) }, null),
   me: (session: string) => req<MeResult>('/v1/me', { method: 'GET' }, session),
   logout: (session: string) => req<{ ok: true }>('/v1/auth/logout', { method: 'POST' }, session),
+  deleteAccount: (session: string) => req<{ ok: true }>('/v1/auth/account', { method: 'DELETE' }, session),
 
   // --- moves / sync ---
   createMove: (session: string, body: { name: string; from?: string | null; to?: string | null; targetDate?: string | null; seed?: boolean }) =>
