@@ -1,9 +1,7 @@
-// The capture screen (Claude Design "Capture Modes & Gating") — one control, three modes:
-//   • One item (free): snap one photo → name it in Add-item. One at a time, no wall.
-//   • Snap many (Pro): rapid photos into a session, committed to the box on "Done".
-//   • Say a box (Pro): voice-only — talk a whole box in at once (no camera).
-// The two streaming modes are Pro-gated; tapping one as a free user upsells in place.
+// Streaming Mode — rapid capture session (Claude Design "Streaming Mode Prototype").
+// Photos-on: snap → say one item. Photos-off (voice only): talk a whole box in at once.
 // Dictation is simulated for now (lib/dictation); the on-device mic swaps in later.
+// Items captured into a local session, committed to their boxes on "Done".
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,38 +14,22 @@ import { money } from '@/lib/money';
 import { persistCapture } from '@/lib/photos';
 import { iconFor, parseList, parseUtterance } from '@/lib/streamParse';
 import { uid } from '@/lib/uid';
-import { isProNow, useStore } from '@/store/useStore';
+import { useStore } from '@/store/useStore';
 import { boxColor, boxTint, colors, fonts, palette } from '@/theme';
 
 type SItem = { id: string; name: string; qty: number | null; value: number | null; icon: string; needsFix: boolean; boxId: string; photo?: string | null };
 type Mic = 'ready' | 'listening' | 'gotit' | 'fail';
-// The one control on the capture screen: free "One item" + the two Pro streaming modes.
-// "Snap many" = rapid photos, "Say a box" = voice-only. Photos-vs-voice is no longer a
-// separate toggle — it's just which of the three you pick.
-type SMode = 'one' | 'snap' | 'say';
-const MODES: { key: SMode; label: string }[] = [
-  { key: 'one', label: 'One item' },
-  { key: 'snap', label: 'Snap many' },
-  { key: 'say', label: 'Say a box' },
-];
-const normMode = (m?: string): SMode => (m === 'snap' || m === 'say' ? m : 'one');
 
 export default function StreamSession() {
-  const { boxId: initialBoxId, mode: initialMode } = useLocalSearchParams<{ boxId: string; mode?: string }>();
+  const { boxId: initialBoxId } = useLocalSearchParams<{ boxId: string }>();
   const boxes = useStore((s) => s.boxes);
-  const isPro = useStore(isProNow);
-  const startProTrial = useStore((s) => s.startProTrial);
 
   const [boxId, setBoxId] = useState<string>(initialBoxId ?? boxes[0]?.id ?? '');
   const [session, setSession] = useState<SItem[]>([]);
   const [mic, setMic] = useState<Mic>('ready');
   const [transcript, setTranscript] = useState('');
   const [lastId, setLastId] = useState<string | null>(null);
-  // Clamp the initial mode to the entitlement so a `?mode=snap` deep link can't drop a
-  // free user straight into a Pro streaming session, bypassing the paywall.
-  const [mode, setMode] = useState<SMode>(() => (isProNow(useStore.getState()) ? normMode(initialMode) : 'one'));
-  // Non-null while a free user is being upsold the Pro mode they just tapped.
-  const [upsellMode, setUpsellMode] = useState<SMode | null>(null);
+  const [voiceMode, setVoiceMode] = useState(false);
   const [flash, setFlash] = useState(false);
   const [ledgerOpen, setLedgerOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -91,11 +73,10 @@ export default function StreamSession() {
     }
   };
 
-  // Switching modes invalidates any in-flight / pending photo.
-  useEffect(() => { pendingPhoto.current = null; captureSeq.current += 1; }, [mode]);
+  // Dropping out of photo mode invalidates any in-flight / pending photo.
+  useEffect(() => { pendingPhoto.current = null; captureSeq.current += 1; }, [voiceMode]);
 
-  const voiceMode = mode === 'say';   // voice-only (no camera)
-  const photoMode = !voiceMode;       // camera shows for "One item" and "Snap many"
+  const photoMode = !voiceMode;
   const box = boxes.find((b) => b.id === boxId) ?? boxes[0];
   const lastIt = session.find((it) => it.id === lastId) ?? null;
   const editIt = session.find((it) => it.id === editId) ?? null;
@@ -198,36 +179,8 @@ export default function StreamSession() {
     scheduleReady();
   };
 
-  // Tap a mode. "One item" is always free; the two streaming modes upsell free users
-  // in place, then open once subscribed.
-  const onMode = (k: SMode) => {
-    if (mic === 'listening') return;
-    if (k === 'one' || isPro) { setMode(k); return; }
-    setUpsellMode(k);
-  };
-
-  // Free "One item": snap one photo, then name it in the regular Add-item form. Returns
-  // here afterwards (router.push), so you can snap the next one — one at a time, no wall.
-  const captureSingle = async () => {
-    if (!boxId) return;
-    // No camera access yet — just open the form; it has its own photo + permission UI.
-    if (!camPerm?.granted) { router.push({ pathname: '/add-item', params: { boxId } }); return; }
-    setFlash(true);
-    if (flashTmo.current) clearTimeout(flashTmo.current);
-    flashTmo.current = setTimeout(() => setFlash(false), 200);
-    let photo: string | null = null;
-    try {
-      const pic = await cameraRef.current?.takePictureAsync({ quality: 0.6 });
-      if (pic?.uri) photo = await persistCapture(pic.uri);
-    } catch (e) {
-      console.warn('stream: single capture failed', e); // still let them name the item
-    }
-    router.push({ pathname: '/add-item', params: photo ? { boxId, photo } : { boxId } });
-  };
-
   // The big button: tap to capture, tap again to stop (finish the utterance now).
   const onCapture = () => {
-    if (mode === 'one') { void captureSingle(); return; }
     if (mic === 'listening') {
       dictRef.current?.stop();
       return;
@@ -312,27 +265,22 @@ export default function StreamSession() {
             <Text style={styles.boxChipText} numberOfLines={1}>{boxLabel(box)}</Text>
             <Icon name="chevron-down" size={15} color="rgba(255,255,255,0.8)" />
           </Pressable>
-          {mode === 'snap' ? (
+          {photoMode ? (
             <View style={styles.iconBtn}><Icon name="zap" size={17} color="#fff" /></View>
           ) : (
             <View style={styles.iconBtn} />
           )}
         </View>
 
-        {/* the one control: One item · Snap many · Say a box (streaming modes Pro-gated) */}
-        <View style={styles.modeRow}>
-          <View style={styles.modeTrack}>
-            {MODES.map((m) => {
-              const active = mode === m.key;
-              const locked = !isPro && m.key !== 'one';
-              return (
-                <Pressable key={m.key} onPress={() => onMode(m.key)} style={[styles.modeSeg, active && styles.modeSegActive]} accessibilityLabel={m.label}>
-                  <Text style={[styles.modeText, active && styles.modeTextActive]} numberOfLines={1}>{m.label}</Text>
-                  {locked ? <View style={styles.modePro}><Text style={styles.modeProText}>PRO</Text></View> : null}
-                </Pressable>
-              );
-            })}
-          </View>
+        {/* photos switch */}
+        <View style={styles.switchWrap}>
+          <Pressable onPress={() => mic !== 'listening' && setVoiceMode((v) => !v)} style={styles.switchBtn}>
+            <Icon name={voiceMode ? 'camera-off' : 'camera'} size={17} color={voiceMode ? 'rgba(255,255,255,0.55)' : '#fff'} />
+            <Text style={styles.switchLabel}>{voiceMode ? 'Photos off' : 'Photos on'}</Text>
+            <View style={[styles.track, { backgroundColor: voiceMode ? 'rgba(255,255,255,0.25)' : colors.brand }]}>
+              <View style={[styles.knob, { left: voiceMode ? 3 : 19 }]} />
+            </View>
+          </Pressable>
         </View>
 
         {/* viewfinder */}
@@ -350,13 +298,8 @@ export default function StreamSession() {
               <Icon name="list-music" size={52} color="rgba(255,255,255,0.5)" />
             </View>
           )}
-          <Text style={styles.hint}>{
-            mode === 'one' ? 'Snap one item, then name it'
-              : mic === 'listening' ? 'Listening… tap the button when you’re done'
-                : voiceMode ? 'Tap, then name everything in the box'
-                  : 'Snap, then say what it is'
-          }</Text>
-          {simulated && mode !== 'one' ? <Text style={styles.simNote}>Mic unavailable here — simulating dictation</Text> : null}
+          <Text style={styles.hint}>{mic === 'listening' ? 'Listening… tap the button when you’re done' : voiceMode ? 'Tap, then name everything in the box' : 'Snap, then say what it is'}</Text>
+          {simulated ? <Text style={styles.simNote}>Mic unavailable here — simulating dictation</Text> : null}
         </View>
 
         {/* mic pills */}
@@ -406,57 +349,30 @@ export default function StreamSession() {
           </Pressable>
         ) : null}
 
-        {/* bottom controls — One item is just the shutter; streaming adds strip + redo */}
+        {/* bottom controls */}
         <View style={styles.bottom}>
-          {mode === 'one' ? (
-            <>
-              <View style={styles.bottomSide} />
-              <Pressable onPress={onCapture} style={styles.shutter} accessibilityLabel="Capture">
-                <Icon name="camera" size={30} color="#fff" />
-              </Pressable>
-              <View style={styles.bottomSide} />
-            </>
-          ) : (
-            <>
-              <View style={styles.bottomSide}>
-                <Pressable onPress={() => setLedgerOpen(true)} style={styles.strip} accessibilityLabel="Session items">
-                  {session.slice(-2).map((it, i) => (
-                    <View key={it.id} style={[styles.thumb, { backgroundColor: boxTint(colorOf(it.boxId)), marginLeft: i === 0 ? 0 : -16 }]}>
-                      <Icon name={it.icon} size={20} color={boxColor(colorOf(it.boxId))} />
-                    </View>
-                  ))}
-                  <Text style={[styles.countPill, session.length ? { marginLeft: 18 } : null]}>{session.length}</Text>
-                </Pressable>
-              </View>
-              <Pressable onPress={onCapture} style={[styles.shutter, mic === 'listening' && styles.shutterStop]} accessibilityLabel={mic === 'listening' ? 'Stop' : voiceMode ? 'Say items' : 'Capture'}>
-                <Icon name={mic === 'listening' ? 'square' : voiceMode ? 'mic' : 'camera'} size={mic === 'listening' ? 26 : voiceMode ? 32 : 30} color="#fff" />
-              </Pressable>
-              <View style={[styles.bottomSide, { alignItems: 'flex-end' }]}>
-                <Pressable onPress={onResay} style={styles.redo} accessibilityLabel="Redo last">
-                  <Icon name="rotate-ccw" size={20} color={resayActive ? '#fff' : 'rgba(255,255,255,0.4)'} />
-                </Pressable>
-              </View>
-            </>
-          )}
+          <View style={styles.bottomSide}>
+            <Pressable onPress={() => setLedgerOpen(true)} style={styles.strip} accessibilityLabel="Session items">
+              {session.slice(-2).map((it, i) => (
+                <View key={it.id} style={[styles.thumb, { backgroundColor: boxTint(colorOf(it.boxId)), marginLeft: i === 0 ? 0 : -16 }]}>
+                  <Icon name={it.icon} size={20} color={boxColor(colorOf(it.boxId))} />
+                </View>
+              ))}
+              <Text style={[styles.countPill, session.length ? { marginLeft: 18 } : null]}>{session.length}</Text>
+            </Pressable>
+          </View>
+          <Pressable onPress={onCapture} style={[styles.shutter, mic === 'listening' && styles.shutterStop]} accessibilityLabel={mic === 'listening' ? 'Stop' : voiceMode ? 'Say items' : 'Capture'}>
+            <Icon name={mic === 'listening' ? 'square' : voiceMode ? 'mic' : 'camera'} size={mic === 'listening' ? 26 : voiceMode ? 32 : 30} color="#fff" />
+          </Pressable>
+          <View style={[styles.bottomSide, { alignItems: 'flex-end' }]}>
+            <Pressable onPress={onResay} style={styles.redo} accessibilityLabel="Redo last">
+              <Icon name="rotate-ccw" size={20} color={resayActive ? '#fff' : 'rgba(255,255,255,0.4)'} />
+            </Pressable>
+          </View>
         </View>
       </SafeAreaView>
 
       {flash ? <View style={styles.flashOverlay} /> : null}
-
-      {/* Pro upsell, shown in place when a free user taps a streaming mode */}
-      {upsellMode ? (
-        <View style={styles.upsellScrim}>
-          <View style={styles.upsellCard}>
-            <View style={styles.upsellGlyph}><Icon name="zap" size={25} color={palette.green700} /></View>
-            <Text style={styles.upsellTitle}>Pack 10× faster with Stream</Text>
-            <Text style={styles.upsellSub}>Snap or speak item after item — Tuck fills in the name, count and value as you go. Part of Tuck Pro.</Text>
-            <Button fullWidth size="lg" onPress={() => { const m = upsellMode; startProTrial(); setUpsellMode(null); if (m) setMode(m); }}>Try Pro free for 7 days</Button>
-            <Pressable onPress={() => setUpsellMode(null)} style={styles.upsellLater} accessibilityLabel="Maybe later">
-              <Text style={styles.upsellLaterText}>Maybe later</Text>
-            </Pressable>
-          </View>
-        </View>
-      ) : null}
 
       {/* box picker */}
       <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title="Stream into which box?">
@@ -581,21 +497,11 @@ const styles = StyleSheet.create({
   boxChip: { flexDirection: 'row', alignItems: 'center', gap: 7, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.16)', maxWidth: 220 },
   dot: { width: 9, height: 9, borderRadius: 5 },
   boxChipText: { color: '#fff', fontFamily: fonts.body.bold, fontSize: 13.5, flexShrink: 1 },
-  modeRow: { alignItems: 'center', marginTop: 14 },
-  modeTrack: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 999, padding: 4, gap: 3 },
-  modeSeg: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 32, paddingHorizontal: 12, borderRadius: 999, justifyContent: 'center' },
-  modeSegActive: { backgroundColor: '#fff' },
-  modeText: { fontFamily: fonts.body.extra, fontSize: 12.5, color: 'rgba(255,255,255,0.9)' },
-  modeTextActive: { color: palette.ink900 },
-  modePro: { backgroundColor: palette.amber400, borderRadius: 999, paddingHorizontal: 6, paddingVertical: 1 },
-  modeProText: { fontSize: 9.5, fontFamily: fonts.body.extra, color: palette.ink900, letterSpacing: 0.3 },
-  upsellScrim: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(20,22,21,0.5)', justifyContent: 'flex-end', padding: 14 },
-  upsellCard: { backgroundColor: colors.surfaceCard, borderRadius: 22, padding: 22, alignItems: 'center', gap: 8 },
-  upsellGlyph: { width: 48, height: 48, borderRadius: 14, backgroundColor: palette.green50, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  upsellTitle: { fontFamily: fonts.display.semibold, fontSize: 19, color: palette.ink900, textAlign: 'center' },
-  upsellSub: { fontSize: 13, fontFamily: fonts.body.bold, color: palette.ink500, textAlign: 'center', lineHeight: 19, marginBottom: 6 },
-  upsellLater: { marginTop: 4, paddingVertical: 6 },
-  upsellLaterText: { fontFamily: fonts.body.extra, fontSize: 12.5, color: palette.ink400 },
+  switchWrap: { alignItems: 'center', marginTop: 14 },
+  switchBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.14)', borderRadius: 999, paddingVertical: 8, paddingLeft: 15, paddingRight: 10 },
+  switchLabel: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 13 },
+  track: { width: 40, height: 24, borderRadius: 999, justifyContent: 'center' },
+  knob: { position: 'absolute', top: 3, width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff' },
   viewfinder: { alignItems: 'center', marginTop: 28, gap: 14, paddingHorizontal: 40 },
   frame: { width: 160, height: 160 },
   corner: { position: 'absolute', width: 28, height: 28, borderColor: 'rgba(255,255,255,0.85)' },
