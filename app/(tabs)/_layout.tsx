@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { Icon } from '@/components/Icon';
+import { useStore } from '@/store/useStore';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
 // Bottom nav: Boxes · Capture (center, raised verb) · Find. The center button is a
@@ -17,13 +18,20 @@ const TABS: { name: string; icon: string; label: string; center?: boolean }[] = 
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const boxes = useStore((s) => s.boxes);
+  // Capture opens the single-item capture view of the unified capture screen, scoped to
+  // the most recent box (or the add-a-box prompt when the library is empty).
+  const openCapture = () => {
+    const b = boxes[boxes.length - 1]?.id;
+    router.push(b ? `/stream/${b}?view=capture` : '/capture');
+  };
   return (
     <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>
       {TABS.map((tab) => {
         if (tab.center) {
           // Verb: capture is an action screen, not a tab destination.
           return (
-            <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={() => router.push('/capture')} style={styles.centerWrap}>
+            <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={openCapture} style={styles.centerWrap}>
               <View style={styles.centerBtn}>
                 <Icon name={tab.icon} size={26} color="#fff" />
               </View>
