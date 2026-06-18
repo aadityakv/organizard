@@ -1,35 +1,48 @@
-// Streaming Mode — rapid capture session (Claude Design "Streaming Mode Prototype").
-// Photos-on: snap → say one item. Photos-off (voice only): talk a whole box in at once.
+// The capture screen (Claude Design "Streaming Mode Prototype"). Two views of ONE
+// screen, flipped in place (no extra navigation — one X closes everything):
+//   • capture (free): snap one item → name it in Add-item, one at a time. A
+//     "Switch to Stream" pill flips to stream (Pro; free users see the upsell).
+//   • stream (Pro): rapid session — Photos-on (snap → say one item) or Photos-off
+//     (talk a whole box in at once) → ledger (tap to fix) → Done commits via addItem.
 // Dictation is simulated for now (lib/dictation); the on-device mic swaps in later.
-// Items captured into a local session, committed to their boxes on "Done".
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
-import { Button, Icon, Sheet } from '@/components';
+import { Button, Icon, Sheet, StreamUpsell } from '@/components';
 import { listen, isDictationSimulated, type DictationSession } from '@/lib/dictation';
 import { money } from '@/lib/money';
 import { persistCapture } from '@/lib/photos';
 import { iconFor, parseList, parseUtterance } from '@/lib/streamParse';
 import { uid } from '@/lib/uid';
-import { useStore } from '@/store/useStore';
+import { isProNow, useStore } from '@/store/useStore';
 import { boxColor, boxTint, colors, fonts, palette } from '@/theme';
 
 type SItem = { id: string; name: string; qty: number | null; value: number | null; icon: string; needsFix: boolean; boxId: string; photo?: string | null };
 type Mic = 'ready' | 'listening' | 'gotit' | 'fail';
 
 export default function StreamSession() {
-  const { boxId: initialBoxId } = useLocalSearchParams<{ boxId: string }>();
+  const { boxId: initialBoxId, view: initialView } = useLocalSearchParams<{ boxId: string; view?: string }>();
   const boxes = useStore((s) => s.boxes);
+  const isPro = useStore(isProNow);
+  const startProTrial = useStore((s) => s.startProTrial);
 
   const [boxId, setBoxId] = useState<string>(initialBoxId ?? boxes[0]?.id ?? '');
+  // Free users always start in capture view — stream is Pro-only, reachable only through
+  // the gated "Switch to Stream" pill / upsell. This also clamps a `?view=stream` deep
+  // link so it can't drop a free user into the Pro session, bypassing the paywall.
+  const [view, setView] = useState<'capture' | 'stream'>(() =>
+    initialView !== 'capture' && isProNow(useStore.getState()) ? 'stream' : 'capture',
+  );
   const [session, setSession] = useState<SItem[]>([]);
   const [mic, setMic] = useState<Mic>('ready');
   const [transcript, setTranscript] = useState('');
   const [lastId, setLastId] = useState<string | null>(null);
   const [voiceMode, setVoiceMode] = useState(false);
+  const [upsellOpen, setUpsellOpen] = useState(false);
+  const [torch, setTorch] = useState(false);
   const [flash, setFlash] = useState(false);
   const [ledgerOpen, setLedgerOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -73,10 +86,13 @@ export default function StreamSession() {
     }
   };
 
-  // Dropping out of photo mode invalidates any in-flight / pending photo.
-  useEffect(() => { pendingPhoto.current = null; captureSeq.current += 1; }, [voiceMode]);
+  // Switching mode or view invalidates any in-flight / pending photo, so a slow stream
+  // capture can't attach to a later item after a flip.
+  useEffect(() => { pendingPhoto.current = null; captureSeq.current += 1; }, [voiceMode, view]);
 
   const photoMode = !voiceMode;
+  // Camera is live in capture view, and in stream view only with Photos on.
+  const cameraOn = !!camPerm?.granted && (view === 'capture' || photoMode);
   const box = boxes.find((b) => b.id === boxId) ?? boxes[0];
   const lastIt = session.find((it) => it.id === lastId) ?? null;
   const editIt = session.find((it) => it.id === editId) ?? null;
@@ -197,6 +213,26 @@ export default function StreamSession() {
     }
   };
 
+  // Capture view (free single item): snap → name it in Add-item, one at a time.
+  const captureSingle = async () => {
+    if (!boxId) return;
+    // No camera yet — open the form; it has its own photo + permission UI.
+    if (!camPerm?.granted) { router.push({ pathname: '/add-item', params: { boxId } }); return; }
+    setFlash(true);
+    if (flashTmo.current) clearTimeout(flashTmo.current);
+    flashTmo.current = setTimeout(() => setFlash(false), 200);
+    let photo: string | null = null;
+    try {
+      const pic = await cameraRef.current?.takePictureAsync({ quality: 0.6 });
+      if (pic?.uri) photo = await persistCapture(pic.uri);
+    } catch (e) {
+      console.warn('capture: photo failed', e); // still let them name the item
+    }
+    router.push({ pathname: '/add-item', params: photo ? { boxId, photo } : { boxId } });
+  };
+  // Switch to Stream in place (no navigation). Free users get the upsell first.
+  const onSwitchToStream = () => { if (isPro) setView('stream'); else setUpsellOpen(true); };
+
   const onResay = () => {
     if (mic === 'listening') return;
     if (voiceMode) {
@@ -224,6 +260,9 @@ export default function StreamSession() {
   };
 
   const closeStream = () => {
+    // Stop a live mic first, so a late onFinal can't append a phantom item after the
+    // summary's count is computed (and committed by finish()).
+    if (mic === 'listening') { dictRef.current?.cancel(); dictRef.current = null; setMic('ready'); }
     if (session.length > 0) setSummaryOpen(true);
     else router.back();
   };
@@ -249,11 +288,11 @@ export default function StreamSession() {
 
   return (
     <View style={styles.root}>
-      {/* Live camera behind the photo-mode UI; dark backdrop in voice mode / no permission. */}
-      {photoMode && camPerm?.granted ? (
-        <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />
+      {/* Live camera behind capture / photo-mode UI; dark backdrop otherwise. */}
+      {cameraOn ? (
+        <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" enableTorch={torch} />
       ) : null}
-      {photoMode && camPerm?.granted ? <View style={styles.camScrim} /> : null}
+      {cameraOn ? <View style={styles.camScrim} /> : null}
       <SafeAreaView style={styles.safe} edges={['top']}>
         {/* top bar */}
         <View style={styles.topBar}>
@@ -265,15 +304,51 @@ export default function StreamSession() {
             <Text style={styles.boxChipText} numberOfLines={1}>{boxLabel(box)}</Text>
             <Icon name="chevron-down" size={15} color="rgba(255,255,255,0.8)" />
           </Pressable>
-          {photoMode ? (
-            <View style={styles.iconBtn}><Icon name="zap" size={17} color="#fff" /></View>
+          {cameraOn ? (
+            <Pressable onPress={() => setTorch((t) => !t)} style={[styles.iconBtn, torch && styles.iconBtnOn]} accessibilityLabel={torch ? 'Flash on' : 'Flash off'}>
+              <Icon name="zap" size={17} color={torch ? palette.ink900 : '#fff'} />
+            </Pressable>
           ) : (
             <View style={styles.iconBtn} />
           )}
         </View>
 
-        {/* photos switch */}
-        <View style={styles.switchWrap}>
+        {view === 'capture' ? (
+          <>
+            {/* Switch to Stream — the Pro upsell, flips in place */}
+            <View style={styles.captureSwitchWrap}>
+              <Pressable onPress={onSwitchToStream} style={styles.streamPill} accessibilityLabel="Switch to Stream">
+                <Icon name="zap" size={17} color={colors.brand} />
+                <Text style={styles.streamPillText}>Switch to Stream</Text>
+                {!isPro ? <View style={styles.proBadge}><Text style={styles.proBadgeText}>PRO</Text></View> : null}
+                <Icon name="chevron-right" size={16} color="rgba(255,255,255,0.7)" />
+              </Pressable>
+            </View>
+            <View style={styles.viewfinder}>
+              <View style={styles.frame}>
+                <View style={[styles.corner, styles.tl]} />
+                <View style={[styles.corner, styles.tr]} />
+                <View style={[styles.corner, styles.bl]} />
+                <View style={[styles.corner, styles.br]} />
+              </View>
+              <Text style={styles.hint}>Snap an item, then name it</Text>
+            </View>
+            <View style={styles.captureBottom}>
+              <Pressable onPress={captureSingle} style={styles.shutter} accessibilityLabel="Capture">
+                <Icon name="camera" size={30} color="#fff" />
+              </Pressable>
+            </View>
+          </>
+        ) : null}
+
+        {view === 'stream' ? (
+        <>
+        {/* back to single capture · photos switch */}
+        <View style={styles.streamSwitchRow}>
+          <Pressable onPress={() => mic !== 'listening' && setView('capture')} style={styles.backPill} accessibilityLabel="Single item">
+            <Icon name="chevron-left" size={15} color="#fff" />
+            <Text style={styles.backPillText}>Single item</Text>
+          </Pressable>
           <Pressable onPress={() => mic !== 'listening' && setVoiceMode((v) => !v)} style={styles.switchBtn}>
             <Icon name={voiceMode ? 'camera-off' : 'camera'} size={17} color={voiceMode ? 'rgba(255,255,255,0.55)' : '#fff'} />
             <Text style={styles.switchLabel}>{voiceMode ? 'Photos off' : 'Photos on'}</Text>
@@ -370,12 +445,14 @@ export default function StreamSession() {
             </Pressable>
           </View>
         </View>
+        </>
+        ) : null}
       </SafeAreaView>
 
       {flash ? <View style={styles.flashOverlay} /> : null}
 
       {/* box picker */}
-      <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title="Stream into which box?">
+      <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title={view === 'capture' ? 'Capture into which box?' : 'Stream into which box?'}>
         <View style={{ gap: 6 }}>
           {boxes.map((b) => (
             <Pressable key={b.id} onPress={() => { setBoxId(b.id); setPickerOpen(false); }} style={[styles.pickRow, b.id === boxId && { backgroundColor: palette.green50 }]}>
@@ -474,6 +551,13 @@ export default function StreamSession() {
           </View>
         </View>
       ) : null}
+
+      {/* Pro upsell for the capture-view "Switch to Stream" pill (free users) */}
+      <StreamUpsell
+        visible={upsellOpen}
+        onClose={() => setUpsellOpen(false)}
+        onTryPro={() => { startProTrial(); setUpsellOpen(false); setView('stream'); }}
+      />
     </View>
   );
 }
@@ -497,11 +581,22 @@ const styles = StyleSheet.create({
   boxChip: { flexDirection: 'row', alignItems: 'center', gap: 7, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.16)', maxWidth: 220 },
   dot: { width: 9, height: 9, borderRadius: 5 },
   boxChipText: { color: '#fff', fontFamily: fonts.body.bold, fontSize: 13.5, flexShrink: 1 },
-  switchWrap: { alignItems: 'center', marginTop: 14 },
   switchBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.14)', borderRadius: 999, paddingVertical: 8, paddingLeft: 15, paddingRight: 10 },
   switchLabel: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 13 },
   track: { width: 40, height: 24, borderRadius: 999, justifyContent: 'center' },
   knob: { position: 'absolute', top: 3, width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff' },
+  iconBtnOn: { backgroundColor: palette.amber400 },
+  // capture view
+  captureSwitchWrap: { marginTop: 12, paddingHorizontal: 16 },
+  streamPill: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9, height: 44, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)' },
+  streamPillText: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 14.5 },
+  proBadge: { backgroundColor: palette.amber400, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
+  proBadgeText: { fontSize: 10, fontFamily: fonts.body.extra, color: palette.ink900, letterSpacing: 0.3 },
+  captureBottom: { position: 'absolute', left: 0, right: 0, bottom: 36, alignItems: 'center' },
+  // stream view switch-back row
+  streamSwitchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 14 },
+  backPill: { flexDirection: 'row', alignItems: 'center', gap: 3, height: 38, paddingLeft: 10, paddingRight: 14, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.14)' },
+  backPillText: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 13 },
   viewfinder: { alignItems: 'center', marginTop: 28, gap: 14, paddingHorizontal: 40 },
   frame: { width: 160, height: 160 },
   corner: { position: 'absolute', width: 28, height: 28, borderColor: 'rgba(255,255,255,0.85)' },
