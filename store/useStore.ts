@@ -359,7 +359,10 @@ export const useStore = create<Store>()(
           for (const [id, b] of Object.entries(library)) {
             if (!b.serverMoveId) kept[id] = b;
           }
-          const base = { session: null, account: null, library: kept };
+          // Signing out returns to the unauthenticated guest state: drop the (account-
+          // tied) Pro trial back to free and reset onboarding so the welcome screen shows
+          // again. Local-only moves are kept (see `kept`).
+          const base = { session: null, account: null, library: kept, proTrialUntil: null, onboarded: false };
           if (s.currentMoveId && kept[s.currentMoveId]) return base; // open move survived (local)
           // Open move was a synced one we dropped (or none) — reset the live slice.
           return { ...base, currentMoveId: null, ...sliceFromBundle(newBundle('__none__', EMPTY_MOVE, now)) };
@@ -750,9 +753,14 @@ export const allIndexedItems = (s: Store): IndexedItem[] => {
   return out;
 }
 
-/** Pro entitlement = an active local trial (real billing will also set this later). */
-export const isProNow = (s: { proTrialUntil: number | null }): boolean =>
-  s.proTrialUntil != null && s.proTrialUntil > Date.now();
+/**
+ * Pro entitlement = signed in AND an active trial (real billing will also set this
+ * later). Pro is account-tied: a signed-out guest is always free, so the paywall gates
+ * for guests and a stale trial flag can't unlock a guest. (Sign-out also clears the
+ * trial — see `signOut`.)
+ */
+export const isProNow = (s: { proTrialUntil: number | null; session: string | null }): boolean =>
+  s.session != null && s.proTrialUntil != null && s.proTrialUntil > Date.now();
 
 export const moveSummaries = (s: Store): MoveSummary[] => {
   const out: MoveSummary[] = [];

@@ -27,6 +27,7 @@ export default function StreamSession() {
   const { boxId: initialBoxId, view: initialView } = useLocalSearchParams<{ boxId: string; view?: string }>();
   const boxes = useStore((s) => s.boxes);
   const isPro = useStore(isProNow);
+  const signedIn = useStore((s) => s.session != null);
   const startProTrial = useStore((s) => s.startProTrial);
 
   const [boxId, setBoxId] = useState<string>(initialBoxId ?? boxes[0]?.id ?? '');
@@ -556,7 +557,13 @@ export default function StreamSession() {
       <StreamUpsell
         visible={upsellOpen}
         onClose={() => setUpsellOpen(false)}
-        onTryPro={() => { startProTrial(); setUpsellOpen(false); setView('stream'); }}
+        onTryPro={() => {
+          setUpsellOpen(false);
+          // Pro is account-tied — a guest must sign in before starting the trial.
+          if (!signedIn) { router.push('/sign-in'); return; }
+          startProTrial();
+          setView('stream');
+        }}
       />
     </View>
   );
