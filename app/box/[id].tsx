@@ -461,7 +461,7 @@ export default function BoxDetail() {
                   size="lg"
                   fullWidth
                   iconLeft="audio-lines"
-                  onPress={() => (isPro ? router.push(`/stream/${box.id}`) : setStreamUpsell(true))}
+                  onPress={() => (isPro ? router.push(`/stream/${box.id}?mode=snap`) : setStreamUpsell(true))}
                 >
                   Stream items
                 </Button>
@@ -480,7 +480,7 @@ export default function BoxDetail() {
       <StreamUpsell
         visible={streamUpsell}
         onClose={() => setStreamUpsell(false)}
-        onTryPro={() => { startProTrial(); setStreamUpsell(false); router.push(`/stream/${box.id}`); }}
+        onTryPro={() => { startProTrial(); setStreamUpsell(false); router.push(`/stream/${box.id}?mode=snap`); }}
       />
 
       {/* ── Status sheet ── */}
