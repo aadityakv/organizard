@@ -480,7 +480,13 @@ export default function BoxDetail() {
       <StreamUpsell
         visible={streamUpsell}
         onClose={() => setStreamUpsell(false)}
-        onTryPro={() => { startProTrial(); setStreamUpsell(false); router.push(`/stream/${box.id}`); }}
+        onTryPro={() => {
+          setStreamUpsell(false);
+          // Pro is account-tied — a guest must sign in before starting the trial.
+          if (!session) { router.push('/sign-in'); return; }
+          startProTrial();
+          router.push(`/stream/${box.id}`);
+        }}
       />
 
       {/* ── Status sheet ── */}

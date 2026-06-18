@@ -151,7 +151,7 @@ export default function Moves() {
                 {account?.email ? <Text style={styles.accountSheetEmail} numberOfLines={1}>{account.email}</Text> : null}
               </View>
             </View>
-            <Button variant="secondary" fullWidth iconLeft="log-out" onPress={() => { setAccountOpen(false); void flushAndSignOut(); }}>
+            <Button variant="secondary" fullWidth iconLeft="log-out" onPress={() => { setAccountOpen(false); void flushAndSignOut().then(() => router.replace('/welcome')); }}>
               Sign out
             </Button>
             <Button variant="danger" fullWidth iconLeft="trash-2" onPress={onDeleteAccount}>
