@@ -1,0 +1,163 @@
+// Add-box sheet — gated to Owner/Editor by the caller.
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { Button, ColorDot, Icon, Input, RoomGlyph, Sheet } from '@/components';
+import type { Room } from '@/data/types';
+import { useSheetForm } from '@/hooks/useSheetForm';
+import { useStore } from '@/store/useStore';
+import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
+
+import { openBox } from './openBox';
+import { shared, sheetForm } from './styles';
+
+export function AddBoxSheet({
+  visible,
+  onClose,
+  rooms,
+  defaultRoomId,
+  onAddRoom,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  rooms: Room[];
+  defaultRoomId: string | null;
+  onAddRoom: () => void;
+}) {
+  const addBox = useStore((s) => s.addBox);
+  // Re-initialised on every open so the picker follows the room the user tapped "+" in.
+  const [{ name, color, roomId }, patch] = useSheetForm(visible, () => ({
+    name: '',
+    color: BOX_COLORS[0] as string,
+    roomId: (defaultRoomId ?? rooms[0]?.id ?? null) as string | null,
+  }));
+
+  const canSave = name.trim().length > 0 && roomId !== null;
+
+  const create = (): void => {
+    if (!canSave || roomId === null) return;
+    const id = addBox({ name: name.trim(), color, roomId });
+    onClose();
+    openBox(id);
+  };
+
+  return (
+    <Sheet visible={visible} onClose={onClose} title="New box">
+      <Input
+        label="What's in it?"
+        value={name}
+        onChangeText={(name) => patch({ name })}
+        placeholder="e.g. Kitchen essentials"
+        autoFocus
+      />
+
+      <Text style={sheetForm.fieldLabel}>Color</Text>
+      <View style={sheetForm.colorRow}>
+        {BOX_COLORS.map((hue) => (
+          <ColorDot
+            key={hue}
+            color={hue}
+            size={28}
+            selected={hue === color}
+            onPress={() => patch({ color: hue })}
+          />
+        ))}
+      </View>
+
+      <Text style={sheetForm.fieldLabel}>Room</Text>
+      {rooms.length === 0 ? (
+        <View style={styles.noRoomsHint}>
+          <Text style={styles.noRoomsText}>
+            Boxes live inside a room. Add your first room to start packing.
+          </Text>
+          <Button variant="secondary" size="md" iconLeft="plus" onPress={onAddRoom}>
+            New room
+          </Button>
+        </View>
+      ) : (
+        <View style={styles.pickRow}>
+          {rooms.map((r) => {
+            const on = r.id === roomId;
+            return (
+              <Pressable
+                key={r.id}
+                accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                onPress={() => patch({ roomId: r.id })}
+                style={({ pressed }) => [
+                  styles.roomPick,
+                  on && styles.roomPickOn,
+                  pressed && shared.pressedSoft,
+                ]}
+              >
+                <RoomGlyph icon={r.icon} color={r.color} size={22} />
+                <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
+                  {r.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
+
+      {rooms.length > 0 && (
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canSave}
+          onPress={create}
+          style={({ pressed }) => [
+            sheetForm.cta,
+            !canSave && sheetForm.ctaDisabled,
+            pressed && canSave && sheetForm.ctaPressed,
+          ]}
+        >
+          <Icon name="plus" size={20} color={colors.textOnBrand} />
+          <Text style={sheetForm.ctaText}>Add box</Text>
+        </Pressable>
+      )}
+    </Sheet>
+  );
+}
+
+const styles = StyleSheet.create({
+  noRoomsHint: {
+    gap: 12,
+    padding: 14,
+    borderRadius: radius.md,
+    backgroundColor: palette.cream100,
+    borderWidth: 1,
+    borderColor: palette.sand300,
+  },
+  noRoomsText: {
+    fontFamily: fonts.body.semibold,
+    fontSize: fontSize.sm,
+    lineHeight: 19,
+    color: palette.ink500,
+  },
+  pickRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  roomPick: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+    backgroundColor: colors.surfaceCard,
+  },
+  roomPickOn: {
+    borderColor: colors.brand,
+    backgroundColor: palette.green50,
+  },
+  roomPickText: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.ink500,
+  },
+  roomPickTextOn: { color: palette.green700 },
+});
