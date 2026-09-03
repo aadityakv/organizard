@@ -1,83 +1,126 @@
-# Organizard 🦎
+# Tuck (repo: `organizard`)
 
-A calm, cute, utilitarian **iOS moving-inventory app** — capture items with photos,
-group them into color-coded boxes inside rooms, track value, generate & scan QR
-labels, and **share a move with a partner under role-based permissions**
-(Owner / Editor / Viewer).
+**An iOS app for organizing a physical move.** Create a move, add rooms, pack boxes
+into rooms, list what's in each box (with photos, value, quantity, notes and handling
+markers), and stick a QR label on every box. During the move, "which box is my X in?"
+is answered by a search or a scan instead of a rummage.
 
-Built with **Expo + React Native (TypeScript)**, implemented from the
-[Organizard design system](./docs/IMPLEMENTATION_CONTRACT.md) handoff bundle.
+Shipped to TestFlight and submitted to the App Store under the name **Tuck** (sloth
+mascot). The repository, bundle id, URL scheme and API host keep the original
+working name **Organizard**; that mismatch is deliberate and not something to "fix".
 
-> Information architecture: **Move › Room › Box › Item.** Pack fast. Find anything. Share the load.
+> Data hierarchy: **Move › Room › Box › Item.** Pack fast. Find anything. Share the load.
+
+<p align="center"><img src="assets/icon.png" width="96" alt="Tuck app icon"></p>
 
 ---
+
+## What it does
+
+| Area | What you get |
+|---|---|
+| **Moves library** | Multiple moves per device (active / archived). Guests keep moves local-only; signed-in users have every move synced to their account and available across devices. |
+| **Boxes** | Boxes grouped by room, status or value. Custom statuses and handling markers (Fragile, Open first, …). Cover photo per box. |
+| **Capture** | Single-item capture (camera-first, multi-photo, value, quantity, note) and **Streaming Mode**: snap or *say* items in a row and a parser splits "two lamps, forty dollars" into name / qty / value. Speech is on-device via a small native module. |
+| **Find** | Search across every item and box in the move, or scan a box's QR label to jump straight to its contents. |
+| **Labels** | QR labels per box, printable as a PDF through the iOS share sheet. |
+| **Sharing** | Invite collaborators to a move with Owner / Editor / Viewer roles. Permissions are enforced on the server; the client only hides affordances. |
+| **Accounts** | Sign in with Apple or email/password, in-app account deletion, guest mode with migration of local moves on first sign-in. |
+
+## Architecture
+
+Two deployables in one repo, sharing one contract.
+
+```
+app/          expo-router screens (file-based navigation)
+components/   design-system primitives and shared chrome
+store/        Zustand store (persisted to AsyncStorage) + sync engine
+lib/          pure helpers (labels, money, QR, parsing) and client services (auth, share, photos)
+shared/       the client<->server contract: wire models + the Mutation union
+modules/      local Expo native modules (Swift): address autocomplete, speech recognizer
+plugins/      Expo config plugins applied on every prebuild
+theme/        design tokens (colors, 12-hue box palette, type, spacing)
+server/       Cloudflare Worker: Hono + Drizzle over D1, R2 for photos, KV for sessions
+docs/         architecture notes and archived design/implementation plans
+```
+
+### Sync model
+
+A move is either **local** or **synced**.
+
+- **Local** moves never touch the network. Guests only ever have local moves.
+- **Synced** moves apply every edit optimistically, then append a `Mutation` to an
+  outbox. The outbox flushes to the Worker, which re-applies each mutation
+  (role-checked, last-write-wins, idempotent by client id) and the client pulls
+  deltas since its last sync timestamp. Photos upload separately to R2 and are
+  swapped from local file refs to server ids once they land.
+- Signing in **migrates** a guest's local moves up to the account. Signing out drops
+  the synced copies from the device (they come back on the next sign-in) and keeps
+  anything that was never synced.
+
+The `Mutation` union in `shared/mutations.ts` is the single source of truth for what
+the client may send and what the server will accept. `ROLE_REQUIRED` in the same
+file drives server-side authorization.
+
+### Client
+
+- **Expo SDK 56** (React Native 0.85, React 19, New Architecture on), TypeScript strict.
+- State lives in one Zustand store split into inventory, library and session
+  concerns, with memoized selectors so React 19's `useSyncExternalStore` never sees a
+  fresh reference per render.
+- Native pieces that Expo doesn't ship (Apple Maps address autocomplete,
+  `SFSpeechRecognizer`) are tiny local Expo modules in `modules/`, autolinked at
+  prebuild. The `ios/` and `android/` folders are generated and gitignored; native
+  tweaks go through config plugins in `plugins/`.
+
+### Server
+
+- **Hono** routes, **Drizzle** repositories, and a middleware layer for sessions and
+  move membership. Everything that touches the outside world (database, clock, id
+  generation, Apple token verification, email) goes through one injectable `Deps`
+  object so the whole Worker is tested in-process without Miniflare.
+- Public privacy and support pages are served by the same Worker so the App Store
+  listing needs no extra hosting.
 
 ## Run it
 
 ```bash
-npm install          # already done in this repo
-npx expo start       # then press “i” for the iOS simulator,
-                     # or scan the QR code with Expo Go on a device
+npm install
+npx expo run:ios            # prebuild + pod install + build for the simulator
 ```
 
-Camera capture and QR scanning need a **real device** (or a simulator with a camera);
-everything else runs anywhere. State persists to the device via AsyncStorage.
+Camera, QR scanning and speech need a real device (or a simulator with a camera).
+Everything else runs anywhere.
 
-Useful scripts: `npm run ios` · `npm run typecheck` (`tsc --noEmit`).
-
----
-
-## What's implemented
-
-All seven surfaces from the design, with the permission model surfaced throughout:
-
-| Screen | Route | Highlights |
-|---|---|---|
-| **Onboarding** | `app/onboarding.tsx` | Sign in → create / join a move (gecko lockup, 2 steps) |
-| **Dashboard** | `app/(tabs)/index.tsx` | Progress, totals, **Find** search (Room › Box breadcrumb), Room/Status/Value grouping, color-coded box grid, Add box / Add room |
-| **Box detail** | `app/box/[id].tsx` | QR card, status changer + **custom statuses**, **markers** (Fragile / Open first…), item list, cover photo, owner-only delete |
-| **Add item** | `app/add-item.tsx` | **Camera-first** capture, multi-photo strip, name / value / qty stepper / note, **Save & add another** |
-| **Members & sharing** | `app/(tabs)/members.tsx` | Roster with role badges, invite + role picker, owner-only manage |
-| **Scan** | `app/(tabs)/scan.tsx` | Live **QR scanner** with four result states (this move / other move / unknown / no access) |
-| **QR overlay** | `app/qr/[id].tsx` | Full-screen scannable label |
-
-### Device features wired in
-- **expo-camera** — real photo capture (Add item, box cover) and live QR scanning (Scan).
-- **react-native-qrcode-svg** — real QR generation encoding `organizard://box/<id>`.
-- **AsyncStorage** (via Zustand `persist`) — your move survives app restarts.
-
-### The differentiator: roles
-A **“Viewing as” switcher** (top of the Dashboard) flips between **Owner / Editor /
-Viewer** so you can watch the same screens gain or lose edit affordances. Gated
-actions show a plain-language `LockNote` — never a dead button.
-
----
-
-## Architecture
-
-```
-app/            expo-router routes (file-based navigation + custom tab bar)
-components/      design-system primitives + shared chrome (21 components)
-theme/           design tokens → TS (colors, 12-hue box palette, type, spacing, shadows)
-store/           Zustand store (Move › Room › Box › Item) + AsyncStorage persistence
-data/            domain types + the mock "NYC Move" seed
-lib/             permissions, money, QR encode/scan-classify
-docs/            implementation contract (the build spec)
+```bash
+cd server
+npm install
+npm run dev                 # wrangler dev with local D1 / R2 / KV emulation
 ```
 
-Brand: warm cream paper, fresh green, a friendly gecko, **Fredoka** (display) +
-**Nunito** (body, via `@expo-google-fonts`), and a vivid 12-hue box palette used as a
-real organizing principle. Copy is sentence-case, warm, and emoji-free in product UI.
+The client's API URL is set in `app.json` under `expo.extra.apiUrl`.
 
----
+## Test and verify
 
-## Caveats / next steps
+```bash
+npm run typecheck && npm test            # client: tsc + vitest (pure modules)
+cd server && npm run typecheck && npm test   # server: tsc + the full HTTP suite
+```
 
-- **App icon & splash** use Expo defaults — drop a 1024px PNG into `assets/` and wire
-  `app.json` `icon`/`splash` when you have brand art. (The gecko exists as an SVG component.)
-- **Fonts** are Google Fonts stand-ins (Fredoka, Nunito) — swap if you license a bespoke face.
-- **Member management** (change role / remove) is local UI state — there's no backend yet, so
-  it doesn't persist. Same for the **print sheet** (intent only; PDF generation is a follow-up).
-- The Scan **“other move” / “no access”** states are reachable via demo buttons since there's
-  no second real move on device.
-- No auth/sync backend — onboarding just flips a local flag (v1 assumes connectivity per the brief).
+The React Native-coupled store cannot be imported in the node test environment, so
+screen and store behavior is verified on the simulator. Pure logic (label layout,
+voice parsing, photo refs, the move library, the mutation engine) is unit tested.
+
+## Shipping
+
+Builds are made **locally** with `eas build --local` and uploaded with `xcrun altool`;
+if the Worker or a D1 migration changed, the server is migrated and deployed first
+so an old Worker never rejects new mutation types. Details live in `docs/`.
+
+## Docs
+
+- `docs/ARCHITECTURE.md` covers the sync engine, permissions and the native-module
+  and build gotchas that shaped the stack.
+- `docs/archive/` holds the original design handoff contract and the dated
+  implementation plans that were executed to build each phase. They are historical
+  and not kept current.

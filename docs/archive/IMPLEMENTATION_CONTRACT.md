@@ -15,7 +15,7 @@ a vivid 12-hue box palette used as a real organizing principle.
 The original prototype lives here (read-only):
 
 ```
-DESIGN_DIR = /Users/aaditya/.claude/projects/-Users-aaditya-Projects-organizard/13403603-23c8-4ce1-a1c9-a1448ba33c7b/tool-results/design_extract/organizard-design-system/project
+DESIGN_DIR = <design handoff bundle, not in repo>
 ```
 
 - Component primitives: `DESIGN_DIR/components/{core,forms,domain}/<Name>.jsx` (+ `.d.ts`, `.prompt.md`)

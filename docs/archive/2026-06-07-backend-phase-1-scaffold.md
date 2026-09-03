@@ -8,7 +8,7 @@
 
 **Tech Stack:** Cloudflare Workers, Hono 4, Drizzle ORM + drizzle-kit, D1 (SQLite), R2, KV, Vitest + `@cloudflare/vitest-pool-workers`, TypeScript.
 
-**Worktree:** `/Users/aaditya/Projects/organizard/.worktrees/organizard-backend` (branch `organizard-backend`). All paths below are relative to it.
+**Worktree:** `<worktree>` (branch `organizard-backend`). All paths below are relative to it.
 
 ---
 

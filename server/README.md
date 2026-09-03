@@ -1,7 +1,8 @@
-# Organizard API (Cloudflare Worker)
+# Tuck API (Cloudflare Worker)
 
-The backend for **shared** Organizard moves. Solo/local moves never touch this —
-see `docs/plans/2026-06-07-organizard-backend-design.md` for the full design.
+The backend for **synced** moves. Local moves never touch this. The original design
+notes are archived in `../docs/archive/2026-06-07-organizard-backend-design.md`; the
+current overview is `../docs/ARCHITECTURE.md`.
 
 **Stack:** Hono + Drizzle on Cloudflare Workers, over D1 (data), R2 (photos), KV (sessions).
 
@@ -56,5 +57,6 @@ wrangler deploy
 
 ## Status
 
-**Complete (Phases 1–8):** auth, mutation/sync engine, sharing, photos, billing, hardening.
-**24 tests passing.** See `docs/plans/2026-06-07-organizard-backend-design.md` for the full design.
+Auth (Apple + email/password), the mutation/sync engine, sharing, photos, account
+deletion and the public legal pages are live in production. Billing (RevenueCat) is
+wired but switched off; everything is free for now.
