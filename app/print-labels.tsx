@@ -10,7 +10,8 @@ import { router } from 'expo-router';
 
 import { Button, Icon } from '@/components';
 import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
-import { printLabels, type LabelInput } from '@/lib/labels';
+import type { LabelInput } from '@/lib/labels';
+import { printLabels } from '@/services/print';
 import { useStore } from '@/store/useStore';
 import type { Box } from '@/data/types';
 
