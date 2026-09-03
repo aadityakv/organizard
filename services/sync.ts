@@ -5,9 +5,9 @@ import { AppState } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import { api, ApiError } from '@/lib/api';
-import { uploadPendingPhotos } from '@/lib/photos';
+import { uploadPendingPhotos } from '@/services/photos';
 import { clearSession } from '@/lib/session';
-import { useStore } from './useStore';
+import { useStore } from '@/store/useStore';
 
 const POLL_MS = 15_000;
 const MAX_BACKOFF_MS = 60_000;

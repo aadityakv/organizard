@@ -32,10 +32,12 @@ working name **Organizard**; that mismatch is deliberate and not something to "f
 Two deployables in one repo, sharing one contract.
 
 ```
-app/          expo-router screens (file-based navigation)
+app/          expo-router screens (file-based navigation) — thin compositions
+features/     per-screen pieces: sheets, hooks and styles, grouped by feature
 components/   design-system primitives and shared chrome
-store/        Zustand store (persisted to AsyncStorage) + sync engine
-lib/          pure helpers (labels, money, QR, parsing) and client services (auth, share, photos)
+store/        Zustand store (persisted to AsyncStorage), slices + selectors
+services/     orchestration: auth, share/sync engine, photo upload, printing
+lib/          pure helpers (labels, money, QR, parsing, migration batch)
 shared/       the client<->server contract: wire models + the Mutation union
 modules/      local Expo native modules (Swift): address autocomplete, speech recognizer
 plugins/      Expo config plugins applied on every prebuild
@@ -43,6 +45,10 @@ theme/        design tokens (colors, 12-hue box palette, type, spacing)
 server/       Cloudflare Worker: Hono + Drizzle over D1, R2 for photos, KV for sessions
 docs/         architecture notes and archived design/implementation plans
 ```
+
+The layering rule: `lib/` is pure (safe to import from node-run tests); anything
+that touches the network, native modules or the store lives in `services/`;
+screens compose `features/`; `app/` holds only routes.
 
 ### Sync model
 

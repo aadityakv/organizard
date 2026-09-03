@@ -41,7 +41,7 @@ Transitions:
 - **Sign out** flushes the outbox, drops synced moves from the device and keeps local
   ones. The synced moves are pulled again on the next sign-in.
 
-## 3. The sync engine (`store/sync.ts`, `server/src/mutations/apply.ts`)
+## 3. The sync engine (`services/sync.ts`, `server/src/mutations/apply.ts`)
 
 One pass, run on mount, foreground, reconnect, and a 15-second poll:
 
@@ -86,8 +86,9 @@ that sends a new type.
 ## 5. Client structure
 
 - **Screens** in `app/` are expo-router routes. Large screens are composed from
-  per-feature folders (`app/box/`, `app/dashboard/`, `app/add-item/`) that hold their
-  sheets, hooks and styles, so the route file reads as a composition.
+  per-feature folders (`features/box/`, `features/dashboard/`, `features/add-item/`,
+  …) that hold their sheets, hooks and styles, so the route file reads as a
+  composition.
 - **State** is one Zustand store persisted to AsyncStorage. It is assembled from
   slices (inventory, library, session/sync) and exposes selectors from
   `store/selectors.ts`. Selectors that build a new array or object per call must be

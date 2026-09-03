@@ -10,7 +10,7 @@ import { Card } from './Card';
 import { Input } from './Input';
 import { Segmented } from './Segmented';
 import { ApiError } from '@/lib/api';
-import { appleSignInAvailable, loginWithEmail, registerWithEmail, signInWithApple } from '@/lib/auth';
+import { appleSignInAvailable, loginWithEmail, registerWithEmail, signInWithApple } from '@/services/auth';
 import { fonts, palette } from '@/theme';
 
 const FRIENDLY: Record<string, string> = {

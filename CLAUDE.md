@@ -30,8 +30,8 @@ shows onboarding: **log in / sign up**, or **continue as guest**.
   signed-in user the move is already synced, so "Share" just **invites** collaborators.
 - Sign-in is **Sign in with Apple OR email/password** (account deletion in-app, per
   5.1.1(v)). Billing is **OFF** (everything free for now). Account UI lives on the
-  Moves library (profile button → account sheet). Key code: `lib/share.ts`
-  (`shareMove`/`syncLocalMovesUp`/`flushAndSignOut`), `store/sync.ts` (`pullServerMoves`),
+  Moves library (profile button → account sheet). Key code: `services/share.ts`
+  (`shareMove`/`syncLocalMovesUp`/`flushAndSignOut`), `services/sync.ts` (`pullServerMoves`),
   store `signOut` (drops synced moves). See the email-auth auto-memory.
 
 Currently iOS-only (shipped via TestFlight). Android targets exist in config but

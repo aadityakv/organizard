@@ -7,8 +7,8 @@ import { Avatar, AuthPanel, Button, Card, Header, Icon, LockNote, RoleBadge, Seg
 import type { Member, Role } from '@/data/types';
 import { api, ApiError } from '@/lib/api';
 import { billingConfigured, configureBilling, isEntitled, purchaseSharing } from '@/lib/billing';
-import { createInviteLink, shareMove } from '@/lib/share';
-import { syncActiveMove } from '@/store/sync';
+import { createInviteLink, shareMove } from '@/services/share';
+import { syncActiveMove } from '@/services/sync';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, fontSize, palette, radius } from '@/theme';
 

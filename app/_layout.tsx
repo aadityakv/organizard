@@ -20,7 +20,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { loadSession } from '@/lib/session';
-import { useSync } from '@/store/sync';
+import { useSync } from '@/services/sync';
 import { useHasHydrated, useStore } from '@/store/useStore';
 import { colors } from '@/theme';
 

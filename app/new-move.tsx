@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { AddressField, Button, Card, DateField, formatTargetDate, Header, Input } from '@/components';
-import { shareMove } from '@/lib/share';
+import { shareMove } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { colors } from '@/theme';
 
