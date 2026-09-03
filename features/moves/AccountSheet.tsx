@@ -5,8 +5,8 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { Avatar, Button, Sheet } from '@/components';
-import { deleteAccount } from '@/lib/auth';
-import { flushAndSignOut } from '@/lib/share';
+import { deleteAccount } from '@/services/auth';
+import { flushAndSignOut } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
 

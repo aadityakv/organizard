@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { completeEmailSignIn } from '@/lib/auth';
+import { completeEmailSignIn } from '@/services/auth';
 import { colors, fonts } from '@/theme';
 
 // Handles the magic-link deep link: organizard://auth?token=…

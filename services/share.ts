@@ -1,80 +1,13 @@
 // The "share this move" upgrade: create an empty server move, replay the local
 // move as one mutation batch (keeping ids), then flip the move to shared mode.
-import type { Mutation, Role } from '@/shared';
+import type { Role } from '@/shared';
 
 import { api } from '@/lib/api';
+import { buildMigrationBatch } from '@/lib/migration';
 import { clearSession } from '@/lib/session';
-import { uid } from '@/lib/uid';
-import { setMigrating, syncActiveMove } from '@/store/sync';
+import { setMigrating, syncActiveMove } from '@/services/sync';
+import { extractSlice } from '@/store/shape';
 import { useStore } from '@/store/useStore';
-
-/** Mutations that recreate the active local move on the server (ids preserved). */
-export function buildMigrationBatch(): Mutation[] {
-  const s = useStore.getState();
-  const out: Mutation[] = [];
-  const ts = Date.now();
-  const cid = () => uid('mig');
-
-  for (const st of s.statuses)
-    out.push({
-      type: 'addStatus',
-      clientId: cid(),
-      ts,
-      payload: { id: st.id, label: st.label, color: st.color },
-    });
-  for (const mk of s.markers)
-    out.push({
-      type: 'addMarker',
-      clientId: cid(),
-      ts,
-      payload: { id: mk.id, label: mk.label, color: mk.color, icon: mk.icon },
-    });
-  for (const r of s.rooms)
-    out.push({
-      type: 'addRoom',
-      clientId: cid(),
-      ts,
-      payload: { id: r.id, name: r.name, dest: r.dest ?? null, icon: r.icon },
-    });
-  for (const b of s.boxes) {
-    out.push({
-      type: 'addBox',
-      clientId: cid(),
-      ts,
-      payload: {
-        id: b.id,
-        roomId: b.roomId,
-        number: b.number,
-        name: b.name,
-        color: b.color,
-        statusId: b.status,
-      },
-    });
-    for (const markerId of b.markers)
-      out.push({ type: 'setBoxMarker', clientId: cid(), ts, payload: { boxId: b.id, markerId, on: true } });
-  }
-  for (const [boxId, items] of Object.entries(s.itemsByBox)) {
-    for (const it of items) {
-      out.push({
-        type: 'addItem',
-        clientId: cid(),
-        ts,
-        payload: {
-          id: it.id,
-          boxId,
-          name: it.name,
-          qty: it.qty,
-          valueCents: Math.round((it.value || 0) * 100),
-          note: it.note ?? null,
-          icon: it.icon ?? null,
-          markerIds: it.markers ?? [],
-          photoIds: [],
-        },
-      });
-    }
-  }
-  return out;
-}
 
 /** Upgrade the active local move to shared. Requires a signed-in session. */
 export async function shareMove(): Promise<{ moveId: string }> {
@@ -96,7 +29,7 @@ export async function shareMove(): Promise<{ moveId: string }> {
   setMigrating(true);
   try {
     useStore.getState().goShared(serverMoveId);
-    const batch = buildMigrationBatch();
+    const batch = buildMigrationBatch(extractSlice(useStore.getState()));
     if (batch.length) await api.mutations(s.session, serverMoveId, batch);
   } finally {
     setMigrating(false);

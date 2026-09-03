@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { Button } from '@/components';
 import { api, ApiError } from '@/lib/api';
-import { appleSignInAvailable, signInWithApple } from '@/lib/auth';
+import { appleSignInAvailable, signInWithApple } from '@/services/auth';
 import { useStore } from '@/store/useStore';
 import { colors, fonts } from '@/theme';
 

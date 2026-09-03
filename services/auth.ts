@@ -4,8 +4,8 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { api } from '@/lib/api';
 import { saveSession } from '@/lib/session';
-import { syncLocalMovesUp } from '@/lib/share';
-import { pullServerMoves } from '@/store/sync';
+import { syncLocalMovesUp } from '@/services/share';
+import { pullServerMoves } from '@/services/sync';
 import { useStore } from '@/store/useStore';
 
 async function adoptSession(
