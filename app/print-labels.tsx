@@ -3,7 +3,7 @@
 // default), a select-all/none toggle, and a "Print N labels" action that hands
 // a print-ready HTML sheet to expo-print → the native iOS print/share dialog.
 // Read-only data, so every role can reach it.
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';

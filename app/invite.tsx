@@ -14,48 +14,59 @@ const FRIENDLY: Record<string, string> = {
   INVITE_EXPIRED: 'That invite link has expired.',
 };
 
+type Outcome = { status: 'working' } | { status: 'joined' } | { status: 'error'; message: string };
+
+/**
+ * Accept an invite token: signs in with Apple first if there is no session, then
+ * imports the shared move. Never throws; the caller renders the outcome.
+ */
+async function joinMove(token: string | undefined): Promise<Outcome> {
+  try {
+    let session = useStore.getState().session;
+    if (!session) {
+      // Sign-in is required to join. If Apple sign-in isn't available we surface a
+      // dead end with an escape rather than a loop.
+      if (!(await appleSignInAvailable())) {
+        return { status: 'error', message: 'Sign in on the Moves screen, then reopen the link.' };
+      }
+      await signInWithApple();
+      session = useStore.getState().session;
+    }
+    if (!session || !token) throw new ApiError(400, 'INVITE_INVALID');
+    const snap = await api.acceptInvite(session, token);
+    const serverMoveId = (snap.move as { id: string }).id;
+    useStore.getState().addSharedMoveFromSnapshot(serverMoveId, snap);
+    return { status: 'joined' };
+  } catch (e) {
+    const message =
+      e instanceof ApiError && FRIENDLY[e.code] ? FRIENDLY[e.code] : 'Could not join this move.';
+    return { status: 'error', message };
+  }
+}
+
 export default function InviteAccept() {
   const { token } = useLocalSearchParams<{ token?: string }>();
-  const [status, setStatus] = useState<'working' | 'error'>('working');
-  const [message, setMessage] = useState('Joining…');
-
-  const accept = async () => {
-    setStatus('working');
-    setMessage('Joining…');
-    try {
-      let session = useStore.getState().session;
-      if (!session) {
-        // Sign-in is required to join. This build is Apple-only; if Apple isn't
-        // available we surface a dead end with an escape rather than a loop.
-        if (!(await appleSignInAvailable())) {
-          setStatus('error');
-          setMessage('Sign in on the Moves screen, then reopen the link.');
-          return;
-        }
-        await signInWithApple();
-        session = useStore.getState().session;
-      }
-      if (!session || !token) throw new ApiError(400, 'INVITE_INVALID');
-      const snap = await api.acceptInvite(session, token);
-      const serverMoveId = (snap.move as { id: string }).id;
-      useStore.getState().addSharedMoveFromSnapshot(serverMoveId, snap);
-      router.replace('/(tabs)');
-    } catch (e) {
-      setStatus('error');
-      setMessage(e instanceof ApiError && FRIENDLY[e.code] ? FRIENDLY[e.code] : 'Could not join this move.');
-    }
-  };
+  const [outcome, setOutcome] = useState<Outcome>({ status: 'working' });
 
   useEffect(() => {
-    void accept();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let cancelled = false;
+    void joinMove(token).then((result) => {
+      if (cancelled) return;
+      if (result.status === 'joined') router.replace('/(tabs)');
+      else setOutcome(result);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [token]);
 
   return (
     <View style={styles.center}>
-      {status === 'working' ? <ActivityIndicator color={colors.brand} /> : null}
-      <Text style={styles.text}>{message}</Text>
-      {status !== 'working' ? <Button onPress={() => router.replace('/moves')}>Back to moves</Button> : null}
+      {outcome.status === 'working' ? <ActivityIndicator color={colors.brand} /> : null}
+      <Text style={styles.text}>{outcome.status === 'error' ? outcome.message : 'Joining…'}</Text>
+      {outcome.status === 'error' ? (
+        <Button onPress={() => router.replace('/moves')}>Back to moves</Button>
+      ) : null}
     </View>
   );
 }

@@ -12,6 +12,7 @@ import {
   ColorDot,
   DateField,
   formatTargetDate,
+  parseTargetDate,
   Header,
   Icon,
   IconButton,
@@ -40,6 +41,8 @@ import {
   type Store,
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
+
+import { useSheetForm } from '@/hooks/useSheetForm';
 import { BOX_COLORS, boxColor, colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
 
 type GroupView = 'room' | 'status' | 'value';
@@ -256,18 +259,12 @@ function AddBoxSheet({
   onAddRoom: () => void;
 }) {
   const addBox = useStore((s) => s.addBox);
-  const [name, setName] = useState('');
-  const [color, setColor] = useState<string>(BOX_COLORS[0]);
-  const [roomId, setRoomId] = useState<string | null>(defaultRoomId ?? rooms[0]?.id ?? null);
-
-  // Keep the picker in sync when the sheet reopens for a specific room.
-  React.useEffect(() => {
-    if (visible) {
-      setName('');
-      setColor(BOX_COLORS[0]);
-      setRoomId(defaultRoomId ?? rooms[0]?.id ?? null);
-    }
-  }, [visible, defaultRoomId, rooms]);
+  // Re-initialised on every open so the picker follows the room the user tapped "+" in.
+  const [{ name, color, roomId }, patch] = useSheetForm(visible, () => ({
+    name: '',
+    color: BOX_COLORS[0] as string,
+    roomId: (defaultRoomId ?? rooms[0]?.id ?? null) as string | null,
+  }));
 
   const canSave = name.trim().length > 0 && roomId !== null;
 
@@ -283,7 +280,7 @@ function AddBoxSheet({
       <Input
         label="What's in it?"
         value={name}
-        onChangeText={setName}
+        onChangeText={(name) => patch({ name })}
         placeholder="e.g. Kitchen essentials"
         autoFocus
       />
@@ -291,7 +288,13 @@ function AddBoxSheet({
       <Text style={styles.fieldLabel}>Color</Text>
       <View style={styles.colorRow}>
         {BOX_COLORS.map((hue) => (
-          <ColorDot key={hue} color={hue} size={28} selected={hue === color} onPress={() => setColor(hue)} />
+          <ColorDot
+            key={hue}
+            color={hue}
+            size={28}
+            selected={hue === color}
+            onPress={() => patch({ color: hue })}
+          />
         ))}
       </View>
 
@@ -314,7 +317,7 @@ function AddBoxSheet({
                 key={r.id}
                 accessibilityRole="button"
                 accessibilityState={{ selected: on }}
-                onPress={() => setRoomId(r.id)}
+                onPress={() => patch({ roomId: r.id })}
                 style={({ pressed }) => [
                   styles.roomPick,
                   on && styles.roomPickOn,
@@ -362,18 +365,12 @@ function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () =
   const itemsByBox = useStore((s) => s.itemsByBox);
 
   const isEdit = !!room;
-  const [name, setName] = useState('');
-  const [dest, setDest] = useState('');
-  const [icon, setIcon] = useState<string>('box');
-  const [color, setColor] = useState<string>('slate');
-
-  React.useEffect(() => {
-    if (!visible) return;
-    setName(room?.name ?? '');
-    setDest(room?.dest ?? '');
-    setIcon(room?.icon ?? 'box');
-    setColor(room?.color ?? 'slate');
-  }, [visible, room]);
+  const [{ name, dest, icon, color }, patch] = useSheetForm(visible, () => ({
+    name: room?.name ?? '',
+    dest: room?.dest ?? '',
+    icon: room?.icon ?? 'box',
+    color: room?.color ?? 'slate',
+  }));
 
   const canSave = name.trim().length > 0;
 
@@ -440,7 +437,7 @@ function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () =
       <Input
         label="Room name"
         value={name}
-        onChangeText={setName}
+        onChangeText={(name) => patch({ name })}
         placeholder="e.g. Garage, Nursery, Office"
         autoFocus
       />
@@ -448,7 +445,7 @@ function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () =
       <Input
         label="Destination (optional)"
         value={dest}
-        onChangeText={setDest}
+        onChangeText={(dest) => patch({ dest })}
         placeholder="Where it lands — e.g. NYC bedroom"
       />
 
@@ -462,7 +459,7 @@ function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () =
               accessibilityRole="button"
               accessibilityLabel={`${ic} icon`}
               accessibilityState={{ selected: on }}
-              onPress={() => setIcon(ic)}
+              onPress={() => patch({ icon: ic })}
               style={({ pressed }) => [
                 styles.iconPick,
                 on && styles.iconPickOn,
@@ -478,7 +475,13 @@ function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () =
       <Text style={styles.fieldLabel}>Color</Text>
       <View style={styles.colorRow}>
         {BOX_COLORS.map((hue) => (
-          <ColorDot key={hue} color={hue} size={28} selected={hue === color} onPress={() => setColor(hue)} />
+          <ColorDot
+            key={hue}
+            color={hue}
+            size={28}
+            selected={hue === color}
+            onPress={() => patch({ color: hue })}
+          />
         ))}
       </View>
 
@@ -516,20 +519,12 @@ function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () =
 // a Date for the picker, write the formatted label (or '' to clear) back on save.
 function EditMoveSheet({ visible, onClose, move }: { visible: boolean; onClose: () => void; move: Move }) {
   const updateMove = useStore((s) => s.updateMove);
-
-  const [name, setName] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [date, setDate] = useState<Date | null>(null);
-
-  React.useEffect(() => {
-    if (!visible) return;
-    setName(move.name ?? '');
-    setFrom(move.from ?? '');
-    setTo(move.to ?? '');
-    const d = move.target ? new Date(move.target) : null;
-    setDate(d && !isNaN(d.getTime()) ? d : null);
-  }, [visible, move]);
+  const [{ name, from, to, date }, patch] = useSheetForm(visible, () => ({
+    name: move.name ?? '',
+    from: move.from ?? '',
+    to: move.to ?? '',
+    date: parseTargetDate(move.target),
+  }));
 
   const canSave = name.trim().length > 0;
 
@@ -546,16 +541,22 @@ function EditMoveSheet({ visible, onClose, move }: { visible: boolean; onClose: 
 
   return (
     <Sheet visible={visible} onClose={onClose} title="Edit move">
-      <Input label="Move name" value={name} onChangeText={setName} placeholder="e.g. NYC Move" autoFocus />
+      <Input
+        label="Move name"
+        value={name}
+        onChangeText={(name) => patch({ name })}
+        placeholder="e.g. NYC Move"
+        autoFocus
+      />
       <View style={styles.fieldGap} />
       <Text style={styles.fieldLabel}>From</Text>
-      <AddressField value={from} onChangeText={setFrom} placeholder="Current address" />
+      <AddressField value={from} onChangeText={(from) => patch({ from })} placeholder="Current address" />
       <View style={styles.fieldGap} />
       <Text style={styles.fieldLabel}>To</Text>
-      <AddressField value={to} onChangeText={setTo} placeholder="New address" />
+      <AddressField value={to} onChangeText={(to) => patch({ to })} placeholder="New address" />
       <View style={styles.fieldGap} />
       <Text style={styles.fieldLabel}>Target date</Text>
-      <DateField value={date} onChange={setDate} placeholder="Pick a move date" />
+      <DateField value={date} onChange={(date) => patch({ date })} placeholder="Pick a move date" />
 
       <Pressable
         accessibilityRole="button"

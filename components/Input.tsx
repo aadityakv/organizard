@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, StyleProp, ViewStyle, Animated } from 'react-native';
-import { colors, radius, space, fonts, fontSize, type as typeTokens } from '@/theme';
+import { colors, radius, space, fonts, fontSize } from '@/theme';
 
 export type InputProps = {
   value: string;
@@ -38,7 +38,7 @@ export function Input({
   const [focused, setFocused] = useState(false);
 
   // Subtle press / focus ring via a border color animation
-  const animBorder = useRef(new Animated.Value(0)).current;
+  const [animBorder] = useState(() => new Animated.Value(0));
 
   const handleFocus = () => {
     setFocused(true);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { colors, palette, space, radius, fonts, fontSize } from '@/theme';
 
@@ -27,9 +27,12 @@ export function Stepper({
   // Local text so you can clear and retype the number (e.g. type "80" directly
   // instead of tapping + eighty times). Kept in sync when value changes via +/-.
   const [text, setText] = useState(String(value));
-  useEffect(() => {
+  const [syncedValue, setSyncedValue] = useState(value);
+  if (value !== syncedValue) {
+    // Prop changed (a +/- tap or an outside reset): mirror it during render, no effect needed.
+    setSyncedValue(value);
     setText(String(value));
-  }, [value]);
+  }
 
   const onText = (t: string) => {
     const digits = t.replace(/[^0-9]/g, '');

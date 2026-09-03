@@ -4,7 +4,7 @@
  * and StatusChip, body with name (Fredoka), room eyebrow, item count + value,
  * and up to 3 MarkerChip pills. Press animates to scale 0.985.
  */
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { Animated, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import {
@@ -100,7 +100,7 @@ export function BoxCard({
   onPress,
   style,
 }: BoxCardProps) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [scaleAnim] = useState(() => new Animated.Value(1));
 
   const handlePressIn = () => {
     Animated.timing(scaleAnim, {

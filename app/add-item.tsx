@@ -20,9 +20,6 @@ import {
   UIManager,
 } from 'react-native';
 
-// iOS keyboard "Done" bar — lets you dismiss the keyboard (which otherwise covers
-// Save) from fields that have no usable return key (number pad, multiline notes).
-const KBD_ACCESSORY_ID = 'add-item-kbd';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
@@ -35,6 +32,10 @@ import { money } from '@/lib/money';
 import { PERM } from '@/lib/permissions';
 import { photoSource, persistCapture } from '@/lib/photos';
 import { colors, palette, space, gutter, radius, shadow, fonts, fontSize, boxColor } from '@/theme';
+
+// iOS keyboard "Done" bar — lets you dismiss the keyboard (which otherwise covers
+// Save) from fields that have no usable return key (number pad, multiline notes).
+const KBD_ACCESSORY_ID = 'add-item-kbd';
 
 // A friendly press animation for the captured layout when photos arrive.
 const FLASH_CONFIG: LayoutAnimationConfig = LayoutAnimation.create(
@@ -484,8 +485,8 @@ export default function AddItem() {
                       <>
                         <Text style={styles.permTitle}>Snap a photo as you pack</Text>
                         <Text style={styles.permBody}>
-                          A quick picture makes items easy to spot later — but it's optional. Save without one
-                          anytime.
+                          A quick picture makes items easy to spot later — but it&apos;s optional. Save
+                          without one anytime.
                         </Text>
                         <Button
                           variant="secondary"

@@ -14,6 +14,7 @@ import {
   Button,
   DateField,
   formatTargetDate,
+  parseTargetDate,
   Header,
   Icon,
   IconButton,
@@ -21,6 +22,7 @@ import {
   Sheet,
   SlothMark,
 } from '@/components';
+import { useSheetForm } from '@/hooks/useSheetForm';
 import { moveSummaries, useStore } from '@/store/useStore';
 import type { MoveSummary } from '@/store/library';
 import { deleteAccount } from '@/lib/auth';
@@ -84,7 +86,7 @@ export default function Moves() {
   // subscribe to the stable inputs it derives from and compute it once via useMemo.
   const library = useStore((s) => s.library);
   const currentMoveId = useStore((s) => s.currentMoveId);
-  const accountId = useStore((s) => s.account?.id ?? null);
+  const account = useStore((s) => s.account);
   const liveSlice = useStore(
     useShallow((s) => ({
       move: s.move,
@@ -95,11 +97,9 @@ export default function Moves() {
     })),
   );
   const summaries = useMemo(
-    () => moveSummaries(useStore.getState()),
-    [library, currentMoveId, accountId, liveSlice],
+    () => moveSummaries({ ...useStore.getState(), library, currentMoveId, account, ...liveSlice }),
+    [library, currentMoveId, account, liveSlice],
   );
-
-  const account = useStore((s) => s.account);
   const session = useStore((s) => s.session);
 
   const [archivedOpen, setArchivedOpen] = useState(false);
@@ -401,19 +401,12 @@ export default function Moves() {
 // ─────────────────────────────────────────────────────────────
 function EditMoveSheet({ move, onClose }: { move: MoveSummary | null; onClose: () => void }) {
   const updateMove = useStore((s) => s.updateMove);
-  const [name, setName] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [date, setDate] = useState<Date | null>(null);
-
-  React.useEffect(() => {
-    if (!move) return;
-    setName(move.name ?? '');
-    setFrom(move.from ?? '');
-    setTo(move.to ?? '');
-    const d = move.target ? new Date(move.target) : null;
-    setDate(d && !isNaN(d.getTime()) ? d : null);
-  }, [move]);
+  const [{ name, from, to, date }, patch] = useSheetForm(move !== null, () => ({
+    name: move?.name ?? '',
+    from: move?.from ?? '',
+    to: move?.to ?? '',
+    date: parseTargetDate(move?.target),
+  }));
 
   const canSave = name.trim().length > 0;
 
@@ -430,16 +423,22 @@ function EditMoveSheet({ move, onClose }: { move: MoveSummary | null; onClose: (
 
   return (
     <Sheet visible={move !== null} onClose={onClose} title="Edit move">
-      <Input label="Move name" value={name} onChangeText={setName} placeholder="e.g. NYC Move" autoFocus />
+      <Input
+        label="Move name"
+        value={name}
+        onChangeText={(name) => patch({ name })}
+        placeholder="e.g. NYC Move"
+        autoFocus
+      />
       <View style={styles.fieldGap} />
       <Text style={styles.editLabel}>From</Text>
-      <AddressField value={from} onChangeText={setFrom} placeholder="Current address" />
+      <AddressField value={from} onChangeText={(from) => patch({ from })} placeholder="Current address" />
       <View style={styles.fieldGap} />
       <Text style={styles.editLabel}>To</Text>
-      <AddressField value={to} onChangeText={setTo} placeholder="New address" />
+      <AddressField value={to} onChangeText={(to) => patch({ to })} placeholder="New address" />
       <View style={styles.fieldGap} />
       <Text style={styles.editLabel}>Target date</Text>
-      <DateField value={date} onChange={setDate} placeholder="Pick a move date" />
+      <DateField value={date} onChange={(date) => patch({ date })} placeholder="Pick a move date" />
       <Button fullWidth iconLeft="check" onPress={save} disabled={!canSave} style={styles.sheetCta}>
         Save changes
       </Button>

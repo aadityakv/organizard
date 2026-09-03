@@ -20,6 +20,13 @@ export type DateFieldProps = {
 export const formatTargetDate = (d: Date): string =>
   d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
+/** Inverse of formatTargetDate for prefilled forms: '' / unparseable → null. */
+export const parseTargetDate = (label: string | null | undefined): Date | null => {
+  if (!label) return null;
+  const d = new Date(label);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MONTHS = [
   'January',
