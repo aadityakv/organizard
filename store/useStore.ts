@@ -4,7 +4,7 @@
 // move is `shared`, every mutating action also enqueues a Mutation to the
 // outbox, which the sync engine (store/sync.ts) flushes to the backend.
 // ============================================================
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -857,14 +857,13 @@ function snapItemsByBox(snap: ServerSnapshot): Record<string, Item[]> {
 // Hydration + selectors
 // ============================================================
 
+/** True once the persisted state has been read back from AsyncStorage. */
 export function useHasHydrated(): boolean {
-  const [hydrated, setHydrated] = useState<boolean>(() => useStore.persist.hasHydrated());
-  useEffect(() => {
-    const unsub = useStore.persist.onFinishHydration(() => setHydrated(true));
-    setHydrated(useStore.persist.hasHydrated());
-    return unsub;
-  }, []);
-  return hydrated;
+  return useSyncExternalStore(
+    (onChange) => useStore.persist.onFinishHydration(onChange),
+    () => useStore.persist.hasHydrated(),
+    () => false,
+  );
 }
 
 // Stable empty reference so the selector keeps a stable identity (Zustand v5 / useSyncExternalStore).

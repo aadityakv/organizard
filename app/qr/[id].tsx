@@ -57,7 +57,7 @@ export default function QRScreen() {
           <View style={styles.center}>
             <View style={[styles.dot, { backgroundColor: colors.borderStrong }]} />
             <Text style={styles.number}>Box not found</Text>
-            <Text style={styles.subtitle}>That box isn't part of this move anymore.</Text>
+            <Text style={styles.subtitle}>That box isn&apos;t part of this move anymore.</Text>
           </View>
         )}
       </View>

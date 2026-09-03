@@ -1,7 +1,7 @@
 // Scan a box — QR viewfinder + the four result states (this move / another
 // move / no access / unknown). Works for viewers too. Translated from the
 // design prototype (ui_kits/packing/Scan.jsx) into Expo / React Native.
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';
@@ -124,18 +124,17 @@ export default function Scan() {
   const [permission, requestPermission] = useCameraPermissions();
   const [result, setResult] = useState<ScanResult | null>(null);
 
-  // Guard so onBarcodeScanned only fires once per scan session.
-  const lockedRef = useRef(false);
-
+  // The first scan wins: once a result is showing, further barcode events are ignored
+  // until the user taps "Scan again".
   const handleValue = useCallback(
     (value: string) => {
-      if (lockedRef.current) return;
-      lockedRef.current = true;
       setResult(
-        classifyScan(
-          value,
-          boxes.map((b) => b.id),
-        ),
+        (current) =>
+          current ??
+          classifyScan(
+            value,
+            boxes.map((b) => b.id),
+          ),
       );
     },
     [boxes],
@@ -148,10 +147,7 @@ export default function Scan() {
     [handleValue],
   );
 
-  const rescan = useCallback(() => {
-    setResult(null);
-    lockedRef.current = false;
-  }, []);
+  const rescan = useCallback(() => setResult(null), []);
 
   // Build the view for the active result.
   const view = result ? buildView(result, store, move.name, rescan) : null;

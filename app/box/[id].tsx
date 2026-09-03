@@ -1,7 +1,7 @@
 // Box detail — cover photo, QR label, status, markers, and the items packed inside.
 // Role-aware: Owner/Editor get every create/edit/delete affordance; Viewers are
 // read-only but can still scan, view the QR, and print the label.
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -26,6 +26,7 @@ import {
   StreamUpsell,
   Thumb,
 } from '@/components';
+import { useSheetForm } from '@/hooks/useSheetForm';
 import {
   BOX_COLORS,
   boxColor,
@@ -1007,25 +1008,21 @@ function EditBoxSheet({
   onSave: (patch: { name: string; color: string; roomId: string }) => void;
   onClose: () => void;
 }) {
-  const [name, setName] = useState(box.name);
-  const [color, setColor] = useState(box.color);
-  const [roomId, setRoomId] = useState(box.roomId);
-
-  // Reflect the box's current values whenever the sheet (re)opens.
-  useEffect(() => {
-    setName(box.name);
-    setColor(box.color);
-    setRoomId(box.roomId);
-  }, [visible, box]);
+  // Reflects the box's current values each time the sheet opens.
+  const [{ name, color, roomId }, patch] = useSheetForm(visible, () => ({
+    name: box.name,
+    color: box.color,
+    roomId: box.roomId,
+  }));
 
   return (
     <Sheet visible={visible} onClose={onClose} title="Edit box">
-      <Input label="Box name" value={name} onChangeText={setName} autoFocus />
+      <Input label="Box name" value={name} onChangeText={(name) => patch({ name })} autoFocus />
 
       <Text style={styles.fieldLabel}>Color</Text>
       <View style={styles.palette}>
         {BOX_COLORS.map((c) => (
-          <ColorDot key={c} color={c} size={28} selected={c === color} onPress={() => setColor(c)} />
+          <ColorDot key={c} color={c} size={28} selected={c === color} onPress={() => patch({ color: c })} />
         ))}
       </View>
 
@@ -1038,7 +1035,7 @@ function EditBoxSheet({
               key={r.id}
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
-              onPress={() => setRoomId(r.id)}
+              onPress={() => patch({ roomId: r.id })}
               style={({ pressed }) => [styles.roomPick, on && styles.roomPickOn, pressed && styles.pressed]}
             >
               <RoomGlyph icon={r.icon} color={r.color} size={22} />

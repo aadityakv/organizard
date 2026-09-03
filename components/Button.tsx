@@ -114,7 +114,7 @@ export function Button({
   const variantConfig = variants[variant];
 
   // Animated scale for the press feedback
-  const scale = React.useRef(new Animated.Value(1)).current;
+  const [scale] = React.useState(() => new Animated.Value(1));
 
   const handlePressIn = () => {
     if (disabled) return;

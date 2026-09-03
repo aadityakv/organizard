@@ -63,7 +63,7 @@ export default function StreamSession() {
   const dictRef = useRef<DictationSession | null>(null);
   const gotitTmo = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTmo = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastBatchIds = useRef<string[]>([]);
+  const [lastBatchIds, setLastBatchIds] = useState<string[]>([]);
   const targetRef = useRef<string | null>(null);
   const listModeRef = useRef(false);
   const cameraRef = useRef<CameraView>(null);
@@ -120,12 +120,6 @@ export default function StreamSession() {
 
   const boxLabel = (b?: { number: number; name: string }) => (b ? `Box #${b.number} · ${b.name}` : 'Box');
   const colorOf = (id: string) => boxes.find((b) => b.id === id)?.color ?? box?.color ?? 'green';
-  const metaOf = (it: SItem) => {
-    const parts: string[] = [];
-    if (it.qty && it.qty > 1) parts.push('×' + it.qty);
-    if (it.value != null) parts.push(money(it.value));
-    return parts.join(' · ') || 'No value yet';
-  };
 
   const scheduleReady = () => {
     if (gotitTmo.current) clearTimeout(gotitTmo.current);
@@ -186,7 +180,7 @@ export default function StreamSession() {
       needsFix: false,
       boxId,
     }));
-    lastBatchIds.current = batch.map((b) => b.id);
+    setLastBatchIds(batch.map((b) => b.id));
     setSession((prev) => [...prev, ...batch]);
     setLastId(batch[batch.length - 1].id);
     setMic('gotit');
@@ -286,12 +280,12 @@ export default function StreamSession() {
   const onResay = () => {
     if (mic === 'listening') return;
     if (voiceMode) {
-      const ids = lastBatchIds.current;
+      const ids = lastBatchIds;
       if (!ids.length) return;
       setSession((prev) => prev.filter((it) => !ids.includes(it.id)));
       setLastId(null);
       setLastBatch(0);
-      lastBatchIds.current = [];
+      setLastBatchIds([]);
       beginListen(null, true);
     } else if (lastId) {
       beginListen(lastId, false);
@@ -339,7 +333,7 @@ export default function StreamSession() {
     });
   };
 
-  const resayActive = voiceMode ? lastBatchIds.current.length > 0 : !!lastId;
+  const resayActive = voiceMode ? lastBatchIds.length > 0 : !!lastId;
   const boxCount = new Set(session.map((it) => it.boxId)).size;
   const summaryLabel = `${session.length} ${session.length === 1 ? 'item' : 'items'} tucked into ${boxCount} ${boxCount === 1 ? 'box' : 'boxes'} — ${money(sessionValue)} packed.`;
 
@@ -497,7 +491,7 @@ export default function StreamSession() {
               {mic === 'fail' ? (
                 <Pressable onPress={() => lastId && setEditId(lastId)} style={styles.pillFail}>
                   <Icon name="ear" size={16} color={palette.amber600} />
-                  <Text style={styles.pillFailText}>Hmm — didn't catch a name. Tap to type it.</Text>
+                  <Text style={styles.pillFailText}>Hmm — didn&apos;t catch a name. Tap to type it.</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -633,7 +627,7 @@ export default function StreamSession() {
                   {it.name}
                 </Text>
                 {it.needsFix ? (
-                  <Text style={styles.ledgerFix}>That doesn't look right — tap to fix</Text>
+                  <Text style={styles.ledgerFix}>That doesn&apos;t look right — tap to fix</Text>
                 ) : null}
               </View>
               {it.qty && it.qty > 1 ? <Text style={styles.qtyChip}>×{it.qty}</Text> : null}
