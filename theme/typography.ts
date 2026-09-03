@@ -76,14 +76,3 @@ export const type = {
   numeral: { fontFamily: fonts.display.bold, fontSize: fontSize['2xl'] } as TextStyle,
 } as const;
 
-/** The full set of font modules to load — imported by app/_layout.tsx. */
-export const FONT_FAMILY_LIST = [
-  'Fredoka_400Regular',
-  'Fredoka_500Medium',
-  'Fredoka_600SemiBold',
-  'Fredoka_700Bold',
-  'Nunito_400Regular',
-  'Nunito_600SemiBold',
-  'Nunito_700Bold',
-  'Nunito_800ExtraBold',
-] as const;

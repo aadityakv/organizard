@@ -14,8 +14,6 @@ type NativeSpeech = {
 
 const native = requireOptionalNativeModule<NativeSpeech>('SpeechRecognizer');
 
-export const hasNativeSpeech = native != null;
-
 /** True when the recognizer is present and currently usable (iOS, online or on-device). */
 export function isSpeechAvailable(): boolean {
   try {

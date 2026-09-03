@@ -1,15 +1,15 @@
 // Scan a box — QR viewfinder + the four result states (this move / another
 // move / no access / unknown). Works for viewers too. Translated from the
 // design prototype (ui_kits/packing/Scan.jsx) into Expo / React Native.
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Icon, SlothMark } from '@/components';
-import { classifyScan, type ScanResult } from '@/lib/qr';
-import { useStore, boxById, roomById, boxStats, statusById } from '@/store/useStore';
+import { classifyScan, type ScanCandidateMove, type ScanResult } from '@/lib/qr';
+import { useStore, boxById, roomById, boxStats, statusById, type Store } from '@/store/useStore';
 import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
 import { money } from '@/lib/money';
 
@@ -118,8 +118,17 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
 
 export default function Scan() {
   const boxes = useStore((s) => s.boxes);
-  const move = useStore((s) => s.move);
-  const store = useStore();
+  const library = useStore((s) => s.library);
+  const currentMoveId = useStore((s) => s.currentMoveId);
+  const switchMove = useStore((s) => s.switchMove);
+  // The other moves on this device, so a label from one of them offers a jump.
+  const otherMoves = useMemo<ScanCandidateMove[]>(
+    () =>
+      Object.values(library)
+        .filter((b) => b.id !== currentMoveId)
+        .map((b) => ({ id: b.id, name: b.move.name, boxIds: b.boxes.map((x) => x.id) })),
+    [library, currentMoveId],
+  );
 
   const [permission, requestPermission] = useCameraPermissions();
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -134,10 +143,11 @@ export default function Scan() {
           classifyScan(
             value,
             boxes.map((b) => b.id),
+            otherMoves,
           ),
       );
     },
-    [boxes],
+    [boxes, otherMoves],
   );
 
   const handleBarcode = useCallback(
@@ -149,8 +159,17 @@ export default function Scan() {
 
   const rescan = useCallback(() => setResult(null), []);
 
-  // Build the view for the active result.
-  const view = result ? buildView(result, store, move.name, rescan) : null;
+  const jumpToMove = useCallback(
+    (moveId: string, boxId: string) => {
+      switchMove(moveId);
+      router.replace(`/box/${boxId}`);
+    },
+    [switchMove],
+  );
+
+  // Build the view for the active result. The result is a snapshot of one scan, so
+  // reading the store once here (rather than subscribing to all of it) is enough.
+  const view = result ? buildView(result, useStore.getState(), rescan, jumpToMove) : null;
 
   // ── Permission states ──────────────────────────────────────
   if (!permission) {
@@ -213,9 +232,9 @@ export default function Scan() {
 
 function buildView(
   result: ScanResult,
-  store: ReturnType<typeof useStore.getState>,
-  moveName: string,
+  store: Store,
   rescan: () => void,
+  jumpToMove: (moveId: string, boxId: string) => void,
 ): ResultView {
   if (result.kind === 'thisMove') {
     const box = boxById(store, result.boxId);
@@ -251,7 +270,7 @@ function buildView(
       actionLabel: 'Jump to it',
       actionIcon: 'corner-up-right',
       actionVariant: 'primary',
-      onAction: () => router.push(`/box/${result.boxId}`),
+      onAction: () => jumpToMove(result.moveId, result.boxId),
     };
   }
 

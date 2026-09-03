@@ -58,8 +58,6 @@ export interface Box {
   markers: string[]; // Marker ids
   /** Optional cover-photo URI. */
   cover?: string | null;
-  /** Legacy flag from the design mock — a placeholder cover exists. */
-  hasPhoto?: boolean;
 }
 
 export interface Item {
