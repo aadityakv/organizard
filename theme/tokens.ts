@@ -79,8 +79,7 @@ export const boxColor = (name: string): string =>
   boxPalette[name as BoxColor]?.solid ?? boxPalette.green.solid;
 
 /** Soft tint wash for a box-palette color name. Falls back to green tint. */
-export const boxTint = (name: string): string =>
-  boxPalette[name as BoxColor]?.tint ?? boxPalette.green.tint;
+export const boxTint = (name: string): string => boxPalette[name as BoxColor]?.tint ?? boxPalette.green.tint;
 
 // ============================================================
 // SEMANTIC COLORS
@@ -170,13 +169,49 @@ type Shadow = {
 };
 
 export const shadow: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'brand', Shadow> = {
-  xs: { shadowColor: '#363026', shadowOpacity: 0.06, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
-  sm: { shadowColor: '#363026', shadowOpacity: 0.07, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
-  md: { shadowColor: '#363026', shadowOpacity: 0.09, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
-  lg: { shadowColor: '#363026', shadowOpacity: 0.12, shadowRadius: 28, shadowOffset: { width: 0, height: 14 }, elevation: 10 },
-  xl: { shadowColor: '#363026', shadowOpacity: 0.16, shadowRadius: 40, shadowOffset: { width: 0, height: 20 }, elevation: 18 },
+  xs: {
+    shadowColor: '#363026',
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
+  sm: {
+    shadowColor: '#363026',
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#363026',
+    shadowOpacity: 0.09,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 5,
+  },
+  lg: {
+    shadowColor: '#363026',
+    shadowOpacity: 0.12,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 10,
+  },
+  xl: {
+    shadowColor: '#363026',
+    shadowOpacity: 0.16,
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 20 },
+    elevation: 18,
+  },
   // green-tinted glow for primary CTAs
-  brand: { shadowColor: '#4CAF7D', shadowOpacity: 0.3, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
+  brand: {
+    shadowColor: '#4CAF7D',
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
 };
 
 // ============================================================

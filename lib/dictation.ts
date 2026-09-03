@@ -52,7 +52,9 @@ export function isDictationSimulated(): boolean {
 /** Simulated dictation: stream a sample utterance, then fire onFinal. */
 function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): DictationSession {
   const pool = opts.listMode ? SAMPLES_LIST : SAMPLES;
-  const idx = opts.listMode ? (listIdx = (listIdx + 1) % pool.length) : (singleIdx = (singleIdx + 1) % pool.length);
+  const idx = opts.listMode
+    ? (listIdx = (listIdx + 1) % pool.length)
+    : (singleIdx = (singleIdx + 1) % pool.length);
   const text = pool[idx];
 
   let cancelled = false;
@@ -73,11 +75,20 @@ function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): Dictati
       finishTimer = setTimeout(fire, 420);
     }
   }, 48);
-  const clear = () => { clearInterval(iv); if (finishTimer) clearTimeout(finishTimer); };
+  const clear = () => {
+    clearInterval(iv);
+    if (finishTimer) clearTimeout(finishTimer);
+  };
 
   return {
-    cancel: () => { cancelled = true; clear(); },
-    stop: () => { clear(); fire(); }, // finalize immediately with the full sample
+    cancel: () => {
+      cancelled = true;
+      clear();
+    },
+    stop: () => {
+      clear();
+      fire();
+    }, // finalize immediately with the full sample
   };
 }
 
@@ -109,9 +120,12 @@ export function listen(opts: { listMode?: boolean }, cb: DictationCallbacks): Di
   // actually heard something, so it never fires on dead air.
   const resetSilence = () => {
     if (silenceTimer) clearTimeout(silenceTimer);
-    silenceTimer = setTimeout(() => {
-      if (lastTranscript.trim()) speech?.stop();
-    }, opts.listMode ? 1800 : 1300);
+    silenceTimer = setTimeout(
+      () => {
+        if (lastTranscript.trim()) speech?.stop();
+      },
+      opts.listMode ? 1800 : 1300,
+    );
   };
 
   requestSpeechPermissions()

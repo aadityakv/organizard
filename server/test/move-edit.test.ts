@@ -24,11 +24,19 @@ describe('updateMove — edits the move row', () => {
     const snap0 = await createMove(h, session);
     const moveId = snap0.move.id;
 
-    const res = await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [
-        m('updateMove', { name: 'Cross-country move', from: '1 Old St', to: '2 New Ave', target: 'Jul 12, 2026' }, 'c1'),
-      ],
-    }, auth(session));
+    const res = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [
+          m(
+            'updateMove',
+            { name: 'Cross-country move', from: '1 Old St', to: '2 New Ave', target: 'Jul 12, 2026' },
+            'c1',
+          ),
+        ],
+      },
+      auth(session),
+    );
     expect(res.status).toBe(200);
     expect(((await res.json()) as { applied: number }).applied).toBe(1);
 
@@ -46,14 +54,22 @@ describe('updateMove — edits the move row', () => {
     const moveId = snap0.move.id;
 
     // Seed all fields first.
-    await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [m('updateMove', { name: 'Move A', from: 'A', to: 'B', target: 'Jan 1, 2026' }, 'c1')],
-    }, auth(session));
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [m('updateMove', { name: 'Move A', from: 'A', to: 'B', target: 'Jan 1, 2026' }, 'c1')],
+      },
+      auth(session),
+    );
 
     // Patch only the target date.
-    const res = await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [m('updateMove', { target: 'Aug 3, 2026' }, 'c2')],
-    }, auth(session));
+    const res = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [m('updateMove', { target: 'Aug 3, 2026' }, 'c2')],
+      },
+      auth(session),
+    );
     expect(res.status).toBe(200);
 
     const snap = (await (await h.request(`/v1/moves/${moveId}`, auth(session))).json()) as Snapshot;
@@ -72,9 +88,13 @@ describe('updateMove — edits the move row', () => {
     const viewer = await h.login('viewer', 'v@x.com');
     await h.seedMember(moveId, viewer.user.id, 'viewer');
 
-    const res = await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [m('updateMove', { name: 'Hacked' }, 'c9')],
-    }, auth(viewer.session));
+    const res = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [m('updateMove', { name: 'Hacked' }, 'c9')],
+      },
+      auth(viewer.session),
+    );
     expect(res.status).toBe(403);
   });
 });

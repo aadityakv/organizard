@@ -25,7 +25,18 @@ describe('sliceFromBundle / snapshotInto round-trip', () => {
     const b = newBundle('mv_1', emptyMove, 1000);
     const withBox: MoveBundle = {
       ...b,
-      boxes: [{ id: 'b1', number: 1, name: 'Books', color: 'amber', roomId: 'r1', status: 'packing', markers: [], cover: null }],
+      boxes: [
+        {
+          id: 'b1',
+          number: 1,
+          name: 'Books',
+          color: 'amber',
+          roomId: 'r1',
+          status: 'packing',
+          markers: [],
+          cover: null,
+        },
+      ],
       rooms: [{ id: 'r1', name: 'Office', dest: null, icon: 'briefcase', color: 'slate' }],
       itemsByBox: { b1: [{ id: 'i1', boxId: 'b1', name: 'Novel', qty: 1, value: 0 }] },
     };
@@ -34,7 +45,7 @@ describe('sliceFromBundle / snapshotInto round-trip', () => {
     expect(restored.boxes).toEqual(withBox.boxes);
     expect(restored.itemsByBox).toEqual(withBox.itemsByBox);
     expect(restored.rooms).toEqual(withBox.rooms);
-    expect(restored.id).toBe('mv_1');         // meta preserved
+    expect(restored.id).toBe('mv_1'); // meta preserved
     expect(restored.lastOpenedAt).toBe(2000); // meta updated
   });
 });
@@ -43,14 +54,25 @@ describe('summarize', () => {
   it('counts boxes and items and reports mode/archived', () => {
     const b: MoveBundle = {
       ...newBundle('mv_1', emptyMove, 1000),
-      boxes: [{ id: 'b1', number: 1, name: 'Books', color: 'amber', roomId: 'r1', status: 'packing', markers: [], cover: null }],
+      boxes: [
+        {
+          id: 'b1',
+          number: 1,
+          name: 'Books',
+          color: 'amber',
+          roomId: 'r1',
+          status: 'packing',
+          markers: [],
+          cover: null,
+        },
+      ],
       itemsByBox: { b1: [{ id: 'i1', boxId: 'b1', name: 'Novel', qty: 2, value: 0 }] },
     };
     const s = summarize(b);
     expect(s.id).toBe('mv_1');
     expect(s.name).toBe('Test Move');
     expect(s.boxCount).toBe(1);
-    expect(s.itemCount).toBe(2);  // sums qty
+    expect(s.itemCount).toBe(2); // sums qty
     expect(s.mode).toBe('local');
     expect(s.archived).toBe(false);
     expect(s.role).toBe('owner'); // local ⇒ owner

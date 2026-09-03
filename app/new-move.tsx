@@ -38,13 +38,34 @@ export default function NewMove() {
       <Header title="New move" onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Card style={styles.card}>
-          <Input label="Name" value={name} onChangeText={setName} placeholder="e.g. Apartment move" autoFocus />
+          <Input
+            label="Name"
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. Apartment move"
+            autoFocus
+          />
           <View style={styles.gap} />
-          <AddressField label="From (optional)" value={from} onChangeText={setFrom} placeholder="Search an address" />
+          <AddressField
+            label="From (optional)"
+            value={from}
+            onChangeText={setFrom}
+            placeholder="Search an address"
+          />
           <View style={styles.gap} />
-          <AddressField label="To (optional)" value={to} onChangeText={setTo} placeholder="Search an address" />
+          <AddressField
+            label="To (optional)"
+            value={to}
+            onChangeText={setTo}
+            placeholder="Search an address"
+          />
           <View style={styles.gap} />
-          <DateField label="Target date (optional)" value={targetDate} onChange={setTargetDate} placeholder="Pick a date" />
+          <DateField
+            label="Target date (optional)"
+            value={targetDate}
+            onChange={setTargetDate}
+            placeholder="Pick a date"
+          />
           <Button fullWidth iconLeft="plus" onPress={onCreate} disabled={!name.trim()} style={styles.cta}>
             Create move
           </Button>

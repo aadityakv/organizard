@@ -27,7 +27,10 @@ export default function Find() {
   const markerLabel = (id: string): string => markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
 
   const items = q
-    ? indexed.filter((it) => it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)))
+    ? indexed.filter(
+        (it) =>
+          it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
+      )
     : [];
   const matchedBoxes = q ? boxes.filter((b) => b.name.toLowerCase().includes(q)) : [];
 
@@ -36,20 +39,44 @@ export default function Find() {
       <Header
         title="Find"
         subtitle="Where's my…?"
-        trailing={<IconButton icon="scan-line" variant="plain" size="sm" accessibilityLabel="Scan a box" onPress={() => router.push('/scan')} />}
+        trailing={
+          <IconButton
+            icon="scan-line"
+            variant="plain"
+            size="sm"
+            accessibilityLabel="Scan a box"
+            onPress={() => router.push('/scan')}
+          />
+        }
       />
       <View style={styles.searchField}>
         <Icon name="search" size={18} color={palette.ink400} />
-        <Input value={query} onChangeText={setQuery} placeholder="Find an item — “Where's my…?”" autoFocus style={styles.searchInput} />
-        {query ? <Pressable onPress={() => setQuery('')} hitSlop={8}><Icon name="x" size={18} color={palette.ink400} /></Pressable> : null}
+        <Input
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Find an item — “Where's my…?”"
+          autoFocus
+          style={styles.searchInput}
+        />
+        {query ? (
+          <Pressable onPress={() => setQuery('')} hitSlop={8}>
+            <Icon name="x" size={18} color={palette.ink400} />
+          </Pressable>
+        ) : null}
       </View>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {!q ? (
           <View style={styles.suggest}>
             <Text style={styles.suggestTitle}>Try</Text>
             <View style={styles.chips}>
               {SUGGESTIONS.map((s) => (
-                <Pressable key={s} onPress={() => setQuery(s)} style={styles.chip}><Text style={styles.chipText}>{s}</Text></Pressable>
+                <Pressable key={s} onPress={() => setQuery(s)} style={styles.chip}>
+                  <Text style={styles.chipText}>{s}</Text>
+                </Pressable>
               ))}
             </View>
           </View>
@@ -65,13 +92,29 @@ export default function Find() {
               <View style={styles.section}>
                 <Text style={styles.heading}>Items · {items.length}</Text>
                 {items.map((it) => (
-                  <Pressable key={it.id} onPress={() => router.push(`/item/${it.id}`)} style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
+                  <Pressable
+                    key={it.id}
+                    onPress={() => router.push(`/item/${it.id}`)}
+                    style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                  >
                     <Thumb color={it.boxColor} icon={it.icon ?? 'image'} size={48} />
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={styles.rowName} numberOfLines={1}>{it.name}</Text>
+                      <Text style={styles.rowName} numberOfLines={1}>
+                        {it.name}
+                      </Text>
                       <View style={styles.crumb}>
-                        {roomFor(it.roomId) ? <RoomGlyph icon={roomFor(it.roomId)!.icon} color={roomFor(it.roomId)!.color} size={16} /> : null}
-                        {roomFor(it.roomId) ? <Text style={styles.crumbText} numberOfLines={1}>{roomFor(it.roomId)!.name}</Text> : null}
+                        {roomFor(it.roomId) ? (
+                          <RoomGlyph
+                            icon={roomFor(it.roomId)!.icon}
+                            color={roomFor(it.roomId)!.color}
+                            size={16}
+                          />
+                        ) : null}
+                        {roomFor(it.roomId) ? (
+                          <Text style={styles.crumbText} numberOfLines={1}>
+                            {roomFor(it.roomId)!.name}
+                          </Text>
+                        ) : null}
                         <Icon name="chevron-right" size={12} color={palette.ink400} />
                         <Text style={styles.crumbText}>Box #{it.boxNumber}</Text>
                       </View>
@@ -85,10 +128,16 @@ export default function Find() {
               <View style={styles.section}>
                 <Text style={styles.heading}>Boxes · {matchedBoxes.length}</Text>
                 {matchedBoxes.map((b) => (
-                  <Pressable key={b.id} onPress={() => router.push(`/box/${b.id}`)} style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
+                  <Pressable
+                    key={b.id}
+                    onPress={() => router.push(`/box/${b.id}`)}
+                    style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                  >
                     <Thumb color={b.color} icon="package" size={48} />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.rowName} numberOfLines={1}>{b.name}</Text>
+                      <Text style={styles.rowName} numberOfLines={1}>
+                        {b.name}
+                      </Text>
                       <Text style={styles.rowSub}>Box #{b.number}</Text>
                     </View>
                     <Icon name="chevron-right" size={18} color={palette.ink400} />
@@ -105,20 +154,61 @@ export default function Find() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: palette.cream100 },
-  searchField: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 16, marginTop: 6, paddingHorizontal: 14, height: 50, backgroundColor: palette.white, borderRadius: radius.lg, borderWidth: 1.5, borderColor: palette.sand300 },
+  searchField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 6,
+    paddingHorizontal: 14,
+    height: 50,
+    backgroundColor: palette.white,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+  },
   searchInput: { flex: 1 },
   content: { padding: 16, paddingBottom: 60 },
   suggest: { marginTop: 8 },
-  suggestTitle: { fontFamily: fonts.body.extra, fontSize: 12, color: palette.ink400, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8 },
+  suggestTitle: {
+    fontFamily: fonts.body.extra,
+    fontSize: 12,
+    color: palette.ink400,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: palette.white, borderRadius: 999, paddingVertical: 9, paddingHorizontal: 14, borderWidth: 1.5, borderColor: palette.sand300 },
+  chip: {
+    backgroundColor: palette.white,
+    borderRadius: 999,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
+    borderColor: palette.sand300,
+  },
   chipText: { fontFamily: fonts.body.bold, fontSize: 13.5, color: palette.ink700 },
   empty: { alignItems: 'center', gap: 8, paddingVertical: 48 },
   emptyTitle: { fontFamily: fonts.display.bold, fontSize: 18, color: palette.ink900 },
   emptyBody: { fontFamily: fonts.body.semibold, fontSize: 13.5, color: palette.ink500, textAlign: 'center' },
   section: { marginBottom: 18 },
-  heading: { fontFamily: fonts.body.extra, fontSize: 12, color: palette.ink400, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: palette.white, borderRadius: radius.lg, padding: 10, marginBottom: 8 },
+  heading: {
+    fontFamily: fonts.body.extra,
+    fontSize: 12,
+    color: palette.ink400,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: palette.white,
+    borderRadius: radius.lg,
+    padding: 10,
+    marginBottom: 8,
+  },
   rowPressed: { backgroundColor: palette.cream200 },
   rowName: { fontFamily: fonts.body.extra, fontSize: 15, color: palette.ink900 },
   rowSub: { fontFamily: fonts.body.bold, fontSize: 12.5, color: palette.ink500, marginTop: 2 },

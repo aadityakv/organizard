@@ -28,19 +28,27 @@ describe('moveItem — moves an item between boxes', () => {
     const statusId = snap0.statuses[0].id;
 
     // room + two boxes (A, B) + an item in box A
-    await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [
-        m('addRoom', { id: 'room1', name: 'Kitchen', icon: 'cooking-pot' }, 'c1'),
-        m('addBox', { id: 'boxA', roomId: 'room1', number: 1, name: 'A', color: 'amber', statusId }, 'c2'),
-        m('addBox', { id: 'boxB', roomId: 'room1', number: 2, name: 'B', color: 'sky', statusId }, 'c3'),
-        m('addItem', { id: 'item1', boxId: 'boxA', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c4'),
-      ],
-    }, auth(session));
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [
+          m('addRoom', { id: 'room1', name: 'Kitchen', icon: 'cooking-pot' }, 'c1'),
+          m('addBox', { id: 'boxA', roomId: 'room1', number: 1, name: 'A', color: 'amber', statusId }, 'c2'),
+          m('addBox', { id: 'boxB', roomId: 'room1', number: 2, name: 'B', color: 'sky', statusId }, 'c3'),
+          m('addItem', { id: 'item1', boxId: 'boxA', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c4'),
+        ],
+      },
+      auth(session),
+    );
 
     // move the item from A -> B
-    const res = await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [m('moveItem', { id: 'item1', fromBoxId: 'boxA', toBoxId: 'boxB' }, 'c5')],
-    }, auth(session));
+    const res = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [m('moveItem', { id: 'item1', fromBoxId: 'boxA', toBoxId: 'boxB' }, 'c5')],
+      },
+      auth(session),
+    );
     expect(res.status).toBe(200);
     expect(((await res.json()) as { applied: number }).applied).toBe(1);
 
@@ -56,18 +64,26 @@ describe('moveItem — moves an item between boxes', () => {
     const moveId = snap0.move.id;
     const statusId = snap0.statuses[0].id;
 
-    await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [
-        m('addRoom', { id: 'room1', name: 'Kitchen', icon: 'cooking-pot' }, 'c1'),
-        m('addBox', { id: 'boxA', roomId: 'room1', number: 1, name: 'A', color: 'amber', statusId }, 'c2'),
-        m('addItem', { id: 'item1', boxId: 'boxA', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c3'),
-      ],
-    }, auth(session));
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [
+          m('addRoom', { id: 'room1', name: 'Kitchen', icon: 'cooking-pot' }, 'c1'),
+          m('addBox', { id: 'boxA', roomId: 'room1', number: 1, name: 'A', color: 'amber', statusId }, 'c2'),
+          m('addItem', { id: 'item1', boxId: 'boxA', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c3'),
+        ],
+      },
+      auth(session),
+    );
 
     // toBoxId is a foreign/non-existent box -> must be a no-op
-    const res = await h.json(`/v1/moves/${moveId}/mutations`, {
-      mutations: [m('moveItem', { id: 'item1', fromBoxId: 'boxA', toBoxId: 'boxNOPE' }, 'c4')],
-    }, auth(session));
+    const res = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [m('moveItem', { id: 'item1', fromBoxId: 'boxA', toBoxId: 'boxNOPE' }, 'c4')],
+      },
+      auth(session),
+    );
     expect(res.status).toBe(200);
 
     const snap = (await (await h.request(`/v1/moves/${moveId}`, auth(session))).json()) as Snapshot;

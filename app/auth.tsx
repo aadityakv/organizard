@@ -30,6 +30,12 @@ export default function AuthVerify() {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: colors.surfaceApp },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceApp,
+  },
   text: { fontFamily: fonts.body.bold, color: colors.textBody },
 });

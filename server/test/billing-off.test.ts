@@ -21,27 +21,55 @@ describe('billing off (default) — sharing is free, no subscription required', 
 
     // Mutations are accepted without entitlement.
     expect(
-      (await h.json(`/v1/moves/${moveId}/mutations`, {
-        mutations: [
-          m('addRoom', { id: 'r0', name: 'Kitchen', icon: 'cooking-pot' }, 'c0'),
-          m('addBox', { id: 'b1', roomId: 'r0', number: 1, name: 'Kitchen', color: 'amber', statusId }, 'c1'),
-          m('addItem', { id: 'i1', boxId: 'b1', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c2'),
-        ],
-      }, auth(owner.session))).status,
+      (
+        await h.json(
+          `/v1/moves/${moveId}/mutations`,
+          {
+            mutations: [
+              m('addRoom', { id: 'r0', name: 'Kitchen', icon: 'cooking-pot' }, 'c0'),
+              m(
+                'addBox',
+                { id: 'b1', roomId: 'r0', number: 1, name: 'Kitchen', color: 'amber', statusId },
+                'c1',
+              ),
+              m('addItem', { id: 'i1', boxId: 'b1', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c2'),
+            ],
+          },
+          auth(owner.session),
+        )
+      ).status,
     ).toBe(200);
 
     // Invites work without entitlement; invitee can accept and edit.
-    const inv = (await (await h.json(`/v1/moves/${moveId}/invites`, { role: 'editor' }, auth(owner.session))).json()) as { token: string };
+    const inv = (await (
+      await h.json(`/v1/moves/${moveId}/invites`, { role: 'editor' }, auth(owner.session))
+    ).json()) as { token: string };
     const ed = await h.login('ed', 'ed@x.com', { entitled: false });
     expect((await h.json(`/v1/invites/${inv.token}/accept`, {}, auth(ed.session))).status).toBe(200);
-    expect((await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addItem', { id: 'i2', boxId: 'b1', name: 'Mug', qty: 4, valueCents: 1200 }, 'c3')] }, auth(ed.session))).status).toBe(200);
+    expect(
+      (
+        await h.json(
+          `/v1/moves/${moveId}/mutations`,
+          {
+            mutations: [m('addItem', { id: 'i2', boxId: 'b1', name: 'Mug', qty: 4, valueCents: 1200 }, 'c3')],
+          },
+          auth(ed.session),
+        )
+      ).status,
+    ).toBe(200);
 
     // Reserving a photo record works without entitlement.
     const photo = await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'i1' }, auth(owner.session));
     expect(photo.status).toBe(200);
     const { uploadPath } = (await photo.json()) as { uploadPath: string };
     expect(
-      (await h.request(uploadPath, { method: 'PUT', body: new Uint8Array([1, 2, 3]), ...auth(owner.session) })).status,
+      (
+        await h.request(uploadPath, {
+          method: 'PUT',
+          body: new Uint8Array([1, 2, 3]),
+          ...auth(owner.session),
+        })
+      ).status,
     ).toBe(200);
   });
 });

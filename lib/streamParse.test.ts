@@ -31,7 +31,9 @@ describe('parseUtterance — the design sample phrases', () => {
 
   it('is order-independent and ignores filler ("about fifty bucks, six of them, stoneware mugs")', () => {
     expect(parseUtterance('about fifty bucks, six of them, stoneware mugs')).toEqual({
-      name: 'Stoneware mugs', qty: 6, value: 50,
+      name: 'Stoneware mugs',
+      qty: 6,
+      value: 50,
     });
   });
 

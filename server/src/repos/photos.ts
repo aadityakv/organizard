@@ -28,8 +28,16 @@ export async function createPhotoRecord(
     createdBy: args.createdBy,
     createdAt: now,
   });
-  if (args.itemId) await db.update(s.items).set({ updatedAt: now }).where(and(eq(s.items.id, args.itemId), eq(s.items.moveId, args.moveId)));
-  if (args.boxId) await db.update(s.boxes).set({ updatedAt: now }).where(and(eq(s.boxes.id, args.boxId), eq(s.boxes.moveId, args.moveId)));
+  if (args.itemId)
+    await db
+      .update(s.items)
+      .set({ updatedAt: now })
+      .where(and(eq(s.items.id, args.itemId), eq(s.items.moveId, args.moveId)));
+  if (args.boxId)
+    await db
+      .update(s.boxes)
+      .set({ updatedAt: now })
+      .where(and(eq(s.boxes.id, args.boxId), eq(s.boxes.moveId, args.moveId)));
 
   return { photoId: id, r2Key };
 }

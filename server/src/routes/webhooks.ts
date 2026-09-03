@@ -5,7 +5,13 @@ import { setEntitlement } from '../repos/users';
 import type { Env } from '../types';
 
 // RevenueCat sets app_user_id to our user id (client calls Purchases.logIn(userId)).
-const GRANT = new Set(['INITIAL_PURCHASE', 'RENEWAL', 'UNCANCELLATION', 'PRODUCT_CHANGE', 'NON_RENEWING_PURCHASE']);
+const GRANT = new Set([
+  'INITIAL_PURCHASE',
+  'RENEWAL',
+  'UNCANCELLATION',
+  'PRODUCT_CHANGE',
+  'NON_RENEWING_PURCHASE',
+]);
 const REVOKE = new Set(['EXPIRATION', 'BILLING_ISSUE', 'SUBSCRIPTION_PAUSED']);
 
 function timingSafeEqual(a: string, b: string): boolean {

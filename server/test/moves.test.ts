@@ -50,7 +50,11 @@ describe('moves — mutation batch', () => {
     const muts: Mutation[] = [
       m('addRoom', { id: 'room1', name: 'Kitchen', dest: 'NYC kitchen', icon: 'cooking-pot' }, 'c1'),
       m('addBox', { id: 'box1', roomId: 'room1', number: 1, name: 'Pots', color: 'amber', statusId }, 'c2'),
-      m('addItem', { id: 'item1', boxId: 'box1', name: 'Skillet', qty: 1, valueCents: 8000, markerIds: [markerId] }, 'c3'),
+      m(
+        'addItem',
+        { id: 'item1', boxId: 'box1', name: 'Skillet', qty: 1, valueCents: 8000, markerIds: [markerId] },
+        'c3',
+      ),
       m('setBoxMarker', { boxId: 'box1', markerId, on: true }, 'c4'),
     ];
     const res = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: muts }, auth(session));
@@ -88,13 +92,23 @@ describe('moves — mutation batch', () => {
     const snap0 = await createMove(h, session);
     const moveId = snap0.move.id;
 
-    await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r1', name: 'Bath', icon: 'bath' }, 'c1')] }, auth(session));
-    await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('deleteRoom', { id: 'r1' }, 'c2')] }, auth(session));
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('addRoom', { id: 'r1', name: 'Bath', icon: 'bath' }, 'c1')] },
+      auth(session),
+    );
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('deleteRoom', { id: 'r1' }, 'c2')] },
+      auth(session),
+    );
 
     const snap = (await (await h.request(`/v1/moves/${moveId}`, auth(session))).json()) as Snapshot;
     expect(snap.rooms).toHaveLength(0); // gone from snapshot
 
-    const changes = (await (await h.request(`/v1/moves/${moveId}/changes?since=0`, auth(session))).json()) as {
+    const changes = (await (
+      await h.request(`/v1/moves/${moveId}/changes?since=0`, auth(session))
+    ).json()) as {
       rooms: { id: string; deletedAt: number | null }[];
     };
     const r1 = changes.rooms.find((r) => r.id === 'r1');
@@ -111,21 +125,45 @@ describe('moves — permissions', () => {
     const statusId = snap0.statuses[0].id;
 
     // owner adds a box for later delete tests
-    await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addBox', { id: 'b1', roomId: 'r0', number: 1, name: 'X', color: 'sky', statusId }, 'o1')] }, auth(owner.session));
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [
+          m('addBox', { id: 'b1', roomId: 'r0', number: 1, name: 'X', color: 'sky', statusId }, 'o1'),
+        ],
+      },
+      auth(owner.session),
+    );
 
     const viewer = await h.login('viewer', 'v@x.com');
     await h.seedMember(moveId, viewer.user.id, 'viewer');
-    const vres = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r9', name: 'No', icon: 'box' }, 'v1')] }, auth(viewer.session));
+    const vres = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('addRoom', { id: 'r9', name: 'No', icon: 'box' }, 'v1')] },
+      auth(viewer.session),
+    );
     expect(vres.status).toBe(403);
 
     const editor = await h.login('editor', 'e@x.com');
     await h.seedMember(moveId, editor.user.id, 'editor');
-    const eEdit = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r2', name: 'Yes', icon: 'box' }, 'e1')] }, auth(editor.session));
+    const eEdit = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('addRoom', { id: 'r2', name: 'Yes', icon: 'box' }, 'e1')] },
+      auth(editor.session),
+    );
     expect(eEdit.status).toBe(200);
-    const eDelete = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('deleteBox', { id: 'b1' }, 'e2')] }, auth(editor.session));
+    const eDelete = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('deleteBox', { id: 'b1' }, 'e2')] },
+      auth(editor.session),
+    );
     expect(eDelete.status).toBe(403); // deleteBox is owner-only
 
-    const oDelete = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('deleteBox', { id: 'b1' }, 'o2')] }, auth(owner.session));
+    const oDelete = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('deleteBox', { id: 'b1' }, 'o2')] },
+      auth(owner.session),
+    );
     expect(oDelete.status).toBe(200);
   });
 
@@ -140,12 +178,14 @@ describe('moves — permissions', () => {
   });
 });
 
-describe('me — lists the user\'s moves', () => {
+describe("me — lists the user's moves", () => {
   it('returns the created move with the owner role', async () => {
     const h = await makeHarness();
     const { session } = await h.login('owner', 'o@x.com');
     await createMove(h, session);
-    const me = (await (await h.request('/v1/me', auth(session))).json()) as { moves: { name: string; role: string }[] };
+    const me = (await (await h.request('/v1/me', auth(session))).json()) as {
+      moves: { name: string; role: string }[];
+    };
     expect(me.moves).toHaveLength(1);
     expect(me.moves[0].role).toBe('owner');
   });

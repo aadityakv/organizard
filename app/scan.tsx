@@ -2,14 +2,7 @@
 // move / no access / unknown). Works for viewers too. Translated from the
 // design prototype (ui_kits/packing/Scan.jsx) into Expo / React Native.
 import React, { useCallback, useRef, useState } from 'react';
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -82,26 +75,17 @@ function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => voi
 // Permission request screen (camera not yet granted / denied).
 // ─────────────────────────────────────────────────────────────
 
-function PermissionGate({
-  denied,
-  onRequest,
-}: {
-  denied: boolean;
-  onRequest: () => void;
-}) {
+function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () => void }) {
   return (
     <SafeAreaView style={styles.permSafe} edges={['top', 'bottom']}>
-      <ScrollView
-        contentContainerStyle={styles.permContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.permContent} showsVerticalScrollIndicator={false}>
         <View style={styles.permIconWrap}>
           <SlothMark size={56} />
         </View>
         <Text style={styles.permTitle}>Point your camera at a box</Text>
         <Text style={styles.permBody}>
-          Tuck needs your camera so you can scan a box&apos;s QR label and jump
-          straight to what&apos;s inside.
+          Tuck needs your camera so you can scan a box&apos;s QR label and jump straight to what&apos;s
+          inside.
         </Text>
         {denied ? (
           <Button
@@ -114,13 +98,7 @@ function PermissionGate({
             Open settings
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            iconLeft="camera"
-            onPress={onRequest}
-          >
+          <Button variant="primary" size="lg" fullWidth iconLeft="camera" onPress={onRequest}>
             Turn on the camera
           </Button>
         )}
@@ -184,12 +162,7 @@ export default function Scan() {
     return <SafeAreaView style={styles.loading} edges={['top', 'bottom']} />;
   }
   if (!permission.granted) {
-    return (
-      <PermissionGate
-        denied={!permission.canAskAgain}
-        onRequest={requestPermission}
-      />
-    );
+    return <PermissionGate denied={!permission.canAskAgain} onRequest={requestPermission} />;
   }
 
   // ── Scanning ───────────────────────────────────────────────

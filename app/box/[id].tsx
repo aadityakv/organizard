@@ -2,15 +2,7 @@
 // Role-aware: Owner/Editor get every create/edit/delete affordance; Viewers are
 // read-only but can still scan, view the QR, and print the label.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -106,7 +98,9 @@ export default function BoxDetail() {
   const allStatuses = useStore((s) => s.statuses);
   const allMarkers = useStore((s) => s.markers);
   const boxMarkerDefs = useStore(
-    useShallow((s) => (box ? (box.markers.map((mid) => markerById(s, mid)).filter(Boolean) as Marker[]) : [])),
+    useShallow((s) =>
+      box ? (box.markers.map((mid) => markerById(s, mid)).filter(Boolean) as Marker[]) : [],
+    ),
   );
   const items = useStore((s) => selectBoxItems(s, boxId));
   const stats = useStore(useShallow((s) => (box ? boxStats(s, boxId) : { count: 0, value: 0 })));
@@ -147,7 +141,8 @@ export default function BoxDetail() {
     if (sortMode === 'added') return filtered;
     const next = [...filtered];
     if (sortMode === 'recent') return next.reverse();
-    if (sortMode === 'az') return next.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    if (sortMode === 'az')
+      return next.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
     // 'value' — by the item's displayed value, high → low.
     return next.sort((a, b) => (b.value || 0) - (a.value || 0));
   }, [items, query, sortMode, allMarkers]);
@@ -163,9 +158,7 @@ export default function BoxDetail() {
         <View style={styles.missing}>
           <Thumb color="slate" icon="package-x" size={72} radius={radius.pill} />
           <Text style={styles.missingTitle}>We couldn&apos;t find that box</Text>
-          <Text style={styles.missingBody}>
-            It may have been deleted, or the link is out of date.
-          </Text>
+          <Text style={styles.missingBody}>It may have been deleted, or the link is out of date.</Text>
           <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={() => router.back()}>
             Go back
           </Button>
@@ -215,9 +208,7 @@ export default function BoxDetail() {
           title={box.name}
           subtitle={subtitle}
           onBack={() => router.back()}
-          leading={
-            room ? <RoomGlyph icon={room.icon} color={room.color} size={28} /> : undefined
-          }
+          leading={room ? <RoomGlyph icon={room.icon} color={room.color} size={28} /> : undefined}
           trailing={
             canEdit || canDelete ? (
               <IconButton
@@ -251,10 +242,7 @@ export default function BoxDetail() {
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Cover photo */}
         <View style={[styles.cover, { backgroundColor: boxTint(box.color) }]}>
           {box.cover ? (
@@ -262,9 +250,7 @@ export default function BoxDetail() {
           ) : (
             <Icon name="camera" size={34} color={hue} />
           )}
-          {!box.cover && (
-            <Text style={styles.coverHint}>{canEdit ? 'Add a box photo' : 'No box photo'}</Text>
-          )}
+          {!box.cover && <Text style={styles.coverHint}>{canEdit ? 'Add a box photo' : 'No box photo'}</Text>}
           {canEdit && (
             <Pressable
               accessibilityRole="button"
@@ -280,7 +266,12 @@ export default function BoxDetail() {
         {/* QR label card */}
         <View style={styles.qrCard}>
           <View style={styles.qrFrame}>
-            <QRCode value={encodeBoxQR(box.id)} size={104} color={palette.ink900} backgroundColor={palette.white} />
+            <QRCode
+              value={encodeBoxQR(box.id)}
+              size={104}
+              color={palette.ink900}
+              backgroundColor={palette.white}
+            />
           </View>
           <View style={styles.qrBody}>
             <Text style={styles.qrEyebrow}>Box #{box.number} label</Text>
@@ -298,9 +289,7 @@ export default function BoxDetail() {
               iconLeft="printer"
               style={styles.qrPrint}
               onPress={() =>
-                void printLabels([
-                  { boxId: box.id, number: box.number, name: box.name, room: room?.name },
-                ])
+                void printLabels([{ boxId: box.id, number: box.number, name: box.name, room: room?.name }])
               }
             >
               Print label
@@ -314,9 +303,7 @@ export default function BoxDetail() {
             photos={photos}
             expanded={photosExpanded}
             onToggle={() => setPhotosExpanded((v) => !v)}
-            onOpen={(i) =>
-              router.push({ pathname: `/gallery/${box.id}`, params: { start: String(i) } })
-            }
+            onOpen={(i) => router.push({ pathname: `/gallery/${box.id}`, params: { start: String(i) } })}
           />
         )}
 
@@ -341,9 +328,7 @@ export default function BoxDetail() {
               {canEdit ? 'No markers yet — flag it "Fragile", "Open first"…' : 'No markers.'}
             </Text>
           ) : (
-            boxMarkerDefs.map((m) => (
-              <MarkerChip key={m.id} label={m.label} color={m.color} icon={m.icon} />
-            ))
+            boxMarkerDefs.map((m) => <MarkerChip key={m.id} label={m.label} color={m.color} icon={m.icon} />)
           )}
         </View>
 
@@ -353,9 +338,7 @@ export default function BoxDetail() {
             <Text style={styles.itemsTitle}>Items</Text>
             <Badge
               label={
-                query.trim().length > 0
-                  ? `${visibleItems.length} of ${items.length}`
-                  : String(items.length)
+                query.trim().length > 0 ? `${visibleItems.length} of ${items.length}` : String(items.length)
               }
               tone="neutral"
             />
@@ -466,7 +449,9 @@ export default function BoxDetail() {
                   Stream items
                 </Button>
                 {!isPro ? (
-                  <View style={styles.proBadge}><Text style={styles.proBadgeText}>PRO</Text></View>
+                  <View style={styles.proBadge}>
+                    <Text style={styles.proBadgeText}>PRO</Text>
+                  </View>
                 ) : null}
               </View>
             </View>
@@ -483,7 +468,10 @@ export default function BoxDetail() {
         onTryPro={() => {
           setStreamUpsell(false);
           // Pro is account-tied — a guest must sign in before starting the trial.
-          if (!session) { router.push('/sign-in'); return; }
+          if (!session) {
+            router.push('/sign-in');
+            return;
+          }
           startProTrial();
           router.push(`/stream/${box.id}`);
         }}
@@ -985,14 +973,7 @@ function CoverSheet({
             <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />
           </View>
           <View style={styles.doneButton}>
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              iconLeft="camera"
-              disabled={busy}
-              onPress={capture}
-            >
+            <Button variant="primary" size="lg" fullWidth iconLeft="camera" disabled={busy} onPress={capture}>
               {busy ? 'Saving…' : 'Take photo'}
             </Button>
           </View>
@@ -1058,11 +1039,7 @@ function EditBoxSheet({
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
               onPress={() => setRoomId(r.id)}
-              style={({ pressed }) => [
-                styles.roomPick,
-                on && styles.roomPickOn,
-                pressed && styles.pressed,
-              ]}
+              style={({ pressed }) => [styles.roomPick, on && styles.roomPickOn, pressed && styles.pressed]}
             >
               <RoomGlyph icon={r.icon} color={r.color} size={22} />
               <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
@@ -1263,7 +1240,15 @@ const styles = StyleSheet.create({
 
   // Bottom
   bottom: { marginTop: 20 },
-  proBadge: { position: 'absolute', top: -7, right: 8, backgroundColor: palette.amber400, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
+  proBadge: {
+    position: 'absolute',
+    top: -7,
+    right: 8,
+    backgroundColor: palette.amber400,
+    borderRadius: 999,
+    paddingHorizontal: 7,
+    paddingVertical: 1,
+  },
   proBadgeText: { fontSize: 10, fontFamily: fonts.body.extra, color: palette.ink900, letterSpacing: 0.3 },
 
   // Sheet — shared

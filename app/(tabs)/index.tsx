@@ -40,17 +40,7 @@ import {
   type Store,
 } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
-import {
-  BOX_COLORS,
-  boxColor,
-  colors,
-  fonts,
-  fontSize,
-  palette,
-  radius,
-  shadow,
-  space,
-} from '@/theme';
+import { BOX_COLORS, boxColor, colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
 
 type GroupView = 'room' | 'status' | 'value';
 
@@ -98,7 +88,9 @@ function DashboardBoxCard({ box }: { box: Box }) {
   const status = useStore((s) => statusById(s, box.status));
   const room = useStore((s) => roomById(s, box.roomId));
   const markerDefs = useStore(
-    useShallow((s) => box.markers.map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m))),
+    useShallow((s) =>
+      box.markers.map((id) => markerById(s, id)).filter((m): m is NonNullable<typeof m> => Boolean(m)),
+    ),
   );
   const { count, value } = useStore(useShallow((s) => boxStats(s, box.id)));
   const session = useStore((s) => s.session);
@@ -132,17 +124,18 @@ function FindResults({ query }: { query: string }) {
   const markers = useStore((s) => s.markers);
   const itemsByBox = useStore((s) => s.itemsByBox);
   // Derive off stable slices (allIndexedItems builds new objects, so it can't be a live selector).
-  const indexed = useMemo(() => allIndexedItems({ boxes, rooms, itemsByBox } as Store), [boxes, rooms, itemsByBox]);
+  const indexed = useMemo(
+    () => allIndexedItems({ boxes, rooms, itemsByBox } as Store),
+    [boxes, rooms, itemsByBox],
+  );
 
   const q = query.trim().toLowerCase();
 
-  const markerLabel = (id: string): string =>
-    markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
+  const markerLabel = (id: string): string => markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
 
   const items = indexed.filter(
     (it) =>
-      it.name.toLowerCase().includes(q) ||
-      (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
+      it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
   );
   const matchedBoxes = boxes.filter((b) => b.name.toLowerCase().includes(q));
   const roomFor = (id: string): Room | undefined => rooms.find((r) => r.id === id);
@@ -298,20 +291,16 @@ function AddBoxSheet({
       <Text style={styles.fieldLabel}>Color</Text>
       <View style={styles.colorRow}>
         {BOX_COLORS.map((hue) => (
-          <ColorDot
-            key={hue}
-            color={hue}
-            size={28}
-            selected={hue === color}
-            onPress={() => setColor(hue)}
-          />
+          <ColorDot key={hue} color={hue} size={28} selected={hue === color} onPress={() => setColor(hue)} />
         ))}
       </View>
 
       <Text style={styles.fieldLabel}>Room</Text>
       {rooms.length === 0 ? (
         <View style={styles.noRoomsHint}>
-          <Text style={styles.noRoomsText}>Boxes live inside a room. Add your first room to start packing.</Text>
+          <Text style={styles.noRoomsText}>
+            Boxes live inside a room. Add your first room to start packing.
+          </Text>
           <Button variant="secondary" size="md" iconLeft="plus" onPress={onAddRoom}>
             New room
           </Button>
@@ -343,19 +332,19 @@ function AddBoxSheet({
       )}
 
       {rooms.length > 0 && (
-      <Pressable
-        accessibilityRole="button"
-        disabled={!canSave}
-        onPress={create}
-        style={({ pressed }) => [
-          styles.cta,
-          !canSave && styles.ctaDisabled,
-          pressed && canSave && styles.ctaPressed,
-        ]}
-      >
-        <Icon name="plus" size={20} color={colors.textOnBrand} />
-        <Text style={styles.ctaText}>Add box</Text>
-      </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canSave}
+          onPress={create}
+          style={({ pressed }) => [
+            styles.cta,
+            !canSave && styles.ctaDisabled,
+            pressed && canSave && styles.ctaPressed,
+          ]}
+        >
+          <Icon name="plus" size={20} color={colors.textOnBrand} />
+          <Text style={styles.ctaText}>Add box</Text>
+        </Pressable>
       )}
     </Sheet>
   );
@@ -363,15 +352,7 @@ function AddBoxSheet({
 
 // Dual-mode room sheet. No `room` prop → CREATE; with `room` → EDIT (prefilled,
 // "Save changes" CTA, plus a Delete control gated by role/cascade size).
-function RoomSheet({
-  visible,
-  onClose,
-  room,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  room?: Room;
-}) {
+function RoomSheet({ visible, onClose, room }: { visible: boolean; onClose: () => void; room?: Room }) {
   const addRoom = useStore((s) => s.addRoom);
   const updateRoom = useStore((s) => s.updateRoom);
   const deleteRoom = useStore((s) => s.deleteRoom);
@@ -497,13 +478,7 @@ function RoomSheet({
       <Text style={styles.fieldLabel}>Color</Text>
       <View style={styles.colorRow}>
         {BOX_COLORS.map((hue) => (
-          <ColorDot
-            key={hue}
-            color={hue}
-            size={28}
-            selected={hue === color}
-            onPress={() => setColor(hue)}
-          />
+          <ColorDot key={hue} color={hue} size={28} selected={hue === color} onPress={() => setColor(hue)} />
         ))}
       </View>
 
@@ -539,15 +514,7 @@ function RoomSheet({
 // Edit-move sheet — name / from / to / target date. Prefilled from the live
 // `move`. The date string round-trips via formatTargetDate: parse move.target to
 // a Date for the picker, write the formatted label (or '' to clear) back on save.
-function EditMoveSheet({
-  visible,
-  onClose,
-  move,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  move: Move;
-}) {
+function EditMoveSheet({ visible, onClose, move }: { visible: boolean; onClose: () => void; move: Move }) {
   const updateMove = useStore((s) => s.updateMove);
 
   const [name, setName] = useState('');
@@ -579,13 +546,7 @@ function EditMoveSheet({
 
   return (
     <Sheet visible={visible} onClose={onClose} title="Edit move">
-      <Input
-        label="Move name"
-        value={name}
-        onChangeText={setName}
-        placeholder="e.g. NYC Move"
-        autoFocus
-      />
+      <Input label="Move name" value={name} onChangeText={setName} placeholder="e.g. NYC Move" autoFocus />
       <View style={styles.fieldGap} />
       <Text style={styles.fieldLabel}>From</Text>
       <AddressField value={from} onChangeText={setFrom} placeholder="Current address" />
@@ -855,9 +816,7 @@ export default function Dashboard() {
                           ]}
                         >
                           <Text style={styles.emptyRoomText}>
-                            {canEdit
-                              ? 'Empty room — add a box here'
-                              : 'No boxes in this room yet'}
+                            {canEdit ? 'Empty room — add a box here' : 'No boxes in this room yet'}
                           </Text>
                         </Pressable>
                       )}

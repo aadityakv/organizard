@@ -20,7 +20,10 @@ export type IconProps = {
 };
 
 export function Icon({ name, size = 22, color = colors.textBody, strokeWidth = 2 }: IconProps) {
-  const map = icons as unknown as Record<string, React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>>;
+  const map = icons as unknown as Record<
+    string,
+    React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>
+  >;
   const Cmp = map[toPascal(name)] ?? map.Box;
   return <Cmp size={size} color={color} strokeWidth={strokeWidth} />;
 }

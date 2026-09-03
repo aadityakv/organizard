@@ -5,7 +5,14 @@ import { authMiddleware, type AuthVars } from '../middleware/auth';
 import { hashPassword, verifyPassword } from '../lib/password';
 import { rateLimit } from '../lib/ratelimit';
 import { createSession, deleteAllSessions, deleteSession } from '../lib/session';
-import { createPasswordUser, deleteUserAndData, getUserByEmail, toPublicUser, upsertAppleUser, upsertEmailUser } from '../repos/users';
+import {
+  createPasswordUser,
+  deleteUserAndData,
+  getUserByEmail,
+  toPublicUser,
+  upsertAppleUser,
+  upsertEmailUser,
+} from '../repos/users';
 import type { Env } from '../types';
 
 const MAGIC_TTL_SECONDS = 60 * 15; // 15 minutes
@@ -19,7 +26,9 @@ export function authRoutes(deps: Deps) {
 
   // Sign in with Apple — verify the identity token, find-or-create the user.
   r.post('/apple', async (c) => {
-    const { identityToken } = await c.req.json<{ identityToken?: string }>().catch(() => ({ identityToken: undefined }));
+    const { identityToken } = await c.req
+      .json<{ identityToken?: string }>()
+      .catch(() => ({ identityToken: undefined }));
     if (!identityToken) return c.json({ error: 'MISSING_TOKEN' }, 400);
 
     let identity;
@@ -84,14 +93,18 @@ export function authRoutes(deps: Deps) {
 
   // Email + password — register a new account.
   r.post('/email/register', async (c) => {
-    const { email, password } = await c.req.json<{ email?: string; password?: string }>().catch(() => ({}) as { email?: string; password?: string });
+    const { email, password } = await c.req
+      .json<{ email?: string; password?: string }>()
+      .catch(() => ({}) as { email?: string; password?: string });
     const normalized = email?.trim().toLowerCase();
     if (!normalized || !EMAIL_RE.test(normalized)) return c.json({ error: 'INVALID_EMAIL' }, 400);
-    if (!password || password.length < PASSWORD_MIN || password.length > PASSWORD_MAX) return c.json({ error: 'WEAK_PASSWORD' }, 400);
+    if (!password || password.length < PASSWORD_MIN || password.length > PASSWORD_MAX)
+      return c.json({ error: 'WEAK_PASSWORD' }, 400);
 
     // Curb automated signup abuse (per IP, hourly).
     const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
-    if (!(await rateLimit(c.env.SESSIONS, `reg:${ip}`, 10, 3600))) return c.json({ error: 'RATE_LIMITED' }, 429);
+    if (!(await rateLimit(c.env.SESSIONS, `reg:${ip}`, 10, 3600)))
+      return c.json({ error: 'RATE_LIMITED' }, 429);
 
     const db = deps.getDb(c.env);
     if (await getUserByEmail(db, normalized)) return c.json({ error: 'EMAIL_TAKEN' }, 409);
@@ -109,9 +122,12 @@ export function authRoutes(deps: Deps) {
 
   // Email + password — sign in. Generic 401 so we don't reveal which part was wrong.
   r.post('/email/login', async (c) => {
-    const { email, password } = await c.req.json<{ email?: string; password?: string }>().catch(() => ({}) as { email?: string; password?: string });
+    const { email, password } = await c.req
+      .json<{ email?: string; password?: string }>()
+      .catch(() => ({}) as { email?: string; password?: string });
     const normalized = email?.trim().toLowerCase();
-    if (!normalized || !EMAIL_RE.test(normalized) || !password) return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
+    if (!normalized || !EMAIL_RE.test(normalized) || !password)
+      return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
 
     // Throttle brute-force (per address + per IP, 15-min window).
     const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
@@ -121,7 +137,8 @@ export function authRoutes(deps: Deps) {
 
     const db = deps.getDb(c.env);
     const user = await getUserByEmail(db, normalized);
-    if (!user || !(await verifyPassword(password, user.passwordHash))) return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
+    if (!user || !(await verifyPassword(password, user.passwordHash)))
+      return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
 
     const session = deps.newToken();
     await createSession(c.env, session, user.id, deps.now());

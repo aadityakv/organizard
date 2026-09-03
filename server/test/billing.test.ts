@@ -29,7 +29,9 @@ describe('billing — owner pays to share', () => {
   it('rejects a webhook with a bad/missing secret', async () => {
     const h = await makeHarness();
     // no auth header -> 401 (fail closed)
-    const res = await h.json('/v1/webhooks/revenuecat', { event: { type: 'INITIAL_PURCHASE', app_user_id: 'x' } });
+    const res = await h.json('/v1/webhooks/revenuecat', {
+      event: { type: 'INITIAL_PURCHASE', app_user_id: 'x' },
+    });
     expect(res.status).toBe(401);
   });
 

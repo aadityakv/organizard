@@ -37,7 +37,7 @@ function initials(name: string): string {
 function hueForName(name: string): string {
   let h = 0;
   for (let i = 0; i < name.length; i++) {
-    h = ((h * 31 + name.charCodeAt(i)) >>> 0);
+    h = (h * 31 + name.charCodeAt(i)) >>> 0;
   }
   return BOX_COLORS[h % BOX_COLORS.length];
 }
@@ -53,25 +53,14 @@ export function Avatar({ name, size = 40, uri, color, style }: AvatarProps) {
 
   return (
     <View
-      style={[
-        styles.base,
-        { width: size, height: size, borderRadius, backgroundColor: bgColor },
-        style,
-      ]}
+      style={[styles.base, { width: size, height: size, borderRadius, backgroundColor: bgColor }, style]}
       accessibilityLabel={name}
     >
       {uri ? (
-        <Image
-          source={{ uri }}
-          style={{ width: size, height: size, borderRadius }}
-          contentFit="cover"
-        />
+        <Image source={{ uri }} style={{ width: size, height: size, borderRadius }} contentFit="cover" />
       ) : (
         <Text
-          style={[
-            styles.initials,
-            { fontSize, lineHeight: size, color: fgColor },
-          ]}
+          style={[styles.initials, { fontSize, lineHeight: size, color: fgColor }]}
           numberOfLines={1}
           allowFontScaling={false}
         >

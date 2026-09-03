@@ -22,8 +22,18 @@ export const formatTargetDate = (d: Date): string =>
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const sameDay = (a: Date, b: Date): boolean =>
@@ -129,7 +139,13 @@ export function DateField({ label, value, onChange, placeholder = 'Pick a date' 
                     style={({ pressed }) => [styles.cell, pressed && styles.cellPressed]}
                   >
                     <View style={[styles.dayDot, selected && styles.daySelected]}>
-                      <Text style={[styles.dayText, selected && styles.dayTextSelected, isToday && !selected && styles.dayToday]}>
+                      <Text
+                        style={[
+                          styles.dayText,
+                          selected && styles.dayTextSelected,
+                          isToday && !selected && styles.dayToday,
+                        ]}
+                      >
                         {day}
                       </Text>
                     </View>

@@ -69,7 +69,8 @@ export async function syncActiveMove(): Promise<void> {
     } else {
       // Transient/network: keep the outbox and back off exponentially (with jitter).
       failures += 1;
-      nextAllowedAt = Date.now() + Math.min(MAX_BACKOFF_MS, 1000 * 2 ** failures) + Math.floor(Math.random() * 1000);
+      nextAllowedAt =
+        Date.now() + Math.min(MAX_BACKOFF_MS, 1000 * 2 ** failures) + Math.floor(Math.random() * 1000);
     }
   } finally {
     syncing = false;

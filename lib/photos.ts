@@ -104,7 +104,10 @@ export async function uploadPendingPhotos(): Promise<void> {
 }
 
 /** Resolve a stored photo (local ref or server id) to an <Image> source. */
-export function photoSource(photo: string, session: string | null): { uri: string; headers?: Record<string, string> } {
+export function photoSource(
+  photo: string,
+  session: string | null,
+): { uri: string; headers?: Record<string, string> } {
   return resolvePhoto(photo, {
     documentDirectory: FileSystem.documentDirectory,
     apiUrl: API_URL,

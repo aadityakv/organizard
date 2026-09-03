@@ -55,14 +55,19 @@ export default function InviteAccept() {
     <View style={styles.center}>
       {status === 'working' ? <ActivityIndicator color={colors.brand} /> : null}
       <Text style={styles.text}>{message}</Text>
-      {status !== 'working' ? (
-        <Button onPress={() => router.replace('/moves')}>Back to moves</Button>
-      ) : null}
+      {status !== 'working' ? <Button onPress={() => router.replace('/moves')}>Back to moves</Button> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24, backgroundColor: colors.surfaceApp },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    padding: 24,
+    backgroundColor: colors.surfaceApp,
+  },
   text: { fontFamily: fonts.body.bold, fontSize: 15, color: colors.textBody, textAlign: 'center' },
 });

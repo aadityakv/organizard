@@ -17,7 +17,14 @@ export type ThumbProps = {
   headers?: Record<string, string>;
 };
 
-export function Thumb({ color = 'green', icon = 'image', size = 56, radius = radii.md, uri, headers }: ThumbProps) {
+export function Thumb({
+  color = 'green',
+  icon = 'image',
+  size = 56,
+  radius = radii.md,
+  uri,
+  headers,
+}: ThumbProps) {
   if (uri) {
     return <Image source={{ uri, headers }} style={{ width: size, height: size, borderRadius: radius }} />;
   }

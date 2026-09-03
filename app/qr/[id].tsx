@@ -10,18 +10,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { Icon } from '@/components';
 import { boxById, roomById, useStore } from '@/store/useStore';
 import { encodeBoxQR } from '@/lib/qr';
-import {
-  boxColor,
-  colors,
-  fonts,
-  fontSize,
-  palette,
-  radius,
-  shadow,
-  space,
-  tap,
-  type,
-} from '@/theme';
+import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space, tap, type } from '@/theme';
 
 export default function QRScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -61,18 +50,14 @@ export default function QRScreen() {
 
             <View style={styles.hint}>
               <Icon name="info" size={15} color={colors.textPlaceholder} />
-              <Text style={styles.hintText}>
-                Hold steady — anyone on the move can scan to open it.
-              </Text>
+              <Text style={styles.hintText}>Hold steady — anyone on the move can scan to open it.</Text>
             </View>
           </View>
         ) : (
           <View style={styles.center}>
             <View style={[styles.dot, { backgroundColor: colors.borderStrong }]} />
             <Text style={styles.number}>Box not found</Text>
-            <Text style={styles.subtitle}>
-              That box isn't part of this move anymore.
-            </Text>
+            <Text style={styles.subtitle}>That box isn't part of this move anymore.</Text>
           </View>
         )}
       </View>

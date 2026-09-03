@@ -27,19 +27,34 @@ export async function createInvite(
   return { token, role: args.role, expiresAt };
 }
 
-export type AcceptResult = { moveId: string } | { error: 'INVITE_INVALID' | 'INVITE_USED' | 'INVITE_EXPIRED' };
+export type AcceptResult =
+  { moveId: string } | { error: 'INVITE_INVALID' | 'INVITE_USED' | 'INVITE_EXPIRED' };
 
-export async function acceptInvite(db: AppDb, deps: Deps, args: { token: string; userId: string }): Promise<AcceptResult> {
+export async function acceptInvite(
+  db: AppDb,
+  deps: Deps,
+  args: { token: string; userId: string },
+): Promise<AcceptResult> {
   const inv = (await db.select().from(s.invites).where(eq(s.invites.token, args.token)).limit(1))[0];
   if (!inv) return { error: 'INVITE_INVALID' };
   if (inv.acceptedBy) return { error: 'INVITE_USED' };
   if (inv.expiresAt < deps.now()) return { error: 'INVITE_EXPIRED' };
 
   const existing = (
-    await db.select().from(s.members).where(and(eq(s.members.moveId, inv.moveId), eq(s.members.userId, args.userId))).limit(1)
+    await db
+      .select()
+      .from(s.members)
+      .where(and(eq(s.members.moveId, inv.moveId), eq(s.members.userId, args.userId)))
+      .limit(1)
   )[0];
   if (!existing) {
-    await db.insert(s.members).values({ id: deps.newId(), moveId: inv.moveId, userId: args.userId, role: inv.role, createdAt: deps.now() });
+    await db.insert(s.members).values({
+      id: deps.newId(),
+      moveId: inv.moveId,
+      userId: args.userId,
+      role: inv.role,
+      createdAt: deps.now(),
+    });
   }
   await db.update(s.invites).set({ acceptedBy: args.userId }).where(eq(s.invites.id, inv.id));
   return { moveId: inv.moveId };
@@ -58,8 +73,14 @@ export async function isOwnerEntitled(db: AppDb, moveId: string, now: number): P
   return owner ? isEntitledNow(owner, now) : false;
 }
 
-export async function changeMemberRole(db: AppDb, args: { moveId: string; userId: string; role: Role }): Promise<void> {
-  await db.update(s.members).set({ role: args.role }).where(and(eq(s.members.moveId, args.moveId), eq(s.members.userId, args.userId)));
+export async function changeMemberRole(
+  db: AppDb,
+  args: { moveId: string; userId: string; role: Role },
+): Promise<void> {
+  await db
+    .update(s.members)
+    .set({ role: args.role })
+    .where(and(eq(s.members.moveId, args.moveId), eq(s.members.userId, args.userId)));
 }
 
 export async function removeMember(db: AppDb, args: { moveId: string; userId: string }): Promise<void> {

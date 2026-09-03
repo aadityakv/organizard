@@ -31,7 +31,12 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
         if (tab.center) {
           // Verb: capture is an action screen, not a tab destination.
           return (
-            <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={openCapture} style={styles.centerWrap}>
+            <Pressable
+              key={tab.name}
+              accessibilityLabel={tab.label}
+              onPress={openCapture}
+              style={styles.centerWrap}
+            >
               <View style={styles.centerBtn}>
                 <Icon name={tab.icon} size={26} color="#fff" />
               </View>
@@ -43,13 +48,19 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
         const routeIndex = state.routes.findIndex((r: { name: string }) => r.name === tab.name);
         const focused = state.index === routeIndex;
         const onPress = () => {
-          const event = navigation.emit({ type: 'tabPress', target: state.routes[routeIndex]?.key, canPreventDefault: true });
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: state.routes[routeIndex]?.key,
+            canPreventDefault: true,
+          });
           if (!focused && !event.defaultPrevented) navigation.navigate(tab.name);
         };
         return (
           <Pressable key={tab.name} accessibilityLabel={tab.label} onPress={onPress} style={styles.tab}>
             <Icon name={tab.icon} size={24} color={focused ? palette.green700 : palette.ink400} />
-            <Text style={[styles.label, { color: focused ? palette.green700 : palette.ink400 }]}>{tab.label}</Text>
+            <Text style={[styles.label, { color: focused ? palette.green700 : palette.ink400 }]}>
+              {tab.label}
+            </Text>
           </Pressable>
         );
       })}

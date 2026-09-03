@@ -134,13 +134,7 @@ export function Button({
   };
 
   return (
-    <Animated.View
-      style={[
-        fullWidth && styles.fullWidth,
-        { transform: [{ scale }] },
-        style,
-      ]}
-    >
+    <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale }] }, style]}>
       <Pressable
         onPress={disabled ? undefined : onPress}
         onPressIn={handlePressIn}
@@ -167,7 +161,12 @@ export function Button({
       >
         {iconLeft && (
           <View
-            style={{ width: sizeConfig.iconSize, height: sizeConfig.iconSize, alignItems: 'center', justifyContent: 'center' }}
+            style={{
+              width: sizeConfig.iconSize,
+              height: sizeConfig.iconSize,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
             <Icon
               name={iconLeft}
@@ -194,7 +193,12 @@ export function Button({
 
         {iconRight && (
           <View
-            style={{ width: sizeConfig.iconSize, height: sizeConfig.iconSize, alignItems: 'center', justifyContent: 'center' }}
+            style={{
+              width: sizeConfig.iconSize,
+              height: sizeConfig.iconSize,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
             <Icon
               name={iconRight}

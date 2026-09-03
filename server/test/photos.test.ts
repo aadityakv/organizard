@@ -18,7 +18,18 @@ async function moveWithItem(h: Awaited<ReturnType<typeof makeHarness>>, session:
     {
       mutations: [
         m('addRoom', { id: 'r0', name: 'Kitchen', icon: 'box' }, 'c0'),
-        m('addBox', { id: 'box1', roomId: 'r0', number: 1, name: 'Pots', color: 'amber', statusId: snap.statuses[0].id }, 'c1'),
+        m(
+          'addBox',
+          {
+            id: 'box1',
+            roomId: 'r0',
+            number: 1,
+            name: 'Pots',
+            color: 'amber',
+            statusId: snap.statuses[0].id,
+          },
+          'c1',
+        ),
         m('addItem', { id: 'item1', boxId: 'box1', name: 'Skillet', qty: 1, valueCents: 8000 }, 'c2'),
       ],
     },
@@ -33,7 +44,9 @@ describe('photos', () => {
     const { session } = await h.login('owner', 'o@x.com');
     const moveId = await moveWithItem(h, session);
 
-    const created = (await (await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'item1' }, auth(session))).json()) as {
+    const created = (await (
+      await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'item1' }, auth(session))
+    ).json()) as {
       photoId: string;
       uploadPath: string;
     };
@@ -46,7 +59,11 @@ describe('photos', () => {
     expect(snap.items.find((it) => it.id === 'item1')?.photoIds).toEqual([created.photoId]);
 
     // upload bytes, then read them back
-    const put = await h.request(created.uploadPath, { method: 'PUT', body: 'JPEGDATA', headers: { 'content-type': 'image/jpeg', ...auth(session).headers } });
+    const put = await h.request(created.uploadPath, {
+      method: 'PUT',
+      body: 'JPEGDATA',
+      headers: { 'content-type': 'image/jpeg', ...auth(session).headers },
+    });
     expect(put.status).toBe(200);
 
     const get = await h.request(`/v1/photos/${created.photoId}`, auth(session));
@@ -64,7 +81,9 @@ describe('photos', () => {
     const vCreate = await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'item1' }, auth(viewer.session));
     expect(vCreate.status).toBe(403);
 
-    const created = (await (await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'item1' }, auth(session))).json()) as { photoId: string };
+    const created = (await (
+      await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'item1' }, auth(session))
+    ).json()) as { photoId: string };
     const stranger = await h.login('stranger', 's@x.com');
     expect((await h.request(`/v1/photos/${created.photoId}`, auth(stranger.session))).status).toBe(404);
   });

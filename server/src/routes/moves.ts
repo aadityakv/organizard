@@ -9,7 +9,13 @@ import { applyMutations } from '../mutations/apply';
 import { createMove, deleteMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
 import { createPhotoRecord } from '../repos/photos';
 import { boxInMove, itemInMove } from '../repos/scope';
-import { changeMemberRole, createInvite, getMoveOwnerId, isOwnerEntitled, removeMember } from '../repos/sharing';
+import {
+  changeMemberRole,
+  createInvite,
+  getMoveOwnerId,
+  isOwnerEntitled,
+  removeMember,
+} from '../repos/sharing';
 import { isEntitledNow } from '../repos/users';
 import type { Env } from '../types';
 import { mutationsBodySchema } from '../validation';
@@ -21,8 +27,15 @@ export function moveRoutes(deps: Deps) {
   // Create a shared move — requires an active subscription ("owner pays to share")
   // only when billing is enabled; otherwise sharing is free.
   r.post('/', async (c) => {
-    if (billingEnabled(c.env) && !isEntitledNow(c.get('user'), deps.now())) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
-    type CreateBody = { name?: string; from?: string | null; to?: string | null; targetDate?: string | null; seed?: boolean };
+    if (billingEnabled(c.env) && !isEntitledNow(c.get('user'), deps.now()))
+      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    type CreateBody = {
+      name?: string;
+      from?: string | null;
+      to?: string | null;
+      targetDate?: string | null;
+      seed?: boolean;
+    };
     const body = await c.req.json<CreateBody>().catch(() => ({}) as CreateBody);
     if (!body.name || !body.name.trim()) return c.json({ error: 'INVALID_NAME' }, 400);
 
@@ -84,10 +97,15 @@ export function moveRoutes(deps: Deps) {
   // --- sharing: invites + member management (owner only) ---
   r.post('/:id/invites', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
-    if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now()))) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now())))
+      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
     const role: Role = body.role ?? 'viewer';
-    const invite = await createInvite(deps.getDb(c.env), deps, { moveId: c.req.param('id'), role, createdBy: c.get('user').id });
+    const invite = await createInvite(deps.getDb(c.env), deps, {
+      moveId: c.req.param('id'),
+      role,
+      createdBy: c.get('user').id,
+    });
     return c.json({ ...invite, url: `tuck://invite?token=${invite.token}` });
   });
 
@@ -119,10 +137,14 @@ export function moveRoutes(deps: Deps) {
     if (c.get('member').role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
-    if (billingEnabled(c.env) && !(await isOwnerEntitled(db, moveId, deps.now()))) return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
-    const body = await c.req.json<{ itemId?: string; boxId?: string }>().catch(() => ({}) as { itemId?: string; boxId?: string });
+    if (billingEnabled(c.env) && !(await isOwnerEntitled(db, moveId, deps.now())))
+      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    const body = await c.req
+      .json<{ itemId?: string; boxId?: string }>()
+      .catch(() => ({}) as { itemId?: string; boxId?: string });
     // The linked item/box must belong to this move (no cross-move photo linking).
-    if (body.itemId && !(await itemInMove(db, moveId, body.itemId))) return c.json({ error: 'NOT_FOUND' }, 404);
+    if (body.itemId && !(await itemInMove(db, moveId, body.itemId)))
+      return c.json({ error: 'NOT_FOUND' }, 404);
     if (body.boxId && !(await boxInMove(db, moveId, body.boxId))) return c.json({ error: 'NOT_FOUND' }, 404);
     const { photoId } = await createPhotoRecord(db, deps, {
       moveId,

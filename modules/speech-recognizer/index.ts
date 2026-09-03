@@ -60,14 +60,18 @@ export function startSpeech(
     onEnd();
   };
 
-  subs.push(native.addListener('onResult', (e) => {
-    const r = e as { transcript: string; isFinal: boolean };
-    onResult(r.transcript, r.isFinal);
-  }));
-  subs.push(native.addListener('onError', (e) => {
-    onError((e as { message: string }).message);
-    end();
-  }));
+  subs.push(
+    native.addListener('onResult', (e) => {
+      const r = e as { transcript: string; isFinal: boolean };
+      onResult(r.transcript, r.isFinal);
+    }),
+  );
+  subs.push(
+    native.addListener('onError', (e) => {
+      onError((e as { message: string }).message);
+      end();
+    }),
+  );
   subs.push(native.addListener('onEnd', () => end()));
 
   native.start().catch((err: unknown) => {
@@ -75,5 +79,13 @@ export function startSpeech(
     end();
   });
 
-  return { stop: () => { try { native.stop(); } catch { /* already stopped */ } } };
+  return {
+    stop: () => {
+      try {
+        native.stop();
+      } catch {
+        /* already stopped */
+      }
+    },
+  };
 }

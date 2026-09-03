@@ -7,8 +7,18 @@ import { deleteMove } from './moves';
 export type UserRow = typeof users.$inferSelect;
 
 const BOX_COLORS = [
-  'coral', 'amber', 'gold', 'lime', 'green', 'teal',
-  'sky', 'indigo', 'orchid', 'rose', 'clay', 'slate',
+  'coral',
+  'amber',
+  'gold',
+  'lime',
+  'green',
+  'teal',
+  'sky',
+  'indigo',
+  'orchid',
+  'rose',
+  'clay',
+  'slate',
 ];
 
 /** Stable avatar hue from a user id. */
@@ -121,8 +131,16 @@ export async function deleteUserAndData(db: AppDb, userId: string): Promise<void
 }
 
 /** Set a user's subscription entitlement (driven by the RevenueCat webhook). */
-export async function setEntitlement(db: AppDb, userId: string, active: boolean, expiresAt: number | null = null): Promise<void> {
-  await db.update(users).set({ entitlementActive: active, entitlementExpiresAt: expiresAt }).where(eq(users.id, userId));
+export async function setEntitlement(
+  db: AppDb,
+  userId: string,
+  active: boolean,
+  expiresAt: number | null = null,
+): Promise<void> {
+  await db
+    .update(users)
+    .set({ entitlementActive: active, entitlementExpiresAt: expiresAt })
+    .where(eq(users.id, userId));
 }
 
 /** Entitlement counts only while active AND not past its expiry. */
