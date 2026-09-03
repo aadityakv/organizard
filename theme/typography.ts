@@ -75,4 +75,3 @@ export const type = {
   /** Big value numerals (Fredoka, tabular feel). */
   numeral: { fontFamily: fonts.display.bold, fontSize: fontSize['2xl'] } as TextStyle,
 } as const;
-

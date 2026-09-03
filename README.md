@@ -107,9 +107,10 @@ npm run typecheck && npm test            # client: tsc + vitest (pure modules)
 cd server && npm run typecheck && npm test   # server: tsc + the full HTTP suite
 ```
 
-The React Native-coupled store cannot be imported in the node test environment, so
-screen and store behavior is verified on the simulator. Pure logic (label layout,
-voice parsing, photo refs, the move library, the mutation engine) is unit tested.
+The store is built by a factory that takes its storage backend, so the whole store
+(slices, the delta merge, sign-out, the persist migration) runs in node against an
+in-memory storage. Pure logic (voice parsing, photo refs, QR classification, the move
+library) is unit tested the same way. Screens are verified on the simulator.
 
 ## Shipping
 

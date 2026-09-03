@@ -23,6 +23,7 @@ import {
   SlothMark,
 } from '@/components';
 import { useSheetForm } from '@/hooks/useSheetForm';
+import { deleteMove } from '@/services/moves';
 import { moveSummaries, useStore } from '@/store/useStore';
 import type { MoveSummary } from '@/store/library';
 import { deleteAccount } from '@/lib/auth';
@@ -97,7 +98,7 @@ export default function Moves() {
     })),
   );
   const summaries = useMemo(
-    () => moveSummaries({ ...useStore.getState(), library, currentMoveId, account, ...liveSlice }),
+    () => moveSummaries({ library, currentMoveId, account, ...liveSlice }),
     [library, currentMoveId, account, liveSlice],
   );
   const session = useStore((s) => s.session);
@@ -234,7 +235,7 @@ export default function Moves() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          void useStore.getState().deleteMove(move.id);
+          void deleteMove(move.id);
         },
       },
     ]);

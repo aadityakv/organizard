@@ -3,6 +3,7 @@
 import type { Mutation, Role } from '@/shared';
 
 import { api } from '@/lib/api';
+import { clearSession } from '@/lib/session';
 import { uid } from '@/lib/uid';
 import { setMigrating, syncActiveMove } from '@/store/sync';
 import { useStore } from '@/store/useStore';
@@ -138,6 +139,7 @@ export async function flushAndSignOut(): Promise<void> {
     console.warn('signOut: final sync failed; recent offline edits may not have saved', e);
   }
   useStore.getState().signOut();
+  void clearSession();
 }
 
 /** Owner creates a shareable invite link for the active shared move. */

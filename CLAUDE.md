@@ -71,8 +71,9 @@ aren't shipped; cross-platform code should degrade gracefully on Android, not br
 - **Unit tests: `npm test`** at the root (vitest, covers the pure/testable modules)
   and in `server/` (vitest, full server suite). **`npm run typecheck`** in both. These
   must be green before shipping.
-- The **RN-coupled Zustand store can't be imported** in the node test env (expo
-  native deps), so store/UI behavior is verified on the **simulator**, not unit-tested.
+- The store is assembled by `store/createStore.ts` with an **injected storage**, so the
+  whole thing (slices, delta merge, sign-out, persist migration) is unit-tested in node
+  (`store/createStore.test.ts`). **Screens** are still verified on the **simulator**.
 - **Simulator driving** uses XcodeBuildMCP `snapshot_ui` (screen hash + element tree)
   + `screenshot`. The MCP tap tool is NOT enabled here, so taps go through **`cliclick`
   with a deliberate press** (`dd:x,y w:150 du:x,y` — quick clicks don't register on the
@@ -114,8 +115,9 @@ GitHub remote. Commit/push when the work is real and verified.
   render → React 19 throws **"Maximum update depth exceeded"** and the screen crashes.
   Typecheck and code review do NOT catch this — only running it does. Fix: wrap in
   `useShallow` when the inner values are stable store refs, OR compute via `useMemo`
-  over the stable slices it derives from (`useStore((s) => s.boxes)` etc.). This is the
-  #1 reason to verify new screens on the simulator before shipping.
+  over the stable slices it derives from (`useStore((s) => s.boxes)` etc.). Selectors in
+  `store/selectors.ts` say in their doc comment which ones build fresh values. This is
+  the #1 reason to verify new screens on the simulator before shipping.
 - `newArchEnabled: false` is ignored — New Arch is always on (see above).
 - `@react-native-community/datetimepicker` is **ABI-incompatible** with SDK 56's
   prebuilt RN (undefined Fabric symbols at link). We use a self-contained JS date
