@@ -6,6 +6,7 @@ import NetInfo from '@react-native-community/netinfo';
 
 import { api, ApiError } from '@/lib/api';
 import { uploadPendingPhotos } from '@/lib/photos';
+import { clearSession } from '@/lib/session';
 import { useStore } from './useStore';
 
 const POLL_MS = 15_000;
@@ -66,6 +67,7 @@ export async function syncActiveMove(): Promise<void> {
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) {
       useStore.getState().signOut(); // session gone — stop syncing
+      void clearSession();
     } else {
       // Transient/network: keep the outbox and back off exponentially (with jitter).
       failures += 1;
