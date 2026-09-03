@@ -1,5 +1,9 @@
 # Tuck (repo: `organizard`)
 
+<p align="center">
+  <img src="https://github.com/aadityakv/organizard/actions/workflows/ci.yml/badge.svg" alt="CI">
+</p>
+
 **An iOS app for organizing a physical move.** Create a move, add rooms, pack boxes
 into rooms, list what's in each box (with photos, value, quantity, notes and handling
 markers), and stick a QR label on every box. During the move, "which box is my X in?"
@@ -43,7 +47,6 @@ modules/      local Expo native modules (Swift): address autocomplete, speech re
 plugins/      Expo config plugins applied on every prebuild
 theme/        design tokens (colors, 12-hue box palette, type, spacing)
 server/       Cloudflare Worker: Hono + Drizzle over D1, R2 for photos, KV for sessions
-docs/         architecture notes and archived design/implementation plans
 ```
 
 The layering rule: `lib/` is pure (safe to import from node-run tests); anything
@@ -122,12 +125,9 @@ library) is unit tested the same way. Screens are verified on the simulator.
 
 Builds are made **locally** with `eas build --local` and uploaded with `xcrun altool`;
 if the Worker or a D1 migration changed, the server is migrated and deployed first
-so an old Worker never rejects new mutation types. Details live in `docs/`.
+so an old Worker never rejects new mutation types.
 
-## Docs
+## License
 
-- `docs/ARCHITECTURE.md` covers the sync engine, permissions and the native-module
-  and build gotchas that shaped the stack.
-- `docs/archive/` holds the original design handoff contract and the dated
-  implementation plans that were executed to build each phase. They are historical
-  and not kept current.
+All rights reserved (see `LICENSE`). The code is published for review; it is not
+licensed for reuse.

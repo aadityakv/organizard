@@ -81,7 +81,7 @@ export async function syncActiveMove(): Promise<void> {
 
 /** Force a full re-pull (resets the cursor). The backstop that heals any delta the
  * unbounded sync could have missed under a rare concurrent-writer race. */
-export async function fullResync(): Promise<void> {
+async function fullResync(): Promise<void> {
   const st = useStore.getState();
   if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session) return;
   pendingFull = true; // consumed by syncActiveMove inside its mutex (survives an in-flight pass)

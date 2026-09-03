@@ -13,7 +13,7 @@ import { useStore } from '@/store/useStore';
 const inFlight = new Set<string>();
 
 /** Upload one local photo, link it to its item/box, and return the server photo id. */
-export async function uploadPhoto(
+async function uploadPhoto(
   session: string,
   moveId: string,
   localUri: string,

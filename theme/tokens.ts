@@ -54,7 +54,7 @@ export const palette = {
 // CATEGORICAL BOX PALETTE — the organizing principle (12 hues).
 // Each hue has a solid (block / chip) and a soft tint (card wash).
 // ============================================================
-export const boxPalette = {
+const boxPalette = {
   coral: { solid: '#F2746B', tint: '#FCE7E4' },
   amber: { solid: '#F2A23C', tint: '#FBEBD5' },
   gold: { solid: '#E5C046', tint: '#FAF1CF' },
@@ -222,10 +222,4 @@ export const tap = {
   sm: 36,
   md: 44,
   lg: 52,
-} as const;
-
-export const duration = {
-  fast: 120,
-  base: 200,
-  slow: 320,
 } as const;
