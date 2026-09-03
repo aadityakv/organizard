@@ -99,5 +99,3 @@ export function useStreamSession() {
     commit,
   };
 }
-
-export type StreamSessionState = ReturnType<typeof useStreamSession>;

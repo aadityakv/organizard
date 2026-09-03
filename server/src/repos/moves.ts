@@ -103,7 +103,7 @@ export async function createMove(
 }
 
 /** Members of a move with display names (small list — returned in full on each delta). */
-export async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
+async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
   const memberRows = await db.select().from(s.members).where(eq(s.members.moveId, moveId));
   const userIds = memberRows.map((m) => m.userId);
   const userRows = userIds.length ? await db.select().from(s.users).where(inArray(s.users.id, userIds)) : [];
