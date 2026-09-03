@@ -47,7 +47,12 @@ export const type = {
   /** Large screen titles. */
   title: { fontFamily: fonts.display.semibold, fontSize: fontSize['2xl'], lineHeight: 34 } as TextStyle,
   /** Standard screen header title (matches the design Header). */
-  screenTitle: { fontFamily: fonts.display.bold, fontSize: 22, lineHeight: 26, color: '#2A2722' } as TextStyle,
+  screenTitle: {
+    fontFamily: fonts.display.bold,
+    fontSize: 22,
+    lineHeight: 26,
+    color: '#2A2722',
+  } as TextStyle,
   /** Section headers. */
   heading: { fontFamily: fonts.display.semibold, fontSize: fontSize.lg, lineHeight: 24 } as TextStyle,
   /** Card / list-item titles. */

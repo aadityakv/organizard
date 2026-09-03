@@ -26,7 +26,9 @@ describe('rooms — color field', () => {
     // addRoom with an explicit color
     await h.json(
       `/v1/moves/${moveId}/mutations`,
-      { mutations: [m('addRoom', { id: 'room1', name: 'Kitchen', icon: 'cooking-pot', color: 'teal' }, 'c1')] },
+      {
+        mutations: [m('addRoom', { id: 'room1', name: 'Kitchen', icon: 'cooking-pot', color: 'teal' }, 'c1')],
+      },
       auth(session),
     );
 
@@ -41,7 +43,9 @@ describe('rooms — color field', () => {
       auth(session),
     );
 
-    const changes = (await (await h.request(`/v1/moves/${moveId}/changes?since=0`, auth(session))).json()) as {
+    const changes = (await (
+      await h.request(`/v1/moves/${moveId}/changes?since=0`, auth(session))
+    ).json()) as {
       rooms: Room[];
     };
     const room1 = changes.rooms.find((r) => r.id === 'room1');

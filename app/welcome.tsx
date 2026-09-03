@@ -32,7 +32,9 @@ export default function Welcome() {
         <Button variant="ghost" size="lg" fullWidth onPress={continueAsGuest}>
           Continue as guest
         </Button>
-        <Text style={styles.fine}>Guest moves stay on this device. Make an account anytime to share a move.</Text>
+        <Text style={styles.fine}>
+          Guest moves stay on this device. Make an account anytime to share a move.
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -45,5 +47,12 @@ const styles = StyleSheet.create({
   wordmark: { fontFamily: fonts.display.bold, fontSize: 40, color: palette.ink900, marginTop: 4 },
   tagline: { fontFamily: fonts.body.semibold, fontSize: 16, color: palette.ink500, textAlign: 'center' },
   actions: { paddingHorizontal: 20, paddingBottom: 24, gap: 10 },
-  fine: { fontFamily: fonts.body.semibold, fontSize: 12.5, color: palette.ink400, textAlign: 'center', marginTop: 4, lineHeight: 18 },
+  fine: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 12.5,
+    color: palette.ink400,
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 18,
+  },
 });

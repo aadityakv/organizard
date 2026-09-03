@@ -33,7 +33,13 @@ export function SlothMark({ size = 40 }: { size?: number }) {
       <Circle cx={68.9} cy={42.1} r={0.9} fill="#FFFFFF" />
       {/* nose + smile */}
       <Ellipse cx={60} cy={49.5} rx={2.8} ry={2.1} fill="#2A2722" />
-      <Path d="M55.5 53.5 q4.5 3.4 9 0" fill="none" stroke="#7A5636" strokeWidth={1.9} strokeLinecap="round" />
+      <Path
+        d="M55.5 53.5 q4.5 3.4 9 0"
+        fill="none"
+        stroke="#7A5636"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+      />
       {/* green moving box (drawn last — sloth peeks over it) */}
       <Rect x={24} y={63} width={72} height={42} rx={11} fill="#4CAF7D" />
       <Path d="M25 64 L57 64 L50.5 49.5 L18 49.5 Z" fill="#62BC8C" />

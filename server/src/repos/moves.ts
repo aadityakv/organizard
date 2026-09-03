@@ -31,7 +31,11 @@ export type Changes = {
 
 export async function getMembership(db: AppDb, moveId: string, userId: string): Promise<Membership | null> {
   const row = (
-    await db.select().from(s.members).where(and(eq(s.members.moveId, moveId), eq(s.members.userId, userId))).limit(1)
+    await db
+      .select()
+      .from(s.members)
+      .where(and(eq(s.members.moveId, moveId), eq(s.members.userId, userId)))
+      .limit(1)
   )[0];
   return row ? { role: row.role } : null;
 }
@@ -44,7 +48,14 @@ export async function getMembership(db: AppDb, moveId: string, userId: string): 
 export async function createMove(
   db: AppDb,
   deps: Deps,
-  args: { name: string; from?: string | null; to?: string | null; targetDate?: string | null; ownerId: string; seed?: boolean },
+  args: {
+    name: string;
+    from?: string | null;
+    to?: string | null;
+    targetDate?: string | null;
+    ownerId: string;
+    seed?: boolean;
+  },
 ): Promise<string> {
   const now = deps.now();
   const moveId = deps.newId();
@@ -59,14 +70,33 @@ export async function createMove(
     createdAt: now,
     updatedAt: now,
   });
-  await db.insert(s.members).values({ id: deps.newId(), moveId, userId: args.ownerId, role: 'owner', createdAt: now });
+  await db
+    .insert(s.members)
+    .values({ id: deps.newId(), moveId, userId: args.ownerId, role: 'owner', createdAt: now });
 
   if (args.seed !== false) {
     for (const st of DEFAULT_STATUSES) {
-      await db.insert(s.statuses).values({ id: deps.newId(), moveId, label: st.label, color: st.color, custom: false, updatedAt: now, deletedAt: null });
+      await db.insert(s.statuses).values({
+        id: deps.newId(),
+        moveId,
+        label: st.label,
+        color: st.color,
+        custom: false,
+        updatedAt: now,
+        deletedAt: null,
+      });
     }
     for (const mk of DEFAULT_MARKERS) {
-      await db.insert(s.markers).values({ id: deps.newId(), moveId, label: mk.label, color: mk.color, icon: mk.icon, custom: false, updatedAt: now, deletedAt: null });
+      await db.insert(s.markers).values({
+        id: deps.newId(),
+        moveId,
+        label: mk.label,
+        color: mk.color,
+        icon: mk.icon,
+        custom: false,
+        updatedAt: now,
+        deletedAt: null,
+      });
     }
   }
   return moveId;
@@ -78,32 +108,75 @@ export async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
   const userIds = memberRows.map((m) => m.userId);
   const userRows = userIds.length ? await db.select().from(s.users).where(inArray(s.users.id, userIds)) : [];
   const nameById = new Map(userRows.map((u) => [u.id, u.name]));
-  return memberRows.map((m) => ({ id: m.id, moveId: m.moveId, userId: m.userId, role: m.role, name: nameById.get(m.userId) ?? 'Friend' }));
+  return memberRows.map((m) => ({
+    id: m.id,
+    moveId: m.moveId,
+    userId: m.userId,
+    role: m.role,
+    name: nameById.get(m.userId) ?? 'Friend',
+  }));
 }
 
 // --- DTO mappers -----------------------------------------------------------
 
 const toRoom = (r: typeof s.rooms.$inferSelect): Room => ({
-  id: r.id, moveId: r.moveId, name: r.name, dest: r.dest, icon: r.icon, color: r.color, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
+  id: r.id,
+  moveId: r.moveId,
+  name: r.name,
+  dest: r.dest,
+  icon: r.icon,
+  color: r.color,
+  updatedAt: r.updatedAt,
+  deletedAt: r.deletedAt,
 });
 const toStatus = (r: typeof s.statuses.$inferSelect): Status => ({
-  id: r.id, moveId: r.moveId, label: r.label, color: r.color, custom: r.custom, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
+  id: r.id,
+  moveId: r.moveId,
+  label: r.label,
+  color: r.color,
+  custom: r.custom,
+  updatedAt: r.updatedAt,
+  deletedAt: r.deletedAt,
 });
 const toMarker = (r: typeof s.markers.$inferSelect): Marker => ({
-  id: r.id, moveId: r.moveId, label: r.label, color: r.color, icon: r.icon, custom: r.custom, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
+  id: r.id,
+  moveId: r.moveId,
+  label: r.label,
+  color: r.color,
+  icon: r.icon,
+  custom: r.custom,
+  updatedAt: r.updatedAt,
+  deletedAt: r.deletedAt,
 });
 const toBox = (r: typeof s.boxes.$inferSelect, markerIds: string[]): Box => ({
-  id: r.id, moveId: r.moveId, roomId: r.roomId, number: r.number, name: r.name, color: r.color,
-  statusId: r.statusId, coverPhotoId: r.coverPhotoId, markerIds, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
+  id: r.id,
+  moveId: r.moveId,
+  roomId: r.roomId,
+  number: r.number,
+  name: r.name,
+  color: r.color,
+  statusId: r.statusId,
+  coverPhotoId: r.coverPhotoId,
+  markerIds,
+  updatedAt: r.updatedAt,
+  deletedAt: r.deletedAt,
 });
 const toItem = (r: typeof s.items.$inferSelect, markerIds: string[], photoIds: string[]): Item => ({
-  id: r.id, moveId: r.moveId, boxId: r.boxId, name: r.name, qty: r.qty, valueCents: r.valueCents,
-  note: r.note, icon: r.icon, markerIds, photoIds, updatedAt: r.updatedAt, deletedAt: r.deletedAt,
+  id: r.id,
+  moveId: r.moveId,
+  boxId: r.boxId,
+  name: r.name,
+  qty: r.qty,
+  valueCents: r.valueCents,
+  note: r.note,
+  icon: r.icon,
+  markerIds,
+  photoIds,
+  updatedAt: r.updatedAt,
+  deletedAt: r.deletedAt,
 });
 
-async function groupJoin(
-  rows: { left: string; right: string }[],
-): Promise<Map<string, string[]>> {
+async function groupJoin(rows: { left: string; right: string }[]): Promise<Map<string, string[]>> {
   const map = new Map<string, string[]>();
   for (const r of rows) {
     const arr = map.get(r.left) ?? [];
@@ -138,21 +211,63 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
   const userRows = userIds.length ? await db.select().from(s.users).where(inArray(s.users.id, userIds)) : [];
   const nameById = new Map(userRows.map((u) => [u.id, u.name]));
   const members: Member[] = memberRows.map((m) => ({
-    id: m.id, moveId: m.moveId, userId: m.userId, role: m.role, name: nameById.get(m.userId) ?? 'Friend',
+    id: m.id,
+    moveId: m.moveId,
+    userId: m.userId,
+    role: m.role,
+    name: nameById.get(m.userId) ?? 'Friend',
   }));
 
-  const rooms = (await db.select().from(s.rooms).where(and(eq(s.rooms.moveId, moveId), isNull(s.rooms.deletedAt)))).map(toRoom);
-  const statuses = (await db.select().from(s.statuses).where(and(eq(s.statuses.moveId, moveId), isNull(s.statuses.deletedAt)))).map(toStatus);
-  const markers = (await db.select().from(s.markers).where(and(eq(s.markers.moveId, moveId), isNull(s.markers.deletedAt)))).map(toMarker);
+  const rooms = (
+    await db
+      .select()
+      .from(s.rooms)
+      .where(and(eq(s.rooms.moveId, moveId), isNull(s.rooms.deletedAt)))
+  ).map(toRoom);
+  const statuses = (
+    await db
+      .select()
+      .from(s.statuses)
+      .where(and(eq(s.statuses.moveId, moveId), isNull(s.statuses.deletedAt)))
+  ).map(toStatus);
+  const markers = (
+    await db
+      .select()
+      .from(s.markers)
+      .where(and(eq(s.markers.moveId, moveId), isNull(s.markers.deletedAt)))
+  ).map(toMarker);
 
-  const boxRows = await db.select().from(s.boxes).where(and(eq(s.boxes.moveId, moveId), isNull(s.boxes.deletedAt)));
-  const itemRows = await db.select().from(s.items).where(and(eq(s.items.moveId, moveId), isNull(s.items.deletedAt)));
-  const bm = await boxMarkerMap(db, boxRows.map((b) => b.id));
-  const im = await itemMarkerMap(db, itemRows.map((i) => i.id));
-  const ip = await itemPhotoMap(db, itemRows.map((i) => i.id));
+  const boxRows = await db
+    .select()
+    .from(s.boxes)
+    .where(and(eq(s.boxes.moveId, moveId), isNull(s.boxes.deletedAt)));
+  const itemRows = await db
+    .select()
+    .from(s.items)
+    .where(and(eq(s.items.moveId, moveId), isNull(s.items.deletedAt)));
+  const bm = await boxMarkerMap(
+    db,
+    boxRows.map((b) => b.id),
+  );
+  const im = await itemMarkerMap(
+    db,
+    itemRows.map((i) => i.id),
+  );
+  const ip = await itemPhotoMap(
+    db,
+    itemRows.map((i) => i.id),
+  );
 
   return {
-    move: { id: move.id, name: move.name, from: move.fromAddr, to: move.toAddr, targetDate: move.targetDate, ownerId: move.ownerId, updatedAt: move.updatedAt },
+    move: {
+      id: move.id,
+      name: move.name,
+      from: move.fromAddr,
+      to: move.toAddr,
+      targetDate: move.targetDate,
+      ownerId: move.ownerId,
+      updatedAt: move.updatedAt,
+    },
     members,
     rooms,
     statuses,
@@ -169,18 +284,53 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
  * up front and returned as the next cursor. A periodic client full-resync (since=0)
  * is the backstop for the rare cross-table read race under concurrent writers.
  */
-export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, since: number): Promise<Changes> {
+export async function getChangesSince(
+  db: AppDb,
+  deps: Deps,
+  moveId: string,
+  since: number,
+): Promise<Changes> {
   const serverTime = deps.now();
 
-  const rooms = (await db.select().from(s.rooms).where(and(eq(s.rooms.moveId, moveId), gt(s.rooms.updatedAt, since)))).map(toRoom);
-  const statuses = (await db.select().from(s.statuses).where(and(eq(s.statuses.moveId, moveId), gt(s.statuses.updatedAt, since)))).map(toStatus);
-  const markers = (await db.select().from(s.markers).where(and(eq(s.markers.moveId, moveId), gt(s.markers.updatedAt, since)))).map(toMarker);
+  const rooms = (
+    await db
+      .select()
+      .from(s.rooms)
+      .where(and(eq(s.rooms.moveId, moveId), gt(s.rooms.updatedAt, since)))
+  ).map(toRoom);
+  const statuses = (
+    await db
+      .select()
+      .from(s.statuses)
+      .where(and(eq(s.statuses.moveId, moveId), gt(s.statuses.updatedAt, since)))
+  ).map(toStatus);
+  const markers = (
+    await db
+      .select()
+      .from(s.markers)
+      .where(and(eq(s.markers.moveId, moveId), gt(s.markers.updatedAt, since)))
+  ).map(toMarker);
 
-  const boxRows = await db.select().from(s.boxes).where(and(eq(s.boxes.moveId, moveId), gt(s.boxes.updatedAt, since)));
-  const itemRows = await db.select().from(s.items).where(and(eq(s.items.moveId, moveId), gt(s.items.updatedAt, since)));
-  const bm = await boxMarkerMap(db, boxRows.map((b) => b.id));
-  const im = await itemMarkerMap(db, itemRows.map((i) => i.id));
-  const ip = await itemPhotoMap(db, itemRows.map((i) => i.id));
+  const boxRows = await db
+    .select()
+    .from(s.boxes)
+    .where(and(eq(s.boxes.moveId, moveId), gt(s.boxes.updatedAt, since)));
+  const itemRows = await db
+    .select()
+    .from(s.items)
+    .where(and(eq(s.items.moveId, moveId), gt(s.items.updatedAt, since)));
+  const bm = await boxMarkerMap(
+    db,
+    boxRows.map((b) => b.id),
+  );
+  const im = await itemMarkerMap(
+    db,
+    itemRows.map((i) => i.id),
+  );
+  const ip = await itemPhotoMap(
+    db,
+    itemRows.map((i) => i.id),
+  );
 
   return {
     serverTime,
@@ -209,8 +359,12 @@ export async function getChangesSince(db: AppDb, deps: Deps, moveId: string, sin
  * The move-id-prefixed keys make a future `R2.list({ prefix })` + bulk delete clean.
  */
 export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
-  const boxIds = (await db.select({ id: s.boxes.id }).from(s.boxes).where(eq(s.boxes.moveId, moveId))).map((r) => r.id);
-  const itemIds = (await db.select({ id: s.items.id }).from(s.items).where(eq(s.items.moveId, moveId))).map((r) => r.id);
+  const boxIds = (await db.select({ id: s.boxes.id }).from(s.boxes).where(eq(s.boxes.moveId, moveId))).map(
+    (r) => r.id,
+  );
+  const itemIds = (await db.select({ id: s.items.id }).from(s.items).where(eq(s.items.moveId, moveId))).map(
+    (r) => r.id,
+  );
   if (itemIds.length) await db.delete(s.itemMarkers).where(inArray(s.itemMarkers.itemId, itemIds));
   if (boxIds.length) await db.delete(s.boxMarkers).where(inArray(s.boxMarkers.boxId, boxIds));
   await db.delete(s.items).where(eq(s.items.moveId, moveId));
@@ -229,10 +383,24 @@ export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
 export async function getUserMoves(db: AppDb, userId: string): Promise<(Move & { role: Role })[]> {
   const memberRows = await db.select().from(s.members).where(eq(s.members.userId, userId));
   if (!memberRows.length) return [];
-  const moveRows = await db.select().from(s.moves).where(inArray(s.moves.id, memberRows.map((m) => m.moveId)));
+  const moveRows = await db
+    .select()
+    .from(s.moves)
+    .where(
+      inArray(
+        s.moves.id,
+        memberRows.map((m) => m.moveId),
+      ),
+    );
   const roleByMove = new Map(memberRows.map((m) => [m.moveId, m.role]));
   return moveRows.map((m) => ({
-    id: m.id, name: m.name, from: m.fromAddr, to: m.toAddr, targetDate: m.targetDate, ownerId: m.ownerId,
-    updatedAt: m.updatedAt, role: roleByMove.get(m.id) ?? 'viewer',
+    id: m.id,
+    name: m.name,
+    from: m.fromAddr,
+    to: m.toAddr,
+    targetDate: m.targetDate,
+    ownerId: m.ownerId,
+    updatedAt: m.updatedAt,
+    role: roleByMove.get(m.id) ?? 'viewer',
   }));
 }

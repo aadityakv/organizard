@@ -19,7 +19,9 @@ const drizzleDir = join(import.meta.dirname, '../../drizzle');
 export async function makeTestDb(): Promise<AppDb> {
   const SQL = await initSqlJs({ locateFile: () => require.resolve('sql.js/dist/sql-wasm.wasm') });
   const sqlite = new SQL.Database();
-  const files = readdirSync(drizzleDir).filter((f) => f.endsWith('.sql')).sort();
+  const files = readdirSync(drizzleDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
   for (const f of files) {
     sqlite.run(readFileSync(join(drizzleDir, f), 'utf8')); // runs all statements; -- comments ignored
   }

@@ -58,19 +58,21 @@ export default function Members() {
     }
   };
 
-  const doShare = () => guard(async () => {
-    // Paywall: subscription required to own a shared move. Server enforces it too.
-    if (billingConfigured() && !(await isEntitled())) {
-      const ok = await purchaseSharing();
-      if (!ok) return;
-    }
-    await shareMove();
-    await syncActiveMove();
-  }, 'Could not share');
+  const doShare = () =>
+    guard(async () => {
+      // Paywall: subscription required to own a shared move. Server enforces it too.
+      if (billingConfigured() && !(await isEntitled())) {
+        const ok = await purchaseSharing();
+        if (!ok) return;
+      }
+      await shareMove();
+      await syncActiveMove();
+    }, 'Could not share');
 
-  const doInvite = () => guard(async () => {
-    setInviteLink(await createInviteLink(inviteRole));
-  }, 'Invite failed');
+  const doInvite = () =>
+    guard(async () => {
+      setInviteLink(await createInviteLink(inviteRole));
+    }, 'Invite failed');
 
   const changeRole = (userId: string, role: Role) =>
     guard(async () => {
@@ -93,12 +95,17 @@ export default function Members() {
       <Header title="Share & members" subtitle={moveName} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {!session ? (
-          <AuthPanel title="Sign in to share" subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner." />
+          <AuthPanel
+            title="Sign in to share"
+            subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner."
+          />
         ) : activeMode === 'local' ? (
           <>
             <Card style={styles.card}>
               <Text style={styles.h}>Share “{moveName}”</Text>
-              <Text style={styles.p}>This uploads the move so your partner can view and edit it in sync. You stay the owner.</Text>
+              <Text style={styles.p}>
+                This uploads the move so your partner can view and edit it in sync. You stay the owner.
+              </Text>
               <Button onPress={doShare} disabled={busy} fullWidth iconLeft="users" style={styles.cta}>
                 {busy ? 'Sharing…' : 'Share this move'}
               </Button>
@@ -112,14 +119,27 @@ export default function Members() {
                 <>
                   <Text style={styles.label}>They join as</Text>
                   <Segmented
-                    options={[{ value: 'editor', label: 'Editor' }, { value: 'viewer', label: 'Viewer' }]}
+                    options={[
+                      { value: 'editor', label: 'Editor' },
+                      { value: 'viewer', label: 'Viewer' },
+                    ]}
                     value={inviteRole}
                     onChange={(v) => setInviteRole(v as Role)}
                   />
-                  <Button onPress={doInvite} disabled={busy} fullWidth iconLeft="user-plus" style={styles.cta}>
+                  <Button
+                    onPress={doInvite}
+                    disabled={busy}
+                    fullWidth
+                    iconLeft="user-plus"
+                    style={styles.cta}
+                  >
                     Create invite link
                   </Button>
-                  {inviteLink ? <Text selectable style={styles.link}>{inviteLink}</Text> : null}
+                  {inviteLink ? (
+                    <Text selectable style={styles.link}>
+                      {inviteLink}
+                    </Text>
+                  ) : null}
                 </>
               ) : (
                 <LockNote>Only the owner can invite people.</LockNote>
@@ -144,7 +164,13 @@ export default function Members() {
   );
 }
 
-function MemberRow({ member, you, canManage, onRole, onRemove }: {
+function MemberRow({
+  member,
+  you,
+  canManage,
+  onRole,
+  onRemove,
+}: {
   member: Member;
   you: boolean;
   canManage: boolean;
@@ -156,7 +182,8 @@ function MemberRow({ member, you, canManage, onRole, onRemove }: {
       <Avatar name={member.name} size={40} />
       <View style={{ flex: 1 }}>
         <Text style={styles.memberName} numberOfLines={1}>
-          {member.name}{you ? ' · You' : ''}
+          {member.name}
+          {you ? ' · You' : ''}
         </Text>
         <RoleBadge role={member.role} size="sm" />
       </View>
@@ -164,7 +191,10 @@ function MemberRow({ member, you, canManage, onRole, onRemove }: {
         <View style={styles.memberActions}>
           <Segmented
             size="sm"
-            options={[{ value: 'editor', label: 'Editor' }, { value: 'viewer', label: 'Viewer' }]}
+            options={[
+              { value: 'editor', label: 'Editor' },
+              { value: 'viewer', label: 'Viewer' },
+            ]}
             value={member.role === 'viewer' ? 'viewer' : 'editor'}
             onChange={(v) => onRole(v as Role)}
           />
@@ -183,21 +213,69 @@ const styles = StyleSheet.create({
   card: { padding: 18, gap: 8 },
   h: { fontFamily: fonts.display.bold, fontSize: 20, color: palette.ink900 },
   p: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20 },
-  label: { fontFamily: fonts.body.bold, fontSize: fontSize.sm, color: palette.ink700, marginTop: 8, marginBottom: 6 },
+  label: {
+    fontFamily: fonts.body.bold,
+    fontSize: fontSize.sm,
+    color: palette.ink700,
+    marginTop: 8,
+    marginBottom: 6,
+  },
   cta: { marginTop: 12 },
-  or: { fontFamily: fonts.body.bold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginVertical: 6 },
+  or: {
+    fontFamily: fonts.body.bold,
+    fontSize: 12,
+    color: palette.ink400,
+    textAlign: 'center',
+    marginVertical: 6,
+  },
   appleBtn: { height: 48, marginTop: 6 },
   emailFields: { gap: 8, marginTop: 8 },
-  hint: { fontFamily: fonts.body.semibold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginTop: 6 },
-  link: { fontFamily: fonts.body.bold, fontSize: 13, color: colors.textLink, marginTop: 12, padding: 12, backgroundColor: palette.green50, borderRadius: radius.md },
-  section: { fontFamily: fonts.body.extra, fontSize: 11, letterSpacing: 0.7, textTransform: 'uppercase', color: palette.ink400, marginTop: 8, marginLeft: 4 },
+  hint: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 12,
+    color: palette.ink400,
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  link: {
+    fontFamily: fonts.body.bold,
+    fontSize: 13,
+    color: colors.textLink,
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: palette.green50,
+    borderRadius: radius.md,
+  },
+  section: {
+    fontFamily: fonts.body.extra,
+    fontSize: 11,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    color: palette.ink400,
+    marginTop: 8,
+    marginLeft: 4,
+  },
   accountWrap: { gap: 8 },
-  account: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surfaceCard, borderRadius: radius.lg, padding: 14 },
+  account: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceCard,
+    borderRadius: radius.lg,
+    padding: 14,
+  },
   deleteAccount: { fontFamily: fonts.body.bold, fontSize: 12.5, color: colors.danger, marginLeft: 6 },
   accountName: { fontFamily: fonts.body.bold, fontSize: 15, color: palette.ink900 },
   accountEmail: { fontFamily: fonts.body.semibold, fontSize: 12.5, color: palette.ink500 },
   signOut: { fontFamily: fonts.body.bold, fontSize: 13, color: colors.danger },
-  memberRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surfaceCard, borderRadius: radius.lg, padding: 12 },
+  memberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surfaceCard,
+    borderRadius: radius.lg,
+    padding: 12,
+  },
   memberName: { fontFamily: fonts.body.bold, fontSize: 15, color: palette.ink900, marginBottom: 4 },
   memberActions: { alignItems: 'flex-end', gap: 8, flexDirection: 'row' },
 });

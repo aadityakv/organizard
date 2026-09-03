@@ -71,7 +71,10 @@ describe('auth — session (me / logout)', () => {
     const anon = await h.request('/v1/me');
     expect(anon.status).toBe(401);
 
-    const out = await h.request('/v1/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${session}` } });
+    const out = await h.request('/v1/auth/logout', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session}` },
+    });
     expect(out.status).toBe(200);
 
     const after = await h.request('/v1/me', { headers: { Authorization: `Bearer ${session}` } });

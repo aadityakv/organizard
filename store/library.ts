@@ -44,8 +44,17 @@ export type MoveSummary = {
 };
 
 const SLICE_KEYS: (keyof SliceData)[] = [
-  'move', 'rooms', 'boxes', 'statuses', 'markers', 'members', 'itemsByBox',
-  'activeMode', 'serverMoveId', 'outbox', 'lastSyncTs',
+  'move',
+  'rooms',
+  'boxes',
+  'statuses',
+  'markers',
+  'members',
+  'itemsByBox',
+  'activeMode',
+  'serverMoveId',
+  'outbox',
+  'lastSyncTs',
 ];
 
 /** Empty local move seeded with the starter statuses/markers. */

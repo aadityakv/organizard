@@ -1,13 +1,5 @@
 import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  Animated,
-} from 'react-native';
+import { View, Text, TextInput, StyleSheet, StyleProp, ViewStyle, Animated } from 'react-native';
 import { colors, radius, space, fonts, fontSize, type as typeTokens } from '@/theme';
 
 export type InputProps = {
@@ -73,9 +65,7 @@ export function Input({
 
   return (
     <View style={[styles.wrapper, style]}>
-      {label ? (
-        <Text style={styles.label}>{label}</Text>
-      ) : null}
+      {label ? <Text style={styles.label}>{label}</Text> : null}
 
       <Animated.View
         style={[
@@ -85,9 +75,7 @@ export function Input({
           focused && styles.fieldFocused,
         ]}
       >
-        {prefix ? (
-          <Text style={styles.prefix}>{prefix}</Text>
-        ) : null}
+        {prefix ? <Text style={styles.prefix}>{prefix}</Text> : null}
 
         <TextInput
           style={[

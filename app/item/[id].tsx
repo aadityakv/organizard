@@ -39,11 +39,7 @@ export default function ItemDetail() {
   const room = useStore((s) => (found ? roomById(s, found.box.roomId) : undefined));
   const itemMarkers = useStore(
     useShallow((s) =>
-      found
-        ? ((found.item.markers ?? [])
-            .map((mid) => markerById(s, mid))
-            .filter(Boolean) as Marker[])
-        : [],
+      found ? ((found.item.markers ?? []).map((mid) => markerById(s, mid)).filter(Boolean) as Marker[]) : [],
     ),
   );
   const deleteItem = useStore((s) => s.deleteItem);
@@ -69,9 +65,7 @@ export default function ItemDetail() {
         <View style={styles.missing}>
           <Thumb color="slate" icon="package-x" size={72} radius={radius.pill} />
           <Text style={styles.missingTitle}>We couldn&apos;t find that item</Text>
-          <Text style={styles.missingBody}>
-            It may have been deleted, or the link is out of date.
-          </Text>
+          <Text style={styles.missingBody}>It may have been deleted, or the link is out of date.</Text>
           <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={() => router.back()}>
             Go back
           </Button>
@@ -84,25 +78,20 @@ export default function ItemDetail() {
   const hue = boxColor(box.color);
   const subtitle = box.name;
 
-  const goEdit = () =>
-    router.push({ pathname: '/add-item', params: { boxId: box.id, itemId: item.id } });
+  const goEdit = () => router.push({ pathname: '/add-item', params: { boxId: box.id, itemId: item.id } });
 
   const confirmDelete = () => {
-    Alert.alert(
-      `Delete "${item.name}"?`,
-      "This removes the item from the box. This can't be undone.",
-      [
-        { text: 'Keep it', style: 'cancel' },
-        {
-          text: 'Delete item',
-          style: 'destructive',
-          onPress: () => {
-            deleteItem(box.id, item.id);
-            router.back();
-          },
+    Alert.alert(`Delete "${item.name}"?`, "This removes the item from the box. This can't be undone.", [
+      { text: 'Keep it', style: 'cancel' },
+      {
+        text: 'Delete item',
+        style: 'destructive',
+        onPress: () => {
+          deleteItem(box.id, item.id);
+          router.back();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const onMore = () => {

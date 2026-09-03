@@ -18,14 +18,7 @@ export type ValueStatProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function ValueStat({
-  value,
-  label,
-  icon,
-  tone = 'default',
-  align = 'left',
-  style,
-}: ValueStatProps) {
+export function ValueStat({ value, label, icon, tone = 'default', align = 'left', style }: ValueStatProps) {
   const isBrand = tone === 'brand';
   const valueColor = isBrand ? colors.success : colors.textStrong;
   const alignItems = align === 'center' ? 'center' : 'flex-start';
@@ -34,14 +27,7 @@ export function ValueStat({
     <View style={[styles.container, { alignItems }, style]}>
       {/* Value row: optional icon + the big numeral */}
       <View style={[styles.valueRow, { justifyContent: alignItems as 'center' | 'flex-start' }]}>
-        {icon ? (
-          <Icon
-            name={icon}
-            size={20}
-            color={valueColor}
-            strokeWidth={2.5}
-          />
-        ) : null}
+        {icon ? <Icon name={icon} size={20} color={valueColor} strokeWidth={2.5} /> : null}
         <Text
           style={[styles.value, { color: valueColor, marginLeft: icon ? space[1] : 0 }]}
           numberOfLines={1}

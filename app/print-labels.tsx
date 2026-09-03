@@ -21,8 +21,7 @@ export default function PrintLabels() {
   // Selection: a Set of box ids. Start with everything checked.
   const [selected, setSelected] = useState<Set<string>>(() => new Set(boxes.map((b) => b.id)));
 
-  const roomName = (roomId: string): string | undefined =>
-    rooms.find((r) => r.id === roomId)?.name;
+  const roomName = (roomId: string): string | undefined => rooms.find((r) => r.id === roomId)?.name;
 
   const allOn = boxes.length > 0 && selected.size === boxes.length;
   const count = selected.size;
@@ -126,9 +125,7 @@ export default function PrintLabels() {
             disabled={count === 0}
             onPress={print}
           >
-            {count === 0
-              ? 'Select a box to print'
-              : `Print ${count} ${count === 1 ? 'label' : 'labels'}`}
+            {count === 0 ? 'Select a box to print' : `Print ${count} ${count === 1 ? 'label' : 'labels'}`}
           </Button>
         </View>
       ) : null}

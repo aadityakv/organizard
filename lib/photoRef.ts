@@ -14,10 +14,7 @@ export const LOCAL_PREFIX = 'local:';
  * absolute local paths persisted before the fix (back-compat).
  */
 export const isLocalRef = (p: string): boolean =>
-  p.startsWith(LOCAL_PREFIX) ||
-  p.startsWith('file://') ||
-  p.startsWith('content://') ||
-  p.startsWith('/');
+  p.startsWith(LOCAL_PREFIX) || p.startsWith('file://') || p.startsWith('content://') || p.startsWith('/');
 
 /** Resolve a stored photo ref to a displayable source, given the device doc dir + api base. */
 export function resolvePhoto(

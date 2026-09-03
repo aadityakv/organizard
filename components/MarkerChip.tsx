@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Pressable,
-  View,
-  Text,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { Pressable, View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, boxTint, colors, radius, fonts, fontSize } from '@/theme';
 import { Icon } from '@/components/Icon';
 
@@ -72,9 +65,7 @@ export function MarkerChip({
               width: dotSize,
               height: dotSize,
               borderRadius: dotSize / 2,
-              backgroundColor: selected
-                ? 'rgba(255,255,255,0.85)'
-                : solidHue,
+              backgroundColor: selected ? 'rgba(255,255,255,0.85)' : solidHue,
             },
           ]}
         />
@@ -95,10 +86,7 @@ export function MarkerChip({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ selected }}
-      style={({ pressed }) => [
-        styles.pressable,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
     >
       {pill}
     </Pressable>

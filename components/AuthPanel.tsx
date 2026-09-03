@@ -25,7 +25,15 @@ function friendly(e: unknown): string {
   return e instanceof Error ? e.message : 'Something went wrong.';
 }
 
-export function AuthPanel({ title = 'Sign in', subtitle, onAuthed }: { title?: string; subtitle?: string; onAuthed?: () => void }) {
+export function AuthPanel({
+  title = 'Sign in',
+  subtitle,
+  onAuthed,
+}: {
+  title?: string;
+  subtitle?: string;
+  onAuthed?: () => void;
+}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -33,7 +41,9 @@ export function AuthPanel({ title = 'Sign in', subtitle, onAuthed }: { title?: s
   const [appleOk, setAppleOk] = useState(false);
 
   useEffect(() => {
-    appleSignInAvailable().then(setAppleOk).catch(() => {});
+    appleSignInAvailable()
+      .then(setAppleOk)
+      .catch(() => {});
   }, []);
 
   const run = async (fn: () => Promise<void>, label: string) => {
@@ -73,15 +83,37 @@ export function AuthPanel({ title = 'Sign in', subtitle, onAuthed }: { title?: s
       ) : null}
       <Text style={styles.or}>or use email</Text>
       <Segmented
-        options={[{ value: 'login', label: 'Log in' }, { value: 'signup', label: 'Sign up' }]}
+        options={[
+          { value: 'login', label: 'Log in' },
+          { value: 'signup', label: 'Sign up' },
+        ]}
         value={authMode}
         onChange={(v) => setAuthMode(v as 'login' | 'signup')}
       />
       <View style={styles.fields}>
-        <Input value={email} onChangeText={setEmail} placeholder="you@email.com" keyboardType="email-address" autoCapitalize="none" textContentType="emailAddress" />
-        <Input value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry autoCapitalize="none" textContentType={authMode === 'signup' ? 'newPassword' : 'password'} />
+        <Input
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@email.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          textContentType="emailAddress"
+        />
+        <Input
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Password"
+          secureTextEntry
+          autoCapitalize="none"
+          textContentType={authMode === 'signup' ? 'newPassword' : 'password'}
+        />
       </View>
-      <Button onPress={submitEmail} disabled={busy || !email.trim() || password.length < 8} fullWidth style={styles.cta}>
+      <Button
+        onPress={submitEmail}
+        disabled={busy || !email.trim() || password.length < 8}
+        fullWidth
+        style={styles.cta}
+      >
         {authMode === 'signup' ? 'Create account' : 'Log in'}
       </Button>
       {authMode === 'signup' ? <Text style={styles.hint}>Use at least 8 characters.</Text> : null}
@@ -94,8 +126,20 @@ const styles = StyleSheet.create({
   h: { fontFamily: fonts.display.bold, fontSize: 20, color: palette.ink900 },
   p: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20 },
   appleBtn: { height: 48, marginTop: 6 },
-  or: { fontFamily: fonts.body.bold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginVertical: 6 },
+  or: {
+    fontFamily: fonts.body.bold,
+    fontSize: 12,
+    color: palette.ink400,
+    textAlign: 'center',
+    marginVertical: 6,
+  },
   fields: { gap: 8, marginTop: 8 },
   cta: { marginTop: 12 },
-  hint: { fontFamily: fonts.body.semibold, fontSize: 12, color: palette.ink400, textAlign: 'center', marginTop: 6 },
+  hint: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 12,
+    color: palette.ink400,
+    textAlign: 'center',
+    marginTop: 6,
+  },
 });

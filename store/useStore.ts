@@ -16,10 +16,24 @@ import { clearSession } from '@/lib/session';
 import { uid } from '@/lib/uid';
 import type { Mutation } from '@/shared';
 import {
-  newBundle, sliceFromBundle, snapshotInto, summarize, roleFor,
-  type MoveBundle, type MoveMode, type MoveSummary, type SliceData,
+  newBundle,
+  sliceFromBundle,
+  snapshotInto,
+  summarize,
+  roleFor,
+  type MoveBundle,
+  type MoveMode,
+  type MoveSummary,
+  type SliceData,
 } from './library';
-import { toClientBox, toClientItem, toClientMarker, toClientMember, toClientRoom, toClientStatus } from './mappers';
+import {
+  toClientBox,
+  toClientItem,
+  toClientMarker,
+  toClientMember,
+  toClientRoom,
+  toClientStatus,
+} from './mappers';
 
 export type { MoveMode } from './library';
 type Account = { id: string; name: string; email: string | null };
@@ -81,7 +95,15 @@ type Actions = {
   addMarker: (input: { label: string; color: string; icon?: string }) => string;
   addItem: (
     boxId: string,
-    input: { name: string; qty?: number; value?: number; note?: string; photos?: string[]; markers?: string[]; icon?: string },
+    input: {
+      name: string;
+      qty?: number;
+      value?: number;
+      note?: string;
+      photos?: string[];
+      markers?: string[];
+      icon?: string;
+    },
   ) => string;
   updateItem: (boxId: string, itemId: string, patch: Partial<Item>) => void;
   deleteItem: (boxId: string, itemId: string) => void;
@@ -119,9 +141,22 @@ type Actions = {
 
 /** Mutation types this build understands — used to drop legacy/poison outbox entries. */
 const KNOWN_MUTATION_TYPES = new Set<string>([
-  'addRoom', 'updateRoom', 'deleteRoom', 'addBox', 'updateBox', 'deleteBox',
-  'setBoxStatus', 'setBoxCover', 'setBoxMarker', 'addStatus', 'addMarker',
-  'addItem', 'updateItem', 'deleteItem', 'moveItem', 'updateMove',
+  'addRoom',
+  'updateRoom',
+  'deleteRoom',
+  'addBox',
+  'updateBox',
+  'deleteBox',
+  'setBoxStatus',
+  'setBoxCover',
+  'setBoxMarker',
+  'addStatus',
+  'addMarker',
+  'addItem',
+  'updateItem',
+  'deleteItem',
+  'moveItem',
+  'updateMove',
 ]);
 
 export type Store = State & Actions;
@@ -178,7 +213,12 @@ export const useStore = create<Store>()(
       addRoom: ({ name, dest = null, icon = 'box', color = 'slate' }) => {
         const id = uid('r');
         set((s) => ({ rooms: [...s.rooms, { id, name, dest, icon, color }] }));
-        const m: Mutation = { type: 'addRoom', clientId: uid('c'), ts: Date.now(), payload: { id, name, dest, icon, color } };
+        const m: Mutation = {
+          type: 'addRoom',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id, name, dest, icon, color },
+        };
         get().enqueue(m);
         return id;
       },
@@ -189,7 +229,9 @@ export const useStore = create<Store>()(
       },
 
       deleteRoom: (id) => {
-        const boxIds = get().boxes.filter((b) => b.roomId === id).map((b) => b.id);
+        const boxIds = get()
+          .boxes.filter((b) => b.roomId === id)
+          .map((b) => b.id);
         set((s) => {
           const itemsByBox = { ...s.itemsByBox };
           for (const bId of boxIds) delete itemsByBox[bId];
@@ -199,7 +241,8 @@ export const useStore = create<Store>()(
             itemsByBox,
           };
         });
-        for (const bId of boxIds) get().enqueue({ type: 'deleteBox', clientId: uid('c'), ts: Date.now(), payload: { id: bId } });
+        for (const bId of boxIds)
+          get().enqueue({ type: 'deleteBox', clientId: uid('c'), ts: Date.now(), payload: { id: bId } });
         get().enqueue({ type: 'deleteRoom', clientId: uid('c'), ts: Date.now(), payload: { id } });
       },
 
@@ -210,7 +253,12 @@ export const useStore = create<Store>()(
           boxes: [...s.boxes, { id, number, name, color, roomId, status, markers: [], cover: null }],
           itemsByBox: { ...s.itemsByBox, [id]: [] },
         }));
-        const m: Mutation = { type: 'addBox', clientId: uid('c'), ts: Date.now(), payload: { id, roomId, number, name, color, statusId: status } };
+        const m: Mutation = {
+          type: 'addBox',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id, roomId, number, name, color, statusId: status },
+        };
         get().enqueue(m);
         return id;
       },
@@ -231,7 +279,12 @@ export const useStore = create<Store>()(
 
       setBoxStatus: (boxId, statusId) => {
         set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, status: statusId } : b)) }));
-        get().enqueue({ type: 'setBoxStatus', clientId: uid('c'), ts: Date.now(), payload: { id: boxId, statusId } });
+        get().enqueue({
+          type: 'setBoxStatus',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id: boxId, statusId },
+        });
       },
 
       setBoxCover: (boxId, uri) => {
@@ -239,7 +292,12 @@ export const useStore = create<Store>()(
         // A local URI gets uploaded by the sync engine, which re-calls this with the
         // server photo id; only sync a non-local value (a real id, or an explicit clear).
         if (!uri || !isLocalUri(uri)) {
-          get().enqueue({ type: 'setBoxCover', clientId: uid('c'), ts: Date.now(), payload: { id: boxId, coverPhotoId: uri } });
+          get().enqueue({
+            type: 'setBoxCover',
+            clientId: uid('c'),
+            ts: Date.now(),
+            payload: { id: boxId, coverPhotoId: uri },
+          });
         }
       },
 
@@ -250,23 +308,41 @@ export const useStore = create<Store>()(
           boxes: s.boxes.map((b) => {
             if (b.id !== boxId) return b;
             const has = b.markers.includes(markerId);
-            return { ...b, markers: has ? b.markers.filter((m) => m !== markerId) : [...b.markers, markerId] };
+            return {
+              ...b,
+              markers: has ? b.markers.filter((m) => m !== markerId) : [...b.markers, markerId],
+            };
           }),
         }));
-        get().enqueue({ type: 'setBoxMarker', clientId: uid('c'), ts: Date.now(), payload: { boxId, markerId, on } });
+        get().enqueue({
+          type: 'setBoxMarker',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { boxId, markerId, on },
+        });
       },
 
       addStatus: ({ label, color }) => {
         const id = uid('st');
         set((s) => ({ statuses: [...s.statuses, { id, label, color, custom: true }] }));
-        get().enqueue({ type: 'addStatus', clientId: uid('c'), ts: Date.now(), payload: { id, label, color } });
+        get().enqueue({
+          type: 'addStatus',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id, label, color },
+        });
         return id;
       },
 
       addMarker: ({ label, color, icon = 'tag' }) => {
         const id = uid('mk');
         set((s) => ({ markers: [...s.markers, { id, label, color, icon, custom: true }] }));
-        get().enqueue({ type: 'addMarker', clientId: uid('c'), ts: Date.now(), payload: { id, label, color, icon } });
+        get().enqueue({
+          type: 'addMarker',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id, label, color, icon },
+        });
         return id;
       },
 
@@ -288,7 +364,17 @@ export const useStore = create<Store>()(
           type: 'addItem',
           clientId: uid('c'),
           ts: Date.now(),
-          payload: { id, boxId, name: item.name, qty: item.qty, valueCents: Math.round(item.value * 100), note: input.note ?? null, icon: input.icon ?? null, markerIds: item.markers, photoIds: [] },
+          payload: {
+            id,
+            boxId,
+            name: item.name,
+            qty: item.qty,
+            valueCents: Math.round(item.value * 100),
+            note: input.note ?? null,
+            icon: input.icon ?? null,
+            markerIds: item.markers,
+            photoIds: [],
+          },
         };
         get().enqueue(m);
         return id;
@@ -317,7 +403,12 @@ export const useStore = create<Store>()(
             [boxId]: (s.itemsByBox[boxId] ?? []).filter((it) => it.id !== itemId),
           },
         }));
-        get().enqueue({ type: 'deleteItem', clientId: uid('c'), ts: Date.now(), payload: { id: itemId, boxId } });
+        get().enqueue({
+          type: 'deleteItem',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id: itemId, boxId },
+        });
       },
 
       moveItem: (fromBoxId, toBoxId, itemId) => {
@@ -332,7 +423,12 @@ export const useStore = create<Store>()(
             },
           };
         });
-        get().enqueue({ type: 'moveItem', clientId: uid('c'), ts: Date.now(), payload: { id: itemId, fromBoxId, toBoxId } });
+        get().enqueue({
+          type: 'moveItem',
+          clientId: uid('c'),
+          ts: Date.now(),
+          payload: { id: itemId, fromBoxId, toBoxId },
+        });
       },
 
       updateMove: (patch) => {
@@ -369,12 +465,18 @@ export const useStore = create<Store>()(
         });
       },
       enqueue: (m) => set((s) => (s.activeMode === 'shared' ? { outbox: [...s.outbox, m] } : {})),
-      clearOutbox: (clientIds) => set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),
+      clearOutbox: (clientIds) =>
+        set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),
 
       applySnapshot: (snap) => {
         const itemsByBox = snapItemsByBox(snap);
         set({
-          move: { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' },
+          move: {
+            name: snap.move.name,
+            from: snap.move.from ?? '',
+            to: snap.move.to ?? '',
+            target: snap.move.targetDate ?? '',
+          },
           rooms: snap.rooms.map(toClientRoom),
           statuses: snap.statuses.map(toClientStatus),
           markers: snap.markers.map(toClientMarker),
@@ -397,12 +499,33 @@ export const useStore = create<Store>()(
           for (const mm of s.outbox) {
             const p = mm.payload as Record<string, string>;
             switch (mm.type) {
-              case 'addRoom': case 'updateRoom': case 'deleteRoom': dRoom.add(p.id); break;
-              case 'addStatus': dStatus.add(p.id); break;
-              case 'addMarker': dMarker.add(p.id); break;
-              case 'addBox': case 'updateBox': case 'deleteBox': case 'setBoxStatus': case 'setBoxCover': dBox.add(p.id); break;
-              case 'setBoxMarker': dBox.add(p.boxId); break;
-              case 'addItem': case 'updateItem': case 'deleteItem': case 'moveItem': dItem.add(p.id); break;
+              case 'addRoom':
+              case 'updateRoom':
+              case 'deleteRoom':
+                dRoom.add(p.id);
+                break;
+              case 'addStatus':
+                dStatus.add(p.id);
+                break;
+              case 'addMarker':
+                dMarker.add(p.id);
+                break;
+              case 'addBox':
+              case 'updateBox':
+              case 'deleteBox':
+              case 'setBoxStatus':
+              case 'setBoxCover':
+                dBox.add(p.id);
+                break;
+              case 'setBoxMarker':
+                dBox.add(p.boxId);
+                break;
+              case 'addItem':
+              case 'updateItem':
+              case 'deleteItem':
+              case 'moveItem':
+                dItem.add(p.id);
+                break;
             }
           }
 
@@ -469,7 +592,9 @@ export const useStore = create<Store>()(
           itemsByBox: {
             ...s.itemsByBox,
             [boxId]: (s.itemsByBox[boxId] ?? []).map((it) =>
-              it.id === itemId ? { ...it, photos: (it.photos ?? []).map((p) => (p === fromUri ? toId : p)) } : it,
+              it.id === itemId
+                ? { ...it, photos: (it.photos ?? []).map((p) => (p === fromUri ? toId : p)) }
+                : it,
             ),
           },
         })),
@@ -506,16 +631,24 @@ export const useStore = create<Store>()(
         }),
 
       archiveMove: (id) =>
-        set((s) => (s.library[id] ? { library: { ...s.library, [id]: { ...s.library[id], archived: true } } } : {})),
+        set((s) =>
+          s.library[id] ? { library: { ...s.library, [id]: { ...s.library[id], archived: true } } } : {},
+        ),
       unarchiveMove: (id) =>
-        set((s) => (s.library[id] ? { library: { ...s.library, [id]: { ...s.library[id], archived: false } } } : {})),
+        set((s) =>
+          s.library[id] ? { library: { ...s.library, [id]: { ...s.library[id], archived: false } } } : {},
+        ),
 
       removeMoveLocal: (id) =>
         set((s) => {
           const library = { ...s.library };
           delete library[id];
           if (s.currentMoveId !== id) return { library };
-          return { library, currentMoveId: null, ...sliceFromBundle(newBundle('__none__', EMPTY_MOVE, Date.now())) };
+          return {
+            library,
+            currentMoveId: null,
+            ...sliceFromBundle(newBundle('__none__', EMPTY_MOVE, Date.now())),
+          };
         }),
 
       deleteMove: async (id) => {
@@ -524,7 +657,8 @@ export const useStore = create<Store>()(
         const data = id === s.currentMoveId ? extractSlice(s) : s.library[id];
         if (!data) return;
         const isOwnedShared =
-          data.activeMode === 'shared' && data.serverMoveId &&
+          data.activeMode === 'shared' &&
+          data.serverMoveId &&
           roleFor('shared', data.members, s.account?.id ?? null) === 'owner';
         if (isOwnedShared && s.session && data.serverMoveId) {
           try {
@@ -545,7 +679,16 @@ export const useStore = create<Store>()(
             library[s.currentMoveId] = snapshotInto(library[s.currentMoveId], extractSlice(s), now);
           }
           const bundle: MoveBundle = {
-            ...newBundle(id, { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' }, now),
+            ...newBundle(
+              id,
+              {
+                name: snap.move.name,
+                from: snap.move.from ?? '',
+                to: snap.move.to ?? '',
+                target: snap.move.targetDate ?? '',
+              },
+              now,
+            ),
             activeMode: 'shared',
             serverMoveId,
             statuses: snap.statuses.map(toClientStatus),
@@ -570,7 +713,16 @@ export const useStore = create<Store>()(
           const id = uid('mv');
           const now = Date.now();
           const bundle: MoveBundle = {
-            ...newBundle(id, { name: snap.move.name, from: snap.move.from ?? '', to: snap.move.to ?? '', target: snap.move.targetDate ?? '' }, now),
+            ...newBundle(
+              id,
+              {
+                name: snap.move.name,
+                from: snap.move.from ?? '',
+                to: snap.move.to ?? '',
+                target: snap.move.targetDate ?? '',
+              },
+              now,
+            ),
             activeMode: 'shared',
             serverMoveId,
             statuses: snap.statuses.map(toClientStatus),
@@ -606,20 +758,47 @@ export const useStore = create<Store>()(
           if (isRealShared) {
             const id = uid('mv');
             const bundle: MoveBundle = {
-              id, archived: false, createdAt: now, lastOpenedAt: now,
-              move: (st.move as Move) ?? EMPTY_MOVE, rooms: (st.rooms as Room[]) ?? [], boxes: (st.boxes as Box[]) ?? [],
-              statuses: (st.statuses as Status[]) ?? [...STARTER_STATUSES], markers: (st.markers as Marker[]) ?? [...STARTER_MARKERS],
-              members: (st.members as Member[]) ?? [], itemsByBox: (st.itemsByBox as Record<string, Item[]>) ?? {},
-              activeMode: 'shared', serverMoveId: st.serverMoveId as string, outbox, lastSyncTs: (st.lastSyncTs as number) ?? 0,
+              id,
+              archived: false,
+              createdAt: now,
+              lastOpenedAt: now,
+              move: (st.move as Move) ?? EMPTY_MOVE,
+              rooms: (st.rooms as Room[]) ?? [],
+              boxes: (st.boxes as Box[]) ?? [],
+              statuses: (st.statuses as Status[]) ?? [...STARTER_STATUSES],
+              markers: (st.markers as Marker[]) ?? [...STARTER_MARKERS],
+              members: (st.members as Member[]) ?? [],
+              itemsByBox: (st.itemsByBox as Record<string, Item[]>) ?? {},
+              activeMode: 'shared',
+              serverMoveId: st.serverMoveId as string,
+              outbox,
+              lastSyncTs: (st.lastSyncTs as number) ?? 0,
             };
-            return { ...st, role: undefined, library: { [id]: bundle }, currentMoveId: id } as unknown as Store;
+            return {
+              ...st,
+              role: undefined,
+              library: { [id]: bundle },
+              currentMoveId: id,
+            } as unknown as Store;
           }
 
           return {
-            ...st, role: undefined, onboarded: false, library: {}, currentMoveId: null,
+            ...st,
+            role: undefined,
+            onboarded: false,
+            library: {},
+            currentMoveId: null,
             move: { name: '', from: '', to: '', target: '' },
-            rooms: [], boxes: [], statuses: [...STARTER_STATUSES], markers: [...STARTER_MARKERS],
-            members: [], itemsByBox: {}, activeMode: 'local', serverMoveId: null, outbox: [], lastSyncTs: 0,
+            rooms: [],
+            boxes: [],
+            statuses: [...STARTER_STATUSES],
+            markers: [...STARTER_MARKERS],
+            members: [],
+            itemsByBox: {},
+            activeMode: 'local',
+            serverMoveId: null,
+            outbox: [],
+            lastSyncTs: 0,
           } as unknown as Store;
         }
         return st as Store;
@@ -627,11 +806,20 @@ export const useStore = create<Store>()(
       partialize: (s) => ({
         onboarded: s.onboarded,
         proTrialUntil: s.proTrialUntil,
-        move: s.move, rooms: s.rooms, boxes: s.boxes, statuses: s.statuses,
-        markers: s.markers, members: s.members, itemsByBox: s.itemsByBox,
-        account: s.account, activeMode: s.activeMode, serverMoveId: s.serverMoveId,
-        outbox: s.outbox, lastSyncTs: s.lastSyncTs,
-        library: s.library, currentMoveId: s.currentMoveId,
+        move: s.move,
+        rooms: s.rooms,
+        boxes: s.boxes,
+        statuses: s.statuses,
+        markers: s.markers,
+        members: s.members,
+        itemsByBox: s.itemsByBox,
+        account: s.account,
+        activeMode: s.activeMode,
+        serverMoveId: s.serverMoveId,
+        outbox: s.outbox,
+        lastSyncTs: s.lastSyncTs,
+        library: s.library,
+        currentMoveId: s.currentMoveId,
       }),
     },
   ),
@@ -644,9 +832,17 @@ export const useStore = create<Store>()(
 /** Pull the live-slice fields off the full store state. */
 function extractSlice(s: State): SliceData {
   return {
-    move: s.move, rooms: s.rooms, boxes: s.boxes, statuses: s.statuses, markers: s.markers,
-    members: s.members, itemsByBox: s.itemsByBox, activeMode: s.activeMode,
-    serverMoveId: s.serverMoveId, outbox: s.outbox, lastSyncTs: s.lastSyncTs,
+    move: s.move,
+    rooms: s.rooms,
+    boxes: s.boxes,
+    statuses: s.statuses,
+    markers: s.markers,
+    members: s.members,
+    itemsByBox: s.itemsByBox,
+    activeMode: s.activeMode,
+    serverMoveId: s.serverMoveId,
+    outbox: s.outbox,
+    lastSyncTs: s.lastSyncTs,
   };
 }
 
@@ -751,7 +947,7 @@ export const allIndexedItems = (s: Store): IndexedItem[] => {
     }
   }
   return out;
-}
+};
 
 /**
  * Pro entitlement = signed in AND an active trial (real billing will also set this

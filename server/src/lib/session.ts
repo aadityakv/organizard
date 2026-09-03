@@ -7,7 +7,9 @@ const sessKey = (token: string) => `session:${token}`;
 const indexKey = (userId: string, token: string) => `usess:${userId}:${token}`;
 
 export async function createSession(env: Env, token: string, userId: string, now: number): Promise<void> {
-  await env.SESSIONS.put(sessKey(token), JSON.stringify({ userId, createdAt: now }), { expirationTtl: SESSION_TTL_SECONDS });
+  await env.SESSIONS.put(sessKey(token), JSON.stringify({ userId, createdAt: now }), {
+    expirationTtl: SESSION_TTL_SECONDS,
+  });
   await env.SESSIONS.put(indexKey(userId, token), '1', { expirationTtl: SESSION_TTL_SECONDS });
 }
 

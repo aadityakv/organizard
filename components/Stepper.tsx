@@ -64,9 +64,7 @@ export function Stepper({
         ]}
         hitSlop={4}
       >
-        <Text style={[styles.btnLabel, atMin ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>
-          {'−'}
-        </Text>
+        <Text style={[styles.btnLabel, atMin ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>{'−'}</Text>
       </Pressable>
 
       {/* Editable value — type a number directly, or use the buttons */}
@@ -96,9 +94,7 @@ export function Stepper({
         ]}
         hitSlop={4}
       >
-        <Text style={[styles.btnLabel, atMax ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>
-          {'+'}
-        </Text>
+        <Text style={[styles.btnLabel, atMax ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>{'+'}</Text>
       </Pressable>
     </View>
   );

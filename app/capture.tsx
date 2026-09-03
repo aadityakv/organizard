@@ -24,7 +24,9 @@ export default function Capture() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
-        <Button variant="ghost" iconLeft="x" onPress={() => router.back()}>Close</Button>
+        <Button variant="ghost" iconLeft="x" onPress={() => router.back()}>
+          Close
+        </Button>
       </View>
       <View style={styles.empty}>
         <Icon name="package" size={32} color={palette.ink400} />
@@ -40,5 +42,11 @@ const styles = StyleSheet.create({
   hold: { flex: 1, backgroundColor: '#161817' },
   topBar: { flexDirection: 'row', paddingHorizontal: 8, paddingTop: 4 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 40 },
-  emptyText: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, textAlign: 'center', lineHeight: 20 },
+  emptyText: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 14,
+    color: palette.ink500,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 });

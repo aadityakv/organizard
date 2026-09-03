@@ -10,11 +10,28 @@ import type {
 } from '@/shared';
 import type { Box, Item, Marker, Member, Room, Status } from '@/data/types';
 
-export const toClientRoom = (r: SRoom): Room => ({ id: r.id, name: r.name, dest: r.dest ?? null, icon: r.icon, color: r.color ?? 'slate' });
+export const toClientRoom = (r: SRoom): Room => ({
+  id: r.id,
+  name: r.name,
+  dest: r.dest ?? null,
+  icon: r.icon,
+  color: r.color ?? 'slate',
+});
 
-export const toClientStatus = (r: SStatus): Status => ({ id: r.id, label: r.label, color: r.color, custom: r.custom });
+export const toClientStatus = (r: SStatus): Status => ({
+  id: r.id,
+  label: r.label,
+  color: r.color,
+  custom: r.custom,
+});
 
-export const toClientMarker = (r: SMarker): Marker => ({ id: r.id, label: r.label, color: r.color, icon: r.icon, custom: r.custom });
+export const toClientMarker = (r: SMarker): Marker => ({
+  id: r.id,
+  label: r.label,
+  color: r.color,
+  icon: r.icon,
+  custom: r.custom,
+});
 
 export const toClientBox = (b: SBox): Box => ({
   id: b.id,

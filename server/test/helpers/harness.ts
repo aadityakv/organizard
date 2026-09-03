@@ -53,7 +53,12 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
   const json = (path: string, body: unknown, init: RequestInit = {}) =>
     app.request(
       path,
-      { method: 'POST', ...init, body: JSON.stringify(body), headers: { 'content-type': 'application/json', ...(init.headers ?? {}) } },
+      {
+        method: 'POST',
+        ...init,
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json', ...(init.headers ?? {}) },
+      },
       env,
     );
 
@@ -77,7 +82,23 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
 
   /** Post an authenticated RevenueCat webhook event. */
   const webhook = (type: string, appUserId: string) =>
-    json('/v1/webhooks/revenuecat', { event: { type, app_user_id: appUserId } }, { headers: { authorization: 'Bearer test-secret' } });
+    json(
+      '/v1/webhooks/revenuecat',
+      { event: { type, app_user_id: appUserId } },
+      { headers: { authorization: 'Bearer test-secret' } },
+    );
 
-  return { db, kv, env, sentEmails, setAppleIdentity, request, json, login, seedMember, setEntitled, webhook };
+  return {
+    db,
+    kv,
+    env,
+    sentEmails,
+    setAppleIdentity,
+    request,
+    json,
+    login,
+    seedMember,
+    setEntitled,
+    webhook,
+  };
 }

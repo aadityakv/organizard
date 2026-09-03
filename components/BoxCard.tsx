@@ -5,16 +5,7 @@
  * and up to 3 MarkerChip pills. Press animates to scale 0.985.
  */
 import React, { useRef } from 'react';
-import {
-  Animated,
-  Image,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Animated, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import {
   boxColor,
@@ -159,18 +150,8 @@ export function BoxCard({
 
           {/* box number */}
           {number != null ? (
-            <View
-              style={[
-                styles.numberBadge,
-                cover ? styles.numberBadgeDark : null,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.numberText,
-                  { color: cover ? colors.textOnDark : solid },
-                ]}
-              >
+            <View style={[styles.numberBadge, cover ? styles.numberBadgeDark : null]}>
+              <Text style={[styles.numberText, { color: cover ? colors.textOnDark : solid }]}>
                 {`#${number}`}
               </Text>
             </View>

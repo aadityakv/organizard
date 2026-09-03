@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { colors, palette, radius, shadow, space, fonts, fontSize } from '@/theme';
 
 // ---------------------------------------------------------------------------
@@ -25,13 +18,7 @@ export type SegmentedProps = {
 // Component
 // ---------------------------------------------------------------------------
 
-export function Segmented({
-  options,
-  value,
-  onChange,
-  size = 'md',
-  style,
-}: SegmentedProps) {
+export function Segmented({ options, value, onChange, size = 'md', style }: SegmentedProps) {
   const segmentHeight = size === 'sm' ? 32 : 38;
   const labelSize = size === 'sm' ? fontSize.sm : 14;
 

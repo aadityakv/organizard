@@ -8,7 +8,10 @@ import { syncLocalMovesUp } from '@/lib/share';
 import { pullServerMoves } from '@/store/sync';
 import { useStore } from '@/store/useStore';
 
-async function adoptSession(session: string, user: { id: string; name: string; email: string | null }): Promise<void> {
+async function adoptSession(
+  session: string,
+  user: { id: string; name: string; email: string | null },
+): Promise<void> {
   await saveSession(session);
   useStore.getState().setSession(session, { id: user.id, name: user.name, email: user.email });
   useStore.getState().setOnboarded(true); // signing in completes onboarding

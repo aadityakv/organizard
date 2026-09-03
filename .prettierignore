@@ -1,0 +1,11 @@
+node_modules
+ios
+android
+.expo
+dist
+package-lock.json
+server/node_modules
+server/drizzle
+server/package-lock.json
+docs/archive
+*.md

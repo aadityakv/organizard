@@ -50,11 +50,7 @@ function qrSvg(boxId: string): string {
 
 /** Minimal HTML escaping for box/room names embedded in the sheet. */
 function esc(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function labelCell(label: LabelInput): string {

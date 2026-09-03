@@ -2,13 +2,7 @@
 // owner = brand green, editor = info blue, viewer = muted/neutral tones.
 // Compact pill (default) or expanded row with blurb when withBlurb=true.
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { StyleSheet, View, Text, type StyleProp, type ViewStyle } from 'react-native';
 
 import { colors, palette, radius, space, fonts, fontSize } from '@/theme';
 import { ROLE_LABEL, ROLE_BLURB, ROLE_ICON } from '@/lib/permissions';
@@ -86,21 +80,13 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
         {/* Label + blurb stack */}
         <View style={styles.textStack}>
           <Text
-            style={[
-              styles.rowLabel,
-              isSm && styles.rowLabelSm,
-              { color: colors.textStrong },
-            ]}
+            style={[styles.rowLabel, isSm && styles.rowLabelSm, { color: colors.textStrong }]}
             numberOfLines={1}
           >
             {label}
           </Text>
           <Text
-            style={[
-              styles.rowBlurb,
-              isSm && styles.rowBlurbSm,
-              { color: tokens.blurbColor },
-            ]}
+            style={[styles.rowBlurb, isSm && styles.rowBlurbSm, { color: tokens.blurbColor }]}
             numberOfLines={2}
           >
             {blurb}
@@ -131,11 +117,7 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
     >
       <Icon name={iconName} size={iconSize} color={tokens.iconColor} strokeWidth={2.2} />
       <Text
-        style={[
-          styles.pillLabel,
-          isSm && styles.pillLabelSm,
-          { color: tokens.labelColor },
-        ]}
+        style={[styles.pillLabel, isSm && styles.pillLabelSm, { color: tokens.labelColor }]}
         numberOfLines={1}
       >
         {label}

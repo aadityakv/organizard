@@ -9,11 +9,18 @@ const m = (type: string, payload: unknown, clientId: string): Mutation =>
 
 async function ownerWithMove(h: Awaited<ReturnType<typeof makeHarness>>) {
   const owner = await h.login('owner', 'o@x.com');
-  const snap = (await (await h.json('/v1/moves', { name: 'NYC' }, auth(owner.session))).json()) as { move: { id: string } };
+  const snap = (await (await h.json('/v1/moves', { name: 'NYC' }, auth(owner.session))).json()) as {
+    move: { id: string };
+  };
   return { owner, moveId: snap.move.id };
 }
 
-async function invite(h: Awaited<ReturnType<typeof makeHarness>>, session: string, moveId: string, role: string) {
+async function invite(
+  h: Awaited<ReturnType<typeof makeHarness>>,
+  session: string,
+  moveId: string,
+  role: string,
+) {
   const res = await h.json(`/v1/moves/${moveId}/invites`, { role }, auth(session));
   return { status: res.status, body: (await res.json()) as { token: string; role: string } };
 }
@@ -36,7 +43,11 @@ describe('sharing — invite + accept', () => {
 
     // jo can now read the move and edit (editor)
     expect((await h.request(`/v1/moves/${moveId}`, auth(jo.session))).status).toBe(200);
-    const edit = await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r1', name: 'Den', icon: 'sofa' }, 'c1')] }, auth(jo.session));
+    const edit = await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      { mutations: [m('addRoom', { id: 'r1', name: 'Den', icon: 'sofa' }, 'c1')] },
+      auth(jo.session),
+    );
     expect(edit.status).toBe(200);
   });
 
@@ -74,19 +85,46 @@ describe('sharing — member management (owner only)', () => {
     await h.json(`/v1/invites/${inv.body.token}/accept`, {}, auth(v.session));
 
     // viewer can't edit yet
-    expect((await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r1', name: 'X', icon: 'box' }, 'c1')] }, auth(v.session))).status).toBe(403);
+    expect(
+      (
+        await h.json(
+          `/v1/moves/${moveId}/mutations`,
+          { mutations: [m('addRoom', { id: 'r1', name: 'X', icon: 'box' }, 'c1')] },
+          auth(v.session),
+        )
+      ).status,
+    ).toBe(403);
 
     // promote to editor
-    const patch = await h.request(`/v1/moves/${moveId}/members/${v.user.id}`, { method: 'PATCH', body: JSON.stringify({ role: 'editor' }), headers: { 'content-type': 'application/json', ...auth(owner.session).headers } });
+    const patch = await h.request(`/v1/moves/${moveId}/members/${v.user.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'editor' }),
+      headers: { 'content-type': 'application/json', ...auth(owner.session).headers },
+    });
     expect(patch.status).toBe(200);
-    expect((await h.json(`/v1/moves/${moveId}/mutations`, { mutations: [m('addRoom', { id: 'r2', name: 'Y', icon: 'box' }, 'c2')] }, auth(v.session))).status).toBe(200);
+    expect(
+      (
+        await h.json(
+          `/v1/moves/${moveId}/mutations`,
+          { mutations: [m('addRoom', { id: 'r2', name: 'Y', icon: 'box' }, 'c2')] },
+          auth(v.session),
+        )
+      ).status,
+    ).toBe(200);
 
     // can't change the owner's role
-    const protectOwner = await h.request(`/v1/moves/${moveId}/members/${owner.user.id}`, { method: 'PATCH', body: JSON.stringify({ role: 'viewer' }), headers: { 'content-type': 'application/json', ...auth(owner.session).headers } });
+    const protectOwner = await h.request(`/v1/moves/${moveId}/members/${owner.user.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'viewer' }),
+      headers: { 'content-type': 'application/json', ...auth(owner.session).headers },
+    });
     expect(protectOwner.status).toBe(400);
 
     // remove the member -> loses access
-    const del = await h.request(`/v1/moves/${moveId}/members/${v.user.id}`, { method: 'DELETE', headers: auth(owner.session).headers });
+    const del = await h.request(`/v1/moves/${moveId}/members/${v.user.id}`, {
+      method: 'DELETE',
+      headers: auth(owner.session).headers,
+    });
     expect(del.status).toBe(200);
     expect((await h.request(`/v1/moves/${moveId}`, auth(v.session))).status).toBe(404);
   });

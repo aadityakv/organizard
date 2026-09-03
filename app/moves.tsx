@@ -33,8 +33,7 @@ import { colors, fonts, palette, radius, shadow, space } from '@/theme';
 // Tapping switches into the move; ⋯ opens a per-move menu.
 // ─────────────────────────────────────────────────────────────
 function MoveRow({ move, onOpen, onMenu }: { move: MoveSummary; onOpen: () => void; onMenu: () => void }) {
-  const route =
-    move.from && move.to ? `${move.from} → ${move.to}` : move.from || move.to || '';
+  const route = move.from && move.to ? `${move.from} → ${move.to}` : move.from || move.to || '';
   const shared = move.mode === 'shared';
 
   return (
@@ -133,7 +132,12 @@ export default function Moves() {
           style: 'destructive',
           onPress: () => {
             setAccountOpen(false);
-            deleteAccount().catch((e) => Alert.alert('Could not delete account', e instanceof Error ? e.message : 'Something went wrong.'));
+            deleteAccount().catch((e) =>
+              Alert.alert(
+                'Could not delete account',
+                e instanceof Error ? e.message : 'Something went wrong.',
+              ),
+            );
           },
         },
       ],
@@ -147,11 +151,25 @@ export default function Moves() {
             <View style={styles.accountRow}>
               <Avatar name={account?.name ?? 'You'} size={44} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.accountSheetName} numberOfLines={1}>{account?.name ?? 'You'}</Text>
-                {account?.email ? <Text style={styles.accountSheetEmail} numberOfLines={1}>{account.email}</Text> : null}
+                <Text style={styles.accountSheetName} numberOfLines={1}>
+                  {account?.name ?? 'You'}
+                </Text>
+                {account?.email ? (
+                  <Text style={styles.accountSheetEmail} numberOfLines={1}>
+                    {account.email}
+                  </Text>
+                ) : null}
               </View>
             </View>
-            <Button variant="secondary" fullWidth iconLeft="log-out" onPress={() => { setAccountOpen(false); void flushAndSignOut().then(() => router.replace('/welcome')); }}>
+            <Button
+              variant="secondary"
+              fullWidth
+              iconLeft="log-out"
+              onPress={() => {
+                setAccountOpen(false);
+                void flushAndSignOut().then(() => router.replace('/welcome'));
+              }}
+            >
               Sign out
             </Button>
             <Button variant="danger" fullWidth iconLeft="trash-2" onPress={onDeleteAccount}>
@@ -161,9 +179,17 @@ export default function Moves() {
         ) : (
           <>
             <Text style={styles.guestNote}>
-              You’re using Tuck as a guest — your moves are saved on this device only. Sign in to back them up and sync across your devices.
+              You’re using Tuck as a guest — your moves are saved on this device only. Sign in to back them up
+              and sync across your devices.
             </Text>
-            <Button fullWidth iconLeft="log-in" onPress={() => { setAccountOpen(false); router.push('/sign-in'); }}>
+            <Button
+              fullWidth
+              iconLeft="log-in"
+              onPress={() => {
+                setAccountOpen(false);
+                router.push('/sign-in');
+              }}
+            >
               Log in or sign up
             </Button>
           </>
@@ -202,14 +228,16 @@ export default function Moves() {
 
   const confirmDelete = (move: MoveSummary) => {
     setMenuFor(null); // close the sheet first
-    Alert.alert(
-      'Delete move?',
-      `“${move.name}” and its boxes will be permanently deleted.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => { void useStore.getState().deleteMove(move.id); } },
-      ],
-    );
+    Alert.alert('Delete move?', `“${move.name}” and its boxes will be permanently deleted.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          void useStore.getState().deleteMove(move.id);
+        },
+      },
+    ]);
   };
 
   // ── Empty state ───────────────────────────────────────────
@@ -269,7 +297,13 @@ export default function Moves() {
           <MoveRow key={m.id} move={m} onOpen={() => openMove(m.id)} onMenu={() => setMenuFor(m)} />
         ))}
 
-        <Button variant="secondary" fullWidth iconLeft="link" onPress={() => setJoinOpen(true)} style={styles.joinCta}>
+        <Button
+          variant="secondary"
+          fullWidth
+          iconLeft="link"
+          onPress={() => setJoinOpen(true)}
+          style={styles.joinCta}
+        >
           Join a move
         </Button>
 
@@ -447,7 +481,16 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.surfaceApp },
   content: { paddingHorizontal: 16, paddingBottom: 60, gap: 12 },
   topBar: { flexDirection: 'row', justifyContent: 'flex-start', paddingHorizontal: 16, paddingTop: 8 },
-  guestAvatar: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceCard, borderWidth: 1, borderColor: colors.borderSubtle },
+  guestAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceCard,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
   accountSheet: { gap: 12, paddingBottom: 8 },
   accountRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingBottom: 4 },
   accountSheetName: { fontFamily: fonts.body.bold, fontSize: 16, color: palette.ink900 },
@@ -512,7 +555,13 @@ const styles = StyleSheet.create({
 
   // ── Sheets ──
   menuActions: { gap: space[3] },
-  sheetBody: { fontFamily: fonts.body.semibold, fontSize: 14, color: palette.ink500, lineHeight: 20, marginBottom: 14 },
+  sheetBody: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 14,
+    color: palette.ink500,
+    lineHeight: 20,
+    marginBottom: 14,
+  },
   sheetCta: { marginTop: 16 },
   fieldGap: { height: 14 },
   editLabel: { fontFamily: fonts.body.bold, fontSize: 14, color: palette.ink700, marginBottom: 8 },

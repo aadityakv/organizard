@@ -9,24 +9,62 @@
 // resolves (falling back to "package").
 
 const WORD_NUMS: Record<string, number> = {
-  zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
-  eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18,
-  nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+  zero: 0,
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+  eleven: 11,
+  twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
+  sixteen: 16,
+  seventeen: 17,
+  eighteen: 18,
+  nineteen: 19,
+  twenty: 20,
+  thirty: 30,
+  forty: 40,
+  fifty: 50,
+  sixty: 60,
+  seventy: 70,
+  eighty: 80,
+  ninety: 90,
 };
 
 /** Parse an English number phrase ("two hundred twenty", "forty") to a number, or null. */
 export function wordNum(str: string): number | null {
-  const toks = str.trim().split(/[\s-]+/).filter(Boolean);
+  const toks = str
+    .trim()
+    .split(/[\s-]+/)
+    .filter(Boolean);
   let total = 0;
   let cur = 0;
   let any = false;
   for (const t of toks) {
-    if (WORD_NUMS[t] != null) { cur += WORD_NUMS[t]; any = true; }
-    else if (t === 'hundred') { cur = (cur || 1) * 100; any = true; }
-    else if (t === 'thousand') { total += (cur || 1) * 1000; cur = 0; any = true; }
-    else if (t === 'a' || t === 'an' || t === 'and') { continue; }
-    else if (/^\d+$/.test(t)) { cur += parseInt(t, 10); any = true; }
-    else return null;
+    if (WORD_NUMS[t] != null) {
+      cur += WORD_NUMS[t];
+      any = true;
+    } else if (t === 'hundred') {
+      cur = (cur || 1) * 100;
+      any = true;
+    } else if (t === 'thousand') {
+      total += (cur || 1) * 1000;
+      cur = 0;
+      any = true;
+    } else if (t === 'a' || t === 'an' || t === 'and') {
+      continue;
+    } else if (/^\d+$/.test(t)) {
+      cur += parseInt(t, 10);
+      any = true;
+    } else return null;
   }
   return any ? total + cur : null;
 }
@@ -54,31 +92,56 @@ export function parseUtterance(raw: string): ParsedItem {
   let m: RegExpMatchArray | null;
 
   // value: "$54" | "54 dollars/bucks/usd" | "...fifty four dollars"
-  if ((m = s.match(/\$\s*(\d+(?:\.\d+)?)/))) { value = parseFloat(m[1]); s = s.replace(m[0], ' '); }
-  else if ((m = s.match(/(\d+(?:\.\d+)?)\s*(?:dollars?|bucks?|usd)\b/))) { value = parseFloat(m[1]); s = s.replace(m[0], ' '); }
-  else if ((m = s.match(/((?:[a-z]+[\s-]){1,6}?)(?:dollars?|bucks?|usd)\b/))) {
+  if ((m = s.match(/\$\s*(\d+(?:\.\d+)?)/))) {
+    value = parseFloat(m[1]);
+    s = s.replace(m[0], ' ');
+  } else if ((m = s.match(/(\d+(?:\.\d+)?)\s*(?:dollars?|bucks?|usd)\b/))) {
+    value = parseFloat(m[1]);
+    s = s.replace(m[0], ' ');
+  } else if ((m = s.match(/((?:[a-z]+[\s-]){1,6}?)(?:dollars?|bucks?|usd)\b/))) {
     // The capture may include leading name words; take only the trailing number run
     // as the value and put the name words back ("cast iron skillet eighty" → 80 + name).
-    const toks = m[1].trim().split(/[\s-]+/).filter(Boolean);
+    const toks = m[1]
+      .trim()
+      .split(/[\s-]+/)
+      .filter(Boolean);
     const tn = trailingNumber(toks);
-    if (tn) { value = tn.value; s = s.replace(m[0], ' ' + toks.slice(0, tn.fromIndex).join(' ') + ' '); }
+    if (tn) {
+      value = tn.value;
+      s = s.replace(m[0], ' ' + toks.slice(0, tn.fromIndex).join(' ') + ' ');
+    }
   }
 
   // qty: "6 of them" | "...six of them" | "x6/times 6"
-  if ((m = s.match(/(\d+)\s*of\s*(?:them|these|those)/))) { qty = parseInt(m[1], 10); s = s.replace(m[0], ' '); }
-  else if ((m = s.match(/((?:[a-z]+[\s-]){1,4}?)of\s+(?:them|these|those)/))) {
-    const toks = m[1].trim().split(/[\s-]+/).filter(Boolean);
+  if ((m = s.match(/(\d+)\s*of\s*(?:them|these|those)/))) {
+    qty = parseInt(m[1], 10);
+    s = s.replace(m[0], ' ');
+  } else if ((m = s.match(/((?:[a-z]+[\s-]){1,4}?)of\s+(?:them|these|those)/))) {
+    const toks = m[1]
+      .trim()
+      .split(/[\s-]+/)
+      .filter(Boolean);
     const tn = trailingNumber(toks);
-    if (tn) { qty = tn.value; s = s.replace(m[0], ' ' + toks.slice(0, tn.fromIndex).join(' ') + ' '); }
+    if (tn) {
+      qty = tn.value;
+      s = s.replace(m[0], ' ' + toks.slice(0, tn.fromIndex).join(' ') + ' ');
+    }
+  } else if ((m = s.match(/\b(?:x|times)\s*(\d+)\b/))) {
+    qty = parseInt(m[1], 10);
+    s = s.replace(m[0], ' ');
   }
-  else if ((m = s.match(/\b(?:x|times)\s*(\d+)\b/))) { qty = parseInt(m[1], 10); s = s.replace(m[0], ' '); }
 
   // qty: leading count ("three mugs")
   if (qty == null) {
     let lm: RegExpMatchArray | null;
-    if ((lm = s.match(/^\s*(\d+)\s+(?=[a-z])/))) { qty = parseInt(lm[1], 10); s = s.replace(lm[0], ' '); }
-    else if ((lm = s.match(/^\s*(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?=[a-z])/))) {
-      qty = wordNum(lm[1].trim()); s = s.replace(lm[0], ' ');
+    if ((lm = s.match(/^\s*(\d+)\s+(?=[a-z])/))) {
+      qty = parseInt(lm[1], 10);
+      s = s.replace(lm[0], ' ');
+    } else if (
+      (lm = s.match(/^\s*(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?=[a-z])/))
+    ) {
+      qty = wordNum(lm[1].trim());
+      s = s.replace(lm[0], ' ');
     }
   }
 
@@ -107,16 +170,29 @@ export function parseList(raw: string): ParsedItem[] {
 export function iconFor(name: string): string {
   const n = (name || '').toLowerCase();
   const rules: [RegExp, string][] = [
-    [/skillet|pan\b|pot\b/, 'cooking-pot'], [/mug|cup|coffee/, 'coffee'],
-    [/plate|dish|bowl/, 'utensils'], [/knife|knives|cutlery/, 'utensils-crossed'],
-    [/mixer|blender/, 'blend'], [/book|novel/, 'book'], [/record|vinyl/, 'disc-3'],
-    [/lamp|light/, 'lamp'], [/shirt|coat|cloth|sweater|jacket|dress/, 'shirt'],
-    [/cable|charger|cord/, 'cable'], [/monitor|tv\b|screen/, 'monitor'],
-    [/keyboard/, 'keyboard'], [/frame|photo|picture|art/, 'image'],
-    [/towel|blanket|comforter|pillow|bed/, 'bed'], [/speaker|turntable|audio|headphone/, 'audio-lines'],
-    [/glass|wine|bottle/, 'wine'], [/plant/, 'sprout'], [/game|console/, 'gamepad-2'],
-    [/tool|drill|hammer/, 'wrench'], [/shoe|boot|sneaker/, 'footprints'],
+    [/skillet|pan\b|pot\b/, 'cooking-pot'],
+    [/mug|cup|coffee/, 'coffee'],
+    [/plate|dish|bowl/, 'utensils'],
+    [/knife|knives|cutlery/, 'utensils-crossed'],
+    [/mixer|blender/, 'blend'],
+    [/book|novel/, 'book'],
+    [/record|vinyl/, 'disc-3'],
+    [/lamp|light/, 'lamp'],
+    [/shirt|coat|cloth|sweater|jacket|dress/, 'shirt'],
+    [/cable|charger|cord/, 'cable'],
+    [/monitor|tv\b|screen/, 'monitor'],
+    [/keyboard/, 'keyboard'],
+    [/frame|photo|picture|art/, 'image'],
+    [/towel|blanket|comforter|pillow|bed/, 'bed'],
+    [/speaker|turntable|audio|headphone/, 'audio-lines'],
+    [/glass|wine|bottle/, 'wine'],
+    [/plant/, 'sprout'],
+    [/game|console/, 'gamepad-2'],
+    [/tool|drill|hammer/, 'wrench'],
+    [/shoe|boot|sneaker/, 'footprints'],
   ];
-  for (const [re, ic] of rules) { if (re.test(n)) return ic; }
+  for (const [re, ic] of rules) {
+    if (re.test(n)) return ic;
+  }
   return 'package';
 }

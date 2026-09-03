@@ -13,43 +13,25 @@ export type BadgeProps = {
 
 // ─── Tone map ─────────────────────────────────────────────────────────────────
 
-const TONES: Record<
-  NonNullable<BadgeProps['tone']>,
-  { bg: string; text: string }
-> = {
-  neutral: { bg: palette.cream200,     text: palette.ink700    },
-  brand:   { bg: colors.brandWash,     text: palette.green700  },
-  success: { bg: colors.successWash,   text: palette.green700  },
-  warning: { bg: colors.warningWash,   text: palette.amber600  },
-  danger:  { bg: colors.dangerWash,    text: palette.red600    },
-  info:    { bg: colors.infoWash,      text: palette.blue600   },
+const TONES: Record<NonNullable<BadgeProps['tone']>, { bg: string; text: string }> = {
+  neutral: { bg: palette.cream200, text: palette.ink700 },
+  brand: { bg: colors.brandWash, text: palette.green700 },
+  success: { bg: colors.successWash, text: palette.green700 },
+  warning: { bg: colors.warningWash, text: palette.amber600 },
+  danger: { bg: colors.dangerWash, text: palette.red600 },
+  info: { bg: colors.infoWash, text: palette.blue600 },
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function Badge({
-  label,
-  tone = 'neutral',
-  size = 'md',
-  style,
-}: BadgeProps): React.JSX.Element {
+export function Badge({ label, tone = 'neutral', size = 'md', style }: BadgeProps): React.JSX.Element {
   const toneStyle = TONES[tone] ?? TONES.neutral;
   const sizeStyle = size === 'sm' ? styles.containerSm : styles.containerMd;
   const textSizeStyle = size === 'sm' ? styles.textSm : styles.textMd;
 
   return (
-    <View
-      style={[
-        styles.base,
-        sizeStyle,
-        { backgroundColor: toneStyle.bg },
-        style,
-      ]}
-    >
-      <Text
-        style={[textSizeStyle, { color: toneStyle.text }]}
-        numberOfLines={1}
-      >
+    <View style={[styles.base, sizeStyle, { backgroundColor: toneStyle.bg }, style]}>
+      <Text style={[textSizeStyle, { color: toneStyle.text }]} numberOfLines={1}>
         {label}
       </Text>
     </View>
