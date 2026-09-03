@@ -8,7 +8,7 @@
 
 **Tech Stack:** Expo Router 4 / React Native 0.76, Zustand 5 (+persist/AsyncStorage), Hono + Drizzle on Cloudflare Workers (server), vitest.
 
-**Working dir:** `/Users/aaditya/Projects/organizard/.worktrees/multi-move-library` (branch `multi-move-library`). Run all client commands from there; server commands from its `server/` subdir.
+**Working dir:** `<worktree>` (branch `multi-move-library`). Run all client commands from there; server commands from its `server/` subdir.
 
 **Design:** `docs/plans/2026-06-08-multi-move-library-design.md`
 
@@ -29,7 +29,7 @@
 
 **Step 1:** Confirm you're in the worktree on the right branch.
 
-Run: `git -C /Users/aaditya/Projects/organizard/.worktrees/multi-move-library status -sb`
+Run: `git -C <worktree> status -sb`
 Expected: `## multi-move-library`, with `docs/plans/2026-06-08-multi-move-library-*.md` untracked.
 
 **Step 2: Commit**
@@ -884,7 +884,7 @@ git commit -m "refactor: Share tab uses the real share/members screen; remove mo
 **Step 1:**
 
 ```bash
-cd /Users/aaditya/Projects/organizard/.worktrees/multi-move-library/server
+cd <worktree>/server
 npm install
 npm test 2>&1 | tail -20
 ```
