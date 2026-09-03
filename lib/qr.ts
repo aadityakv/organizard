@@ -19,16 +19,26 @@ export const parseBoxQR = (value: string): string | null => {
 
 export type ScanResult =
   | { kind: 'thisMove'; boxId: string }
-  | { kind: 'otherMove'; boxId: string; moveName: string }
+  | { kind: 'otherMove'; boxId: string; moveId: string; moveName: string }
   | { kind: 'noAccess' }
   | { kind: 'unknown'; value: string };
 
-/** Classify a scanned value against the boxes in the current move. */
-export const classifyScan = (value: string, knownBoxIds: string[]): ScanResult => {
+/** Another move on this device that a scanned box might belong to. */
+export type ScanCandidateMove = { id: string; name: string; boxIds: string[] };
+
+/**
+ * Classify a scanned value: a box in the current move, a box in another move on
+ * this device, a Tuck code we can't see (someone else's move), or not a Tuck code.
+ */
+export const classifyScan = (
+  value: string,
+  currentBoxIds: string[],
+  otherMoves: ScanCandidateMove[] = [],
+): ScanResult => {
   const id = parseBoxQR(value);
   if (id == null) return { kind: 'unknown', value };
-  if (id === 'OTHERMOVE') return { kind: 'otherMove', boxId: 'b2', moveName: 'Austin storage' };
-  if (id === 'NOACCESS') return { kind: 'noAccess' };
-  if (knownBoxIds.includes(id)) return { kind: 'thisMove', boxId: id };
+  if (currentBoxIds.includes(id)) return { kind: 'thisMove', boxId: id };
+  const other = otherMoves.find((m) => m.boxIds.includes(id));
+  if (other) return { kind: 'otherMove', boxId: id, moveId: other.id, moveName: other.name };
   return { kind: 'noAccess' };
 };
