@@ -16,9 +16,10 @@ import {
   toClientStatus,
 } from '../mappers';
 import { emptyLiveSlice, parkCurrentMove } from '../shape';
-import { isLocalUri, mergeList, moveFromSnapshot, snapItemsByBox } from '../snapshot';
+import { mergeList, moveFromSnapshot, snapItemsByBox } from '../snapshot';
 import type { Store, SyncActions } from '../types';
 import { MOVE_MODE, type MoveBundle } from '../library';
+import { isLocalRef } from '@/lib/photoRef';
 
 export type SyncSlice = StateCreator<Store, [['zustand/persist', unknown]], [], SyncActions>;
 
@@ -85,7 +86,7 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
         }
         // Preserve local (not-yet-uploaded) photo URIs so a pull can't drop a fresh capture.
         const existing = (itemsByBox[it.boxId] ?? []).find((x) => x.id === it.id);
-        const localPhotos = (existing?.photos ?? []).filter(isLocalUri);
+        const localPhotos = (existing?.photos ?? []).filter(isLocalRef);
         const arr = (itemsByBox[it.boxId] ?? []).filter((x) => x.id !== it.id);
         if (!it.deletedAt) {
           const ci = toClientItem(it);

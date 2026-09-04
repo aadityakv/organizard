@@ -14,6 +14,7 @@ import type { LabelInput } from '@/lib/labels';
 import { printLabels } from '@/services/print';
 import { useStore } from '@/store/useStore';
 import type { Box } from '@/data/types';
+import { countOf } from '@/lib/text';
 
 /** Print labels: pick boxes and share a PDF sheet of their QR labels. */
 export default function PrintLabels() {
@@ -124,7 +125,7 @@ export default function PrintLabels() {
             disabled={count === 0}
             onPress={print}
           >
-            {count === 0 ? 'Select a box to print' : `Print ${count} ${count === 1 ? 'label' : 'labels'}`}
+            {count === 0 ? 'Select a box to print' : `Print ${countOf(count, 'label')}`}
           </Button>
         </View>
       ) : null}

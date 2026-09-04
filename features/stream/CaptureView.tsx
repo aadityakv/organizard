@@ -3,7 +3,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
-import { colors, fonts, palette } from '@/theme';
+import { colors, fonts, palette, alpha } from '@/theme';
 
 import { sharedStyles } from './styles';
 import { Viewfinder } from './Viewfinder';
@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
     gap: 9,
     height: 44,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: alpha(palette.white, 0.14),
   },
-  streamPillText: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 14.5 },
+  streamPillText: { color: palette.white, fontFamily: fonts.body.extra, fontSize: 14.5 },
   proBadge: {
     backgroundColor: palette.amber400,
     borderRadius: 999,

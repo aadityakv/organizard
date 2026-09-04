@@ -8,7 +8,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { Icon } from '@/components/Icon';
 import { useStore } from '@/store/useStore';
-import { colors, fonts, palette, radius, shadow } from '@/theme';
+import { colors, fonts, palette, radius, shadow, alpha } from '@/theme';
 
 const TABS: { name: string; icon: string; label: string; center?: boolean }[] = [
   { name: 'index', icon: 'package', label: 'Boxes' },
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: 10,
     paddingHorizontal: 24,
-    backgroundColor: 'rgba(252,251,248,0.96)',
+    backgroundColor: alpha(palette.cream50, 0.96),
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: palette.sand300,
   },

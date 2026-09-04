@@ -10,7 +10,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Icon, SlothMark } from '@/components';
 import { classifyScan, type ScanCandidateMove, type ScanResult } from '@/lib/qr';
 import { useStore, boxById, roomById, boxStats, statusById, type Store } from '@/store/useStore';
-import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space, DEFAULT_HUE } from '@/theme';
+import {
+  boxColor,
+  boxTint,
+  colors,
+  fonts,
+  palette,
+  radius,
+  shadow,
+  space,
+  DEFAULT_HUE,
+  alpha,
+} from '@/theme';
 import { money } from '@/lib/money';
 import { routes } from '@/lib/routes';
 
@@ -275,13 +286,13 @@ function buildView(
   };
 }
 
-const VIEWFINDER_BG = '#111312';
+const VIEWFINDER_BG = palette.cameraViewfinder;
 const GREEN = palette.green400;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: VIEWFINDER_BG },
   loading: { flex: 1, backgroundColor: colors.surfaceApp },
-  dim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(13,15,14,0.45)' },
+  dim: { ...StyleSheet.absoluteFill, backgroundColor: alpha(palette.cameraDim, 0.45) },
   overlay: { flex: 1 },
 
   topBar: {
@@ -296,7 +307,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: alpha(palette.white, 0.16),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -334,7 +345,7 @@ const styles = StyleSheet.create({
     ...shadow.brand,
   },
   windowHint: {
-    color: 'rgba(255,255,255,0.72)',
+    color: alpha(palette.white, 0.72),
     fontFamily: fonts.body.bold,
     fontSize: 14,
   },

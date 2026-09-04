@@ -4,21 +4,21 @@
 import type { StateCreator } from 'zustand';
 
 import type { Item } from '@/data/types';
-import { uid } from '@/lib/uid';
+import { uid, ID_PREFIX } from '@/lib/uid';
 import type { Mutation } from '@/shared';
 
 import { mutation } from '../mutation';
-import { isLocalUri } from '../snapshot';
 import type { InventoryActions, Store } from '../types';
 import { STATUS_ID } from '@/data/defaults';
 import { NEUTRAL_HUE } from '@/theme';
+import { isLocalRef } from '@/lib/photoRef';
 
 export type InventorySlice = StateCreator<Store, [['zustand/persist', unknown]], [], InventoryActions>;
 
 /** Actions that edit the open move. */
 export const createInventorySlice: InventorySlice = (set, get) => ({
   addRoom: ({ name, dest = null, icon = 'box', color = NEUTRAL_HUE }) => {
-    const id = uid('r');
+    const id = uid(ID_PREFIX.room);
     set((s) => ({ rooms: [...s.rooms, { id, name, dest, icon, color }] }));
     get().enqueue(mutation('addRoom', { id, name, dest, icon, color }));
     return id;
@@ -47,7 +47,7 @@ export const createInventorySlice: InventorySlice = (set, get) => ({
   },
 
   addBox: ({ name, color, roomId, status = STATUS_ID.packing }) => {
-    const id = uid('b');
+    const id = uid(ID_PREFIX.box);
     const number = get().boxes.reduce((max, b) => Math.max(max, b.number), 0) + 1;
     set((s) => ({
       boxes: [...s.boxes, { id, number, name, color, roomId, status, markers: [], cover: null }],
@@ -80,7 +80,7 @@ export const createInventorySlice: InventorySlice = (set, get) => ({
     set((s) => ({ boxes: s.boxes.map((b) => (b.id === boxId ? { ...b, cover: uri } : b)) }));
     // A local URI gets uploaded by the sync engine, which re-calls this with the
     // server photo id; only sync a non-local value (a real id, or an explicit clear).
-    if (!uri || !isLocalUri(uri)) {
+    if (!uri || !isLocalRef(uri)) {
       get().enqueue(mutation('setBoxCover', { id: boxId, coverPhotoId: uri }));
     }
   },
@@ -99,21 +99,21 @@ export const createInventorySlice: InventorySlice = (set, get) => ({
   },
 
   addStatus: ({ label, color }) => {
-    const id = uid('st');
+    const id = uid(ID_PREFIX.status);
     set((s) => ({ statuses: [...s.statuses, { id, label, color, custom: true }] }));
     get().enqueue(mutation('addStatus', { id, label, color }));
     return id;
   },
 
   addMarker: ({ label, color, icon = 'tag' }) => {
-    const id = uid('mk');
+    const id = uid(ID_PREFIX.marker);
     set((s) => ({ markers: [...s.markers, { id, label, color, icon, custom: true }] }));
     get().enqueue(mutation('addMarker', { id, label, color, icon }));
     return id;
   },
 
   addItem: (boxId, input) => {
-    const id = uid('i');
+    const id = uid(ID_PREFIX.item);
     const item: Item = {
       id,
       boxId,

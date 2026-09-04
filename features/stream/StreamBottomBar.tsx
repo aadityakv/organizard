@@ -3,7 +3,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
-import { boxColor, boxTint, fonts, palette } from '@/theme';
+import { boxColor, boxTint, fonts, palette, alpha } from '@/theme';
 
 import { sharedStyles } from './styles';
 import type { Mic, SItem } from './types';
@@ -63,7 +63,7 @@ export function StreamBottomBar({
       </Pressable>
       <View style={[styles.bottomSide, { alignItems: 'flex-end' }]}>
         <Pressable onPress={onResay} style={styles.redo} accessibilityLabel="Redo last">
-          <Icon name="rotate-ccw" size={20} color={resayActive ? '#fff' : 'rgba(255,255,255,0.4)'} />
+          <Icon name="rotate-ccw" size={20} color={resayActive ? palette.white : alpha(palette.white, 0.4)} />
         </Pressable>
       </View>
     </View>
@@ -87,13 +87,13 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.9)',
+    borderColor: alpha(palette.white, 0.9),
     alignItems: 'center',
     justifyContent: 'center',
   },
   countPill: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    color: '#fff',
+    backgroundColor: alpha(palette.white, 0.16),
+    color: palette.white,
     borderRadius: 999,
     paddingVertical: 4,
     paddingHorizontal: 10,
@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body.extra,
     overflow: 'hidden',
   },
-  shutterStop: { backgroundColor: palette.red500, borderColor: 'rgba(255,255,255,0.85)' },
+  shutterStop: { backgroundColor: palette.red500, borderColor: alpha(palette.white, 0.85) },
   redo: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: alpha(palette.white, 0.16),
     alignItems: 'center',
     justifyContent: 'center',
   },

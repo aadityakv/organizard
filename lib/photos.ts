@@ -6,7 +6,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 
 import { API_URL } from '@/lib/config';
-import { uid } from '@/lib/uid';
+import { uid, ID_PREFIX } from '@/lib/uid';
 import { LOCAL_PREFIX, resolvePhoto } from '@/lib/photoRef';
 
 /** Copy a capture out of the volatile cache dir into the document dir and return a relative `local:` ref that survives reinstall. */
@@ -19,7 +19,7 @@ export async function persistCapture(srcUri: string): Promise<string> {
   } catch {
     // already exists — fine.
   }
-  const filename = `${uid('ph')}.jpg`;
+  const filename = `${uid(ID_PREFIX.photo)}.jpg`;
   await FileSystem.copyAsync({ from: srcUri, to: `${dir}${filename}` });
   return `${LOCAL_PREFIX}photos/${filename}`;
 }

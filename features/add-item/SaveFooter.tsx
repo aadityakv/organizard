@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Button, Icon, LockNote } from '@/components';
 import { colors, fonts, fontSize, gutter, palette, space } from '@/theme';
+import { countOf } from '@/lib/text';
 
 /** Sticky footer: Save / Save & add another / Save changes, or a lock note for viewers. */
 export function SaveFooter({
@@ -25,9 +26,7 @@ export function SaveFooter({
       {addedCount > 0 ? (
         <View style={styles.addedRow}>
           <Icon name="check-circle-2" size={16} color={colors.success} />
-          <Text style={styles.addedText}>
-            Added {addedCount} {addedCount === 1 ? 'item' : 'items'} to this box
-          </Text>
+          <Text style={styles.addedText}>Added {countOf(addedCount, 'item')} to this box</Text>
         </View>
       ) : null}
 

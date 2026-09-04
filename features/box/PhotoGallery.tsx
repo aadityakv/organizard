@@ -7,7 +7,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
 import { type BoxPhoto, useStore } from '@/store/useStore';
-import { fonts, palette, radius } from '@/theme';
+import { fonts, palette, radius, alpha } from '@/theme';
 
 import { shared } from './styles';
 
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(42,39,34,0.55)',
+    backgroundColor: alpha(palette.ink900, 0.55),
   },
   galleryMoreText: { fontFamily: fonts.display.bold, fontSize: 18, color: palette.white },
 });

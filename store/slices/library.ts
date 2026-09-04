@@ -2,7 +2,7 @@
 // it (createMove / switchMove / removeMoveLocal) parks the live slice back first.
 import type { StateCreator } from 'zustand';
 
-import { uid } from '@/lib/uid';
+import { uid, ID_PREFIX } from '@/lib/uid';
 
 import { newBundle, sliceFromBundle } from '../library';
 import { emptyLiveSlice, parkCurrentMove } from '../shape';
@@ -14,7 +14,7 @@ export type LibrarySlice = StateCreator<Store, [['zustand/persist', unknown]], [
 /** Actions that manage the library of moves. */
 export const createLibrarySlice: LibrarySlice = (set) => ({
   createMove: ({ name, from = '', to = '', target = '' }) => {
-    const id = uid('mv');
+    const id = uid(ID_PREFIX.move);
     const now = Date.now();
     const bundle = newBundle(id, { name, from, to, target }, now);
     set((s) => ({
@@ -51,7 +51,7 @@ export const createLibrarySlice: LibrarySlice = (set) => ({
     }),
 
   addSharedMoveFromSnapshot: (serverMoveId, snap) => {
-    const id = uid('mv');
+    const id = uid(ID_PREFIX.move);
     const now = Date.now();
     set((s) => {
       const bundle = bundleFromSnapshot(id, serverMoveId, snap, now);
@@ -68,7 +68,7 @@ export const createLibrarySlice: LibrarySlice = (set) => ({
     set((s) => {
       // Already in the library (by server id) — don't duplicate.
       if (Object.values(s.library).some((b) => b.serverMoveId === serverMoveId)) return {};
-      const id = uid('mv');
+      const id = uid(ID_PREFIX.move);
       return { library: { ...s.library, [id]: bundleFromSnapshot(id, serverMoveId, snap, Date.now()) } };
     }),
 });

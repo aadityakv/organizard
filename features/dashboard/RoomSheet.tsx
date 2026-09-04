@@ -13,6 +13,7 @@ import { BOX_COLORS, colors, fonts, fontSize, palette, radius, space, NEUTRAL_HU
 
 import { ROOM_ICONS } from './constants';
 import { shared, sheetForm } from './styles';
+import { plural } from '@/lib/text';
 
 /** Sheet to create or edit a room, including the role-gated cascade delete. */
 export function RoomSheet({
@@ -80,8 +81,8 @@ export function RoomSheet({
       return;
     }
 
-    const boxWord = roomBoxes.length === 1 ? 'box' : 'boxes';
-    const itemWord = itemCount === 1 ? 'item' : 'items';
+    const boxWord = plural(roomBoxes.length, 'box');
+    const itemWord = plural(itemCount, 'item');
     Alert.alert(
       `Delete “${room.name}” and everything in it?`,
       `This permanently removes the room, its ${roomBoxes.length} ${boxWord}, and ${itemCount} ${itemWord}. This can't be undone.`,

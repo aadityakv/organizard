@@ -2,7 +2,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
-import { boxColor, fonts, palette, DEFAULT_HUE } from '@/theme';
+import { boxColor, fonts, palette, DEFAULT_HUE, alpha } from '@/theme';
 
 import { boxLabel, type BoxRef } from './types';
 
@@ -35,7 +35,7 @@ export function TopBar({ box, cameraOn, torch, onClose, onPickBox, onToggleTorch
           style={[styles.iconBtn, torch && styles.iconBtnOn]}
           accessibilityLabel={torch ? 'Flash on' : 'Flash off'}
         >
-          <Icon name="zap" size={17} color={torch ? palette.ink900 : '#fff'} />
+          <Icon name="zap" size={17} color={torch ? palette.ink900 : palette.white} />
         </Pressable>
       ) : (
         <View style={styles.iconBtn} />
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: alpha(palette.white, 0.16),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -69,9 +69,9 @@ const styles = StyleSheet.create({
     height: 38,
     paddingHorizontal: 14,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: alpha(palette.white, 0.16),
     maxWidth: 220,
   },
   dot: { width: 9, height: 9, borderRadius: 5 },
-  boxChipText: { color: '#fff', fontFamily: fonts.body.bold, fontSize: 13.5, flexShrink: 1 },
+  boxChipText: { color: palette.white, fontFamily: fonts.body.bold, fontSize: 13.5, flexShrink: 1 },
 });

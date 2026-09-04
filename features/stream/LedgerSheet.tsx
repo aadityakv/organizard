@@ -7,6 +7,7 @@ import { boxColor, boxTint, fonts, palette } from '@/theme';
 
 import { sharedStyles } from './styles';
 import type { SItem } from './types';
+import { countOf } from '@/lib/text';
 
 type Props = {
   visible: boolean;
@@ -23,7 +24,7 @@ export function LedgerSheet({ visible, session, sessionValue, fixCount, colorOf,
   return (
     <Sheet visible={visible} onClose={onClose} title="This session">
       <Text style={styles.ledgerTotals}>
-        {session.length} {session.length === 1 ? 'item' : 'items'} · {money(sessionValue)}
+        {countOf(session.length, 'item')} · {money(sessionValue)}
         {fixCount ? ` · ${fixCount} to fix` : ''}
       </Text>
       <ScrollView style={{ maxHeight: 320 }}>

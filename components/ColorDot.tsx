@@ -4,7 +4,7 @@
 // becomes a Pressable whose hit area is padded up to 44pt regardless of `size`.
 import React from 'react';
 import { Pressable, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
-import { boxColor, palette, tap, DEFAULT_HUE } from '@/theme';
+import { boxColor, palette, tap, DEFAULT_HUE, alpha } from '@/theme';
 
 export type ColorDotProps = {
   /** One of the 12 box-palette hue names, e.g. "green", "coral". */
@@ -74,7 +74,7 @@ export function ColorDot({
             borderRadius: size / 2,
             backgroundColor: solid,
             borderWidth: 1,
-            borderColor: 'rgba(0,0,0,0.06)',
+            borderColor: alpha(palette.black, 0.06),
           }}
         />
       )}

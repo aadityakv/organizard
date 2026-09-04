@@ -11,6 +11,7 @@ import { boxColor, colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { openBox } from './openBox';
 import { routes } from '@/lib/routes';
+import { countOf } from '@/lib/text';
 
 /** Search results for the dashboard: matching items and boxes with breadcrumbs. */
 export function FindResults({ query }: { query: string }) {
@@ -123,7 +124,7 @@ function BoxResultRow({ box, room }: { box: Box; room?: Room }) {
         </Text>
         <Text style={styles.resultMeta} numberOfLines={1}>
           {room ? `${room.name} · ` : ''}
-          {count} {count === 1 ? 'item' : 'items'}
+          {countOf(count, 'item')}
         </Text>
       </View>
       <Icon name="arrow-up-right" size={18} color={palette.ink400} />

@@ -1,7 +1,7 @@
 // What survives a relaunch, and how older persisted shapes are upgraded.
 import { STARTER_MARKERS, STARTER_STATUSES } from '@/data/defaults';
 import type { Box, Item, Marker, Member, Move, Room, Status } from '@/data/types';
-import { uid } from '@/lib/uid';
+import { uid, ID_PREFIX } from '@/lib/uid';
 import type { Mutation } from '@/shared';
 
 import { MOVE_MODE, type MoveBundle } from './library';
@@ -47,7 +47,7 @@ export function migrate(persisted: unknown, version: number): Store {
   const now = Date.now();
 
   if (isRealShared) {
-    const id = uid('mv');
+    const id = uid(ID_PREFIX.move);
     const bundle: MoveBundle = {
       id,
       archived: false,
