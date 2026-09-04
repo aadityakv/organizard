@@ -21,9 +21,6 @@ import {
 import { money } from '@/lib/money';
 import { StatusChip } from '@/components/StatusChip';
 
-// ---------------------------------------------------------------------------
-// Prop type — matches §8 contract exactly
-// ---------------------------------------------------------------------------
 export type BoxCardProps = {
   name: string;
   number?: number;
@@ -41,10 +38,8 @@ export type BoxCardProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-// ---------------------------------------------------------------------------
 // MarkerChip inline (tiny pill, no onPress needed here — display-only)
 // The full MarkerChip with toggle affordance lives in MarkerChip.tsx.
-// ---------------------------------------------------------------------------
 type MarkerPill = { label: string; color: string; icon: string };
 
 function InlineMarker({ label, color: hue }: MarkerPill) {
@@ -82,9 +77,6 @@ const markerStyles = StyleSheet.create({
   },
 });
 
-// ---------------------------------------------------------------------------
-// BoxCard
-// ---------------------------------------------------------------------------
 export function BoxCard({
   name,
   number,
@@ -132,10 +124,8 @@ export function BoxCard({
         accessibilityLabel={`Box ${number != null ? `#${number} ` : ''}${name}`}
         style={styles.card}
       >
-        {/* ── 5px top color rail ── */}
         <View style={[styles.rail, { backgroundColor: solid }]} />
 
-        {/* ── tint / cover band ── */}
         <View style={[styles.band, { backgroundColor: tint }]}>
           {cover ? (
             <Image
@@ -162,9 +152,7 @@ export function BoxCard({
           <StatusChip label={statusLabel} color={statusColor} size="sm" />
         </View>
 
-        {/* ── body ── */}
         <View style={styles.body}>
-          {/* name — Fredoka semibold */}
           <Text style={styles.name} numberOfLines={2}>
             {name}
           </Text>
@@ -195,9 +183,6 @@ export function BoxCard({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceCard,
@@ -215,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    padding: space[2] + 2, // ~10px
+    padding: space[2] + 2,
     overflow: 'hidden',
   },
 

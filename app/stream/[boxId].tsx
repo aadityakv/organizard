@@ -132,7 +132,6 @@ export default function StreamSession() {
     }
   };
 
-  // Capture view (free single item): snap → name it in Add-item, one at a time.
   const captureSingle = async () => {
     if (!boxId) return;
     // No camera yet — open the form; it has its own photo + permission UI.

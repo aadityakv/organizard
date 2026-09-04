@@ -126,7 +126,6 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
 
 // ─── styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  // pill
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -145,7 +144,6 @@ const styles = StyleSheet.create({
     lineHeight: 13,
   },
 
-  // row
   row: {
     flexDirection: 'row',
     alignItems: 'center',

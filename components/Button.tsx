@@ -13,10 +13,6 @@ import {
 import { colors, palette, radius, shadow, fonts, fontSize, tap } from '@/theme';
 import { Icon } from '@/components/Icon';
 
-// ─────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────
-
 export type ButtonProps = {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
@@ -28,10 +24,6 @@ export type ButtonProps = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 };
-
-// ─────────────────────────────────────────────────────────────
-// Size scale
-// ─────────────────────────────────────────────────────────────
 
 type SizeConfig = {
   height: number;
@@ -46,10 +38,6 @@ const sizes: Record<NonNullable<ButtonProps['size']>, SizeConfig> = {
   md: { height: 44, paddingHorizontal: 18, fontSize: fontSize.base, gap: 8, iconSize: 18 },
   lg: { height: 52, paddingHorizontal: 22, fontSize: fontSize.md, gap: 9, iconSize: 20 },
 };
-
-// ─────────────────────────────────────────────────────────────
-// Variant palette
-// ─────────────────────────────────────────────────────────────
 
 type VariantConfig = {
   bg: string;
@@ -94,10 +82,6 @@ const variants: Record<NonNullable<ButtonProps['variant']>, VariantConfig> = {
     shadowStyle: {},
   },
 };
-
-// ─────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────
 
 export function Button({
   variant = 'primary',
@@ -211,10 +195,6 @@ export function Button({
     </Animated.View>
   );
 }
-
-// ─────────────────────────────────────────────────────────────
-// Styles
-// ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   base: {

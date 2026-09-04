@@ -41,7 +41,6 @@ export function ColorDot({ color = 'green', size = 24, selected = false, onPress
   const dot = (
     <View style={[styles.root, style]}>
       {selected ? (
-        // Outer coloured ring
         <View
           style={{
             width: ringSize,
@@ -54,7 +53,6 @@ export function ColorDot({ color = 'green', size = 24, selected = false, onPress
             backgroundColor: 'transparent',
           }}
         >
-          {/* White gap between ring and dot */}
           <View
             style={{
               width: gapSize,
@@ -65,7 +63,6 @@ export function ColorDot({ color = 'green', size = 24, selected = false, onPress
               justifyContent: 'center',
             }}
           >
-            {/* Inner dot */}
             <View
               style={{
                 width: size,

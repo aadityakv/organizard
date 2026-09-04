@@ -1,7 +1,5 @@
-// ============================================================
 // Organizard — domain types
 // Hierarchy: Move › Room › Box › Item. Destination is optional.
-// ============================================================
 
 export type Role = 'owner' | 'editor' | 'viewer';
 

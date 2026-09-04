@@ -1,9 +1,7 @@
-// ============================================================
 // Organizard — typography
 // Display: Fredoka (rounded, warm). Body / UI: Nunito.
 // Font-family strings match the @expo-google-fonts module names
 // loaded in app/_layout.tsx.
-// ============================================================
 import type { TextStyle } from 'react-native';
 
 /** Loaded font-family identifiers (see app/_layout.tsx useFonts map). */

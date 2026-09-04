@@ -1,4 +1,3 @@
-// ============================================================
 // Printable QR labels: builds the print-ready HTML sheet of box
 // labels (QR + box #, name, room). Pure — rendering it to a PDF
 // and sharing it is services/print.ts.
@@ -9,7 +8,6 @@
 // SVG keeps the codes crisp at any print scale (vector) and lets
 // the whole label build live here in plain TS — no hidden RN
 // render pass, no base64 round-trip.
-// ============================================================
 
 import { encodeBoxQR } from './qr';
 
