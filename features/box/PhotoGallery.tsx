@@ -1,7 +1,6 @@
 // Photo gallery — collapsible strip/grid of the box cover + every item photo.
 // Collapsed: a peek of the first few thumbs with a "+K" overlay on the last.
 // Expanded: every thumb in a wrapping grid. Tapping any opens the full viewer.
-import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';

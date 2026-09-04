@@ -1,6 +1,5 @@
 // Move to box (edit mode): pick the box this item should live in. Hidden when
 // there is nowhere else to move it.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Box } from '@/data/types';

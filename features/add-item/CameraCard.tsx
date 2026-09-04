@@ -1,6 +1,5 @@
 // The inline camera card: a live viewfinder with flash / shutter / done controls,
 // or — until access is granted — the permission prompt in the same frame.
-import React from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 

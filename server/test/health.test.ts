@@ -18,3 +18,9 @@ describe('GET /v1/health', () => {
     expect(res.status).toBe(404);
   });
 });
+
+it('answers unknown routes with JSON, not HTML', async () => {
+  const res = await app.request('/v1/nope');
+  expect(res.status).toBe(404);
+  expect(await res.json()).toEqual({ error: 'NOT_FOUND' });
+});

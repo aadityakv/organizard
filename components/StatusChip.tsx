@@ -1,7 +1,6 @@
 // StatusChip: a box's lifecycle status (Packing, Sealed, In transit, Unpacked, or a
 // custom one) as a coloured pill. The colour is the status's palette hue, so custom
 // statuses look native. Used on BoxCard, the box hero and the status sheet.
-import React from 'react';
 import { StyleSheet, View, Text, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, boxTint, colors, radius, fonts, fontSize } from '@/theme';
 

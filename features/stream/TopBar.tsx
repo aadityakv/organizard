@@ -22,7 +22,7 @@ export function TopBar({ box, cameraOn, torch, onClose, onPickBox, onToggleTorch
       <Pressable onPress={onClose} accessibilityLabel="End session" style={styles.iconBtn}>
         <Icon name="x" size={19} color="#fff" />
       </Pressable>
-      <Pressable onPress={onPickBox} style={styles.boxChip}>
+      <Pressable accessibilityRole="button" onPress={onPickBox} style={styles.boxChip}>
         <View style={[styles.dot, { backgroundColor: boxColor(box?.color ?? DEFAULT_HUE) }]} />
         <Text style={styles.boxChipText} numberOfLines={1}>
           {boxLabel(box)}

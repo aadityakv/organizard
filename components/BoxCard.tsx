@@ -1,5 +1,5 @@
 // Dashboard tile for a box: color rail, cover or tint band, name, room, status and markers.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Animated, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import {
@@ -14,6 +14,7 @@ import {
   type as typeTokens,
   alpha,
   palette,
+  motion,
 } from '@/theme';
 import { money } from '@/lib/money';
 import { StatusChip } from '@/components/StatusChip';
@@ -93,8 +94,8 @@ export function BoxCard({
 
   const handlePressIn = () => {
     Animated.timing(scaleAnim, {
-      toValue: 0.985,
-      duration: 80,
+      toValue: motion.pressCardScale,
+      duration: motion.pressInMs,
       useNativeDriver: true,
     }).start();
   };
@@ -102,7 +103,7 @@ export function BoxCard({
   const handlePressOut = () => {
     Animated.timing(scaleAnim, {
       toValue: 1,
-      duration: 120,
+      duration: motion.pressOutMs,
       useNativeDriver: true,
     }).start();
   };
@@ -166,8 +167,8 @@ export function BoxCard({
 
           {visibleMarkers.length > 0 ? (
             <View style={styles.markersRow}>
-              {visibleMarkers.map((m, i) => (
-                <InlineMarker key={i} {...m} />
+              {visibleMarkers.map((m) => (
+                <InlineMarker key={m.label} {...m} />
               ))}
             </View>
           ) : null}

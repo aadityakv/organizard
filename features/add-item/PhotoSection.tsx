@@ -1,6 +1,5 @@
 // Photos (optional, collapsed by default): the strip of captured photos, then
 // either the inline camera card or the ghost "Add photo" affordance.
-import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';

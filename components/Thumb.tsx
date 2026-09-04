@@ -1,6 +1,5 @@
 // Photo placeholder — a soft tinted tile + category glyph, or a real image.
 // Photos ARE the content, so this stands in until one is captured.
-import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 import { boxColor, boxTint, radius as radii, DEFAULT_HUE } from '@/theme';

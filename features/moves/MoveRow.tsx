@@ -1,6 +1,5 @@
 // A single move row — name, route, target, meta + Local/Shared badge.
 // Tapping switches into the move; ⋯ opens a per-move menu.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Badge, IconButton } from '@/components';

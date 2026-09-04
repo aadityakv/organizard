@@ -1,7 +1,6 @@
 // IconButton: icon-only round button for headers and rows (back, close, more, search).
 // Four variants (plain cream, brand green, ghost transparent, danger wash) and three
 // sizes (36 / 44 / 52). Requires an accessibilityLabel because there is no visible text.
-import React from 'react';
 import { Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 import { colors, palette, radius, tap, shadow } from '@/theme';

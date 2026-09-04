@@ -2,7 +2,6 @@
 // Modal route. params: { boxId, itemId?, photo? }. The highest-frequency flow in the app.
 // Leads with the item form; a photo can be captured inline but is never required.
 // The pieces live in features/add-item; this file is the layout.
-import React from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';

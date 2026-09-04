@@ -31,6 +31,7 @@ export function LedgerSheet({ visible, session, sessionValue, fixCount, colorOf,
         {session.length === 0 ? <Text style={styles.empty}>Nothing yet — snap your first item.</Text> : null}
         {[...session].reverse().map((it) => (
           <Pressable
+            accessibilityRole="button"
             key={it.id}
             onPress={() => onEdit(it.id)}
             style={[styles.ledgerRow, it.needsFix && { backgroundColor: palette.amber50 }]}

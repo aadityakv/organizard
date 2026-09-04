@@ -1,5 +1,4 @@
 // Cover photo card: the box photo (or a camera placeholder) with an edit button.
-import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';

@@ -2,7 +2,7 @@
 // From/To use platform-native address autocomplete (Apple Maps on iOS); the
 // target date uses the native date picker. Creating switches the store into the
 // new move and lands on the dashboard.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';

@@ -1,7 +1,6 @@
 // Segmented: a pill-shaped control for two to four mutually exclusive options
 // (dashboard grouping, item sort, member role, sign-in vs register). Controlled via
 // `value` / `onChange`; the selected segment is raised on a white card.
-import React from 'react';
 import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { colors, palette, radius, shadow, space, fonts, fontSize } from '@/theme';
 

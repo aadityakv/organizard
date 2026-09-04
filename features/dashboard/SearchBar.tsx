@@ -1,5 +1,4 @@
 // The Find field shown when search is open, with quick suggestions while empty.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon, Input } from '@/components';

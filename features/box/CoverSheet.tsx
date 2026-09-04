@@ -1,5 +1,5 @@
 // Cover sheet — snap a box photo (expo-camera) with a friendly permission fallback.
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Linking from 'expo-linking';

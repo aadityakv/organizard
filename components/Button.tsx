@@ -14,7 +14,7 @@ import {
   type PressableStateCallbackType,
 } from 'react-native';
 
-import { colors, palette, radius, shadow, fonts, fontSize, tap } from '@/theme';
+import { colors, palette, radius, shadow, fonts, fontSize, tap, motion } from '@/theme';
 import { Icon } from '@/components/Icon';
 
 export type ButtonProps = {
@@ -107,8 +107,8 @@ export function Button({
   const handlePressIn = () => {
     if (disabled) return;
     Animated.timing(scale, {
-      toValue: 0.97,
-      duration: 100,
+      toValue: motion.pressScale,
+      duration: motion.pressInMs,
       useNativeDriver: true,
     }).start();
   };
@@ -116,7 +116,7 @@ export function Button({
   const handlePressOut = () => {
     Animated.timing(scale, {
       toValue: 1,
-      duration: 120,
+      duration: motion.pressOutMs,
       useNativeDriver: true,
     }).start();
   };

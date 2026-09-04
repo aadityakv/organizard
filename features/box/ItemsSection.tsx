@@ -1,6 +1,5 @@
 // The "Items" section: count badge, search toggle + sort control, then the list
 // (or one of the two empty states). Filtering/sorting lives in useVisibleItems.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 

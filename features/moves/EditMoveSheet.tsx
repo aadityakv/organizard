@@ -3,7 +3,6 @@
 // the move before opening this. The date string round-trips via formatTargetDate:
 // parse move.target to a Date for the picker, write the formatted label (or '' to
 // clear) back on save.
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import {

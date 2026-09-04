@@ -1,6 +1,5 @@
 // Bottom actions: Save / Save & add another (create), Save changes (edit), or the
 // lock note for viewers. Also the "Added N items" confirmation between saves.
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button, Icon, LockNote } from '@/components';

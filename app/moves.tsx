@@ -1,7 +1,7 @@
 // Moves home — your library of moves. Empty state hero, an active list, and a
 // collapsible archived section. Tapping a move switches into it; the ⋯ menu
 // archives / unarchives. A paste sheet routes invite links to /invite.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -36,7 +36,12 @@ export default function Moves() {
   const [accountOpen, setAccountOpen] = useState(false);
 
   const accountButton = (
-    <Pressable onPress={() => setAccountOpen(true)} hitSlop={8} accessibilityLabel="Account">
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => setAccountOpen(true)}
+      hitSlop={8}
+      accessibilityLabel="Account"
+    >
       {account ? (
         <Avatar name={account.name} size={32} />
       ) : (

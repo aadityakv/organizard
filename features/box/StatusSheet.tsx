@@ -1,5 +1,5 @@
 // Status sheet — pick an existing status or create a new one.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, ColorDot, Icon, Input, Sheet, StatusChip } from '@/components';

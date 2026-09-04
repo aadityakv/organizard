@@ -1,5 +1,4 @@
 // Markers (optional): the chips the item can be tagged with.
-import React from 'react';
 import { Text, View } from 'react-native';
 
 import { MarkerChip } from '@/components';

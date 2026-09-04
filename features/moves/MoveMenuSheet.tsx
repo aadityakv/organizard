@@ -1,5 +1,4 @@
 // Per-move ⋯ menu — Edit (editors), Archive / Unarchive, and Delete (owner only).
-import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Button, Sheet } from '@/components';

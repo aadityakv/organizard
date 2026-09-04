@@ -1,5 +1,4 @@
 // Join paste sheet — routes a pasted invite link or code to /invite.
-import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { Button, Input, Sheet } from '@/components';

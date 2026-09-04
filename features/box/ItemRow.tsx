@@ -1,5 +1,4 @@
 // One packed item in the box list: thumb, name, qty + first marker, value.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MarkerChip, Thumb } from '@/components';

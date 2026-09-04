@@ -1,6 +1,5 @@
 // One room on the dashboard: a tappable header (edit, for editors) and its box
 // grid with an "Add box" tile, or an empty-room prompt.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon, RoomGlyph } from '@/components';

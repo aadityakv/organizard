@@ -1,6 +1,5 @@
 // iOS-only keyboard accessory: a Done button above the keyboard so the notes /
 // value keyboard can be dismissed to reach Save.
-import React from 'react';
 import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts, fontSize, gutter, palette, space } from '@/theme';
