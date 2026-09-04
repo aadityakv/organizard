@@ -1,22 +1,22 @@
 // Fallback when the route's box id resolves to nothing (deleted, or a stale link).
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 
 import { Button, Header, Thumb } from '@/components';
 import { colors, fonts, fontSize, palette, radius, type as typeTokens } from '@/theme';
 import { copy } from '@/copy/box';
+import { goBack } from '@/lib/navigation';
 
 /** Fallback screen when the route's box id no longer exists. */
 export function MissingBox() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <Header title={copy.boxNotFoundHeader} onBack={() => router.back()} />
+      <Header title={copy.boxNotFoundHeader} onBack={goBack} />
       <View style={styles.missing}>
         <Thumb color="slate" icon="package-x" size={72} radius={radius.pill} />
         <Text style={styles.missingTitle}>{copy.missingBoxTitle}</Text>
         <Text style={styles.missingBody}>{copy.missingBoxBody}</Text>
-        <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={() => router.back()}>
+        <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={goBack}>
           {copy.goBackButton}
         </Button>
       </View>

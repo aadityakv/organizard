@@ -1,11 +1,11 @@
 // Tinted hero header: title/room, the "more" menu, and the status + value strip.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 
 import { Header, Icon, IconButton, RoomGlyph, StatusChip } from '@/components';
 import type { Box, Room, Status } from '@/data/types';
 import { money } from '@/lib/money';
 import { boxColor, boxTint, fonts, palette, space, NEUTRAL_HUE, alpha } from '@/theme';
+import { goBack } from '@/lib/navigation';
 
 import { shared } from './styles';
 
@@ -38,7 +38,7 @@ export function BoxHero({
       <Header
         title={box.name}
         subtitle={subtitle}
-        onBack={() => router.back()}
+        onBack={goBack}
         leading={room ? <RoomGlyph icon={room.icon} color={room.color} size={28} /> : undefined}
         trailing={
           showMenu ? (

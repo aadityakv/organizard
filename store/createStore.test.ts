@@ -332,6 +332,20 @@ describe('library', () => {
     expect(store.getState().library[b].move.name).toBe('B');
   });
 
+  it('opens a library move when nothing is open (deep link after the current move was removed)', () => {
+    const store = createAppStore(memoryStorage());
+    const a = store.getState().createMove({ name: 'A' });
+    const roomId = store.getState().addRoom({ name: 'Hall' });
+    const boxId = store.getState().addBox({ name: 'Coats', color: 'teal', roomId });
+    const b = store.getState().createMove({ name: 'B' });
+    store.getState().removeMoveLocal(b);
+    expect(store.getState().currentMoveId).toBeNull();
+
+    store.getState().switchMove(a);
+    expect(store.getState().currentMoveId).toBe(a);
+    expect(store.getState().boxes.map((x) => x.id)).toEqual([boxId]);
+  });
+
   it('summarises the open move from the live slice, not its stale bundle', () => {
     const store = createAppStore(memoryStorage());
     const id = store.getState().createMove({ name: 'Live' });

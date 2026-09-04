@@ -25,6 +25,7 @@ import {
 } from '@/features/box';
 import { shared } from '@/features/box/styles';
 import { colors, fonts, palette } from '@/theme';
+import { goBack } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { copy } from '@/copy/box';
 
@@ -46,10 +47,10 @@ export default function BoxDetail() {
   const switchMove = useStore((s) => s.switchMove);
 
   // A printed label scanned with the SYSTEM camera deep-links here, for a box that
-  // may live in another move on this device. Switch to the owning move instead of
-  // showing "not found" (the in-app scanner already does this).
+  // may live in another move on this device, or with no move open at all. Switch to
+  // the owning move instead of showing "not found" (the in-app scanner already does this).
   useEffect(() => {
-    if (box || !boxId || currentMoveId == null) return;
+    if (box || !boxId) return;
     const owner = Object.values(library).find(
       (b) => b.id !== currentMoveId && b.boxes.some((x) => x.id === boxId),
     );
@@ -71,7 +72,7 @@ export default function BoxDetail() {
           style: 'destructive',
           onPress: () => {
             actions.deleteBox(box.id);
-            router.back();
+            goBack();
           },
         },
       ],

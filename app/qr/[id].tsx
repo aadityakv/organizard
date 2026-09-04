@@ -2,7 +2,7 @@
 // Full-screen modal showing a box's scannable QR label on warm cream.
 // Anyone on the move can scan it to open the box. Read-only for every role.
 
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
@@ -12,6 +12,7 @@ import { boxById, roomById, useStore } from '@/store/useStore';
 import { encodeBoxQR } from '@/lib/qr/codes';
 import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space, tap, type } from '@/theme';
 import { copy } from '@/copy/box';
+import { goBack } from '@/lib/navigation';
 
 /** Full-screen QR label for one box, for scanning from another device. */
 export default function QRScreen() {
@@ -26,7 +27,7 @@ export default function QRScreen() {
           accessibilityRole="button"
           accessibilityLabel="Close"
           hitSlop={8}
-          onPress={() => router.back()}
+          onPress={goBack}
           style={({ pressed }) => [styles.close, pressed && styles.pressed]}
         >
           <Icon name="x" size={22} color={colors.textBody} />

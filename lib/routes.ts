@@ -1,5 +1,6 @@
 // Every navigable path in one place, so screens never assemble URL strings by hand.
 export const routes = {
+  home: '/',
   welcome: '/welcome',
   signIn: '/sign-in',
   moves: '/moves',

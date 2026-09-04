@@ -20,6 +20,7 @@ export default defineConfig({
         'lib/api/config.ts',
         'lib/billing.ts',
         'lib/monitoring.ts',
+        'lib/navigation.ts',
         'lib/photos/index.ts',
         'lib/session.ts',
         'lib/voice/dictation.ts',
