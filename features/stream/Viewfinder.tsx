@@ -1,4 +1,4 @@
-// The centre of the screen: the corner frame (photo capture) or the voice ring
+// The center of the screen: the corner frame (photo capture) or the voice ring
 // (Photos-off), plus the one-line hint under it.
 import { StyleSheet, Text, View } from 'react-native';
 

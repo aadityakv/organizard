@@ -40,5 +40,16 @@
     "vite": "^8.2.2",
     "vitest": "^5.0.0",
     "wrangler": "^4.129.0"
-  }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "hono",
+    "drizzle",
+    "d1",
+    "sync",
+    "backend"
+  ]
 }

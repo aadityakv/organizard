@@ -1,5 +1,5 @@
 // Users: find-or-create for Apple and email identities, password accounts, display
-// name and avatar colour derivation, the billing entitlement, and full account
+// name and avatar color derivation, the billing entitlement, and full account
 // deletion (cascades to owned moves and memberships).
 import { eq } from 'drizzle-orm';
 

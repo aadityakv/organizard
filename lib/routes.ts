@@ -6,6 +6,7 @@ export const routes = {
   moves: '/moves',
   newMove: '/new-move',
   tabs: '/(tabs)',
+  capture: '/capture',
   members: '/members',
   printLabels: '/print-labels',
   scan: '/scan',

@@ -28,13 +28,14 @@ import {
   useSnapCapture,
   useStreamSession,
   type StreamView,
+  MIC,
+  STREAM_VIEW,
 } from '@/features/stream';
 import { money } from '@/lib/money';
 import { iconFor } from '@/lib/voice/streamParse';
 import { uid, ID_PREFIX } from '@/lib/uid';
 import { isProNow, useStore } from '@/store/useStore';
 import { colors, fonts, palette, DEFAULT_HUE, alpha } from '@/theme';
-import { MIC, STREAM_VIEW } from '@/features/stream/types';
 import { routes } from '@/lib/routes';
 import { countOf } from '@/lib/text';
 import { copy } from '@/copy/stream';

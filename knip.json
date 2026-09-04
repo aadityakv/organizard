@@ -1,6 +1,6 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreDependencies": ["@babel/core", "expo-modules-core", "expo-updates", "promise"],
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreDependencies": ["@babel/core", "expo-modules-core", "expo-updates"],
   "ignore": ["components/index.ts", "store/useStore.ts", "store/types.ts", "store/createStore.ts"],
   "workspaces": {
     ".": {

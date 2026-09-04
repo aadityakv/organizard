@@ -8,6 +8,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { Icon } from '@/components/ui/Icon';
 import { useStore } from '@/store/useStore';
+import { routes } from '@/lib/routes';
 import { colors, fonts, palette, radius, shadow, alpha } from '@/theme';
 
 const TABS: { name: string; icon: string; label: string; center?: boolean }[] = [
@@ -23,7 +24,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   // the most recent box (or the add-a-box prompt when the library is empty).
   const openCapture = () => {
     const b = boxes[boxes.length - 1]?.id;
-    router.push(b ? `/stream/${b}?view=capture` : '/capture');
+    router.push(b ? routes.streamCapture(b) : routes.capture);
   };
   return (
     <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>

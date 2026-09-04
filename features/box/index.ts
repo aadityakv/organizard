@@ -9,3 +9,4 @@ export { PhotoGallery } from './PhotoGallery';
 export { QrLabelCard } from './QrLabelCard';
 export { StatusSheet } from './StatusSheet';
 export { useBoxDetail } from './useBoxDetail';
+export { shared } from './styles';

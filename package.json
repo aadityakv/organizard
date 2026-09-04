@@ -50,7 +50,6 @@
     "expo-status-bar": "~56.0.4",
     "expo-system-ui": "~56.0.5",
     "lucide-react-native": "^0.468.0",
-    "promise": "^8.3.0",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
@@ -97,5 +96,16 @@
     "*.{ts,tsx}": [
       "eslint --fix"
     ]
-  }
+  },
+  "keywords": [
+    "expo",
+    "react-native",
+    "ios",
+    "moving",
+    "inventory",
+    "packing",
+    "qr",
+    "expo-router",
+    "zustand"
+  ]
 }

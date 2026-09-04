@@ -37,8 +37,6 @@ export function PermissionGate({ denied, onRequest }: { denied: boolean; onReque
   );
 }
 
-/** QR scanner with the four result states: this move, another move, no access, unknown code. */
-
 const styles = StyleSheet.create({
   permSafe: { flex: 1, backgroundColor: colors.surfaceApp },
   permContent: {

@@ -1,6 +1,6 @@
 // Avatar: a member's face in rosters and the account sheet (Members, Moves, AccountSheet).
 // Shows the initials of the display name on a box-palette hue; the hue is derived
-// deterministically from the name, so the same person always gets the same colour
+// deterministically from the name, so the same person always gets the same color
 // across screens.
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 

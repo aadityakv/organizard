@@ -1,4 +1,4 @@
-// ColorDot: one swatch of the 12-hue box palette, used in every colour picker (add box,
+// ColorDot: one swatch of the 12-hue box palette, used in every color picker (add box,
 // edit box, room, status and marker sheets). Plain circle when unselected; when
 // `selected`, a white gap ring plus an outer ring in the same hue. With `onPress` it
 // becomes a Pressable whose hit area is padded up to 44pt regardless of `size`.
@@ -10,7 +10,7 @@ export type ColorDotProps = {
   color: string;
   /** Diameter in logical pixels. @default 24 */
   size?: number;
-  /** Picker selected state — adds a white gap ring then an outer colour ring. */
+  /** Picker selected state — adds a white gap ring then an outer color ring. */
   selected?: boolean;
   /** When provided the dot becomes a Pressable with a tap target ≥ 44 pt. */
   onPress?: () => void;

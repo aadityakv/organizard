@@ -13,6 +13,7 @@ import {
   DashboardBoxCard,
   FindResults,
   GROUP_OPTIONS,
+  GROUP_VIEW,
   RoomGroup,
   RoomSheet,
   SearchBar,
@@ -23,7 +24,6 @@ import {
 import { EditMoveSheet } from '@/features/moves';
 import { money } from '@/lib/money';
 import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
-import { GROUP_VIEW } from '@/features/dashboard/constants';
 import { routes } from '@/lib/routes';
 import { searchSuggestions, useStore } from '@/store/useStore';
 import { copy } from '@/copy/dashboard';
@@ -83,7 +83,7 @@ export default function Dashboard() {
         title={move.name}
         subtitle={
           move.target
-            ? `${progress.sealed} of ${progress.total} sealed · 🗓 ${move.target}`
+            ? `${progress.sealed} of ${progress.total} sealed · ${move.target}`
             : `${progress.sealed} of ${progress.total} boxes sealed`
         }
         trailing={

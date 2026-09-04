@@ -27,6 +27,9 @@ export default defineConfig({
         'lib/voice/dictation.simulated.ts',
         'store/useStore.ts',
       ],
+      // Branches run lowest because the excluded adapters hold most of the
+      // conditional logic; measured code sits mostly on the happy path. Keep the
+      // bars at or just below current coverage — raise them when it grows.
       thresholds: { lines: 70, branches: 60, functions: 55 },
     },
   },

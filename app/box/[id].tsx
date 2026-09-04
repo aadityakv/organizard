@@ -22,8 +22,8 @@ import {
   QrLabelCard,
   StatusSheet,
   useBoxDetail,
+  shared,
 } from '@/features/box';
-import { shared } from '@/features/box/styles';
 import { colors, fonts, palette } from '@/theme';
 import { goBack } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
@@ -64,7 +64,7 @@ export default function BoxDetail() {
   const confirmDelete = () => {
     Alert.alert(
       `Delete "${box.name}"?`,
-      'This removes the box and everything packed inside. This can’t be undone.',
+      "This removes the box and everything packed inside. This can't be undone.",
       [
         { text: copy.keepButton, style: 'cancel' },
         {

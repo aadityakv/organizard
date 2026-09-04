@@ -9,7 +9,7 @@ export const copy = {
   datePlaceholder: 'Pick a date',
   deleteAccountButton: 'Delete account',
   deleteAccountConfirmBody:
-    'This permanently deletes your account and any moves saved to it. This can’t be undone.',
+    "This permanently deletes your account and any moves saved to it. This can't be undone.",
   deleteAccountConfirmTitle: 'Delete account?',
   deleteAccountFailedTitle: 'Could not delete account',
   deleteButton: 'Delete',
@@ -19,7 +19,7 @@ export const copy = {
   fromOptionalLabel: 'From (optional)',
   fromPlaceholder: 'Current address',
   guestAccountNote:
-    'You’re using Tuck as a guest — your moves are saved on this device only. Sign in to back them up and sync across your devices.',
+    "You're using Tuck as a guest — your moves are saved on this device only. Sign in to back them up and sync across your devices.",
   joinButton: 'Join',
   joinHint: 'Paste the invite link or code a friend shared with you.',
   joinPlaceholder: 'Paste invite link or code',

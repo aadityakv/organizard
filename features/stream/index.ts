@@ -12,4 +12,5 @@ export { Viewfinder } from './Viewfinder';
 export { useDictation } from './useDictation';
 export { useSnapCapture } from './useSnapCapture';
 export { useStreamSession } from './useStreamSession';
+export { MIC, STREAM_VIEW } from './types';
 export type { StreamView } from './types';

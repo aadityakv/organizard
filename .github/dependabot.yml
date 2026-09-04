@@ -6,6 +6,9 @@ updates:
       interval: weekly
     # Expo, React Native and React move together with the SDK (npx expo install
     # --fix), not one package at a time; leave them to the SDK upgrade.
+    # NOTE: `ignore` also suppresses security advisories for these trees — the
+    # known transitive advisories (uuid, decode-uri-component, image-size) ride
+    # under them and are accepted until the next SDK bump.
     ignore:
       - dependency-name: 'expo*'
       - dependency-name: '@expo/*'

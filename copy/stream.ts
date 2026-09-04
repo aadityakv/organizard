@@ -11,13 +11,13 @@ export const copy = {
   itemNamePlaceholder: 'e.g. Cast iron skillet',
   keepGoingButton: 'Keep going',
   ledgerTitle: 'This session',
-  listeningHint: 'Listening… tap the button when you’re done',
+  listeningHint: "Listening… tap the button when you're done",
   micPermissionBody:
     'Tuck needs microphone and speech access to add items by voice. Turn them on in Settings › Tuck, then try again.',
   micPermissionTitle: 'Microphone access needed',
   micUnavailableBody:
-    'This device has no speech recognizer, so items can’t be added by voice. Snap or type them instead.',
-  micUnavailableTitle: 'Voice capture isn’t available',
+    "This device has no speech recognizer, so items can't be added by voice. Snap or type them instead.",
+  micUnavailableTitle: "Voice capture isn't available",
   needsFixHint: "That doesn't look right — tap to fix",
   noBoxesHint: 'No boxes yet — add a box first, then capture into it.',
   noNameHeardHint: "Hmm — didn't catch a name. Tap to type it.",

@@ -24,7 +24,7 @@ migrations_dir = "drizzle"
 binding = "PHOTOS"
 bucket_name = "organizard-photos"
 
-# KV — sessions + magic-link tokens.
+# KV — session tokens (+ rate-limit counters).
 [[kv_namespaces]]
 binding = "SESSIONS"
 id = "a5c68a99c85e428b863f10ee2df03eaa"
