@@ -82,10 +82,6 @@ export function createApi(baseUrl: string, fetchImpl: typeof fetch = fetch, time
   return {
     appleLogin: (identityToken: string) =>
       req<AuthResult>('/v1/auth/apple', { method: 'POST', body: JSON.stringify({ identityToken }) }, null),
-    emailStart: (email: string) =>
-      req<{ ok: true }>('/v1/auth/email/start', { method: 'POST', body: JSON.stringify({ email }) }, null),
-    emailVerify: (token: string) =>
-      req<AuthResult>(`/v1/auth/email/verify?token=${encodeURIComponent(token)}`, { method: 'GET' }, null),
     emailRegister: (email: string, password: string) =>
       req<AuthResult>(
         '/v1/auth/email/register',

@@ -127,7 +127,6 @@ function RootLayout() {
               name="gallery/[boxId]"
               options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
             />
-            <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
             <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
           </Stack>
         </ErrorBoundary>

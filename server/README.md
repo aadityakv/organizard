@@ -32,7 +32,7 @@ npm run db:migrate:local  # apply migrations to the local D1
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/v1/auth/apple` · `/v1/auth/email/start` · `GET /v1/auth/email/verify` | sign in |
+| POST | `/v1/auth/apple` · `/v1/auth/email/register` · `/v1/auth/email/login` | sign in |
 | GET | `/v1/me` | user + their moves |
 | POST | `/v1/moves` | create shared move (**entitlement required**) |
 | GET | `/v1/moves/:id` · `/v1/moves/:id/changes?since=` | snapshot · delta |
@@ -49,7 +49,6 @@ wrangler d1 create organizard          # paste database_id into wrangler.toml
 wrangler kv namespace create SESSIONS  # paste id into wrangler.toml
 wrangler r2 bucket create organizard-photos
 wrangler d1 migrations apply organizard --remote
-wrangler secret put RESEND_API_KEY
 wrangler secret put APPLE_BUNDLE_ID
 wrangler secret put REVENUECAT_WEBHOOK_SECRET
 wrangler deploy

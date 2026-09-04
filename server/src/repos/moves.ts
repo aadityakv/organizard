@@ -17,7 +17,7 @@ import { and, eq, gt, inArray, isNull } from 'drizzle-orm';
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
 import type { Deps } from '../deps';
-import { DEFAULT_MARKERS, DEFAULT_STATUSES } from '../seed';
+import { DEFAULT_MARKERS, DEFAULT_STATUSES } from '../defaults';
 
 export type Membership = { role: Role };
 export type Snapshot = {

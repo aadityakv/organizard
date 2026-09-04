@@ -73,29 +73,6 @@ export async function upsertAppleUser(
   return row;
 }
 
-/** Find-or-create by email (magic link). */
-export async function upsertEmailUser(
-  db: AppDb,
-  args: { email: string; id: string; now: number },
-): Promise<UserRow> {
-  const existing = (await db.select().from(users).where(eq(users.email, args.email)).limit(1))[0];
-  if (existing) return existing;
-
-  const row: UserRow = {
-    id: args.id,
-    appleSub: null,
-    email: args.email,
-    passwordHash: null,
-    name: deriveName(args.email),
-    avatarColor: pickColor(args.id),
-    entitlementActive: false,
-    entitlementExpiresAt: null,
-    createdAt: args.now,
-  };
-  await db.insert(users).values(row);
-  return row;
-}
-
 /** User row by (normalised) email. */
 export async function getUserByEmail(db: AppDb, email: string): Promise<UserRow | undefined> {
   return (await db.select().from(users).where(eq(users.email, email)).limit(1))[0];

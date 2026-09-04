@@ -6,10 +6,7 @@ export type Env = {
   SESSIONS: KVNamespace;
   // Secrets / vars (set via `wrangler secret put` / [vars]); optional so local
   // dev and tests work without them configured.
-  RESEND_API_KEY?: string;
   APPLE_BUNDLE_ID?: string;
-  /** Base URL used to build the magic-link (deep link), e.g. organizard://. */
-  APP_URL?: string;
   /** Shared secret for verifying the RevenueCat webhook. */
   REVENUECAT_WEBHOOK_SECRET?: string;
   /**

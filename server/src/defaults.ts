@@ -1,4 +1,4 @@
-// Defaults seeded into every new shared move (mirrors the app's starter set).
+// Starter statuses and markers every new shared move begins with (mirrors data/defaults.ts in the app).
 export const DEFAULT_STATUSES: { label: string; color: string }[] = [
   { label: 'Packing', color: 'amber' },
   { label: 'Sealed', color: 'green' },

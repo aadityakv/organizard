@@ -1,5 +1,4 @@
-// /v1/auth: Sign in with Apple, email/password register + login, legacy magic-link
-// verify, logout (one or all sessions) and account deletion. Sign-in endpoints are
+// /v1/auth: Sign in with Apple, email/password register + login, logout (one or all sessions) and account deletion. Sign-in endpoints are
 // rate-limited per address and per IP and never reveal whether an email exists.
 import { Hono } from 'hono';
 
@@ -14,13 +13,9 @@ import {
   getUserByEmail,
   toPublicUser,
   upsertAppleUser,
-  upsertEmailUser,
 } from '../repos/users';
 import type { Env } from '../types';
-import { appleLoginBody, emailStartBody, loginBody, parseBody, registerBody } from '../validation';
-
-const MAGIC_TTL_SECONDS = 60 * 15; // 15 minutes
-const magicKey = (token: string) => `maglink:${token}`;
+import { appleLoginBody, loginBody, parseBody, registerBody } from '../validation';
 
 /** Sign-in, sign-out and account-deletion routes. */
 export function authRoutes(deps: Deps) {
@@ -45,46 +40,6 @@ export function authRoutes(deps: Deps) {
       id: deps.newId(),
       now: deps.now(),
     });
-
-    const session = deps.newToken();
-    await createSession(c.env, session, user.id, deps.now());
-    return c.json({ session, user: toPublicUser(user) });
-  });
-
-  // Email magic link — step 1: send the link. Never reveal whether the email exists.
-  r.post('/email/start', async (c) => {
-    const body = await parseBody(c, emailStartBody);
-    if (!body.ok) return c.json({ error: 'INVALID_EMAIL' }, 400);
-    const normalized = body.data.email;
-
-    // Throttle to curb abuse / email-relay spam (per address + per IP, 15-min window).
-    const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
-    const okEmail = await rateLimit(c.env.SESSIONS, `mail:${normalized}`, 5, 900);
-    const okIp = await rateLimit(c.env.SESSIONS, `mailip:${ip}`, 20, 900);
-    if (!okEmail || !okIp) return c.json({ error: 'RATE_LIMITED' }, 429);
-
-    const token = deps.newToken();
-    await c.env.SESSIONS.put(magicKey(token), JSON.stringify({ email: normalized }), {
-      expirationTtl: MAGIC_TTL_SECONDS,
-    });
-
-    const base = c.env.APP_URL ?? 'tuck://auth';
-    await deps.sendEmail(c.env, normalized, `${base}?token=${token}`);
-    return c.json({ ok: true });
-  });
-
-  // Email magic link — step 2: verify the token (single-use), sign in.
-  r.get('/email/verify', async (c) => {
-    const token = c.req.query('token');
-    if (!token) return c.json({ error: 'INVALID_TOKEN' }, 400);
-
-    const raw = await c.env.SESSIONS.get(magicKey(token));
-    if (!raw) return c.json({ error: 'INVALID_TOKEN' }, 400);
-    await c.env.SESSIONS.delete(magicKey(token)); // single use (best-effort; KV get-then-delete)
-
-    const { email } = JSON.parse(raw) as { email: string };
-    const db = deps.getDb(c.env);
-    const user = await upsertEmailUser(db, { email, id: deps.newId(), now: deps.now() });
 
     const session = deps.newToken();
     await createSession(c.env, session, user.id, deps.now());

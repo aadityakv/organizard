@@ -14,7 +14,6 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
   const db = await makeTestDb();
   const kv = makeMemoryKv();
   const r2 = makeMemoryR2();
-  const sentEmails: { to: string; link: string }[] = [];
   let appleNext: AppleIdentity | null = null; // null => verify throws
 
   let idN = 0;
@@ -40,9 +39,6 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
     verifyApple: async () => {
       if (!appleNext) throw new Error('invalid apple token');
       return appleNext;
-    },
-    sendEmail: async (_env, to, link) => {
-      sentEmails.push({ to, link });
     },
   });
 
@@ -92,7 +88,6 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
     db,
     kv,
     env,
-    sentEmails,
     setAppleIdentity,
     request,
     json,

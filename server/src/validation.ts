@@ -146,7 +146,6 @@ const PASSWORD_MAX = 200;
 const email = z.string().trim().toLowerCase().max(254).regex(EMAIL_RE);
 
 export const appleLoginBody = z.object({ identityToken: str });
-export const emailStartBody = z.object({ email });
 export const registerBody = z.object({ email, password: z.string().min(PASSWORD_MIN).max(PASSWORD_MAX) });
 export const loginBody = z.object({ email, password: str });
 export const createMoveBody = z.object({

@@ -22,11 +22,15 @@ describe('sessions — logout everywhere', () => {
 });
 
 describe('auth — rate limiting', () => {
-  it('429s after too many email/start requests for one address', async () => {
+  it('429s after too many login attempts for one address', async () => {
     const h = await makeHarness();
-    for (let i = 0; i < 5; i++) {
-      expect((await h.json('/v1/auth/email/start', { email: 'spam@x.com' })).status).toBe(200);
+    for (let i = 0; i < 10; i++) {
+      expect(
+        (await h.json('/v1/auth/email/login', { email: 'spam@x.com', password: 'wrong-pass' })).status,
+      ).toBe(401);
     }
-    expect((await h.json('/v1/auth/email/start', { email: 'spam@x.com' })).status).toBe(429);
+    expect(
+      (await h.json('/v1/auth/email/login', { email: 'spam@x.com', password: 'wrong-pass' })).status,
+    ).toBe(429);
   });
 });

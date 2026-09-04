@@ -2,7 +2,7 @@
 
 export const newId = (): string => crypto.randomUUID();
 
-/** A 256-bit random hex token (sessions, magic links, invites). */
+/** A 256-bit random hex token (sessions, invites). */
 export const newToken = (): string => {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);

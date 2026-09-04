@@ -56,9 +56,3 @@ export async function deleteAccount(): Promise<void> {
   signOut();
   await clearSession();
 }
-
-/** Legacy magic-link verify — still handled if an old link is opened. */
-export async function completeEmailSignIn(token: string): Promise<void> {
-  const { session, user } = await api.emailVerify(token);
-  await adoptSession(session, user);
-}

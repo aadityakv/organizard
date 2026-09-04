@@ -129,8 +129,8 @@ registered on the team; a new phone means a new device on the profile. Metro run
 
 | APP_ENV | Backend | Used by |
 |---|---|---|
-| `production` | `organizard-api` Worker | `eas build --profile production` (default) |
-| `staging` | `organizard-api-staging` Worker (`wrangler --env staging`) | the `development` and `preview` profiles |
+| `production` | `organizard-api` Worker | every EAS profile today, and the default for `expo run:ios` |
+| `staging` | `organizard-api-staging` Worker (`wrangler --env staging`) | opt in with `APP_ENV=staging` once the staging resources exist |
 | `local` | `http://localhost:8787` (`npm run dev` in `server/`) | set `APP_ENV=local` for a dev client |
 
 `app.config.ts` maps the profile to the API URL; `server/wrangler.toml` defines both
