@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SlothMark } from '@/components/brand/SlothMark';
 import { Button } from '@/components/ui/Button';
+import { reportError } from '@/lib/monitoring';
 import { colors, type } from '@/theme';
 
 /**
@@ -41,6 +42,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error(`[ErrorBoundary ${errorDigest(error)}]`, error, info.componentStack);
+    reportError(error, {
+      tags: { digest: errorDigest(error) },
+      extra: { componentStack: info.componentStack },
+    });
   }
 
   restart = () => {

@@ -8,4 +8,12 @@ export default defineConfig({
       '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
     },
   },
+  test: {
+    coverage: {
+      provider: 'v8',
+      include: ['src/**'],
+      exclude: ['src/seed.ts', 'src/index.ts'],
+      thresholds: { lines: 85, branches: 75, functions: 85 },
+    },
+  },
 });

@@ -52,7 +52,12 @@ export function PhotoGallery({
                 onPress={() => onOpen(i)}
                 style={({ pressed }) => [styles.galleryGridCell, pressed && shared.pressed]}
               >
-                <Image source={src} style={styles.galleryThumb} resizeMode="cover" />
+                <Image
+                  source={src}
+                  style={styles.galleryThumb}
+                  resizeMode="cover"
+                  accessibilityIgnoresInvertColors
+                />
               </Pressable>
             );
           })}
@@ -80,7 +85,12 @@ export function PhotoGallery({
                 onPress={() => (isLast ? onToggle() : onOpen(i))}
                 style={({ pressed }) => [styles.galleryStripCell, pressed && shared.pressed]}
               >
-                <Image source={src} style={styles.galleryThumb} resizeMode="cover" />
+                <Image
+                  source={src}
+                  style={styles.galleryThumb}
+                  resizeMode="cover"
+                  accessibilityIgnoresInvertColors
+                />
                 {isLast ? (
                   <View style={styles.galleryMore}>
                     <Text style={styles.galleryMoreText}>+{extra}</Text>

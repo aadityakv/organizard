@@ -47,7 +47,12 @@ export function Avatar({ name, size = 40, uri, color, style }: AvatarProps) {
       accessibilityLabel={name}
     >
       {uri ? (
-        <Image source={{ uri }} style={{ width: size, height: size, borderRadius }} contentFit="cover" />
+        <Image
+          source={{ uri }}
+          style={{ width: size, height: size, borderRadius }}
+          contentFit="cover"
+          accessibilityIgnoresInvertColors
+        />
       ) : (
         <Text
           style={[styles.initials, { fontSize, lineHeight: size, color: fgColor }]}

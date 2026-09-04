@@ -130,6 +130,7 @@ export function BoxCard({
               source={{ uri: cover, headers: coverHeaders }}
               style={StyleSheet.absoluteFill}
               resizeMode="cover"
+              accessibilityIgnoresInvertColors
             />
           ) : null}
 

@@ -24,7 +24,13 @@ export function CoverCard({
   return (
     <View style={[styles.cover, { backgroundColor: boxTint(box.color) }]}>
       {box.cover ? (
-        <Image source={photoSource(box.cover, session)} style={styles.coverImage} resizeMode="cover" />
+        <Image
+          source={photoSource(box.cover, session)}
+          style={styles.coverImage}
+          resizeMode="cover"
+          accessibilityLabel={`Cover photo of ${box.name}`}
+          accessibilityIgnoresInvertColors
+        />
       ) : (
         <Icon name="camera" size={34} color={hue} />
       )}

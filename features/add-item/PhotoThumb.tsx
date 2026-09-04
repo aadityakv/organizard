@@ -32,6 +32,8 @@ export function PhotoThumb({
         <Image
           source={photoSource(photoRef, session)}
           style={styles.thumbImg}
+          accessibilityLabel={isCover ? 'Cover photo' : 'Captured photo'}
+          accessibilityIgnoresInvertColors
           onError={() => setFailed(true)}
         />
       )}

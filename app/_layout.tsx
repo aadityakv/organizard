@@ -22,6 +22,7 @@ import * as SystemUI from 'expo-system-ui';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { initMonitoring, wrapRoot } from '@/lib/monitoring';
 import { loadSession } from '@/lib/session';
 import { useSync } from '@/services/sync';
 import { useHasHydrated, useStore } from '@/store/useStore';
@@ -29,9 +30,10 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
+initMonitoring();
 
 /** Root layout: loads fonts, restores the session, starts sync, then mounts the navigator. */
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts({
     Fredoka_400Regular,
     Fredoka_500Medium,
@@ -133,3 +135,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default wrapRoot(RootLayout);

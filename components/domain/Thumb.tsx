@@ -6,6 +6,8 @@ import { boxColor, boxTint, radius as radii, DEFAULT_HUE } from '@/theme';
 import { Icon } from '@/components/ui/Icon';
 
 export type ThumbProps = {
+  /** Describes the photo for screen readers; omit when the parent control is already labelled. */
+  accessibilityLabel?: string;
   color?: string;
   icon?: string;
   size?: number;
@@ -24,9 +26,17 @@ export function Thumb({
   radius = radii.md,
   uri,
   headers,
+  accessibilityLabel,
 }: ThumbProps) {
   if (uri) {
-    return <Image source={{ uri, headers }} style={{ width: size, height: size, borderRadius: radius }} />;
+    return (
+      <Image
+        source={{ uri, headers }}
+        style={{ width: size, height: size, borderRadius: radius }}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityIgnoresInvertColors
+      />
+    );
   }
   return (
     <View

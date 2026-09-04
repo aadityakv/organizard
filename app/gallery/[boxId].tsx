@@ -93,7 +93,12 @@ export default function GalleryScreen() {
               onPress={() => router.back()}
               style={[styles.page, { width }]}
             >
-              <Image source={src} style={styles.image} resizeMode="contain" />
+              <Image
+                source={src}
+                style={styles.image}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
             </Pressable>
           );
         })}

@@ -8,5 +8,11 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['store/**/*.test.ts', 'data/**/*.test.ts', 'lib/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['lib/**', 'store/**', 'shared/**'],
+      exclude: ['**/*.test.ts', 'lib/api/index.ts', 'lib/api/config.ts', 'store/useStore.ts'],
+      thresholds: { lines: 65, branches: 70, functions: 50 },
+    },
   },
 });

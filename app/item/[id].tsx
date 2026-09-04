@@ -160,7 +160,12 @@ export default function ItemDetail() {
                   }
                   style={({ pressed }) => [styles.photo, pressed && styles.pressed]}
                 >
-                  <Image source={src} style={styles.photoImage} resizeMode="cover" />
+                  <Image
+                    source={src}
+                    style={styles.photoImage}
+                    resizeMode="cover"
+                    accessibilityIgnoresInvertColors
+                  />
                 </Pressable>
               );
             })}
