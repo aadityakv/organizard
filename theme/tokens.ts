@@ -1,7 +1,5 @@
-// ============================================================
 // Organizard — design tokens (translated from the design-system CSS)
 // Warm cream base, fresh green primary, vivid 12-hue box palette.
-// ============================================================
 
 /** Raw palette — warm neutrals, brand green, accents, danger. */
 export const palette = {
@@ -50,10 +48,8 @@ export const palette = {
   red600: '#C0392C',
 } as const;
 
-// ============================================================
 // CATEGORICAL BOX PALETTE — the organizing principle (12 hues).
 // Each hue has a solid (block / chip) and a soft tint (card wash).
-// ============================================================
 const boxPalette = {
   coral: { solid: '#F2746B', tint: '#FCE7E4' },
   amber: { solid: '#F2A23C', tint: '#FBEBD5' },
@@ -81,9 +77,6 @@ export const boxColor = (name: string): string =>
 /** Soft tint wash for a box-palette color name. Falls back to green tint. */
 export const boxTint = (name: string): string => boxPalette[name as BoxColor]?.tint ?? boxPalette.green.tint;
 
-// ============================================================
-// SEMANTIC COLORS
-// ============================================================
 export const colors = {
   // surfaces
   surfaceApp: palette.cream100, // app background (warm cream)
@@ -123,9 +116,7 @@ export const colors = {
   infoWash: palette.blue50,
 } as const;
 
-// ============================================================
 // SPACING — 4px grid
-// ============================================================
 export const space = {
   0: 0,
   1: 4,
@@ -144,9 +135,7 @@ export const space = {
 /** Screen edge padding. */
 export const gutter = 16;
 
-// ============================================================
 // RADIUS — generous, friendly rounding
-// ============================================================
 export const radius = {
   xs: 6,
   sm: 10,
@@ -157,9 +146,7 @@ export const radius = {
   pill: 999, // chips, buttons
 } as const;
 
-// ============================================================
 // SHADOWS — soft, warm-tinted (RN iOS shadow + Android elevation)
-// ============================================================
 type Shadow = {
   shadowColor: string;
   shadowOpacity: number;
@@ -214,9 +201,6 @@ export const shadow: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'brand', Shadow> 
   },
 };
 
-// ============================================================
-// SIZING & MOTION
-// ============================================================
 export const tap = {
   min: 44, // iOS minimum hit target
   sm: 36,

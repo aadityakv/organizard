@@ -239,7 +239,6 @@ export default function ItemDetail() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surfaceApp },
 
-  // Hero
   hero: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: palette.sand300,
@@ -266,10 +265,8 @@ const styles = StyleSheet.create({
     color: palette.green600,
   },
 
-  // Scroll body
   scroll: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 },
 
-  // Photos
   photoStrip: { gap: 10, paddingBottom: 4 },
   photo: {
     width: 220,
@@ -290,7 +287,6 @@ const styles = StyleSheet.create({
   },
   photoEmptyText: { fontFamily: fonts.body.semibold, fontSize: 13.5, color: palette.ink400 },
 
-  // Field card
   fieldCard: {
     backgroundColor: colors.surfaceCard,
     borderRadius: radius.lg,
@@ -316,7 +312,6 @@ const styles = StyleSheet.create({
     color: palette.ink700,
   },
 
-  // Markers
   markerSection: { marginTop: 18 },
   sectionTitle: {
     fontFamily: fonts.display.bold,
@@ -326,7 +321,6 @@ const styles = StyleSheet.create({
   },
   markerWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 
-  // Breadcrumb
   crumb: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -346,10 +340,8 @@ const styles = StyleSheet.create({
     color: palette.ink700,
   },
 
-  // Bottom
   bottom: { marginTop: 22 },
 
-  // Missing item
   missing: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 32 },
   missingTitle: {
     ...typeTokens.heading,

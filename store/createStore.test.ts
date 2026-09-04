@@ -8,10 +8,6 @@ import { createAppStore } from './createStore';
 import { migrate, STORE_KEY } from './persist';
 import { moveSummaries } from './selectors';
 
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
-
 /** Synchronous in-memory storage: the store hydrates before the first read. */
 function memoryStorage(seed: Record<string, string> = {}): StateStorage & { data: Record<string, string> } {
   const data = { ...seed };
@@ -107,10 +103,6 @@ function sharedStore() {
   return store;
 }
 
-// ---------------------------------------------------------------------------
-// Local vs shared writes
-// ---------------------------------------------------------------------------
-
 describe('inventory actions', () => {
   it('a local move never touches the outbox', () => {
     const store = createAppStore(memoryStorage());
@@ -175,10 +167,6 @@ describe('inventory actions', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Delta merge
-// ---------------------------------------------------------------------------
-
 describe('applyChanges', () => {
   it('applies server edits, tombstones and the cursor', () => {
     const store = sharedStore();
@@ -214,10 +202,6 @@ describe('applyChanges', () => {
     expect(store.getState().itemsByBox.b1[0].photos).toEqual(['ph_1', 'ph_2', 'file:///tmp/new.jpg']);
   });
 });
-
-// ---------------------------------------------------------------------------
-// Library and session
-// ---------------------------------------------------------------------------
 
 describe('library', () => {
   it('switching moves parks live edits into the bundle and restores them on return', () => {
@@ -276,10 +260,6 @@ describe('signOut', () => {
     expect(s.boxes).toEqual([]);
   });
 });
-
-// ---------------------------------------------------------------------------
-// Persistence
-// ---------------------------------------------------------------------------
 
 describe('persistence', () => {
   it('survives a relaunch through the injected storage, without the session token', () => {

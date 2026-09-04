@@ -13,9 +13,7 @@ import { useStore, boxById, roomById, boxStats, statusById, type Store } from '@
 import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
 import { money } from '@/lib/money';
 
-// ─────────────────────────────────────────────────────────────
 // Visual config per result state — icon, wash, copy, action label.
-// ─────────────────────────────────────────────────────────────
 
 type ResultView = {
   icon: string;
@@ -29,9 +27,7 @@ type ResultView = {
   onAction: () => void;
 };
 
-// ─────────────────────────────────────────────────────────────
 // The result sheet that slides up over the viewfinder.
-// ─────────────────────────────────────────────────────────────
 
 function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => void }) {
   return (
@@ -71,9 +67,7 @@ function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => voi
   );
 }
 
-// ─────────────────────────────────────────────────────────────
 // Permission request screen (camera not yet granted / denied).
-// ─────────────────────────────────────────────────────────────
 
 function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () => void }) {
   return (
@@ -111,10 +105,6 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
     </SafeAreaView>
   );
 }
-
-// ─────────────────────────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────────────────────────
 
 export default function Scan() {
   const boxes = useStore((s) => s.boxes);
@@ -173,7 +163,6 @@ export default function Scan() {
 
   // ── Permission states ──────────────────────────────────────
   if (!permission) {
-    // Permissions are still loading.
     return <SafeAreaView style={styles.loading} edges={['top', 'bottom']} />;
   }
   if (!permission.granted) {
@@ -223,10 +212,8 @@ export default function Scan() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
 // Map a ScanResult to its on-screen view. Resolves the box via the
 // store for the thisMove success state.
-// ─────────────────────────────────────────────────────────────
 
 function buildView(
   result: ScanResult,
@@ -286,7 +273,6 @@ function buildView(
     };
   }
 
-  // unknown
   return {
     icon: 'help-circle',
     iconWash: colors.warningWash,
@@ -300,10 +286,6 @@ function buildView(
   };
 }
 
-// ─────────────────────────────────────────────────────────────
-// Styles
-// ─────────────────────────────────────────────────────────────
-
 const VIEWFINDER_BG = '#111312';
 const GREEN = palette.green400;
 
@@ -313,7 +295,6 @@ const styles = StyleSheet.create({
   dim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(13,15,14,0.45)' },
   overlay: { flex: 1 },
 
-  // Top bar
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -336,7 +317,6 @@ const styles = StyleSheet.create({
     fontSize: 19,
   },
 
-  // Scan window
   windowWrap: {
     flex: 1,
     alignItems: 'center',
@@ -370,7 +350,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  // Result sheet
   sheet: {
     position: 'absolute',
     left: 0,
@@ -435,7 +414,6 @@ const styles = StyleSheet.create({
     color: palette.ink500,
   },
 
-  // Permission gate
   permSafe: { flex: 1, backgroundColor: colors.surfaceApp },
   permContent: {
     flexGrow: 1,

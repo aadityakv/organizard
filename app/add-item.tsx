@@ -26,7 +26,6 @@ export default function AddItem() {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        {/* ── Top bar: close · box label ────────────────────────────────────── */}
         <View style={styles.topBar}>
           <Pressable
             onPress={form.close}
@@ -49,7 +48,6 @@ export default function AddItem() {
           <View style={styles.topBtnSpacer} />
         </View>
 
-        {/* ── Form (primary content) ────────────────────────────────────────── */}
         <ScrollView
           style={styles.form}
           contentContainerStyle={styles.formContent}
@@ -83,7 +81,6 @@ export default function AddItem() {
             onToggle={form.toggleMarker}
           />
 
-          {/* ── Move to box + delete (edit mode only) ─────────────────────── */}
           {form.isEdit && form.canEdit ? (
             <>
               <MoveToBoxPicker

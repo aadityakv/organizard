@@ -1,7 +1,5 @@
-// ============================================================
 // QR encoding for box labels. A box's QR encodes a deep link;
 // scanning resolves it against the current move.
-// ============================================================
 
 export const QR_PREFIX = 'tuck://box/';
 // Pre-rebrand labels were printed with the old scheme — keep scanning them.

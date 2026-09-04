@@ -110,27 +110,25 @@ export function Input({
 
 const styles = StyleSheet.create({
   wrapper: {
-    gap: space[1] + 2, // 6px gap between label and field (4+2)
+    gap: space[1] + 2,
   },
 
-  // Label — eyebrow style but slightly larger for legibility (13px bold Nunito = caption-bold)
   label: {
     fontFamily: fonts.body.bold,
-    fontSize: fontSize.sm, // 13
+    fontSize: fontSize.sm,
     color: colors.textBody,
     marginBottom: 6,
   },
 
-  // Field wrapper
   field: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surfaceCard,
     borderWidth: 1.5,
     borderColor: colors.borderSubtle, // overridden by Animated.View borderColor
-    borderRadius: radius.md, // 14
+    borderRadius: radius.md,
     paddingHorizontal: 14,
-    gap: space[2], // 8
+    gap: space[2],
   },
   fieldSingle: {
     height: 48,
@@ -149,7 +147,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  // Prefix (e.g. "$")
   prefix: {
     fontFamily: fonts.body.bold,
     fontSize: fontSize.md, // 17 — slightly larger to match input text
@@ -159,7 +156,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Text input
   input: {
     flex: 1,
     minWidth: 0,
@@ -177,7 +173,5 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     paddingTop: 2,
   },
-  inputWithPrefix: {
-    // no extra style needed — flex:1 handles it
-  },
+  inputWithPrefix: {},
 });

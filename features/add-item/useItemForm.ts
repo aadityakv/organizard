@@ -180,7 +180,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
     boxes,
     session,
     markerChoices,
-    // fields
     name,
     setName,
     value,
@@ -198,7 +197,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
     targetBoxId,
     setTargetBoxId,
     addedCount,
-    // actions
     close,
     save,
     saveEdit,

@@ -1,7 +1,5 @@
-// ============================================================
 // Permission model — the differentiator.
 // Owner / Editor / Viewer. Affordances appear & disappear by role.
-// ============================================================
 import type { Role } from '@/data/types';
 
 export const PERM = {
