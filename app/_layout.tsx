@@ -1,3 +1,4 @@
+// Root layout for the whole app: fonts, session restore, sync engine and the navigator.
 import { useEffect, useState } from 'react';
 import {
   Fredoka_400Regular,
@@ -22,10 +23,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { loadSession } from '@/lib/session';
 import { useSync } from '@/services/sync';
 import { useHasHydrated, useStore } from '@/store/useStore';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
 
+/** Root layout: loads fonts, restores the session, starts sync, then mounts the navigator. */
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Fredoka_400Regular,
@@ -71,42 +74,59 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.surfaceApp },
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="welcome" />
-          <Stack.Screen name="sign-in" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="moves" />
-          <Stack.Screen name="new-move" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="box/[id]" />
-          <Stack.Screen name="item/[id]" />
-          <Stack.Screen name="add-item" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="stream/[boxId]" options={{ animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="capture" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="members" />
-          <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom' }} />
-          <Stack.Screen
-            name="print-labels"
-            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-          />
-          <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
-          {/* Card modal (NOT fullScreenModal): a fullScreenModal is dead to touch on
+        {/* Crash boundary: a render error anywhere in the router shows the
+            fallback (with an error code) instead of killing the app. Restart
+            remounts the navigator — Zustand state survives outside React. */}
+        <ErrorBoundary>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.surfaceApp },
+              animation: 'slide_from_right',
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="welcome" />
+            <Stack.Screen
+              name="sign-in"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="moves" />
+            <Stack.Screen
+              name="new-move"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="box/[id]" />
+            <Stack.Screen name="item/[id]" />
+            <Stack.Screen
+              name="add-item"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="stream/[boxId]" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen
+              name="capture"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="members" />
+            <Stack.Screen name="scan" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen
+              name="print-labels"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="qr/[id]" options={{ presentation: 'modal', animation: 'fade' }} />
+            {/* Card modal (NOT fullScreenModal): a fullScreenModal is dead to touch on
               iOS 26 — its close X never fired, trapping the user (force-quit). A card
               modal reliably receives taps AND has a native swipe-down-to-dismiss, so the
               user can always get out (swipe down · tap the photo · the X). */}
-          <Stack.Screen
-            name="gallery/[boxId]"
-            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-          />
-          <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
-          <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
-        </Stack>
+            <Stack.Screen
+              name="gallery/[boxId]"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'fade' }} />
+            <Stack.Screen name="invite" options={{ presentation: 'modal', animation: 'fade' }} />
+          </Stack>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
