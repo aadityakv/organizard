@@ -30,7 +30,7 @@ import {
   type StreamView,
 } from '@/features/stream';
 import { money } from '@/lib/money';
-import { iconFor } from '@/lib/streamParse';
+import { iconFor } from '@/lib/voice/streamParse';
 import { uid, ID_PREFIX } from '@/lib/uid';
 import { isProNow, useStore } from '@/store/useStore';
 import { colors, fonts, palette, DEFAULT_HUE, alpha } from '@/theme';

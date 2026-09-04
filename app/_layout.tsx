@@ -25,7 +25,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { loadSession } from '@/lib/session';
 import { useSync } from '@/services/sync';
 import { useHasHydrated, useStore } from '@/store/useStore';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();

@@ -4,7 +4,7 @@
 import { StyleProp, View, ViewStyle } from 'react-native';
 
 import { boxColor, boxTint, radius, NEUTRAL_HUE } from '@/theme';
-import { Icon } from './Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type RoomGlyphProps = {
   icon: string;

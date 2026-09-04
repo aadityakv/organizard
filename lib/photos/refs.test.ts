@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isLocalRef, resolvePhoto } from './photoRef';
+import { isLocalRef, resolvePhoto } from '@/lib/photos/refs';
 
 describe('isLocalRef', () => {
   it('treats local: refs as local', () => {

@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 
 import { colors, palette, radius, shadow, fonts, fontSize, tap, motion } from '@/theme';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type ButtonProps = {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';

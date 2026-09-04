@@ -9,7 +9,7 @@ import QRCode from 'react-native-qrcode-svg';
 
 import { Icon } from '@/components';
 import { boxById, roomById, useStore } from '@/store/useStore';
-import { encodeBoxQR } from '@/lib/qr';
+import { encodeBoxQR } from '@/lib/qr/codes';
 import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space, tap, type } from '@/theme';
 
 /** Full-screen QR label for one box, for scanning from another device. */

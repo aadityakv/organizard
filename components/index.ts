@@ -1,35 +1,35 @@
 // Public component surface. Screens import from '@/components'.
 
 // Shared app chrome (foundation)
-export { ErrorBoundary } from './ErrorBoundary';
-export { Icon, type IconProps } from './Icon';
-export { SlothMark } from './SlothMark';
-export { Card } from './Card';
-export { Header, type HeaderProps } from './Header';
-export { LockNote } from './LockNote';
-export { Thumb, type ThumbProps } from './Thumb';
-export { Sheet, type SheetProps } from './Sheet';
+export { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+export { Icon, type IconProps } from '@/components/ui/Icon';
+export { SlothMark } from '@/components/brand/SlothMark';
+export { Card } from '@/components/ui/Card';
+export { Header, type HeaderProps } from '@/components/ui/Header';
+export { LockNote } from '@/components/domain/LockNote';
+export { Thumb, type ThumbProps } from '@/components/domain/Thumb';
+export { Sheet, type SheetProps } from '@/components/ui/Sheet';
 
 // Design-system primitives (core)
-export { Button, type ButtonProps } from './Button';
-export { IconButton, type IconButtonProps } from './IconButton';
-export { Badge, type BadgeProps } from './Badge';
-export { StatusChip, type StatusChipProps } from './StatusChip';
-export { Avatar, type AvatarProps } from './Avatar';
+export { Button, type ButtonProps } from '@/components/ui/Button';
+export { IconButton, type IconButtonProps } from '@/components/ui/IconButton';
+export { Badge, type BadgeProps } from '@/components/ui/Badge';
+export { StatusChip, type StatusChipProps } from '@/components/domain/StatusChip';
+export { Avatar, type AvatarProps } from '@/components/domain/Avatar';
 
 // Design-system primitives (forms)
-export { Input, type InputProps } from './Input';
-export { AuthPanel } from './AuthPanel';
-export { StreamUpsell } from './StreamUpsell';
-export { Stepper, type StepperProps } from './Stepper';
-export { Segmented, type SegmentedProps } from './Segmented';
-export { AddressField, type AddressFieldProps } from './AddressField';
-export { DateField, formatTargetDate, parseTargetDate, type DateFieldProps } from './DateField';
+export { Input, type InputProps } from '@/components/ui/Input';
+export { AuthPanel } from '@/components/brand/AuthPanel';
+export { StreamUpsell } from '@/components/brand/StreamUpsell';
+export { Stepper, type StepperProps } from '@/components/ui/Stepper';
+export { Segmented, type SegmentedProps } from '@/components/ui/Segmented';
+export { AddressField, type AddressFieldProps } from '@/components/ui/AddressField';
+export { DateField, formatTargetDate, parseTargetDate, type DateFieldProps } from '@/components/ui/DateField';
 
 // Design-system primitives (domain)
-export { BoxCard, type BoxCardProps } from './BoxCard';
-export { RoomGlyph, type RoomGlyphProps } from './RoomGlyph';
-export { RoleBadge, type RoleBadgeProps } from './RoleBadge';
-export { MarkerChip, type MarkerChipProps } from './MarkerChip';
-export { ColorDot, type ColorDotProps } from './ColorDot';
-export { ValueStat, type ValueStatProps } from './ValueStat';
+export { BoxCard, type BoxCardProps } from '@/components/domain/BoxCard';
+export { RoomGlyph, type RoomGlyphProps } from '@/components/domain/RoomGlyph';
+export { RoleBadge, type RoleBadgeProps } from '@/components/domain/RoleBadge';
+export { MarkerChip, type MarkerChipProps } from '@/components/domain/MarkerChip';
+export { ColorDot, type ColorDotProps } from '@/components/domain/ColorDot';
+export { ValueStat, type ValueStatProps } from '@/components/domain/ValueStat';

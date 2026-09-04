@@ -2,9 +2,9 @@
 // "Try Pro" starts the local trial; real billing replaces that later.
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Button } from './Button';
-import { Icon } from './Icon';
-import { Sheet } from './Sheet';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { Sheet } from '@/components/ui/Sheet';
 import { fonts, palette } from '@/theme';
 
 const PERKS: { icon: string; label: string }[] = [

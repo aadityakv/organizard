@@ -17,7 +17,7 @@ import {
   motion,
 } from '@/theme';
 import { money } from '@/lib/money';
-import { StatusChip } from '@/components/StatusChip';
+import { StatusChip } from '@/components/domain/StatusChip';
 import { countOf } from '@/lib/text';
 
 export type BoxCardProps = {

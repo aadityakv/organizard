@@ -5,8 +5,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 
-import { listen, isDictationSimulated, type DictationSession } from '@/lib/dictation';
-import { parseList, parseUtterance, type ParsedItem } from '@/lib/streamParse';
+import { listen, isDictationSimulated, type DictationSession } from '@/lib/voice/dictation';
+import { parseList, parseUtterance, type ParsedItem } from '@/lib/voice/streamParse';
 
 import type { Mic } from './types';
 import { MIC } from './types';

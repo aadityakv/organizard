@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { iconFor, parseList, parseUtterance, wordNum } from './streamParse';
+import { iconFor, parseList, parseUtterance, wordNum } from '@/lib/voice/streamParse';
 
 describe('wordNum', () => {
   it('parses spelled-out numbers', () => {

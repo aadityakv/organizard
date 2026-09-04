@@ -9,7 +9,7 @@
 // the whole label build live here in plain TS — no hidden RN
 // render pass, no base64 round-trip.
 
-import { encodeBoxQR } from './qr';
+import { encodeBoxQR } from './codes';
 
 // The `qrcode` package ships its `main` as a server build that pulls in
 // PNG/terminal renderers (Buffer, fs). We only want the matrix builder + the

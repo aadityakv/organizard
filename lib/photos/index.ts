@@ -5,9 +5,9 @@
 // (unit-tested); uploading to R2 lives in `@/services/photos`.
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { API_URL } from '@/lib/config';
+import { API_URL } from '@/lib/api/config';
 import { uid, ID_PREFIX } from '@/lib/uid';
-import { LOCAL_PREFIX, resolvePhoto } from '@/lib/photoRef';
+import { LOCAL_PREFIX, resolvePhoto } from './refs';
 
 /** Copy a capture out of the volatile cache dir into the document dir and return a relative `local:` ref that survives reinstall. */
 export async function persistCapture(srcUri: string): Promise<string> {

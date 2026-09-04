@@ -4,7 +4,7 @@
 import { Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 import { colors, palette, radius, tap, shadow } from '@/theme';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/components/ui/Icon';
 export type IconButtonProps = {
   /** Lucide kebab-case icon name, e.g. "x", "more-horizontal", "camera". */
   icon: string;

@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Icon, SlothMark } from '@/components';
-import { classifyScan, type ScanCandidateMove, type ScanResult } from '@/lib/qr';
+import { classifyScan, type ScanCandidateMove, type ScanResult } from '@/lib/qr/codes';
 import { useStore, boxById, roomById, boxStats, statusById, type Store } from '@/store/useStore';
 import {
   boxColor,

@@ -5,8 +5,8 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Icon } from './Icon';
-import { Sheet } from './Sheet';
+import { Icon } from '@/components/ui/Icon';
+import { Sheet } from '@/components/ui/Sheet';
 import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 
 export type DateFieldProps = {

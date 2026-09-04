@@ -2,7 +2,7 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button, Sheet } from '@/components';
-import { iconFor } from '@/lib/streamParse';
+import { iconFor } from '@/lib/voice/streamParse';
 import { fonts, palette } from '@/theme';
 
 import type { SItem } from './types';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { classifyScan, encodeBoxQR, parseBoxQR, QR_PREFIX } from './qr';
+import { classifyScan, encodeBoxQR, parseBoxQR, QR_PREFIX } from '@/lib/qr/codes';
 
 describe('box QR payloads', () => {
   it('round-trips a box id through the tuck:// scheme', () => {

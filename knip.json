@@ -6,7 +6,7 @@
     "store/useStore.ts",
     "store/types.ts",
     "store/createStore.ts",
-    "lib/api.ts"
+    "lib/api/index.ts"
   ],
   "workspaces": {
     ".": {

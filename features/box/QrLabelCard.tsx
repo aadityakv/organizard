@@ -5,7 +5,7 @@ import QRCode from 'react-native-qrcode-svg';
 
 import { Button } from '@/components';
 import type { Box } from '@/data/types';
-import { encodeBoxQR } from '@/lib/qr';
+import { encodeBoxQR } from '@/lib/qr/codes';
 import { printLabels } from '@/services/print';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 import { routes } from '@/lib/routes';

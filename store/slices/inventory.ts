@@ -11,7 +11,7 @@ import { mutation } from '../mutation';
 import type { InventoryActions, Store } from '../types';
 import { STATUS_ID } from '@/data/defaults';
 import { NEUTRAL_HUE } from '@/theme';
-import { isLocalRef } from '@/lib/photoRef';
+import { isLocalRef } from '@/lib/photos/refs';
 
 export type InventorySlice = StateCreator<Store, [['zustand/persist', unknown]], [], InventoryActions>;
 

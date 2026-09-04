@@ -6,8 +6,8 @@ import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 
-import { Icon } from './Icon';
-import { Input } from './Input';
+import { Icon } from '@/components/ui/Icon';
+import { Input } from '@/components/ui/Input';
 import {
   hasNativeAddressAutocomplete,
   searchAddresses,

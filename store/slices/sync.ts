@@ -19,7 +19,7 @@ import { emptyLiveSlice, parkCurrentMove } from '../shape';
 import { mergeList, moveFromSnapshot, snapItemsByBox } from '../snapshot';
 import type { Store, SyncActions } from '../types';
 import { MOVE_MODE, type MoveBundle } from '../library';
-import { isLocalRef } from '@/lib/photoRef';
+import { isLocalRef } from '@/lib/photos/refs';
 
 export type SyncSlice = StateCreator<Store, [['zustand/persist', unknown]], [], SyncActions>;
 

@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/components/ui/Icon';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette, radius, shadow, alpha } from '@/theme';
 

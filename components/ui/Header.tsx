@@ -3,7 +3,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts, palette, radius } from '@/theme';
-import { Icon } from './Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type HeaderProps = {
   title: string;

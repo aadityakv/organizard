@@ -2,7 +2,7 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-import { buildLabelsHtml, type LabelInput } from '@/lib/labels';
+import { buildLabelsHtml, type LabelInput } from '@/lib/qr/labels';
 
 /**
  * Render the label sheet to a PDF file and hand it to the iOS share sheet.

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { ApiError, createApi } from './apiClient';
+import { ApiError, createApi } from '@/lib/api/client';
 
 type Call = { url: string; init: RequestInit };
 

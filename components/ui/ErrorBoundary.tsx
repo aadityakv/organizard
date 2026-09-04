@@ -5,8 +5,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SlothMark } from '@/components/SlothMark';
-import { Button } from '@/components/Button';
+import { SlothMark } from '@/components/brand/SlothMark';
+import { Button } from '@/components/ui/Button';
 import { colors, type } from '@/theme';
 
 /**

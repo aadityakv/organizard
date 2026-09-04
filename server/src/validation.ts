@@ -140,8 +140,8 @@ export const mutationsBodySchema = z.object({ mutations: z.array(mutationSchema)
 // ---- request bodies ----
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const PASSWORD_MIN = 8;
-export const PASSWORD_MAX = 200;
+const PASSWORD_MIN = 8;
+const PASSWORD_MAX = 200;
 
 const email = z.string().trim().toLowerCase().max(254).regex(EMAIL_RE);
 

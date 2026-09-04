@@ -5,8 +5,8 @@
 import * as FileSystem from 'expo-file-system/legacy';
 
 import { api } from '@/lib/api';
-import { API_URL } from '@/lib/config';
-import { isLocalRef } from '@/lib/photoRef';
+import { API_URL } from '@/lib/api/config';
+import { isLocalRef } from '@/lib/photos/refs';
 import { photoSource } from '@/lib/photos';
 import { useStore } from '@/store/useStore';
 import { MOVE_MODE } from '@/store/library';

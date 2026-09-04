@@ -4,7 +4,7 @@
 // add-item marker section.
 import { Pressable, View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, boxTint, colors, radius, fonts, fontSize, alpha, palette } from '@/theme';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type MarkerChipProps = {
   label: string;

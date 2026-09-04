@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildLabelsHtml } from './labels';
+import { buildLabelsHtml } from '@/lib/qr/labels';
 
 describe('buildLabelsHtml', () => {
   it('renders one label cell per box with an inline SVG QR code', () => {

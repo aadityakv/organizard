@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
-import { Button } from './Button';
-import { Card } from './Card';
-import { Input } from './Input';
-import { Segmented } from './Segmented';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Segmented } from '@/components/ui/Segmented';
 import { ApiError } from '@/lib/api';
 import { appleSignInAvailable, loginWithEmail, registerWithEmail, signInWithApple } from '@/services/auth';
 import { fonts, palette } from '@/theme';

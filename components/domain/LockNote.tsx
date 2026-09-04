@@ -4,7 +4,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { fonts, palette, radius } from '@/theme';
-import { Icon } from './Icon';
+import { Icon } from '@/components/ui/Icon';
 
 /** Plain-language note shown in place of an action the current role cannot perform. */
 export function LockNote({ children }: { children: React.ReactNode }) {

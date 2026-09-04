@@ -6,7 +6,7 @@ import { StyleSheet, View, Text, type StyleProp, type ViewStyle } from 'react-na
 import { colors, palette, radius, space, fonts, fontSize } from '@/theme';
 import { ROLE_LABEL, ROLE_BLURB, ROLE_ICON } from '@/lib/permissions';
 import type { Role } from '@/data/types';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type RoleBadgeProps = {
   role: Role;

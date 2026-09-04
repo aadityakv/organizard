@@ -3,7 +3,7 @@
 import { Image, StyleSheet, View } from 'react-native';
 
 import { boxColor, boxTint, radius as radii, DEFAULT_HUE } from '@/theme';
-import { Icon } from './Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type ThumbProps = {
   color?: string;

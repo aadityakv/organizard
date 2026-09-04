@@ -2,7 +2,7 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 import { colors, fonts, fontSize, space } from '@/theme';
-import { Icon } from '@/components/Icon';
+import { Icon } from '@/components/ui/Icon';
 
 export type ValueStatProps = {
   /** The big number/string displayed prominently, e.g. "$4,210" or 18. */
