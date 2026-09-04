@@ -101,7 +101,7 @@ export default function PrintLabels() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.blurb}>{copy.intro}</Text>
+          <Text style={styles.blurb}>{copy.introBody}</Text>
           {boxes.map((b) => (
             <BoxRow
               key={b.id}

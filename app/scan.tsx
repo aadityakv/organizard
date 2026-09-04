@@ -84,7 +84,7 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
           <SlothMark size={56} />
         </View>
         <Text style={styles.permTitle}>{copy.permissionTitle}</Text>
-        <Text style={styles.permBody}>{copy.tuckNeedsYourCameraSo}</Text>
+        <Text style={styles.permBody}>{copy.permissionBody}</Text>
         {denied ? (
           <Button
             variant="primary"

@@ -25,7 +25,7 @@ export default function Welcome() {
           <SlothMark size={104} />
         </View>
         <Text style={styles.wordmark}>{copy.appName}</Text>
-        <Text style={styles.tagline}>{copy.tagline}</Text>
+        <Text style={styles.tagline}>{copy.taglineText}</Text>
       </View>
 
       <View style={styles.actions}>

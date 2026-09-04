@@ -75,7 +75,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
           ) : permissionDenied ? (
             <>
               <Text style={styles.permTitle}>{copy.cameraDeniedTitle}</Text>
-              <Text style={styles.permBody}>{copy.turnItOnInSettings}</Text>
+              <Text style={styles.permBody}>{copy.cameraDeniedBody}</Text>
               <Button
                 variant="secondary"
                 size="md"
@@ -89,7 +89,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
           ) : (
             <>
               <Text style={styles.permTitle}>{copy.cameraPromptTitle}</Text>
-              <Text style={styles.permBody}>{copy.aQuickPictureMakesItems}</Text>
+              <Text style={styles.permBody}>{copy.cameraPromptBody}</Text>
               <Button
                 variant="secondary"
                 size="md"

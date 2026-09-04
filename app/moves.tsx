@@ -114,7 +114,7 @@ export default function Moves() {
             <Text style={styles.wordmark}>
               <Text style={styles.wordmarkInk}>{copy.appName}</Text>
             </Text>
-            <Text style={styles.tagline}>{copy.tagline}</Text>
+            <Text style={styles.tagline}>{copy.taglineText}</Text>
           </View>
           <View style={styles.emptyActions}>
             <Button size="lg" fullWidth iconLeft="plus" onPress={() => router.push(routes.newMove)}>

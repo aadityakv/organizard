@@ -31,7 +31,7 @@ export function StreamUpsell({
           <Icon name="zap" size={28} color={palette.green700} />
         </View>
         <Text style={styles.title}>{copy.upsellTitle}</Text>
-        <Text style={styles.sub}>{copy.snapOrSpeakItemAfter}</Text>
+        <Text style={styles.sub}>{copy.upsellBody}</Text>
       </View>
       <View style={styles.perks}>
         {PERKS.map((p) => (

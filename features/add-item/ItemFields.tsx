@@ -56,7 +56,7 @@ export function ItemFields({
           style={styles.valueField}
         />
         <View style={styles.qtyField}>
-          <Text style={styles.qtyLabel}>{copy.quantity}</Text>
+          <Text style={styles.qtyLabel}>{copy.quantityLabel}</Text>
           <View style={styles.qtyBox}>
             <Stepper value={qty} onChange={onQty} inputAccessoryViewID={KBD_ACCESSORY} />
           </View>

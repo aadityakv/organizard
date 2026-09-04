@@ -17,7 +17,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
   const session = useStore((s) => s.session);
 
   const onDeleteAccount = () =>
-    Alert.alert(copy.deleteAccountConfirmTitle, copy.thisPermanentlyDeletesYourAccount, [
+    Alert.alert(copy.deleteAccountConfirmTitle, copy.deleteAccountConfirmBody, [
       { text: copy.cancelButton, style: 'cancel' },
       {
         text: copy.deleteButton,
@@ -69,7 +69,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
           </>
         ) : (
           <>
-            <Text style={styles.guestNote}>{copy.youReUsingTuckAs}</Text>
+            <Text style={styles.guestNote}>{copy.guestAccountNote}</Text>
             <Button
               fullWidth
               iconLeft="log-in"

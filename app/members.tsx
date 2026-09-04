@@ -107,7 +107,7 @@ export default function Members() {
           <>
             <Card style={styles.card}>
               <Text style={styles.h}>Share “{moveName}”</Text>
-              <Text style={styles.p}>{copy.thisUploadsTheMoveSo}</Text>
+              <Text style={styles.p}>{copy.shareUploadNote}</Text>
               <Button onPress={doShare} disabled={busy} fullWidth iconLeft="users" style={styles.cta}>
                 {busy ? 'Sharing…' : 'Share this move'}
               </Button>
