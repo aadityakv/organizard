@@ -31,11 +31,12 @@ import {
 } from '@/features/stream';
 import { money } from '@/lib/money';
 import { iconFor } from '@/lib/streamParse';
-import { uid } from '@/lib/uid';
+import { uid, ID_PREFIX } from '@/lib/uid';
 import { isProNow, useStore } from '@/store/useStore';
-import { colors, fonts, palette, DEFAULT_HUE } from '@/theme';
+import { colors, fonts, palette, DEFAULT_HUE, alpha } from '@/theme';
 import { MIC, STREAM_VIEW } from '@/features/stream/types';
 import { routes } from '@/lib/routes';
+import { countOf } from '@/lib/text';
 
 /** Capture screen: free single-item capture and the Pro streaming session, flipped in place. */
 export default function StreamSession() {
@@ -82,7 +83,7 @@ export default function StreamSession() {
         session.setLastId(target);
       } else {
         session.addOne({
-          id: uid('s'),
+          id: uid(ID_PREFIX.streamItem),
           name: p.name || 'Untitled item',
           qty: p.qty,
           value: p.value,
@@ -96,7 +97,7 @@ export default function StreamSession() {
     onList: (parsed) => {
       session.addBatch(
         parsed.map((p) => ({
-          id: uid('v'),
+          id: uid(ID_PREFIX.voiceItem),
           name: p.name,
           qty: p.qty,
           value: p.value,
@@ -120,7 +121,7 @@ export default function StreamSession() {
   const lastIt = session.lastIt;
   const colorOf = (id: string) => boxes.find((b) => b.id === id)?.color ?? box?.color ?? DEFAULT_HUE;
   const resayActive = voiceMode ? session.lastBatchIds.length > 0 : !!session.lastId;
-  const summaryLabel = `${session.session.length} ${session.session.length === 1 ? 'item' : 'items'} tucked into ${session.boxCount} ${session.boxCount === 1 ? 'box' : 'boxes'} — ${money(session.sessionValue)} packed.`;
+  const summaryLabel = `${countOf(session.session.length, 'item')} tucked into ${session.boxCount} ${session.boxCount === 1 ? 'box' : 'boxes'} — ${money(session.sessionValue)} packed.`;
 
   const onCapture = () => {
     if (dictation.mic === MIC.listening) {
@@ -338,21 +339,21 @@ function SlothGlyph() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#161817' },
+  root: { flex: 1, backgroundColor: palette.cameraBg },
   camScrim: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(20,22,21,0.32)',
+    backgroundColor: alpha(palette.cameraInk, 0.32),
   },
   safe: { flex: 1 },
-  flashOverlay: { position: 'absolute', inset: 0, backgroundColor: '#fff', opacity: 0.85 },
+  flashOverlay: { position: 'absolute', inset: 0, backgroundColor: palette.white, opacity: 0.85 },
   summaryScrim: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(42,39,34,0.55)',
+    backgroundColor: alpha(palette.ink900, 0.55),
     alignItems: 'center',
     justifyContent: 'center',
     padding: 28,

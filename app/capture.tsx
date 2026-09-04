@@ -41,7 +41,7 @@ export default function Capture() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: palette.cream100 },
-  hold: { flex: 1, backgroundColor: '#161817' },
+  hold: { flex: 1, backgroundColor: palette.cameraBg },
   topBar: { flexDirection: 'row', paddingHorizontal: 8, paddingTop: 4 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 40 },
   emptyText: {

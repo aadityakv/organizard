@@ -1,6 +1,12 @@
 // Organizard — design tokens (translated from the design-system CSS)
 // Warm cream base, fresh green primary, vivid 12-hue box palette.
 
+/** A palette color with an alpha channel, as an rgba() string. */
+export const alpha = (hex: string, a: number): string => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+};
+
 /** Raw palette — warm neutrals, brand green, accents, danger. */
 export const palette = {
   cream50: '#FCFBF8',
@@ -16,6 +22,14 @@ export const palette = {
   ink400: '#918B7C',
 
   white: '#FFFFFF',
+  black: '#000000',
+
+  // Camera and photo surfaces (the only dark chrome in the app)
+  cameraBg: '#161817',
+  cameraCard: '#1B1D1C',
+  cameraViewfinder: '#111312',
+  cameraInk: '#141615',
+  cameraDim: '#0D0F0E',
 
   green50: '#EAF6EF',
   green100: '#CFEBDB',

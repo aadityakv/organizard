@@ -5,7 +5,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 
 import { Button, Icon } from '@/components';
-import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
+import { colors, fonts, fontSize, palette, radius, shadow, space, alpha } from '@/theme';
 
 import { CAMERA_CARD_H } from './constants';
 import type { Capture } from './useCapture';
@@ -127,10 +127,10 @@ const styles = StyleSheet.create({
     height: CAMERA_CARD_H,
     borderRadius: radius.lg,
     overflow: 'hidden',
-    backgroundColor: '#1B1D1C',
+    backgroundColor: palette.cameraCard,
   },
   cameraScrim: {
-    backgroundColor: 'rgba(20,22,21,0.22)',
+    backgroundColor: alpha(palette.cameraInk, 0.22),
   },
   cameraControls: {
     position: 'absolute',
@@ -148,12 +148,12 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: alpha(palette.white, 0.16),
     alignItems: 'center',
     justifyContent: 'center',
   },
   glassBtnActive: {
-    backgroundColor: 'rgba(242,162,60,0.55)',
+    backgroundColor: alpha(palette.amber400, 0.55),
   },
   glassBtnPressed: {
     opacity: 0.7,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: alpha(palette.white, 0.14),
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: space[1],
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body.semibold,
     fontSize: fontSize.sm,
     lineHeight: 19,
-    color: 'rgba(255,255,255,0.72)',
+    color: alpha(palette.white, 0.72),
     textAlign: 'center',
   },
   permBtn: {
@@ -222,6 +222,6 @@ const styles = StyleSheet.create({
   notNowText: {
     fontFamily: fonts.body.bold,
     fontSize: fontSize.sm,
-    color: 'rgba(255,255,255,0.7)',
+    color: alpha(palette.white, 0.7),
   },
 });

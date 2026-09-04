@@ -4,7 +4,7 @@
 // add-item marker section.
 import React from 'react';
 import { Pressable, View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { boxColor, boxTint, colors, radius, fonts, fontSize } from '@/theme';
+import { boxColor, boxTint, colors, radius, fonts, fontSize, alpha, palette } from '@/theme';
 import { Icon } from '@/components/Icon';
 
 export type MarkerChipProps = {
@@ -69,7 +69,7 @@ export function MarkerChip({
               width: dotSize,
               height: dotSize,
               borderRadius: dotSize / 2,
-              backgroundColor: selected ? 'rgba(255,255,255,0.85)' : solidHue,
+              backgroundColor: selected ? alpha(palette.white, 0.85) : solidHue,
             },
           ]}
         />

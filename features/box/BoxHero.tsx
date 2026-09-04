@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { Header, Icon, IconButton, RoomGlyph, StatusChip } from '@/components';
 import type { Box, Room, Status } from '@/data/types';
 import { money } from '@/lib/money';
-import { boxColor, boxTint, fonts, palette, space, NEUTRAL_HUE } from '@/theme';
+import { boxColor, boxTint, fonts, palette, space, NEUTRAL_HUE, alpha } from '@/theme';
 
 import { shared } from './styles';
 
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.08)',
+    borderColor: alpha(palette.black, 0.08),
   },
   statusTap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   heroValue: {

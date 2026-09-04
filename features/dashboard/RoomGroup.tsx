@@ -9,6 +9,7 @@ import { fonts, fontSize, palette, radius } from '@/theme';
 
 import { DashboardBoxCard } from './DashboardBoxCard';
 import { shared } from './styles';
+import { countOf } from '@/lib/text';
 
 /** One room on the dashboard: header with edit action and its box grid or empty prompt. */
 export function RoomGroup({
@@ -42,9 +43,7 @@ export function RoomGroup({
             → {room.dest}
           </Text>
         ) : null}
-        <Text style={styles.groupCount}>
-          {boxes.length} {boxes.length === 1 ? 'box' : 'boxes'}
-        </Text>
+        <Text style={styles.groupCount}>{countOf(boxes.length, 'box')}</Text>
         {canEdit ? (
           <View style={styles.groupEditIcon}>
             <Icon name="pencil" size={15} color={palette.ink400} />

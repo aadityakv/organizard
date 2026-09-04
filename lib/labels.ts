@@ -17,13 +17,9 @@ import { encodeBoxQR } from './qr';
 // Typed via types/qrcode-core.d.ts.
 import QRCodeCore from 'qrcode/lib/core/qrcode';
 import * as SvgRenderer from 'qrcode/lib/renderer/svg-tag';
+import { palette } from '@/theme/tokens';
 
-// App palette echoed as literals — the print sheet is plain HTML, so it can't
-// reach the RN theme objects. Kept in sync with theme/tokens.ts.
-const INK_900 = '#2A2722';
-const INK_500 = '#6F6A5E';
-const INK_400 = '#918B7C';
-const SAND_300 = '#E4E1D7';
+const { ink900: INK_900, ink500: INK_500, ink400: INK_400, sand300: SAND_300 } = palette;
 
 export type LabelInput = {
   /** Box id — encoded into the QR via encodeBoxQR. */

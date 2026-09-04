@@ -20,7 +20,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
 import { boxPhotos, useStore } from '@/store/useStore';
-import { fonts, fontSize, palette, radius, space, tap } from '@/theme';
+import { fonts, fontSize, palette, radius, space, tap, alpha } from '@/theme';
 import { routes } from '@/lib/routes';
 
 /** Full-screen photo viewer for a box: the cover and every item photo, swipeable. */
@@ -142,7 +142,7 @@ export default function GalleryScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#000' },
+  screen: { flex: 1, backgroundColor: palette.black },
   page: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   image: { width: '100%', height: '100%' },
 
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     width: tap.md,
     height: tap.md,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: alpha(palette.black, 0.5),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[3],
     paddingVertical: space[1],
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: alpha(palette.black, 0.5),
   },
   counterText: {
     fontFamily: fonts.body.bold,
@@ -194,9 +194,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[4],
     paddingVertical: space[2],
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: alpha(palette.black, 0.6),
   },
-  labelPillTap: { backgroundColor: 'rgba(60,150,105,0.85)' },
+  labelPillTap: { backgroundColor: alpha(palette.green600, 0.85) },
   labelText: {
     flexShrink: 1,
     fontFamily: fonts.body.bold,

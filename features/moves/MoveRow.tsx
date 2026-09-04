@@ -7,6 +7,7 @@ import { Badge, IconButton } from '@/components';
 import type { MoveSummary } from '@/store/library';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 import { MOVE_MODE } from '@/store/library';
+import { countOf } from '@/lib/text';
 
 /** One move in the library list with its summary and menu button. */
 export function MoveRow({
@@ -43,8 +44,7 @@ export function MoveRow({
           ) : null}
           {move.target ? <Text style={styles.rowTarget}>Target · {move.target}</Text> : null}
           <Text style={styles.rowMeta}>
-            {move.boxCount} {move.boxCount === 1 ? 'box' : 'boxes'} · {move.itemCount}{' '}
-            {move.itemCount === 1 ? 'item' : 'items'}
+            {countOf(move.boxCount, 'box')} · {countOf(move.itemCount, 'item')}
           </Text>
         </View>
       </Pressable>

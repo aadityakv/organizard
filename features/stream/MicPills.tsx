@@ -3,7 +3,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
-import { colors, fonts, palette } from '@/theme';
+import { colors, fonts, palette, alpha } from '@/theme';
 
 import type { Mic, SItem } from './types';
 import { MIC } from './types';
@@ -69,8 +69,8 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
   },
   wave: { flexDirection: 'row', alignItems: 'center', gap: 2.5, height: 16 },
-  waveBar: { width: 3, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.95)' },
-  pillListenText: { color: '#fff', fontFamily: fonts.body.bold, fontSize: 14, flexShrink: 1 },
+  waveBar: { width: 3, borderRadius: 999, backgroundColor: alpha(palette.white, 0.95) },
+  pillListenText: { color: palette.white, fontFamily: fonts.body.bold, fontSize: 14, flexShrink: 1 },
   pillGot: {
     flexDirection: 'row',
     alignItems: 'center',

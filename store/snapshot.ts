@@ -12,10 +12,6 @@ import {
   toClientStatus,
 } from './mappers';
 
-/** A photo reference that still points at a file on this device (not yet uploaded). */
-export const isLocalUri = (p: string): boolean =>
-  p.startsWith('file://') || p.startsWith('content://') || p.startsWith('/');
-
 /** Move details from a server snapshot. */
 export function moveFromSnapshot(snap: ServerSnapshot): Move {
   return {

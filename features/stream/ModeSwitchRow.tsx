@@ -3,7 +3,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
-import { colors, fonts } from '@/theme';
+import { colors, fonts, alpha, palette } from '@/theme';
 
 type Props = {
   voiceMode: boolean;
@@ -28,11 +28,11 @@ export function ModeSwitchRow({ voiceMode, listening, onBackToCapture, onToggleV
         <Icon
           name={voiceMode ? 'camera-off' : 'camera'}
           size={17}
-          color={voiceMode ? 'rgba(255,255,255,0.55)' : '#fff'}
+          color={voiceMode ? alpha(palette.white, 0.55) : palette.white}
         />
         <Text style={styles.switchLabel}>{voiceMode ? 'Photos off' : 'Photos on'}</Text>
         <View
-          style={[styles.track, { backgroundColor: voiceMode ? 'rgba(255,255,255,0.25)' : colors.brand }]}
+          style={[styles.track, { backgroundColor: voiceMode ? alpha(palette.white, 0.25) : colors.brand }]}
         >
           <View style={[styles.knob, { left: voiceMode ? 3 : 19 }]} />
         </View>
@@ -57,20 +57,27 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 14,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: alpha(palette.white, 0.14),
   },
-  backPillText: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 13 },
+  backPillText: { color: palette.white, fontFamily: fonts.body.extra, fontSize: 13 },
   switchBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: alpha(palette.white, 0.14),
     borderRadius: 999,
     paddingVertical: 8,
     paddingLeft: 15,
     paddingRight: 10,
   },
-  switchLabel: { color: '#fff', fontFamily: fonts.body.extra, fontSize: 13 },
+  switchLabel: { color: palette.white, fontFamily: fonts.body.extra, fontSize: 13 },
   track: { width: 40, height: 24, borderRadius: 999, justifyContent: 'center' },
-  knob: { position: 'absolute', top: 3, width: 18, height: 18, borderRadius: 9, backgroundColor: '#fff' },
+  knob: {
+    position: 'absolute',
+    top: 3,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: palette.white,
+  },
 });

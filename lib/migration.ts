@@ -4,14 +4,14 @@
 // server move, holding sync) lives in services/share.ts.
 import type { Mutation } from '@/shared';
 
-import { uid } from '@/lib/uid';
+import { uid, ID_PREFIX } from '@/lib/uid';
 import type { SliceData } from '@/store/library';
 
 /** Mutations that recreate a move on the server, ordered so every reference exists before it is used. */
 export function buildMigrationBatch(data: SliceData): Mutation[] {
   const out: Mutation[] = [];
   const ts = Date.now();
-  const cid = () => uid('mig');
+  const cid = () => uid(ID_PREFIX.migration);
 
   for (const st of data.statuses)
     out.push({

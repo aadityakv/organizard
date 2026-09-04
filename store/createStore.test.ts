@@ -155,6 +155,16 @@ describe('inventory actions', () => {
     });
   });
 
+  it("treats a persisted 'local:' capture like any other not-yet-uploaded photo", () => {
+    const store = sharedStore();
+    store.getState().setBoxCover('b1', 'local:photos/abc.jpg');
+    expect(store.getState().outbox).toEqual([]);
+
+    store.getState().swapItemPhoto('b1', 'i1', 'ph_1', 'local:photos/new.jpg');
+    store.getState().applyChanges(changes({ items: [wireItem({ photoIds: ['ph_1'], updatedAt: 450 })] }));
+    expect(store.getState().itemsByBox.b1[0].photos).toEqual(['ph_1', 'local:photos/new.jpg']);
+  });
+
   it('toggling a marker sends the desired end state', () => {
     const store = sharedStore();
     store.getState().toggleBoxMarker('b1', 'mk_fragile');

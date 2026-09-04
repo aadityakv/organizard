@@ -7,7 +7,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
-import { colors, fonts, palette, radius, shadow } from '@/theme';
+import { colors, fonts, palette, radius, shadow, alpha } from '@/theme';
 
 /** One captured photo in the strip, with cover badge and remove button. */
 export function PhotoThumb({
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(20,22,21,0.62)',
+    backgroundColor: alpha(palette.cameraInk, 0.62),
   },
   coverBadgeText: {
     fontFamily: fonts.body.extra,

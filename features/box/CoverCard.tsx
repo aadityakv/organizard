@@ -5,7 +5,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '@/components';
 import type { Box } from '@/data/types';
 import { photoSource } from '@/lib/photos';
-import { boxColor, boxTint, fonts, palette, radius } from '@/theme';
+import { boxColor, boxTint, fonts, palette, radius, alpha } from '@/theme';
 
 import { shared } from './styles';
 
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.88)',
+    backgroundColor: alpha(palette.white, 0.88),
     alignItems: 'center',
     justifyContent: 'center',
   },

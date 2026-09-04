@@ -1,7 +1,7 @@
 // Styles used by more than one piece of the stream screen.
 import { StyleSheet } from 'react-native';
 
-import { colors, fonts, palette } from '@/theme';
+import { colors, fonts, palette, alpha } from '@/theme';
 
 export const sharedStyles = StyleSheet.create({
   /** The big round capture button (capture view and stream bottom bar). */
@@ -10,7 +10,7 @@ export const sharedStyles = StyleSheet.create({
     height: 76,
     borderRadius: 38,
     borderWidth: 5,
-    borderColor: 'rgba(255,255,255,0.85)',
+    borderColor: alpha(palette.white, 0.85),
     backgroundColor: colors.brand,
     alignItems: 'center',
     justifyContent: 'center',

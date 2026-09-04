@@ -12,9 +12,12 @@ import {
   shadow,
   space,
   type as typeTokens,
+  alpha,
+  palette,
 } from '@/theme';
 import { money } from '@/lib/money';
 import { StatusChip } from '@/components/StatusChip';
+import { countOf } from '@/lib/text';
 
 export type BoxCardProps = {
   name: string;
@@ -157,9 +160,7 @@ export function BoxCard({
           ) : null}
 
           <View style={styles.statsRow}>
-            <Text style={styles.count}>
-              {itemCount} {itemCount === 1 ? 'item' : 'items'}
-            </Text>
+            <Text style={styles.count}>{countOf(itemCount, 'item')}</Text>
             <Text style={styles.value}>{money(value)}</Text>
           </View>
 
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
 
   bandScrim: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    backgroundColor: alpha(palette.black, 0.22),
   },
 
   numberBadge: {
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
   },
 
   numberBadgeDark: {
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: alpha(palette.black, 0.35),
     paddingHorizontal: 8,
     paddingVertical: 2,
   },

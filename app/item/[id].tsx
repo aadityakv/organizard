@@ -17,6 +17,7 @@ import {
   radius,
   shadow,
   type as typeTokens,
+  alpha,
 } from '@/theme';
 import { money } from '@/lib/money';
 import { photoSource } from '@/lib/photos';
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.08)',
+    borderColor: alpha(palette.black, 0.08),
   },
   heroQty: { fontFamily: fonts.body.bold, fontSize: 14, color: palette.ink500 },
   heroValue: {
