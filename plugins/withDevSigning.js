@@ -1,8 +1,8 @@
-// Debug builds for a physical device sign with the explicit "Organizard Development"
-// profile. Xcode's automatic signing falls back to the team wildcard profile, which
-// cannot carry the Sign in with Apple entitlement, so `expo run:ios --device` fails
-// without this. Release stays automatic (EAS local builds bring their own credentials)
-// and simulator builds ignore provisioning entirely.
+// Device builds made with `expo run:ios --device` (Debug or Release) sign with the
+// explicit "Organizard Development" profile. Xcode's automatic signing falls back to
+// the team wildcard profile, which cannot carry the Sign in with Apple entitlement.
+// EAS/TestFlight builds override these settings with the distribution credentials in
+// credentials.json, and simulator builds ignore provisioning entirely.
 const { withXcodeProject } = require('@expo/config-plugins');
 
 const PROFILE = 'Organizard Development';
@@ -13,7 +13,7 @@ module.exports = function withDevSigning(config) {
     const project = cfg.modResults;
     const configs = project.pbxXCBuildConfigurationSection();
     for (const [, entry] of Object.entries(configs)) {
-      if (!entry || typeof entry !== 'object' || entry.name !== 'Debug') continue;
+      if (!entry || typeof entry !== 'object' || !entry.buildSettings) continue;
       const s = entry.buildSettings;
       if (!s || s.PRODUCT_BUNDLE_IDENTIFIER !== 'com.organizard.app') continue;
       s.CODE_SIGN_STYLE = 'Manual';
