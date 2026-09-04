@@ -16,7 +16,7 @@ export function authMiddleware(deps: Deps) {
     const token = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
     if (!token) return c.json({ error: 'UNAUTHENTICATED' }, 401);
 
-    const userId = await getSessionUserId(c.env, token);
+    const userId = await getSessionUserId(c.env, token, deps.now());
     if (!userId) return c.json({ error: 'UNAUTHENTICATED' }, 401);
 
     const user = await getUserById(deps.getDb(c.env), userId);

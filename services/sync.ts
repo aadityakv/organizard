@@ -14,20 +14,14 @@ const POLL_MS = 15_000;
 const MAX_BACKOFF_MS = 60_000;
 const FLUSH_CHUNK = 200; // well under the server's 500/batch cap
 let syncing = false;
-let migrating = false; // share-upgrade in progress: hold sync so it can't flush before the migration batch
 let pendingFull = false; // a full-resync was requested; consumed at the start of the next pass
 let failures = 0;
 let nextAllowedAt = 0;
 
-/** Pause/resume sync around the local→shared migration (so edits aren't flushed before their entities exist). */
-export const setMigrating = (v: boolean): void => {
-  migrating = v;
-};
-
 /** One sync pass: flush pending mutations (in order), then merge the delta. */
 export async function syncActiveMove(): Promise<void> {
   const st = useStore.getState();
-  if (st.activeMode !== MOVE_MODE.shared || !st.serverMoveId || !st.session || syncing || migrating) return;
+  if (st.activeMode !== MOVE_MODE.shared || !st.serverMoveId || !st.session || syncing) return;
   if (Date.now() < nextAllowedAt) return; // backing off after repeated failures
 
   syncing = true;
@@ -67,7 +61,9 @@ export async function syncActiveMove(): Promise<void> {
     nextAllowedAt = 0;
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) {
-      useStore.getState().signOut(); // session gone — stop syncing
+      // The token is dead, the data is not: keep the moves (and their outboxes) so the
+      // next sign-in flushes what was captured offline.
+      useStore.getState().expireSession();
       void clearSession();
     } else {
       // Transient/network: keep the outbox and back off exponentially (with jitter).

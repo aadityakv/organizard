@@ -3,6 +3,8 @@
 import type { Env } from '../types';
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 60; // 60 days
+/** A session used at least this long after it was (re)issued gets a fresh 60-day window. */
+const REFRESH_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
 
 const sessKey = (token: string) => `session:${token}`;
 // Per-user index so all of a user's sessions can be revoked at once.
@@ -16,15 +18,27 @@ export async function createSession(env: Env, token: string, userId: string, now
   await env.SESSIONS.put(indexKey(userId, token), '1', { expirationTtl: SESSION_TTL_SECONDS });
 }
 
-/** Resolve a session token to its user id, or null. */
-export async function getSessionUserId(env: Env, token: string): Promise<string | null> {
+/**
+ * Resolve a session token to its user id, or null. Sessions slide: one that has been
+ * in use for over a week since issue is re-issued with a fresh TTL, so an active
+ * device is never signed out for age alone.
+ */
+export async function getSessionUserId(
+  env: Env,
+  token: string,
+  now: number = Date.now(),
+): Promise<string | null> {
   const raw = await env.SESSIONS.get(sessKey(token));
   if (!raw) return null;
+  let parsed: { userId?: string; createdAt?: number };
   try {
-    return (JSON.parse(raw) as { userId: string }).userId ?? null;
+    parsed = JSON.parse(raw) as { userId?: string; createdAt?: number };
   } catch {
     return null;
   }
+  if (!parsed.userId) return null;
+  if (now - (parsed.createdAt ?? 0) > REFRESH_AFTER_MS) await createSession(env, token, parsed.userId, now);
+  return parsed.userId;
 }
 
 /** Revoke one session token. */

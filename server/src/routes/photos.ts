@@ -6,13 +6,15 @@ import type { Deps } from '../deps';
 import { billingEnabled } from '../lib/flags';
 import { authMiddleware, type AuthVars } from '../middleware/auth';
 import { getMembership } from '../repos/moves';
-import { getPhoto } from '../repos/photos';
+import { getPhoto, markPhotoUploaded } from '../repos/photos';
 import { isOwnerEntitled } from '../repos/sharing';
 import type { Env } from '../types';
 import { ROLES } from '@shared/index';
 
 // Blob upload/download for photos. Membership is checked via the photo's move
 // (these routes aren't under /moves/:id, so membershipMiddleware doesn't apply).
+const MAX_PHOTO_BYTES = 15 * 1024 * 1024;
+
 export function photoBlobRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: AuthVars }>();
   r.use('*', authMiddleware(deps));
@@ -27,10 +29,14 @@ export function photoBlobRoutes(deps: Deps) {
     if (billingEnabled(c.env) && !(await isOwnerEntitled(db, photo.moveId, deps.now())))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
 
+    const declared = Number(c.req.header('content-length') ?? '0');
+    if (declared > MAX_PHOTO_BYTES) return c.json({ error: 'TOO_LARGE' }, 413);
     const body = await c.req.arrayBuffer();
+    if (body.byteLength > MAX_PHOTO_BYTES) return c.json({ error: 'TOO_LARGE' }, 413);
     await c.env.PHOTOS.put(photo.r2Key, body, {
       httpMetadata: { contentType: c.req.header('content-type') ?? 'image/jpeg' },
     });
+    await markPhotoUploaded(db, photo, deps.now());
     return c.json({ ok: true });
   });
 
@@ -44,8 +50,7 @@ export function photoBlobRoutes(deps: Deps) {
 
     const obj = await c.env.PHOTOS.get(photo.r2Key);
     if (!obj) return c.json({ error: 'NOT_FOUND' }, 404);
-    const buf = await obj.arrayBuffer();
-    return new Response(buf, {
+    return new Response(obj.body, {
       headers: {
         'content-type': obj.httpMetadata?.contentType ?? 'image/jpeg',
         'cache-control': 'private, max-age=86400',

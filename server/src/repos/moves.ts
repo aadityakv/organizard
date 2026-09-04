@@ -206,7 +206,12 @@ async function itemMarkerMap(db: AppDb, itemIds: string[]): Promise<Map<string, 
 async function itemPhotoMap(db: AppDb, itemIds: string[]): Promise<Map<string, string[]>> {
   if (!itemIds.length) return new Map();
   const rows = await db.select().from(s.photos).where(inArray(s.photos.itemId, itemIds));
-  return groupJoin(rows.filter((r) => r.itemId).map((r) => ({ left: r.itemId as string, right: r.id })));
+  // A reserved-but-never-uploaded photo would render as a broken image; leave it out.
+  return groupJoin(
+    rows
+      .filter((r) => r.itemId && r.uploadedAt != null)
+      .map((r) => ({ left: r.itemId as string, right: r.id })),
+  );
 }
 
 /** Everything a client needs to open a move, or null if it does not exist. */

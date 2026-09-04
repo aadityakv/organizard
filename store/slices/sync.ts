@@ -47,6 +47,8 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
       return { ...base, currentMoveId: null, ...emptyLiveSlice(now) };
     }),
 
+  expireSession: () => set({ session: null }),
+
   enqueue: (m) => set((s) => (s.activeMode === MOVE_MODE.shared ? { outbox: [...s.outbox, m] } : {})),
   clearOutbox: (clientIds) =>
     set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),

@@ -27,18 +27,22 @@ export async function createPhotoRecord(
     createdBy: args.createdBy,
     createdAt: now,
   });
-  if (args.itemId)
+  return { photoId: id, r2Key };
+}
+
+/** Record that the bytes are in R2 and bump the linked row so the next delta carries the photo. */
+export async function markPhotoUploaded(db: AppDb, photo: PhotoRow, now: number): Promise<void> {
+  await db.update(s.photos).set({ uploadedAt: now }).where(eq(s.photos.id, photo.id));
+  if (photo.itemId)
     await db
       .update(s.items)
       .set({ updatedAt: now })
-      .where(and(eq(s.items.id, args.itemId), eq(s.items.moveId, args.moveId)));
-  if (args.boxId)
+      .where(and(eq(s.items.id, photo.itemId), eq(s.items.moveId, photo.moveId)));
+  if (photo.boxId)
     await db
       .update(s.boxes)
       .set({ updatedAt: now })
-      .where(and(eq(s.boxes.id, args.boxId), eq(s.boxes.moveId, args.moveId)));
-
-  return { photoId: id, r2Key };
+      .where(and(eq(s.boxes.id, photo.boxId), eq(s.boxes.moveId, photo.moveId)));
 }
 
 /** Photo row by id. */

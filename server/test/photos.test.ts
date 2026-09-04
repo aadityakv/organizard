@@ -52,10 +52,14 @@ describe('photos', () => {
     };
     expect(created.photoId).toBeTruthy();
 
-    const snap = (await (await h.request(`/v1/moves/${moveId}`, auth(session))).json()) as {
-      items: { id: string; photoIds: string[] }[];
-    };
-    expect(snap.items.find((it) => it.id === 'item1')?.photoIds).toEqual([created.photoId]);
+    const snapshotItems = async () =>
+      (
+        (await (await h.request(`/v1/moves/${moveId}`, auth(session))).json()) as {
+          items: { id: string; photoIds: string[] }[];
+        }
+      ).items;
+    // Reserved but not uploaded: clients must not see it yet (it would render as a broken image).
+    expect((await snapshotItems()).find((it) => it.id === 'item1')?.photoIds).toEqual([]);
 
     const put = await h.request(created.uploadPath, {
       method: 'PUT',
@@ -63,6 +67,7 @@ describe('photos', () => {
       headers: { 'content-type': 'image/jpeg', ...auth(session).headers },
     });
     expect(put.status).toBe(200);
+    expect((await snapshotItems()).find((it) => it.id === 'item1')?.photoIds).toEqual([created.photoId]);
 
     const get = await h.request(`/v1/photos/${created.photoId}`, auth(session));
     expect(get.status).toBe(200);
@@ -84,5 +89,24 @@ describe('photos', () => {
     ).json()) as { photoId: string };
     const stranger = await h.login('stranger', 's@x.com');
     expect((await h.request(`/v1/photos/${created.photoId}`, auth(stranger.session))).status).toBe(404);
+  });
+
+  it('refuses an upload larger than the photo cap', async () => {
+    const h = await makeHarness();
+    const { session } = await h.login('owner', 'o@x.com');
+    const moveId = await moveWithItem(h, session);
+    const created = (await (
+      await h.json(`/v1/moves/${moveId}/photos`, { itemId: 'item1' }, auth(session))
+    ).json()) as { uploadPath: string };
+    const res = await h.request(created.uploadPath, {
+      method: 'PUT',
+      body: 'x',
+      headers: {
+        'content-type': 'image/jpeg',
+        'content-length': String(20 * 1024 * 1024),
+        ...auth(session).headers,
+      },
+    });
+    expect(res.status).toBe(413);
   });
 });

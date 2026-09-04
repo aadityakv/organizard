@@ -155,6 +155,8 @@ export const photos = sqliteTable('photos', {
   itemId: text('item_id'),
   boxId: text('box_id'),
   r2Key: text('r2_key').notNull(),
+  /** Set when the bytes landed in R2; a photo is only surfaced to clients after this. */
+  uploadedAt: integer('uploaded_at'),
   width: integer('width'),
   height: integer('height'),
   createdBy: text('created_by')

@@ -259,6 +259,17 @@ describe('session', () => {
   });
 });
 
+describe('expireSession', () => {
+  it('forgets the token but keeps synced moves and their pending edits', () => {
+    const store = sharedStore();
+    store.getState().addBox({ name: 'Offline box', color: 'amber', roomId: 'r1' });
+    store.getState().expireSession();
+    expect(store.getState().session).toBeNull();
+    expect(Object.keys(store.getState().library)).toHaveLength(1);
+    expect(store.getState().outbox).toHaveLength(1);
+  });
+});
+
 describe('signOut', () => {
   it('drops synced moves, keeps local ones, and returns to the guest state', () => {
     const store = createAppStore(memoryStorage());

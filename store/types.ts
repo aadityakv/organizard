@@ -93,6 +93,8 @@ export type SyncActions = {
    * caller clears the keychain token.
    */
   signOut: () => void;
+  /** The server no longer accepts the token: forget it but keep every move so a re-login can flush pending edits. */
+  expireSession: () => void;
   enqueue: (m: Mutation) => void;
   clearOutbox: (clientIds: string[]) => void;
   applySnapshot: (snap: ServerSnapshot) => void;

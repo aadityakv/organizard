@@ -3,7 +3,7 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 
 import { api } from '@/lib/api';
-import { saveSession } from '@/lib/session';
+import { clearSession, saveSession } from '@/lib/session';
 import { syncLocalMovesUp } from '@/services/share';
 import { pullServerMoves } from '@/services/sync';
 import { useStore } from '@/store/useStore';
@@ -54,6 +54,7 @@ export async function deleteAccount(): Promise<void> {
   const { session, signOut } = useStore.getState();
   if (session) await api.deleteAccount(session);
   signOut();
+  await clearSession();
 }
 
 /** Legacy magic-link verify — still handled if an old link is opened. */

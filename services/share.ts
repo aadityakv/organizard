@@ -5,7 +5,7 @@ import type { Role } from '@/shared';
 import { api } from '@/lib/api';
 import { buildMigrationBatch } from '@/lib/migration';
 import { clearSession } from '@/lib/session';
-import { setMigrating, syncActiveMove } from '@/services/sync';
+import { syncActiveMove } from '@/services/sync';
 import { extractSlice } from '@/store/shape';
 import { useStore } from '@/store/useStore';
 import { MOVE_MODE } from '@/store/library';
@@ -25,17 +25,13 @@ export async function shareMove(): Promise<{ moveId: string }> {
   });
   const serverMoveId = snap.move.id;
 
-  // Hold sync during the migration so concurrent edits can't flush before the batch
-  // creates their rooms/boxes. Flip to shared FIRST so those edits enqueue (not no-op'd).
-  setMigrating(true);
-  try {
-    useStore.getState().goShared(serverMoveId);
-    const batch = buildMigrationBatch(extractSlice(useStore.getState()));
-    if (batch.length) await api.mutations(s.session, serverMoveId, batch);
-  } finally {
-    setMigrating(false);
-  }
-  void syncActiveMove(); // flush anything captured during the migration
+  // Flip to shared, then queue the whole inventory as the first entries in the outbox.
+  // Going through the outbox (not a direct post) means a dropped connection here leaves
+  // nothing half-done: the batch is persisted and retried like any other edit, ahead of
+  // anything captured afterwards.
+  useStore.getState().goShared(serverMoveId);
+  for (const m of buildMigrationBatch(extractSlice(useStore.getState()))) useStore.getState().enqueue(m);
+  void syncActiveMove();
   return { moveId: serverMoveId };
 }
 
