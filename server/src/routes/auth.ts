@@ -28,7 +28,6 @@ const PASSWORD_MAX = 200;
 export function authRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: AuthVars }>();
 
-  // Sign in with Apple — verify the identity token, find-or-create the user.
   r.post('/apple', async (c) => {
     const { identityToken } = await c.req
       .json<{ identityToken?: string }>()
@@ -95,7 +94,6 @@ export function authRoutes(deps: Deps) {
     return c.json({ session, user: toPublicUser(user) });
   });
 
-  // Email + password — register a new account.
   r.post('/email/register', async (c) => {
     const { email, password } = await c.req
       .json<{ email?: string; password?: string }>()
@@ -158,7 +156,6 @@ export function authRoutes(deps: Deps) {
     return c.json({ ok: true });
   });
 
-  // Sign out — revoke the current session.
   r.post('/logout', authMiddleware(deps), async (c) => {
     const header = c.req.header('Authorization');
     const token = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
@@ -166,7 +163,6 @@ export function authRoutes(deps: Deps) {
     return c.json({ ok: true });
   });
 
-  // Sign out everywhere — revoke all of the user's sessions.
   r.post('/logout-all', authMiddleware(deps), async (c) => {
     await deleteAllSessions(c.env, c.get('user').id);
     return c.json({ ok: true });

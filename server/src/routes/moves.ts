@@ -98,7 +98,6 @@ export function moveRoutes(deps: Deps) {
     return c.json({ ok: true });
   });
 
-  // --- sharing: invites + member management (owner only) ---
   r.post('/:id/invites', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now())))
@@ -136,7 +135,6 @@ export function moveRoutes(deps: Deps) {
     return c.json({ ok: true });
   });
 
-  // --- photos: reserve a record (bytes uploaded via PUT /v1/photos/:photoId) ---
   r.post('/:id/photos', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);

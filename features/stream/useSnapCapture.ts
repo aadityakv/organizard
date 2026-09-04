@@ -39,7 +39,6 @@ export function useSnapCapture() {
     return pic?.uri ? persistCapture(pic.uri) : null;
   };
 
-  // Take a photo (best-effort) and stash it for the item the next utterance creates.
   const capturePhoto = async (seq: number) => {
     try {
       const ref = await takePicture();

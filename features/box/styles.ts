@@ -7,7 +7,6 @@ import { fonts, palette, radius } from '@/theme';
 export const shared = StyleSheet.create({
   pressed: { opacity: 0.7 },
 
-  // Section headers (route body + photo gallery)
   sectionHead: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -16,7 +15,6 @@ export const shared = StyleSheet.create({
   },
   sectionTitle: { fontFamily: fonts.display.bold, fontSize: 16, color: palette.ink900 },
 
-  // Sheet chrome
   sheetBlurb: {
     fontFamily: fonts.body.semibold,
     fontSize: 13.5,

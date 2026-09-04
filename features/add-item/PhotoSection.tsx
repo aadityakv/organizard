@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     paddingHorizontal: 5,
   },
-  // Add-photo button (ghost affordance)
   addPhotoBtn: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -13,8 +13,6 @@ import { useStore, boxById, roomById, boxStats, statusById, type Store } from '@
 import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
 import { money } from '@/lib/money';
 
-// Visual config per result state — icon, wash, copy, action label.
-
 type ResultView = {
   icon: string;
   iconWash: string;
@@ -26,8 +24,6 @@ type ResultView = {
   actionVariant: 'primary' | 'secondary';
   onAction: () => void;
 };
-
-// The result sheet that slides up over the viewfinder.
 
 function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => void }) {
   return (
@@ -66,8 +62,6 @@ function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => voi
     </View>
   );
 }
-
-// Permission request screen (camera not yet granted / denied).
 
 function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () => void }) {
   return (
@@ -208,9 +202,6 @@ export default function Scan() {
     </View>
   );
 }
-
-// Map a ScanResult to its on-screen view. Resolves the box via the
-// store for the thisMove success state.
 
 function buildView(
   result: ScanResult,

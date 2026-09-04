@@ -43,7 +43,7 @@ export function useCapture(onPhoto: (ref: string) => void) {
     try {
       const pic = await cameraRef.current.takePictureAsync({ quality: 0.6 });
       if (pic?.uri) {
-        const ref = await persistCapture(pic.uri); // copy to doc dir → stable `local:` ref
+        const ref = await persistCapture(pic.uri);
         LayoutAnimation.configureNext(FLASH_CONFIG);
         onPhoto(ref);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});

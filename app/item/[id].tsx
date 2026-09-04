@@ -144,8 +144,6 @@ export default function ItemDetail() {
           >
             {photos.map((photo, i) => {
               const src = photoSource(photo, session);
-              // Open the box-wide viewer at this photo's spot in the box gallery.
-              // Falls back to the first occurrence of this ref, else 0.
               const start = Math.max(
                 0,
                 galleryPhotos.findIndex((p) => p.kind === 'item' && p.itemId === item.id && p.ref === photo),

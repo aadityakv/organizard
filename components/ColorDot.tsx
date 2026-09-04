@@ -22,12 +22,8 @@ export type ColorDotProps = {
 export function ColorDot({ color = 'green', size = 24, selected = false, onPress, style }: ColorDotProps) {
   const solid = boxColor(color);
 
-  // Dimensions for the layered ring construction.
-  // Inner circle:  size × size
-  // White gap:     size + 4  (+2 on each side)
-  // Outer ring:    size + 8  (+2 on each side)
-  const gapSize = size + 4; // 2 pt white gap on each side
-  const ringSize = size + 8; // 2 pt colour ring on each side
+  const gapSize = size + 4;
+  const ringSize = size + 8;
 
   const dot = (
     <View style={[styles.root, style]}>
@@ -65,7 +61,6 @@ export function ColorDot({ color = 'green', size = 24, selected = false, onPress
           </View>
         </View>
       ) : (
-        // Unselected: plain circle with a subtle inset hairline
         <View
           style={{
             width: size,

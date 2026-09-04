@@ -42,7 +42,6 @@ export function Input({
 }: InputProps) {
   const [focused, setFocused] = useState(false);
 
-  // Subtle press / focus ring via a border color animation
   const [animBorder] = useState(() => new Animated.Value(0));
 
   const handleFocus = () => {
@@ -144,7 +143,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   fieldFocused: {
-    // Supplemental shadow ring for focus (green-tinted, subtle)
     shadowColor: colors.borderFocus,
     shadowOpacity: 0.18,
     shadowRadius: 5,
@@ -154,10 +152,9 @@ const styles = StyleSheet.create({
 
   prefix: {
     fontFamily: fonts.body.bold,
-    fontSize: fontSize.md, // 17 — slightly larger to match input text
+    fontSize: fontSize.md,
     color: colors.textMuted,
     flexShrink: 0,
-    // Ensure prefix is visually in-line with the text input
     lineHeight: 20,
   },
 

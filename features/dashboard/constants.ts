@@ -32,5 +32,4 @@ export const ROOM_ICONS = [
   'dumbbell',
 ];
 
-// Quick search suggestions surfaced when the search field is empty.
 export const SEARCH_SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];

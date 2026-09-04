@@ -18,7 +18,6 @@ type Props = {
 export function CaptureView({ isPro, onSwitchToStream, onCapture }: Props) {
   return (
     <>
-      {/* Switch to Stream — the Pro upsell, flips in place */}
       <View style={styles.captureSwitchWrap}>
         <Pressable onPress={onSwitchToStream} style={styles.streamPill} accessibilityLabel="Switch to Stream">
           <Icon name="zap" size={17} color={colors.brand} />

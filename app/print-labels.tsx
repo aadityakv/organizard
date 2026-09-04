@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceApp,
   },
 
-  // Top bar
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -217,7 +216,6 @@ const styles = StyleSheet.create({
     color: palette.green700,
   },
 
-  // List
   list: { flex: 1 },
   listContent: {
     paddingHorizontal: 16,
@@ -285,7 +283,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Empty
   empty: {
     flex: 1,
     alignItems: 'center',
@@ -306,7 +303,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Footer
   footer: {
     paddingHorizontal: 16,
     paddingTop: space[3],

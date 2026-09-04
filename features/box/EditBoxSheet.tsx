@@ -23,7 +23,6 @@ export function EditBoxSheet({
   onSave: (patch: { name: string; color: string; roomId: string }) => void;
   onClose: () => void;
 }) {
-  // Reflects the box's current values each time the sheet opens.
   const [{ name, color, roomId }, patch] = useSheetForm(visible, () => ({
     name: box.name,
     color: box.color,

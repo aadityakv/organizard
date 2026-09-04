@@ -18,13 +18,12 @@ export function resolvePhoto(
   opts: { documentDirectory: string | null; apiUrl: string; session: string | null },
 ): { uri: string; headers?: Record<string, string> } {
   if (photo.startsWith(LOCAL_PREFIX)) {
-    const rel = photo.slice(LOCAL_PREFIX.length); // e.g. "photos/abc.jpg"
+    const rel = photo.slice(LOCAL_PREFIX.length);
     return { uri: `${opts.documentDirectory ?? ''}${rel}` };
   }
   if (photo.startsWith('file://') || photo.startsWith('content://') || photo.startsWith('/')) {
     return { uri: photo }; // legacy absolute local path (back-compat passthrough)
   }
-  // server photo id
   return {
     uri: `${opts.apiUrl}/v1/photos/${photo}`,
     ...(opts.session ? { headers: { Authorization: `Bearer ${opts.session}` } } : {}),

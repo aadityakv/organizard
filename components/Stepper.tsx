@@ -104,13 +104,13 @@ export function Stepper({
   );
 }
 
-const BTN_SIZE = 44; // Meets 44px tap target
+const BTN_SIZE = 44;
 
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space[3], // 12px — matches design gap: 12
+    gap: space[3],
   },
   btn: {
     width: BTN_SIZE,
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   btnLabel: {
     fontFamily: fonts.display.bold,
-    fontSize: fontSize.lg, // 20 — close to design's 22px
+    fontSize: fontSize.lg,
     lineHeight: 24,
     includeFontPadding: false,
     textAlignVertical: 'center',
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 0,
     fontFamily: fonts.display.semibold,
-    fontSize: fontSize.lg, // 20
+    fontSize: fontSize.lg,
     lineHeight: 26,
     color: colors.textStrong,
     textAlign: 'center',

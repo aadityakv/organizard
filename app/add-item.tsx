@@ -126,7 +126,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // ── Top bar ──────────────────────────────────────────────────────────────--
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -173,7 +172,6 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
 
-  // ── Form ─────────────────────────────────────────────────────────────────--
   form: {
     flex: 1,
   },
@@ -182,7 +180,6 @@ const styles = StyleSheet.create({
     gap: space[3] + 2,
   },
 
-  // ── Delete item (edit mode) ─────────────────────────────────────────────────
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
