@@ -3,8 +3,9 @@
 import type { StateCreator } from 'zustand';
 
 import { uid, ID_PREFIX } from '@/lib/uid';
+import { buildShareReplayBatch } from '@/lib/shareReplay';
 
-import { newBundle, sliceFromBundle } from '../library';
+import { MOVE_MODE, newBundle, sliceFromBundle, type MoveBundle } from '../library';
 import { emptyLiveSlice, parkCurrentMove } from '../shape';
 import { bundleFromSnapshot } from '../snapshot';
 import type { LibraryActions, Store } from '../types';
@@ -12,7 +13,7 @@ import type { LibraryActions, Store } from '../types';
 export type LibrarySlice = StateCreator<Store, [['zustand/persist', unknown]], [], LibraryActions>;
 
 /** Actions that manage the library of moves. */
-export const createLibrarySlice: LibrarySlice = (set) => ({
+export const createLibrarySlice: LibrarySlice = (set, get) => ({
   createMove: ({ name, from = '', to = '', target = '' }) => {
     const id = uid(ID_PREFIX.move);
     const now = Date.now();
@@ -51,6 +52,13 @@ export const createLibrarySlice: LibrarySlice = (set) => ({
     }),
 
   addSharedMoveFromSnapshot: (serverMoveId, snap) => {
+    // Redeeming an invite for a move already on this device (e.g. a re-invite at a
+    // new role) must open the existing bundle, not add a second library entry.
+    const existingId = Object.values(get().library).find((b) => b.serverMoveId === serverMoveId)?.id;
+    if (existingId) {
+      get().switchMove(existingId);
+      return existingId;
+    }
     const id = uid(ID_PREFIX.move);
     const now = Date.now();
     set((s) => {
@@ -70,6 +78,35 @@ export const createLibrarySlice: LibrarySlice = (set) => ({
       if (Object.values(s.library).some((b) => b.serverMoveId === serverMoveId)) return {};
       const id = uid(ID_PREFIX.move);
       return { library: { ...s.library, [id]: bundleFromSnapshot(id, serverMoveId, snap, Date.now()) } };
+    }),
+
+  adoptSharedMove: (localId, serverMoveId) =>
+    set((s) => {
+      // Park the live slice first: when the twin is the open move its bundle is
+      // stale by design (the live slice is authoritative), and adoption must keep
+      // the real data.
+      const parked = parkCurrentMove(s, Date.now());
+      const b = parked[localId];
+      if (!b || b.serverMoveId) return {}; // gone, or already linked
+      // Keep the local data — the server twin may be empty/partial (that is exactly
+      // the crash window this covers) — and queue a replay of it; every replay
+      // op is idempotent server-side (adds conflict-nothing on the same row ids).
+      const adopted: MoveBundle = {
+        ...b,
+        activeMode: MOVE_MODE.shared,
+        serverMoveId,
+        lastSyncTs: 0,
+        outbox: [
+          ...b.outbox,
+          ...buildShareReplayBatch(sliceFromBundle({ ...b, activeMode: MOVE_MODE.shared, serverMoveId })),
+        ],
+      };
+      const library = { ...parked, [localId]: adopted };
+      if (s.currentMoveId === localId) {
+        // It's open right now: mirror the adopted bundle into the live slice.
+        return { library, ...sliceFromBundle(adopted) };
+      }
+      return { library };
     }),
 });
 

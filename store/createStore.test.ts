@@ -86,6 +86,7 @@ const changes = (over: Partial<ServerChanges> = {}): ServerChanges => ({
   serverTime: 500,
   cursor: 500,
   hasMore: false,
+  move: null,
   rooms: [],
   statuses: [],
   markers: [],
@@ -98,7 +99,7 @@ const changes = (over: Partial<ServerChanges> = {}): ServerChanges => ({
 /** A store with one shared move open and a session. */
 function sharedStore() {
   const store = createAppStore(memoryStorage());
-  store.getState().setSession('tok', { id: 'u1', name: 'Me', email: null });
+  store.getState().setSession('tok', { id: 'u1', name: 'Me', email: null, entitlementActive: false });
   store.getState().addSharedMoveFromSnapshot('srv1', snapshot());
   return store;
 }
@@ -211,6 +212,109 @@ describe('applyChanges', () => {
 
     expect(store.getState().itemsByBox.b1[0].photos).toEqual(['ph_1', 'ph_2', 'file:///tmp/new.jpg']);
   });
+
+  it('merges an updated item in place, keeping box order stable across pulls', () => {
+    const store = sharedStore();
+    store.getState().applyChanges(changes({ items: [wireItem({ id: 'i0', updatedAt: 440 })] }));
+    expect(store.getState().itemsByBox.b1.map((it) => it.id)).toEqual(['i1', 'i0']); // new appends
+    store
+      .getState()
+      .applyChanges(changes({ items: [wireItem({ name: 'Skillet (cleaned)', updatedAt: 460 })] }));
+    const items = store.getState().itemsByBox.b1;
+    expect(items.map((it) => it.id)).toEqual(['i1', 'i0']); // i1 re-delivered but did not jump to the end
+    expect(items[0].name).toBe('Skillet (cleaned)');
+  });
+});
+
+describe('move details down-sync', () => {
+  it('applies a renamed move row from the delta', () => {
+    const store = sharedStore();
+    store.getState().applyChanges(
+      changes({
+        move: {
+          id: 'srv1',
+          name: 'Renamed',
+          from: 'X',
+          to: 'Y',
+          targetDate: null,
+          ownerId: 'u1',
+          updatedAt: 480,
+        },
+      }),
+    );
+    expect(store.getState().move).toEqual({ name: 'Renamed', from: 'X', to: 'Y', target: '' });
+  });
+
+  it('a pending local updateMove wins and holds the cursor back', () => {
+    const store = sharedStore();
+    store.getState().updateMove({ name: 'My edit' }); // dirty
+    store.getState().applyChanges(
+      changes({
+        move: {
+          id: 'srv1',
+          name: 'Their edit',
+          from: null,
+          to: null,
+          targetDate: null,
+          ownerId: 'u1',
+          updatedAt: 480,
+        },
+      }),
+    );
+    const s = store.getState();
+    expect(s.move.name).toBe('My edit');
+    expect(s.lastSyncTs).toBe(479);
+  });
+});
+
+describe('note clearing', () => {
+  it('an explicit clear sends note: null (distinct from an untouched note)', () => {
+    const store = sharedStore();
+    store.getState().updateItem('b1', 'i1', { note: null });
+    const [m] = store.getState().outbox;
+    expect(m.type).toBe('updateItem');
+    expect(m.payload).toMatchObject({ id: 'i1', note: null });
+    expect(store.getState().itemsByBox.b1[0].note).toBeNull();
+  });
+});
+
+describe('parkServerMove', () => {
+  it('turns a dead shared move local-only and drops its outbox', () => {
+    const store = sharedStore();
+    store.getState().addBox({ name: 'Doomed', color: 'amber', roomId: 'r1' });
+    expect(store.getState().outbox).toHaveLength(1);
+
+    store.getState().parkServerMove();
+
+    const s = store.getState();
+    expect(s.activeMode).toBe('local');
+    expect(s.serverMoveId).toBeNull();
+    expect(s.outbox).toEqual([]);
+    expect(s.boxes).toHaveLength(2); // data survives
+  });
+});
+
+describe('adoptSharedMove', () => {
+  it('links a local move to its interrupted server twin, keeping its data and queueing a replay', () => {
+    const store = createAppStore(memoryStorage());
+    const localId = store.getState().createMove({ name: 'Crashed share' });
+    const roomId = store.getState().addRoom({ name: 'Attic' });
+    store.getState().addBox({ name: 'Winter clothes', color: 'teal', roomId });
+    store.getState().adoptSharedMove(localId, 'srv1');
+
+    const s = store.getState();
+    expect(Object.keys(s.library)).toEqual([localId]); // no second entry
+    expect(s.library[localId].serverMoveId).toBe('srv1');
+    // Local data survived (the server twin may be empty in this crash window)…
+    expect(s.library[localId].rooms.map((r) => r.name)).toEqual(['Attic']);
+    expect(s.library[localId].boxes).toHaveLength(1);
+    // …and a replay batch was queued so the server catches up (idempotent adds).
+    expect(s.outbox.map((m) => m.type)).toEqual(expect.arrayContaining(['addRoom', 'addBox']));
+    // The open move's live slice was linked too.
+    expect(s.activeMode).toBe('shared');
+    expect(s.serverMoveId).toBe('srv1');
+    expect(s.lastSyncTs).toBe(0); // forces a full re-pull
+  });
 });
 
 describe('library', () => {
@@ -247,12 +351,22 @@ describe('library', () => {
     expect(Object.keys(store.getState().library)).toHaveLength(1);
     expect(store.getState().currentMoveId).toBeNull(); // import does not open the move
   });
+
+  it('redeeming an invite for a move already in the library opens it instead of duplicating', () => {
+    const store = createAppStore(memoryStorage());
+    const first = store.getState().addSharedMoveFromSnapshot('srv1', snapshot());
+    // A re-invite (e.g. at a new role) accepts server-side and hands back the same snapshot.
+    const second = store.getState().addSharedMoveFromSnapshot('srv1', snapshot());
+    expect(second).toBe(first);
+    expect(Object.keys(store.getState().library)).toEqual([first]);
+    expect(store.getState().currentMoveId).toBe(first);
+  });
 });
 
 describe('session', () => {
   it('restores a keychain token without touching the persisted account', () => {
     const store = createAppStore(memoryStorage());
-    store.getState().setSession('old', { id: 'u1', name: 'Me', email: null });
+    store.getState().setSession('old', { id: 'u1', name: 'Me', email: null, entitlementActive: false });
     store.getState().restoreSession('new');
     expect(store.getState().session).toBe('new');
     expect(store.getState().account?.id).toBe('u1');
@@ -274,7 +388,7 @@ describe('signOut', () => {
   it('drops synced moves, keeps local ones, and returns to the guest state', () => {
     const store = createAppStore(memoryStorage());
     const local = store.getState().createMove({ name: 'Guest move' });
-    store.getState().setSession('tok', { id: 'u1', name: 'Me', email: null });
+    store.getState().setSession('tok', { id: 'u1', name: 'Me', email: null, entitlementActive: false });
     store.getState().startProTrial();
     store.getState().setOnboarded(true);
     store.getState().addSharedMoveFromSnapshot('srv1', snapshot()); // now open
@@ -296,7 +410,7 @@ describe('persistence', () => {
   it('survives a relaunch through the injected storage, without the session token', () => {
     const storage = memoryStorage();
     const first = createAppStore(storage);
-    first.getState().setSession('secret', { id: 'u1', name: 'Me', email: null });
+    first.getState().setSession('secret', { id: 'u1', name: 'Me', email: null, entitlementActive: false });
     const id = first.getState().createMove({ name: 'Persisted' });
 
     expect(storage.data[STORE_KEY]).not.toContain('secret');

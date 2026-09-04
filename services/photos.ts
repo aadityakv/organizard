@@ -13,6 +13,18 @@ import { MOVE_MODE } from '@/store/library';
 
 const inFlight = new Set<string>();
 
+/**
+ * Uploads that finished while the user was on a different move: the bytes are on
+ * the server, but the local ref couldn't be swapped (the swap must target the
+ * owning move's live slice). Keyed by local ref; applied when that move is open
+ * again — otherwise the next pass would upload the same bytes twice and the item
+ * would end up with duplicate photos.
+ */
+const pendingSwaps = new Map<
+  string,
+  { serverMoveId: string; kind: 'item' | 'box'; boxId: string; itemId?: string; photoId: string }
+>();
+
 async function uploadPhoto(
   session: string,
   moveId: string,
@@ -43,22 +55,48 @@ export async function uploadPendingPhotos(): Promise<void> {
   const s = useStore.getState();
   if (s.activeMode !== MOVE_MODE.shared || !s.session || !s.serverMoveId) return;
   const { session, serverMoveId } = s;
+  // Uploads can outlive a move switch; every store write re-checks the link first
+  // so a photo of move A never lands on (or enqueues against) move B.
+  const linked = (): boolean => useStore.getState().serverMoveId === serverMoveId;
+  /** Resolve + upload one local ref; null means it failed and retries next sync tick. */
+  const uploadRef = async (
+    ref: string,
+    link: { itemId?: string; boxId?: string },
+  ): Promise<string | null> => {
+    try {
+      // Resolve a `local:` ref to the real document-dir uri the fetch can read.
+      const localUri = photoSource(ref, session).uri;
+      return await uploadPhoto(session, serverMoveId, localUri, link);
+    } catch {
+      return null;
+    }
+  };
+
+  // First: apply any swaps that were waiting for this move to be open again.
+  for (const [ref, swap] of pendingSwaps) {
+    if (swap.serverMoveId !== serverMoveId) continue;
+    const st = useStore.getState();
+    if (swap.kind === 'item') {
+      const stillThere = (st.itemsByBox[swap.boxId] ?? []).some((it) => it.id === swap.itemId);
+      if (stillThere) useStore.getState().swapItemPhoto(swap.boxId, swap.itemId as string, ref, swap.photoId);
+    } else if (st.boxes.some((b) => b.id === swap.boxId)) {
+      useStore.getState().setBoxCover(swap.boxId, swap.photoId);
+    }
+    pendingSwaps.delete(ref);
+  }
 
   for (const [boxId, items] of Object.entries(s.itemsByBox)) {
     for (const it of items) {
       for (const photo of it.photos ?? []) {
         if (!isLocalRef(photo) || inFlight.has(photo)) continue;
         inFlight.add(photo);
-        try {
-          // Resolve a `local:` ref to the real document-dir uri the fetch can read.
-          const localUri = photoSource(photo, session).uri;
-          const photoId = await uploadPhoto(session, serverMoveId, localUri, { itemId: it.id });
-          useStore.getState().swapItemPhoto(boxId, it.id, photo, photoId); // local uri -> server id (stops re-upload)
-        } catch {
-          // leave it; retried next sync tick
-        } finally {
-          inFlight.delete(photo);
+        const photoId = await uploadRef(photo, { itemId: it.id });
+        if (photoId) {
+          if (linked())
+            useStore.getState().swapItemPhoto(boxId, it.id, photo, photoId); // local uri -> server id (stops re-upload)
+          else pendingSwaps.set(photo, { serverMoveId, kind: 'item', boxId, itemId: it.id, photoId });
         }
+        inFlight.delete(photo);
       }
     }
   }
@@ -66,15 +104,12 @@ export async function uploadPendingPhotos(): Promise<void> {
   for (const b of s.boxes) {
     if (!b.cover || !isLocalRef(b.cover) || inFlight.has(b.cover)) continue;
     inFlight.add(b.cover);
-    try {
-      // Resolve a `local:` ref to the real document-dir uri the fetch can read.
-      const localUri = photoSource(b.cover, session).uri;
-      const photoId = await uploadPhoto(session, serverMoveId, localUri, { boxId: b.id });
-      useStore.getState().setBoxCover(b.id, photoId); // swap local uri -> server id (and enqueue)
-    } catch {
-      // retried next tick
-    } finally {
-      inFlight.delete(b.cover);
+    const photoId = await uploadRef(b.cover, { boxId: b.id });
+    if (photoId) {
+      if (linked())
+        useStore.getState().setBoxCover(b.id, photoId); // swap local uri -> server id (and enqueue)
+      else pendingSwaps.set(b.cover, { serverMoveId, kind: 'box', boxId: b.id, photoId });
     }
+    inFlight.delete(b.cover);
   }
 }

@@ -73,6 +73,12 @@ describe('buildShareReplayBatch', () => {
     expect(ids.size).toBe(batch.length);
   });
 
+  it('carries the room color so a shared move keeps its palette', () => {
+    const batch = buildShareReplayBatch(slice());
+    const room = batch.find((m) => m.type === 'addRoom');
+    expect(room && 'payload' in room && room.payload).toMatchObject({ id: 'r1', color: 'amber' });
+  });
+
   it('handles an empty move and missing optional fields', () => {
     const empty = slice({
       rooms: [],

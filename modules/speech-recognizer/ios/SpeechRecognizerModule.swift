@@ -41,10 +41,15 @@ public class SpeechRecognizerModule: Module {
     // Begin streaming recognition. Partial transcripts arrive on "onResult".
     AsyncFunction("start") { (promise: Promise) in
       DispatchQueue.main.async {
+        if self.isDestroyed { return }
         do {
           try self.startRecognition()
           promise.resolve(nil)
         } catch {
+          // Roll back anything startRecognition set up before failing (audio
+          // session, tap, task) — otherwise the mic session stays active with
+          // nothing listening (the orange dot) until the next start().
+          self.teardown(emitEnd: false)
           self.sendEvent("onError", ["message": error.localizedDescription])
           promise.reject("E_SPEECH_START", error.localizedDescription)
         }
@@ -86,27 +91,41 @@ public class SpeechRecognizerModule: Module {
     audioEngine = engine
     let inputNode = engine.inputNode
     let format = inputNode.outputFormat(forBus: 0)
+    // Without mic permission the input node reports a 0-channel format, and
+    // installTap raises an uncatchable NSException — bail out with a real error.
+    guard format.channelCount > 0 else {
+      throw NSError(
+        domain: "SpeechRecognizer", code: 2,
+        userInfo: [NSLocalizedDescriptionKey: "Microphone input unavailable (permission denied?)"])
+    }
     inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
       self?.request?.append(buffer)
     }
 
     task = recognizer.recognitionTask(with: req) { [weak self] result, error in
-      guard let self = self else { return }
-      if let result = result {
-        self.sendEvent("onResult", [
-          "transcript": result.bestTranscription.formattedString,
-          "isFinal": result.isFinal,
-        ])
-        if result.isFinal {
+      // Speech invokes this on an internal background queue; all state it touches
+      // (ended/audioEngine/request/task) is owned by the main queue — hop over.
+      DispatchQueue.main.async {
+        guard let self = self else { return }
+        if let result = result {
+          self.sendEvent("onResult", [
+            "transcript": result.bestTranscription.formattedString,
+            "isFinal": result.isFinal,
+          ])
+          if result.isFinal {
+            self.teardown(emitEnd: true)
+          }
+        }
+        if let error = error {
+          // A cancel/endAudio also surfaces here; only report genuine failures
+          // (216 = request canceled, and only in Speech's own error domain).
+          let ns = error as NSError
+          let canceled = ns.domain == "kAFAssistantErrorDomain" && ns.code == 216
+          if !canceled {
+            self.sendEvent("onError", ["message": error.localizedDescription])
+          }
           self.teardown(emitEnd: true)
         }
-      }
-      if let error = error {
-        // A cancel/endAudio also surfaces here; only report genuine failures.
-        if (error as NSError).code != 216 { // 216 = recognition request was canceled
-          self.sendEvent("onError", ["message": error.localizedDescription])
-        }
-        self.teardown(emitEnd: true)
       }
     }
 

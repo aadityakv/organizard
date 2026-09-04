@@ -149,12 +149,15 @@ export const createInventorySlice: InventorySlice = (set, get) => ({
         [boxId]: (s.itemsByBox[boxId] ?? []).map((it) => (it.id === itemId ? { ...it, ...patch } : it)),
       },
     }));
+    // `undefined` means "not edited" (field omitted from the mutation); an explicit
+    // clear is `null`, which the server stores as NULL — the two must never blur.
     const payload: Extract<Mutation, { type: 'updateItem' }>['payload'] = { id: itemId, boxId };
     if (patch.name !== undefined) payload.name = patch.name;
     if (patch.qty !== undefined) payload.qty = patch.qty;
     if (patch.value !== undefined) payload.valueCents = Math.round(patch.value * 100);
     if (patch.note !== undefined) payload.note = patch.note ?? null;
     if (patch.markers !== undefined) payload.markerIds = patch.markers;
+    if (patch.photos !== undefined) payload.photoIds = patch.photos.filter((p) => !isLocalRef(p));
     get().enqueue(mutation('updateItem', payload));
   },
 

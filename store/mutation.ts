@@ -1,6 +1,6 @@
 // Building outbox entries. Every write action does `enqueue(mutation('type', payload))`;
-// the envelope (client id for idempotency, timestamp for last-write-wins) lives here so
-// it is impossible to forget a field.
+// the envelope (client id for idempotency, timestamp metadata) lives here so it is
+// impossible to forget a field.
 import { uid, ID_PREFIX } from '@/lib/uid';
 import { ROLE_REQUIRED, type Mutation, type MutationType } from '@/shared';
 

@@ -32,7 +32,7 @@ export function buildShareReplayBatch(data: SliceData): Mutation[] {
       type: 'addRoom',
       clientId: cid(),
       ts,
-      payload: { id: r.id, name: r.name, dest: r.dest ?? null, icon: r.icon },
+      payload: { id: r.id, name: r.name, dest: r.dest ?? null, icon: r.icon, color: r.color },
     });
   for (const b of data.boxes) {
     out.push({

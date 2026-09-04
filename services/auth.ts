@@ -10,10 +10,15 @@ import { useStore } from '@/store/useStore';
 
 async function adoptSession(
   session: string,
-  user: { id: string; name: string; email: string | null },
+  user: { id: string; name: string; email: string | null; entitlementActive: boolean },
 ): Promise<void> {
   await saveSession(session);
-  useStore.getState().setSession(session, { id: user.id, name: user.name, email: user.email });
+  useStore.getState().setSession(session, {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    entitlementActive: user.entitlementActive,
+  });
   useStore.getState().setOnboarded(true); // signing in completes onboarding
   // Pull this account's existing moves onto the device, then push up any local (guest)
   // moves so everything is synced/backed up ("synced by default"). Failures are non-fatal.

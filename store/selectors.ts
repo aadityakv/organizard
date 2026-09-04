@@ -96,9 +96,32 @@ export const allIndexedItems = (s: Pick<State, 'boxes' | 'rooms' | 'itemsByBox'>
   return out;
 };
 
-/** Pro = signed in with an active trial. Account-tied, so a guest is always free. */
-export const isProNow = (s: Pick<State, 'proTrialUntil' | 'session'>): boolean =>
-  s.session != null && s.proTrialUntil != null && s.proTrialUntil > Date.now();
+/**
+ * The Find/search match: an item hits when its name OR one of its marker labels
+ * contains the query; a box hits on its name. One implementation so the Find tab
+ * and the dashboard search can't disagree on what matches. Fresh arrays: useMemo.
+ */
+export function searchMove(
+  s: Pick<State, 'boxes' | 'markers'>,
+  indexed: IndexedItem[],
+  query: string,
+): { items: IndexedItem[]; boxes: Box[] } {
+  const q = query.trim().toLowerCase();
+  if (!q) return { items: [], boxes: [] };
+  const markerLabel = (id: string): string => s.markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
+  return {
+    items: indexed.filter(
+      (it) =>
+        it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
+    ),
+    boxes: s.boxes.filter((b) => b.name.toLowerCase().includes(q)),
+  };
+}
+
+/** Pro = the server says the account is entitled, or an unexpired local trial. */
+export const isProNow = (s: Pick<State, 'proTrialUntil' | 'session' | 'account'>): boolean =>
+  s.session != null &&
+  (s.account?.entitlementActive === true || (s.proTrialUntil != null && s.proTrialUntil > Date.now()));
 
 /** What `moveSummaries` reads: the library plus the live fields of the open move. */
 export type MoveSummaryInputs = Pick<
@@ -127,7 +150,6 @@ export const moveSummaries = (s: MoveSummaryInputs): MoveSummary[] => {
   return out.sort((a, z) => z.lastOpenedAt - a.lastOpenedAt);
 };
 
-/** The signed-in user's role in the open move (owner for local moves). */
 /**
  * Up to three things the user might search for, drawn from their own data: the most
  * recently added item names, then labels of markers actually in use. Fresh array: useMemo.
@@ -153,6 +175,7 @@ export const searchSuggestions = (
   return out;
 };
 
+/** The signed-in user's role in the open move (owner for local moves). */
 export const currentRole = (s: State): Role => roleFor(s.activeMode, s.members, s.account?.id ?? null);
 
 /** The data of any move: the live slice for the open one, the bundle otherwise. */

@@ -73,6 +73,9 @@ export function startSpeech(
   subs.push(native.addListener('onEnd', () => end()));
 
   native.start().catch((err: unknown) => {
+    // A failed start rejects AND emits onError natively — same failure. The event
+    // arrives first and ends the session; don't surface the rejection twice.
+    if (ended) return;
     onError(String(err));
     end();
   });

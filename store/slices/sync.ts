@@ -26,7 +26,7 @@ export type SyncSlice = StateCreator<Store, [['zustand/persist', unknown]], [], 
 const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Session, outbox and server-data ingestion actions. */
-export const createSyncSlice: SyncSlice = (set, get) => ({
+export const createSyncSlice: SyncSlice = (set) => ({
   setOnboarded: (v) => set({ onboarded: v }),
   startProTrial: () => set({ proTrialUntil: Date.now() + TRIAL_MS }),
   setSession: (session, account) => set({ session, account }),
@@ -89,14 +89,19 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
           continue;
         }
         // Preserve local (not-yet-uploaded) photo URIs so a pull can't drop a fresh capture.
-        const existing = (itemsByBox[it.boxId] ?? []).find((x) => x.id === it.id);
+        const list = itemsByBox[it.boxId] ?? [];
+        const idx = list.findIndex((x) => x.id === it.id);
+        const existing = idx >= 0 ? list[idx] : undefined;
         const localPhotos = (existing?.photos ?? []).filter(isLocalRef);
-        const arr = (itemsByBox[it.boxId] ?? []).filter((x) => x.id !== it.id);
+        // Replace in place when the item is already in the box (keeps user-visible
+        // order stable across pulls); append only when it is genuinely new.
+        const arr = list.filter((x) => x.id !== it.id);
+        const at = idx >= 0 ? idx : arr.length;
         if (!it.deletedAt) {
           const ci = toClientItem(it);
           const base = ci.photos ?? [];
           ci.photos = [...base, ...localPhotos.filter((p) => !base.includes(p))];
-          arr.push(ci);
+          arr.splice(at, 0, ci);
         }
         itemsByBox[it.boxId] = arr;
       }
@@ -106,8 +111,23 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
       const rooms = mergeList(s.rooms, fresh(ch.rooms, dirty.rooms), toClientRoom);
       const statuses = mergeList(s.statuses, fresh(ch.statuses, dirty.statuses), toClientStatus);
       const markers = mergeList(s.markers, fresh(ch.markers, dirty.markers), toClientMarker);
+
+      // Move details (rename/address/date) ride the delta only when the row changed,
+      // and a pending local updateMove wins until it flushes.
+      const move =
+        ch.move && !dirty.move
+          ? {
+              name: ch.move.name,
+              from: ch.move.from ?? '',
+              to: ch.move.to ?? '',
+              target: ch.move.targetDate ?? '',
+            }
+          : s.move;
+      if (ch.move && dirty.move) minSkipped = Math.min(minSkipped, ch.move.updatedAt);
+
       const cursor = minSkipped === Infinity ? ch.cursor : Math.min(ch.cursor, minSkipped - 1);
       return {
+        move,
         rooms,
         statuses,
         markers,
@@ -118,10 +138,19 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
       };
     }),
 
-  markActiveShared: (serverMoveId, snap) => {
-    set({ activeMode: MOVE_MODE.shared, serverMoveId, lastSyncTs: 0, outbox: [] });
-    get().applySnapshot(snap);
-  },
+  parkServerMove: () =>
+    set((s) =>
+      s.activeMode === MOVE_MODE.shared
+        ? {
+            // Sync is over for this move (deleted server-side, or a stale bundle from a
+            // different account): keep the data as a local-only move, drop its outbox.
+            activeMode: MOVE_MODE.local,
+            serverMoveId: null,
+            outbox: [],
+            lastSyncTs: 0,
+          }
+        : {},
+    ),
 
   goShared: (serverMoveId) => set({ activeMode: MOVE_MODE.shared, serverMoveId, lastSyncTs: 0, outbox: [] }),
 
@@ -143,37 +172,41 @@ function dirtyRows(outbox: Store['outbox']) {
   const markers = new Set<string>();
   const boxes = new Set<string>();
   const items = new Set<string>();
+  let move = false;
   for (const m of outbox) {
-    const p = m.payload as Record<string, string>;
+    const p = m.payload as { id?: string; boxId?: string };
     switch (m.type) {
       case 'addRoom':
       case 'updateRoom':
       case 'deleteRoom':
-        rooms.add(p.id);
+        if (p.id) rooms.add(p.id);
         break;
       case 'addStatus':
-        statuses.add(p.id);
+        if (p.id) statuses.add(p.id);
         break;
       case 'addMarker':
-        markers.add(p.id);
+        if (p.id) markers.add(p.id);
         break;
       case 'addBox':
       case 'updateBox':
       case 'deleteBox':
       case 'setBoxStatus':
       case 'setBoxCover':
-        boxes.add(p.id);
+        if (p.id) boxes.add(p.id);
         break;
       case 'setBoxMarker':
-        boxes.add(p.boxId);
+        if (p.boxId) boxes.add(p.boxId);
         break;
       case 'addItem':
       case 'updateItem':
       case 'deleteItem':
       case 'moveItem':
-        items.add(p.id);
+        if (p.id) items.add(p.id);
+        break;
+      case 'updateMove':
+        move = true;
         break;
     }
   }
-  return { rooms, statuses, markers, boxes, items };
+  return { rooms, statuses, markers, boxes, items, move };
 }

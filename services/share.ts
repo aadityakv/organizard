@@ -15,6 +15,7 @@ export async function shareMove(): Promise<{ moveId: string }> {
   const s = useStore.getState();
   if (!s.session) throw new Error('Sign in first');
   if (s.activeMode === MOVE_MODE.shared && s.serverMoveId) return { moveId: s.serverMoveId };
+  const localId = s.currentMoveId;
 
   const snap = await api.createMove(s.session, {
     name: s.move.name,
@@ -22,6 +23,9 @@ export async function shareMove(): Promise<{ moveId: string }> {
     to: s.move.to || null,
     targetDate: s.move.target || null,
     seed: false, // we replay our own statuses/markers
+    // The local move's id: if a previous attempt died between createMove and the
+    // link persisting, the server reuses that move instead of minting a duplicate.
+    clientId: localId ?? undefined,
   });
   const serverMoveId = snap.move.id;
 
@@ -55,13 +59,27 @@ export async function syncLocalMovesUp(): Promise<void> {
 
 /** Flush the open move while still authenticated, then sign out. */
 export async function flushAndSignOut(): Promise<void> {
-  try {
+  // signOut drops synced bundles — outbox included — so every OTHER shared move
+  // with queued offline edits must be flushed too, or those edits are lost.
+  const startId = useStore.getState().currentMoveId;
+  const dirtyShared = Object.values(useStore.getState().library).filter(
+    (b) => b.serverMoveId && b.id !== startId && b.outbox.length > 0,
+  );
+  for (const b of dirtyShared) {
+    useStore.getState().switchMove(b.id);
     await syncActiveMove();
-  } catch (e) {
-    console.warn('signOut: final sync failed; recent offline edits may not have saved', e);
   }
+  if (startId && dirtyShared.length) {
+    const back = useStore.getState().library[startId] ? startId : null;
+    if (back) useStore.getState().switchMove(back);
+  }
+
+  const ok = await syncActiveMove();
+  if (!ok) console.warn('signOut: final sync failed; recent offline edits stay queued for next sign-in');
+  const session = useStore.getState().session;
+  if (session) await api.logout(session).catch(() => {}); // best-effort server-side revoke
   useStore.getState().signOut();
-  void clearSession();
+  await clearSession();
 }
 
 /** Owner creates a shareable invite link for the active shared move. */

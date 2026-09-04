@@ -7,7 +7,7 @@ import type { Mutation } from '@/shared';
 
 import type { MoveBundle, MoveMode } from './library';
 
-export type Account = { id: string; name: string; email: string | null };
+export type Account = { id: string; name: string; email: string | null; entitlementActive: boolean };
 
 export type State = {
   onboarded: boolean;
@@ -46,6 +46,13 @@ export type State = {
   currentMoveId: string | null;
 };
 
+/**
+ * The item fields an edit may change. Exactly the set that syncs via the
+ * `updateItem` mutation — anything else on `Item` (id, boxId) is structural and
+ * photos are attached by the upload engine, so the type keeps patches honest.
+ */
+export type ItemPatch = Partial<Pick<Item, 'name' | 'qty' | 'value' | 'note' | 'markers' | 'photos'>>;
+
 /** Editing the open move. Every action applies locally and, for a shared move, enqueues a Mutation. */
 export type InventoryActions = {
   addRoom: (input: { name: string; dest?: string | null; icon?: string; color?: string }) => string;
@@ -71,7 +78,7 @@ export type InventoryActions = {
       icon?: string;
     },
   ) => string;
-  updateItem: (boxId: string, itemId: string, patch: Partial<Item>) => void;
+  updateItem: (boxId: string, itemId: string, patch: ItemPatch) => void;
   deleteItem: (boxId: string, itemId: string) => void;
   moveItem: (fromBoxId: string, toBoxId: string, itemId: string) => void;
   updateMove: (patch: { name?: string; from?: string; to?: string; target?: string }) => void;
@@ -99,8 +106,11 @@ export type SyncActions = {
   clearOutbox: (clientIds: string[]) => void;
   applySnapshot: (snap: ServerSnapshot) => void;
   applyChanges: (ch: ServerChanges) => void;
-  /** Flip the active move to shared and seed it from a server snapshot. */
-  markActiveShared: (serverMoveId: string, snap: ServerSnapshot) => void;
+  /**
+   * The server no longer has this move for this account (deleted, or a bundle left over
+   * from a previous account): park it as local-only so its data survives but sync stops.
+   */
+  parkServerMove: () => void;
   /** Flip the active (already-pushed) move to shared, keeping local data as-is. */
   goShared: (serverMoveId: string) => void;
   /** Replace a local photo URI with its uploaded server id (local-only, no mutation). */
@@ -122,6 +132,15 @@ export type LibraryActions = {
    * pulling your moves after sign-in). No-op if a bundle for serverMoveId already exists.
    */
   importSharedMove: (serverMoveId: string, snap: ServerSnapshot) => void;
+  /**
+   * Attach an existing local move to its server counterpart (matched by the server
+   * move's clientId — the local move's id). Used when a share was interrupted after
+   * the server move existed but before the link persisted, so a re-pull adopts the
+   * local move instead of duplicating it. The local data is kept and re-queued as a
+   * replay batch (server-side adds are idempotent by row id), because the server
+   * twin may be empty or partial in exactly this crash window.
+   */
+  adoptSharedMove: (localId: string, serverMoveId: string) => void;
 };
 
 export type Actions = InventoryActions & SyncActions & LibraryActions;

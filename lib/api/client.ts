@@ -26,6 +26,8 @@ export type ServerChanges = {
   serverTime: number;
   cursor: number;
   hasMore: boolean;
+  /** The move row itself when it changed since the cursor (rename/address/date); else null. */
+  move: Move | null;
   rooms: Room[];
   statuses: Status[];
   markers: Marker[];
@@ -106,6 +108,8 @@ export function createApi(baseUrl: string, fetchImpl: typeof fetch = fetch, time
         to?: string | null;
         targetDate?: string | null;
         seed?: boolean;
+        /** The local move's id — a retried share reuses the existing server move. */
+        clientId?: string;
       },
     ) => req<ServerSnapshot>('/v1/moves', { method: 'POST', body: JSON.stringify(body) }, session),
     snapshot: (session: string, moveId: string) =>
