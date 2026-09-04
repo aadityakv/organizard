@@ -9,6 +9,7 @@ import { SlothMark } from '@/components/brand/SlothMark';
 import { Button } from '@/components/ui/Button';
 import { reportError } from '@/lib/monitoring';
 import { colors, type } from '@/theme';
+import { copy } from '@/copy/shared';
 
 /**
  * Stable 8-hex-char code for an error (message + throw site, djb2). Shown in
@@ -59,13 +60,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return (
       <SafeAreaView style={styles.screen}>
         <SlothMark size={72} />
-        <Text style={styles.title}>Well, this is awkward</Text>
-        <Text style={styles.body}>Something broke on this screen. Your data is safe — nothing was lost.</Text>
-        <Button onPress={this.restart}>Restart the app</Button>
+        <Text style={styles.title}>{copy.wellThisIsAwkward}</Text>
+        <Text style={styles.body}>{copy.somethingBrokeOnThisScreen}</Text>
+        <Button onPress={this.restart}>{copy.restartTheApp}</Button>
         <View style={styles.codeChip}>
           <Text style={styles.code}>error code {this.state.digest}</Text>
         </View>
-        <Text style={styles.hint}>If it keeps happening, quote this code when you report it.</Text>
+        <Text style={styles.hint}>{copy.ifItKeepsHappeningQuote}</Text>
       </SafeAreaView>
     );
   }

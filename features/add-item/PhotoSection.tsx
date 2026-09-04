@@ -9,6 +9,7 @@ import { CameraCard } from './CameraCard';
 import { PhotoThumb } from './PhotoThumb';
 import { sharedStyles } from './styles';
 import { useCapture } from './useCapture';
+import { copy } from '@/copy/addItem';
 
 /** Photo strip plus the inline camera or "Add photo" affordance. */
 export function PhotoSection({
@@ -25,7 +26,7 @@ export function PhotoSection({
   const capture = useCapture(onAddPhoto);
   return (
     <View style={styles.photoSection}>
-      <Text style={sharedStyles.sectionHeading}>Photos (optional)</Text>
+      <Text style={sharedStyles.sectionHeading}>{copy.photosOptional}</Text>
 
       {photos.length > 0 ? (
         <ScrollView

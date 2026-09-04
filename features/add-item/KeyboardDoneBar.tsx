@@ -5,6 +5,7 @@ import { InputAccessoryView, Keyboard, Platform, Pressable, StyleSheet, Text, Vi
 import { colors, fonts, fontSize, gutter, palette, space } from '@/theme';
 
 import { KBD_ACCESSORY_ID } from './constants';
+import { copy } from '@/copy/addItem';
 
 /** iOS keyboard accessory with a Done button for fields that have no return key. */
 export function KeyboardDoneBar() {
@@ -19,7 +20,7 @@ export function KeyboardDoneBar() {
           hitSlop={8}
           style={({ pressed }) => [styles.kbdDone, pressed && styles.kbdDonePressed]}
         >
-          <Text style={styles.kbdDoneText}>Done</Text>
+          <Text style={styles.kbdDoneText}>{copy.done}</Text>
         </Pressable>
       </View>
     </InputAccessoryView>

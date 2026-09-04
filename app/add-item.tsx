@@ -17,6 +17,7 @@ import {
   useItemForm,
 } from '@/features/add-item';
 import { boxColor, colors, fonts, fontSize, gutter, palette, radius, space } from '@/theme';
+import { copy } from '@/copy/addItem';
 
 /** Add / edit item modal. Params: boxId, optional itemId (edit) and photo (prefilled capture). */
 export default function AddItem() {
@@ -96,7 +97,7 @@ export default function AddItem() {
                 style={({ pressed }) => [styles.deleteBtn, pressed && styles.deleteBtnPressed]}
               >
                 <Icon name="trash-2" size={18} color={colors.danger} />
-                <Text style={styles.deleteText}>Delete item</Text>
+                <Text style={styles.deleteText}>{copy.deleteItem}</Text>
               </Pressable>
             </>
           ) : null}

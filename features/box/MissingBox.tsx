@@ -5,18 +5,19 @@ import { router } from 'expo-router';
 
 import { Button, Header, Thumb } from '@/components';
 import { colors, fonts, fontSize, palette, radius, type as typeTokens } from '@/theme';
+import { copy } from '@/copy/box';
 
 /** Fallback screen when the route's box id no longer exists. */
 export function MissingBox() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <Header title="Box not found" onBack={() => router.back()} />
+      <Header title={copy.boxNotFound} onBack={() => router.back()} />
       <View style={styles.missing}>
         <Thumb color="slate" icon="package-x" size={72} radius={radius.pill} />
-        <Text style={styles.missingTitle}>We couldn&apos;t find that box</Text>
-        <Text style={styles.missingBody}>It may have been deleted, or the link is out of date.</Text>
+        <Text style={styles.missingTitle}>{copy.weCouldnTFindThat}</Text>
+        <Text style={styles.missingBody}>{copy.itMayHaveBeenDeleted}</Text>
         <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={() => router.back()}>
-          Go back
+          {copy.goBack}
         </Button>
       </View>
     </SafeAreaView>

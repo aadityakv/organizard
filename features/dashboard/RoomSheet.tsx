@@ -13,6 +13,7 @@ import { BOX_COLORS, colors, fonts, fontSize, palette, radius, space, NEUTRAL_HU
 import { ROOM_ICONS } from './constants';
 import { shared, sheetForm } from './styles';
 import { plural } from '@/lib/text';
+import { copy } from '@/copy/dashboard';
 
 /** Sheet to create or edit a room, including the role-gated cascade delete. */
 export function RoomSheet({
@@ -57,9 +58,9 @@ export function RoomSheet({
     // Empty room — a simple, low-stakes delete any editor may perform.
     if (roomBoxes.length === 0) {
       Alert.alert(`Delete “${room.name}”?`, "This removes the room. This can't be undone.", [
-        { text: 'Keep it', style: 'cancel' },
+        { text: copy.keepIt, style: 'cancel' },
         {
-          text: 'Delete room',
+          text: copy.deleteRoom,
           style: 'destructive',
           onPress: () => {
             deleteRoom(room.id);
@@ -72,11 +73,7 @@ export function RoomSheet({
 
     // Cascade — destroys boxes + items. Owner-only.
     if (!PERM.canDelete(role)) {
-      Alert.alert(
-        'Only the owner can delete a room with boxes',
-        'Ask the move owner, or move/empty its boxes first.',
-        [{ text: 'OK' }],
-      );
+      Alert.alert(copy.onlyTheOwnerCanDelete, copy.askTheMoveOwnerOr, [{ text: copy.ok }]);
       return;
     }
 
@@ -86,9 +83,9 @@ export function RoomSheet({
       `Delete “${room.name}” and everything in it?`,
       `This permanently removes the room, its ${roomBoxes.length} ${boxWord}, and ${itemCount} ${itemWord}. This can't be undone.`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: copy.cancel, style: 'cancel' },
         {
-          text: 'Delete all',
+          text: copy.deleteAll,
           style: 'destructive',
           onPress: () => {
             deleteRoom(room.id);
@@ -102,21 +99,21 @@ export function RoomSheet({
   return (
     <Sheet visible={visible} onClose={onClose} title={isEdit ? 'Edit room' : 'New room'}>
       <Input
-        label="Room name"
+        label={copy.roomName}
         value={name}
         onChangeText={(name) => patch({ name })}
-        placeholder="e.g. Garage, Nursery, Office"
+        placeholder={copy.eGGarageNurseryOffice}
         autoFocus
       />
       <View style={styles.fieldGap} />
       <Input
-        label="Destination (optional)"
+        label={copy.destinationOptional}
         value={dest}
         onChangeText={(dest) => patch({ dest })}
-        placeholder="Where it lands — e.g. NYC bedroom"
+        placeholder={copy.whereItLandsEG}
       />
 
-      <Text style={sheetForm.fieldLabel}>Icon</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.icon}</Text>
       <View style={styles.iconRow}>
         {ROOM_ICONS.map((ic) => {
           const on = ic === icon;
@@ -139,7 +136,7 @@ export function RoomSheet({
         })}
       </View>
 
-      <Text style={sheetForm.fieldLabel}>Color</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.color}</Text>
       <View style={sheetForm.colorRow}>
         {BOX_COLORS.map((hue) => (
           <ColorDot
@@ -174,7 +171,7 @@ export function RoomSheet({
           style={({ pressed }) => [styles.deleteRow, pressed && shared.pressedSoft]}
         >
           <Icon name="trash-2" size={18} color={colors.danger} />
-          <Text style={styles.deleteText}>Delete room</Text>
+          <Text style={styles.deleteText}>{copy.deleteRoom}</Text>
         </Pressable>
       )}
     </Sheet>

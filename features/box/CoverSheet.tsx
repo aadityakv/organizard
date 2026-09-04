@@ -9,6 +9,7 @@ import { persistCapture } from '@/lib/photos';
 import { palette, radius } from '@/theme';
 
 import { shared } from './styles';
+import { copy } from '@/copy/box';
 
 /** Sheet to capture a new cover photo or remove the current one. */
 export function CoverSheet({
@@ -43,9 +44,9 @@ export function CoverSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Box photo">
+    <Sheet visible={visible} onClose={onClose} title={copy.boxPhoto}>
       {!permission ? (
-        <Text style={shared.sheetBlurb}>Getting the camera ready&hellip;</Text>
+        <Text style={shared.sheetBlurb}>{copy.gettingTheCameraReady}</Text>
       ) : !permission.granted ? (
         <View>
           <Text style={shared.sheetBlurb}>
@@ -80,7 +81,7 @@ export function CoverSheet({
       {hasCover ? (
         <View style={styles.removeCover}>
           <Button variant="ghost" size="md" fullWidth iconLeft="trash-2" onPress={onRemove}>
-            Remove photo
+            {copy.removePhoto}
           </Button>
         </View>
       ) : null}

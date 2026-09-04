@@ -12,6 +12,7 @@ import { Segmented } from '@/components/ui/Segmented';
 import { ApiError } from '@/lib/api';
 import { appleSignInAvailable, loginWithEmail, registerWithEmail, signInWithApple } from '@/services/auth';
 import { fonts, palette } from '@/theme';
+import { copy } from '@/copy/shared';
 
 const AUTH_MODE = { login: 'login', signup: 'signup' } as const;
 type AuthMode = (typeof AUTH_MODE)[keyof typeof AUTH_MODE];
@@ -85,7 +86,7 @@ export function AuthPanel({
           onPress={() => run(signInWithApple, 'Sign-in failed')}
         />
       ) : null}
-      <Text style={styles.or}>or use email</Text>
+      <Text style={styles.or}>{copy.orUseEmail}</Text>
       <Segmented
         options={[
           { value: AUTH_MODE.login, label: 'Log in' },
@@ -98,7 +99,7 @@ export function AuthPanel({
         <Input
           value={email}
           onChangeText={setEmail}
-          placeholder="you@email.com"
+          placeholder={copy.youEmailCom}
           keyboardType="email-address"
           autoCapitalize="none"
           textContentType="emailAddress"
@@ -106,7 +107,7 @@ export function AuthPanel({
         <Input
           value={password}
           onChangeText={setPassword}
-          placeholder="Password"
+          placeholder={copy.password}
           secureTextEntry
           autoCapitalize="none"
           textContentType={authMode === AUTH_MODE.signup ? 'newPassword' : 'password'}
@@ -120,7 +121,7 @@ export function AuthPanel({
       >
         {authMode === AUTH_MODE.signup ? 'Create account' : 'Log in'}
       </Button>
-      {authMode === AUTH_MODE.signup ? <Text style={styles.hint}>Use at least 8 characters.</Text> : null}
+      {authMode === AUTH_MODE.signup ? <Text style={styles.hint}>{copy.useAtLeast8Characters}</Text> : null}
     </Card>
   );
 }

@@ -9,6 +9,7 @@ import { encodeBoxQR } from '@/lib/qr/codes';
 import { printLabels } from '@/services/print';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/box';
 
 /** Card with the box's QR code and actions to view or print the label. */
 export function QrLabelCard({ box, roomName }: { box: Box; roomName?: string }) {
@@ -30,7 +31,7 @@ export function QrLabelCard({ box, roomName }: { box: Box; roomName?: string }) 
           iconLeft="scan-line"
           onPress={() => router.push(routes.qr(box.id))}
         >
-          Show full-screen
+          {copy.showFullScreen}
         </Button>
         <Button
           variant="ghost"

@@ -3,6 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 
 import { Button, Input, Sheet } from '@/components';
 import { fonts, palette } from '@/theme';
+import { copy } from '@/copy/moves';
 
 /** Sheet to paste an invite link and join a shared move. */
 export function JoinSheet({
@@ -19,11 +20,11 @@ export function JoinSheet({
   onSubmit: () => void;
 }) {
   return (
-    <Sheet visible={visible} onClose={onClose} title="Join a move">
-      <Text style={styles.sheetBody}>Paste the invite link or code a friend shared with you.</Text>
-      <Input value={value} onChangeText={onChange} placeholder="Paste invite link or code" autoFocus />
+    <Sheet visible={visible} onClose={onClose} title={copy.joinAMove}>
+      <Text style={styles.sheetBody}>{copy.pasteTheInviteLinkOr}</Text>
+      <Input value={value} onChangeText={onChange} placeholder={copy.pasteInviteLinkOrCode} autoFocus />
       <Button fullWidth iconLeft="link" onPress={onSubmit} disabled={!value.trim()} style={styles.sheetCta}>
-        Join
+        {copy.join}
       </Button>
     </Sheet>
   );

@@ -12,6 +12,7 @@ import { shareMove } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { colors } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/moves';
 
 /** Create-move modal: name, from/to addresses and target date; syncs up when signed in. */
 export default function NewMove() {
@@ -37,39 +38,39 @@ export default function NewMove() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="New move" onBack={() => router.back()} />
+      <Header title={copy.newMove} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Card style={styles.card}>
           <Input
-            label="Name"
+            label={copy.name}
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Apartment move"
+            placeholder={copy.eGApartmentMove}
             autoFocus
           />
           <View style={styles.gap} />
           <AddressField
-            label="From (optional)"
+            label={copy.fromOptional}
             value={from}
             onChangeText={setFrom}
-            placeholder="Search an address"
+            placeholder={copy.searchAnAddress}
           />
           <View style={styles.gap} />
           <AddressField
-            label="To (optional)"
+            label={copy.toOptional}
             value={to}
             onChangeText={setTo}
-            placeholder="Search an address"
+            placeholder={copy.searchAnAddress}
           />
           <View style={styles.gap} />
           <DateField
-            label="Target date (optional)"
+            label={copy.targetDateOptional}
             value={targetDate}
             onChange={setTargetDate}
-            placeholder="Pick a date"
+            placeholder={copy.pickADate}
           />
           <Button fullWidth iconLeft="plus" onPress={onCreate} disabled={!name.trim()} style={styles.cta}>
-            Create move
+            {copy.createMove}
           </Button>
         </Card>
       </ScrollView>

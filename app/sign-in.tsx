@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthPanel, Header } from '@/components';
 import { colors } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/onboarding';
 
 /** Sign-in screen reached from onboarding. */
 export default function SignIn() {
@@ -16,13 +17,9 @@ export default function SignIn() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="Welcome to Tuck" subtitle="Log in or create an account" onBack={() => router.back()} />
+      <Header title={copy.welcomeToTuck} subtitle={copy.logInOrCreateAn} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <AuthPanel
-          title="Log in or sign up"
-          subtitle="Sign in to share moves and sync across devices. You can also keep using Tuck as a guest."
-          onAuthed={done}
-        />
+        <AuthPanel title={copy.logInOrSignUp} subtitle={copy.signInToShareMoves} onAuthed={done} />
       </ScrollView>
     </SafeAreaView>
   );

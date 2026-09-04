@@ -6,6 +6,7 @@ import type { Box } from '@/data/types';
 import { boxColor, colors, fonts, fontSize, palette, radius } from '@/theme';
 
 import { sharedStyles } from './styles';
+import { copy } from '@/copy/addItem';
 
 /** Edit-mode picker to move the item to another box. */
 export function MoveToBoxPicker({
@@ -20,7 +21,7 @@ export function MoveToBoxPicker({
   if (boxes.length <= 1) return null;
   return (
     <View style={sharedStyles.chipSection}>
-      <Text style={sharedStyles.sectionHeading}>Move to box</Text>
+      <Text style={sharedStyles.sectionHeading}>{copy.moveToBox}</Text>
       <View style={sharedStyles.chipWrap}>
         {boxes.map((b) => {
           const on = b.id === targetBoxId;

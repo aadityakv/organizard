@@ -26,6 +26,7 @@ import { boxPhotos, currentRole, findItem, markerById, roomById, useStore } from
 import { useShallow } from 'zustand/react/shallow';
 import type { Marker } from '@/data/types';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/item';
 
 /** Item detail: photos, fields, markers and breadcrumb, with edit as a secondary action. */
 export default function ItemDetail() {
@@ -62,13 +63,13 @@ export default function ItemDetail() {
   if (!found) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-        <Header title="Item not found" onBack={() => router.back()} />
+        <Header title={copy.itemNotFound} onBack={() => router.back()} />
         <View style={styles.missing}>
           <Thumb color="slate" icon="package-x" size={72} radius={radius.pill} />
-          <Text style={styles.missingTitle}>We couldn&apos;t find that item</Text>
-          <Text style={styles.missingBody}>It may have been deleted, or the link is out of date.</Text>
+          <Text style={styles.missingTitle}>{copy.weCouldnTFindThat}</Text>
+          <Text style={styles.missingBody}>{copy.itMayHaveBeenDeleted}</Text>
           <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={() => router.back()}>
-            Go back
+            {copy.goBack}
           </Button>
         </View>
       </SafeAreaView>
@@ -83,9 +84,9 @@ export default function ItemDetail() {
 
   const confirmDelete = () => {
     Alert.alert(`Delete "${item.name}"?`, "This removes the item from the box. This can't be undone.", [
-      { text: 'Keep it', style: 'cancel' },
+      { text: copy.keepIt, style: 'cancel' },
       {
-        text: 'Delete item',
+        text: copy.deleteItem,
         style: 'destructive',
         onPress: () => {
           deleteItem(box.id, item.id);
@@ -98,12 +99,12 @@ export default function ItemDetail() {
   const onMore = () => {
     const options: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
     if (canEdit) {
-      options.push({ text: 'Edit item', onPress: goEdit });
+      options.push({ text: copy.editItem, onPress: goEdit });
     }
     if (canDelete) {
-      options.push({ text: 'Delete item', style: 'destructive', onPress: confirmDelete });
+      options.push({ text: copy.deleteItem, style: 'destructive', onPress: confirmDelete });
     }
-    options.push({ text: 'Cancel', style: 'cancel' });
+    options.push({ text: copy.cancel, style: 'cancel' });
     Alert.alert(item.name, undefined, options);
   };
 
@@ -173,30 +174,30 @@ export default function ItemDetail() {
         ) : (
           <View style={styles.photoEmpty}>
             <Thumb color={box.color} icon={item.icon ?? 'package'} size={96} radius={radius.lg} />
-            <Text style={styles.photoEmptyText}>No photos yet</Text>
+            <Text style={styles.photoEmptyText}>{copy.noPhotosYet}</Text>
           </View>
         )}
 
         <View style={styles.fieldCard}>
           <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Price (each)</Text>
+            <Text style={styles.fieldLabel}>{copy.priceEach}</Text>
             <Text style={styles.fieldValue}>{money(item.value)}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Quantity</Text>
+            <Text style={styles.fieldLabel}>{copy.quantity}</Text>
             <Text style={styles.fieldValue}>{item.qty}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>Total</Text>
+            <Text style={styles.fieldLabel}>{copy.total}</Text>
             <Text style={styles.fieldValueStrong}>{money(item.value * item.qty)}</Text>
           </View>
           {item.note ? (
             <>
               <View style={styles.divider} />
               <View style={styles.noteBlock}>
-                <Text style={styles.fieldLabel}>Notes</Text>
+                <Text style={styles.fieldLabel}>{copy.notes}</Text>
                 <Text style={styles.noteText}>{item.note}</Text>
               </View>
             </>
@@ -205,7 +206,7 @@ export default function ItemDetail() {
 
         {itemMarkers.length > 0 ? (
           <View style={styles.markerSection}>
-            <Text style={styles.sectionTitle}>Markers</Text>
+            <Text style={styles.sectionTitle}>{copy.markers}</Text>
             <View style={styles.markerWrap}>
               {itemMarkers.map((m) => (
                 <MarkerChip key={m.id} label={m.label} color={m.color} icon={m.icon} />
@@ -231,7 +232,7 @@ export default function ItemDetail() {
         {canEdit ? (
           <View style={styles.bottom}>
             <Button variant="primary" size="lg" fullWidth iconLeft="pencil" onPress={goEdit}>
-              Edit item
+              {copy.editItem}
             </Button>
           </View>
         ) : null}

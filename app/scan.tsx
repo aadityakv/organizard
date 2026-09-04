@@ -24,6 +24,7 @@ import {
 } from '@/theme';
 import { money } from '@/lib/money';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/scan';
 
 type ResultView = {
   icon: string;
@@ -67,7 +68,7 @@ function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => voi
             accessibilityRole="button"
           >
             <Icon name="scan-line" size={16} color={palette.ink500} />
-            <Text style={styles.rescanText}>Scan again</Text>
+            <Text style={styles.rescanText}>{copy.scanAgain}</Text>
           </Pressable>
         )}
       </View>
@@ -82,11 +83,8 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
         <View style={styles.permIconWrap}>
           <SlothMark size={56} />
         </View>
-        <Text style={styles.permTitle}>Point your camera at a box</Text>
-        <Text style={styles.permBody}>
-          Tuck needs your camera so you can scan a box&apos;s QR label and jump straight to what&apos;s
-          inside.
-        </Text>
+        <Text style={styles.permTitle}>{copy.pointYourCameraAtA}</Text>
+        <Text style={styles.permBody}>{copy.tuckNeedsYourCameraSo}</Text>
         {denied ? (
           <Button
             variant="primary"
@@ -95,18 +93,14 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
             iconLeft="settings"
             onPress={() => Linking.openSettings()}
           >
-            Open settings
+            {copy.openSettings}
           </Button>
         ) : (
           <Button variant="primary" size="lg" fullWidth iconLeft="camera" onPress={onRequest}>
-            Turn on the camera
+            {copy.turnOnTheCamera}
           </Button>
         )}
-        {denied && (
-          <Text style={styles.permHint}>
-            Camera access is off. Turn it on in Settings, then come back here.
-          </Text>
-        )}
+        {denied && <Text style={styles.permHint}>{copy.cameraAccessIsOffTurn}</Text>}
       </ScrollView>
     </SafeAreaView>
   );
@@ -195,7 +189,7 @@ export default function Scan() {
           >
             <Icon name="chevron-left" size={22} color={palette.white} />
           </Pressable>
-          <Text style={styles.topTitle}>Scan a box</Text>
+          <Text style={styles.topTitle}>{copy.scanABox}</Text>
         </View>
 
         <View style={styles.windowWrap} pointerEvents="none">
@@ -206,7 +200,7 @@ export default function Scan() {
             <View style={[styles.corner, styles.cornerBR]} />
             {!result && <View style={styles.scanLine} />}
           </View>
-          {!result && <Text style={styles.windowHint}>Line up a box&apos;s QR label</Text>}
+          {!result && <Text style={styles.windowHint}>{copy.lineUpABoxS}</Text>}
         </View>
       </SafeAreaView>
 

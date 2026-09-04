@@ -8,6 +8,7 @@ import { colors, fonts, fontSize, palette, radius, shadow, space, alpha } from '
 
 import { CAMERA_CARD_H } from './constants';
 import type { Capture } from './useCapture';
+import { copy } from '@/copy/addItem';
 
 /** Inline camera card for the item form: live viewfinder with capture controls, or the permission prompt. */
 export function CameraCard({ capture }: { capture: Capture }) {
@@ -70,14 +71,11 @@ export function CameraCard({ capture }: { capture: Capture }) {
             <Icon name="camera" size={24} color={palette.white} />
           </View>
           {permission == null ? (
-            <Text style={styles.permTitle}>Getting the camera ready…</Text>
+            <Text style={styles.permTitle}>{copy.gettingTheCameraReady}</Text>
           ) : permissionDenied ? (
             <>
-              <Text style={styles.permTitle}>Camera access is off</Text>
-              <Text style={styles.permBody}>
-                Turn it on in settings to snap a photo as you pack. You can still add the item with just its
-                details.
-              </Text>
+              <Text style={styles.permTitle}>{copy.cameraAccessIsOff}</Text>
+              <Text style={styles.permBody}>{copy.turnItOnInSettings}</Text>
               <Button
                 variant="secondary"
                 size="md"
@@ -85,16 +83,13 @@ export function CameraCard({ capture }: { capture: Capture }) {
                 onPress={() => Linking.openSettings()}
                 style={styles.permBtn}
               >
-                Open settings
+                {copy.openSettings}
               </Button>
             </>
           ) : (
             <>
-              <Text style={styles.permTitle}>Snap a photo as you pack</Text>
-              <Text style={styles.permBody}>
-                A quick picture makes items easy to spot later — but it&apos;s optional. Save without one
-                anytime.
-              </Text>
+              <Text style={styles.permTitle}>{copy.snapAPhotoAsYou}</Text>
+              <Text style={styles.permBody}>{copy.aQuickPictureMakesItems}</Text>
               <Button
                 variant="secondary"
                 size="md"
@@ -102,7 +97,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
                 onPress={requestPermission}
                 style={styles.permBtn}
               >
-                Allow camera
+                {copy.allowCamera}
               </Button>
             </>
           )}
@@ -113,7 +108,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
             hitSlop={8}
             style={({ pressed }) => [styles.notNowBtn, pressed && styles.notNowBtnPressed]}
           >
-            <Text style={styles.notNowText}>Not now</Text>
+            <Text style={styles.notNowText}>{copy.notNow}</Text>
           </Pressable>
         </View>
       )}

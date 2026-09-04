@@ -6,6 +6,7 @@ import { money } from '@/lib/money';
 import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 
 import { KBD_ACCESSORY } from './constants';
+import { copy } from '@/copy/addItem';
 
 /** The item form fields: name, price, quantity, computed total and notes. */
 export function ItemFields({
@@ -34,10 +35,10 @@ export function ItemFields({
   return (
     <>
       <Input
-        label="Item name"
+        label={copy.itemName}
         value={name}
         onChangeText={onName}
-        placeholder="e.g. Cast iron skillet"
+        placeholder={copy.eGCastIronSkillet}
         // Only pop the keyboard when CREATING a new item. When editing an
         // existing one you're usually just glancing/tweaking — don't hijack focus.
         autoFocus={!isEdit}
@@ -45,7 +46,7 @@ export function ItemFields({
 
       <View style={styles.fieldRow}>
         <Input
-          label="Price (each)"
+          label={copy.priceEach}
           value={value}
           onChangeText={onValue}
           placeholder="0"
@@ -55,7 +56,7 @@ export function ItemFields({
           style={styles.valueField}
         />
         <View style={styles.qtyField}>
-          <Text style={styles.qtyLabel}>Quantity</Text>
+          <Text style={styles.qtyLabel}>{copy.quantity}</Text>
           <View style={styles.qtyBox}>
             <Stepper value={qty} onChange={onQty} inputAccessoryViewID={KBD_ACCESSORY} />
           </View>
@@ -70,10 +71,10 @@ export function ItemFields({
       ) : null}
 
       <Input
-        label="Notes (optional)"
+        label={copy.notesOptional}
         value={note}
         onChangeText={onNote}
-        placeholder="Fragile, which towel it's wrapped in…"
+        placeholder={copy.fragileWhichTowelItS}
         inputAccessoryViewID={KBD_ACCESSORY}
         multiline
       />

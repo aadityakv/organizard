@@ -7,6 +7,7 @@ import { colors, fonts, palette, alpha } from '@/theme';
 
 import type { Mic, SItem } from './types';
 import { MIC } from './types';
+import { copy } from '@/copy/stream';
 
 type Props = {
   mic: Mic;
@@ -43,7 +44,7 @@ export function MicPills({ mic, transcript, lastBatch, lastIt, onFixLast }: Prop
       {mic === MIC.fail ? (
         <Pressable accessibilityRole="button" onPress={onFixLast} style={styles.pillFail}>
           <Icon name="ear" size={16} color={palette.amber600} />
-          <Text style={styles.pillFailText}>Hmm — didn&apos;t catch a name. Tap to type it.</Text>
+          <Text style={styles.pillFailText}>{copy.hmmDidnTCatchA}</Text>
         </Pressable>
       ) : null}
     </View>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Sheet } from '@/components/ui/Sheet';
 import { fonts, palette } from '@/theme';
+import { copy } from '@/copy/shared';
 
 const PERKS: { icon: string; label: string }[] = [
   { icon: 'camera', label: 'Snap a photo and just say what it is' },
@@ -29,10 +30,8 @@ export function StreamUpsell({
         <View style={styles.tile}>
           <Icon name="zap" size={28} color={palette.green700} />
         </View>
-        <Text style={styles.title}>Pack 10× faster with Stream</Text>
-        <Text style={styles.sub}>
-          Snap or speak item after item — Tuck fills in the name, count and value as you go. Part of Tuck Pro.
-        </Text>
+        <Text style={styles.title}>{copy.pack10FasterWithStream}</Text>
+        <Text style={styles.sub}>{copy.snapOrSpeakItemAfter}</Text>
       </View>
       <View style={styles.perks}>
         {PERKS.map((p) => (
@@ -45,7 +44,7 @@ export function StreamUpsell({
         ))}
       </View>
       <Button fullWidth size="lg" onPress={onTryPro}>
-        Try Pro free for 7 days
+        {copy.tryProFreeFor7}
       </Button>
       <Button variant="ghost" fullWidth onPress={onClose} style={{ marginTop: 4 }}>
         Maybe later

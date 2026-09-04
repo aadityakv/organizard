@@ -25,6 +25,7 @@ import {
 import { shared } from '@/features/box/styles';
 import { colors, fonts, palette } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/box';
 
 const SHEET = { status: 'status', markers: 'markers', cover: 'cover', edit: 'edit' } as const;
 type SheetKind = (typeof SHEET)[keyof typeof SHEET];
@@ -49,9 +50,9 @@ export default function BoxDetail() {
       `Delete "${box.name}"?`,
       'This removes the box and everything packed inside. This can’t be undone.',
       [
-        { text: 'Keep it', style: 'cancel' },
+        { text: copy.keepIt, style: 'cancel' },
         {
-          text: 'Delete box',
+          text: copy.deleteBox,
           style: 'destructive',
           onPress: () => {
             actions.deleteBox(box.id);
@@ -64,9 +65,9 @@ export default function BoxDetail() {
 
   const onMore = () => {
     const options: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
-    if (canEdit) options.push({ text: 'Edit box', onPress: () => setSheet(SHEET.edit) });
-    if (canDelete) options.push({ text: 'Delete box', style: 'destructive', onPress: confirmDelete });
-    options.push({ text: 'Cancel', style: 'cancel' });
+    if (canEdit) options.push({ text: copy.editBox, onPress: () => setSheet(SHEET.edit) });
+    if (canDelete) options.push({ text: copy.deleteBox, style: 'destructive', onPress: confirmDelete });
+    options.push({ text: copy.cancel, style: 'cancel' });
     Alert.alert(box.name, undefined, options);
   };
 
@@ -99,7 +100,7 @@ export default function BoxDetail() {
         )}
 
         <View style={shared.sectionHead}>
-          <Text style={shared.sectionTitle}>Markers</Text>
+          <Text style={shared.sectionTitle}>{copy.markers}</Text>
           {canEdit && (
             <Pressable
               accessibilityRole="button"
@@ -108,7 +109,7 @@ export default function BoxDetail() {
               style={({ pressed }) => [styles.editLink, pressed && shared.pressed]}
             >
               <Icon name="plus" size={16} color={palette.green600} />
-              <Text style={styles.editLinkText}>Edit markers</Text>
+              <Text style={styles.editLinkText}>{copy.editMarkers}</Text>
             </Pressable>
           )}
         </View>
@@ -142,17 +143,17 @@ export default function BoxDetail() {
               </View>
               <View style={styles.streamItems}>
                 <Button variant="primary" size="lg" fullWidth iconLeft="audio-lines" onPress={startStreaming}>
-                  Stream items
+                  {copy.streamItems}
                 </Button>
                 {!isPro ? (
                   <View style={styles.proBadge}>
-                    <Text style={styles.proBadgeText}>PRO</Text>
+                    <Text style={styles.proBadgeText}>{copy.pro}</Text>
                   </View>
                 ) : null}
               </View>
             </View>
           ) : (
-            <LockNote>You&apos;re viewing as a guest. Ask the owner to invite you to add items.</LockNote>
+            <LockNote>{copy.youReViewingAsA}</LockNote>
           )}
         </View>
       </ScrollView>

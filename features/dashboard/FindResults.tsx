@@ -12,6 +12,7 @@ import { boxColor, colors, fonts, palette, radius, shadow } from '@/theme';
 import { openBox } from './openBox';
 import { routes } from '@/lib/routes';
 import { countOf } from '@/lib/text';
+import { copy } from '@/copy/dashboard';
 
 /** Search results for the dashboard: matching items and boxes with breadcrumbs. */
 export function FindResults({ query }: { query: string }) {
@@ -37,7 +38,7 @@ export function FindResults({ query }: { query: string }) {
     return (
       <View style={styles.empty}>
         <Icon name="search-x" size={32} color={palette.ink400} />
-        <Text style={styles.emptyTitle}>Nothing found</Text>
+        <Text style={styles.emptyTitle}>{copy.nothingFound}</Text>
         <Text style={styles.emptyBody}>No items or boxes match “{query}”.</Text>
       </View>
     );

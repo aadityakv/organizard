@@ -18,6 +18,7 @@ import type { Move } from '@/data/types';
 import { useSheetForm } from '@/hooks/useSheetForm';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
+import { copy } from '@/copy/moves';
 
 /** Sheet to edit the open move's name, addresses and target date. */
 export function EditMoveSheet({
@@ -51,25 +52,25 @@ export function EditMoveSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Edit move">
+    <Sheet visible={visible} onClose={onClose} title={copy.editMove}>
       <Input
-        label="Move name"
+        label={copy.moveName}
         value={name}
         onChangeText={(name) => patch({ name })}
-        placeholder="e.g. NYC Move"
+        placeholder={copy.eGNycMove}
         autoFocus
       />
       <View style={styles.fieldGap} />
-      <Text style={styles.editLabel}>From</Text>
-      <AddressField value={from} onChangeText={(from) => patch({ from })} placeholder="Current address" />
+      <Text style={styles.editLabel}>{copy.from}</Text>
+      <AddressField value={from} onChangeText={(from) => patch({ from })} placeholder={copy.currentAddress} />
       <View style={styles.fieldGap} />
       <Text style={styles.editLabel}>To</Text>
-      <AddressField value={to} onChangeText={(to) => patch({ to })} placeholder="New address" />
+      <AddressField value={to} onChangeText={(to) => patch({ to })} placeholder={copy.newAddress} />
       <View style={styles.fieldGap} />
-      <Text style={styles.editLabel}>Target date</Text>
-      <DateField value={date} onChange={(date) => patch({ date })} placeholder="Pick a move date" />
+      <Text style={styles.editLabel}>{copy.targetDate}</Text>
+      <DateField value={date} onChange={(date) => patch({ date })} placeholder={copy.pickAMoveDate} />
       <Button fullWidth iconLeft="check" onPress={save} disabled={!canSave} style={styles.sheetCta}>
-        Save changes
+        {copy.saveChanges}
       </Button>
     </Sheet>
   );

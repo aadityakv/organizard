@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
 import { colors, fonts, alpha, palette } from '@/theme';
+import { copy } from '@/copy/stream';
 
 type Props = {
   voiceMode: boolean;
@@ -23,7 +24,7 @@ export function ModeSwitchRow({ voiceMode, listening, onBackToCapture, onToggleV
         accessibilityLabel="Single item"
       >
         <Icon name="chevron-left" size={15} color="#fff" />
-        <Text style={styles.backPillText}>Single item</Text>
+        <Text style={styles.backPillText}>{copy.singleItem}</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"

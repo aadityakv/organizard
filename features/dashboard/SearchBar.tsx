@@ -6,6 +6,7 @@ import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 
 import { SEARCH_SUGGESTIONS } from './constants';
 import { shared } from './styles';
+import { copy } from '@/copy/dashboard';
 
 /** Dashboard search field with suggestion pills. */
 export function SearchBar({ query, onChange }: { query: string; onChange: (q: string) => void }) {
@@ -17,7 +18,7 @@ export function SearchBar({ query, onChange }: { query: string; onChange: (q: st
         <Input
           value={query}
           onChangeText={onChange}
-          placeholder="Find an item — “Where's my…?”"
+          placeholder={copy.findAnItemWhereS}
           autoFocus
           style={styles.searchInput}
         />

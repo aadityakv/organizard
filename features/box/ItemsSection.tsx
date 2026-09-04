@@ -11,6 +11,7 @@ import { ItemRow } from './ItemRow';
 import { shared } from './styles';
 import { SORT_OPTIONS, type SortMode, useVisibleItems } from './useVisibleItems';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/box';
 
 /** The box's item list with search, sort and empty states. */
 export function ItemsSection({
@@ -31,7 +32,7 @@ export function ItemsSection({
     <>
       <View style={shared.sectionHead}>
         <View style={styles.itemsTitleRow}>
-          <Text style={styles.itemsTitle}>Items</Text>
+          <Text style={styles.itemsTitle}>{copy.items}</Text>
           <Badge
             label={
               query.trim().length > 0 ? `${visibleItems.length} of ${items.length}` : String(items.length)
@@ -58,7 +59,7 @@ export function ItemsSection({
               <Input
                 value={query}
                 onChangeText={setQuery}
-                placeholder="Search items in this box…"
+                placeholder={copy.searchItemsInThisBox}
                 autoFocus
                 style={styles.searchInput}
               />
@@ -86,7 +87,7 @@ export function ItemsSection({
       {items.length === 0 ? (
         <View style={styles.empty}>
           <Thumb color={boxColor} icon="package-open" size={64} radius={radius.pill} />
-          <Text style={styles.emptyTitle}>No items yet</Text>
+          <Text style={styles.emptyTitle}>{copy.noItemsYet}</Text>
           <Text style={styles.emptyBody}>
             {canEdit ? 'No items yet — add your first one to start packing.' : 'Nothing packed in here yet.'}
           </Text>
@@ -94,7 +95,7 @@ export function ItemsSection({
       ) : visibleItems.length === 0 ? (
         <View style={styles.empty}>
           <Icon name="search-x" size={32} color={palette.ink400} />
-          <Text style={styles.emptyTitle}>No items match</Text>
+          <Text style={styles.emptyTitle}>{copy.noItemsMatch}</Text>
           <Text style={styles.emptyBody}>Nothing in this box matches “{query.trim()}”.</Text>
         </View>
       ) : (

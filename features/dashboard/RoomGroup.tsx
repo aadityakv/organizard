@@ -9,6 +9,7 @@ import { fonts, fontSize, palette, radius } from '@/theme';
 import { DashboardBoxCard } from './DashboardBoxCard';
 import { shared } from './styles';
 import { countOf } from '@/lib/text';
+import { copy } from '@/copy/dashboard';
 
 /** One room on the dashboard: header with edit action and its box grid or empty prompt. */
 export function RoomGroup({
@@ -63,7 +64,7 @@ export function RoomGroup({
               style={({ pressed }) => [shared.gridCard, styles.addBoxTile, pressed && shared.pressedSoft]}
             >
               <Icon name="plus" size={22} color={palette.green600} />
-              <Text style={styles.addBoxTileText}>Add box</Text>
+              <Text style={styles.addBoxTileText}>{copy.addBox}</Text>
             </Pressable>
           ) : null}
         </View>

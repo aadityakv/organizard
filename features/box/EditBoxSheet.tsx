@@ -7,6 +7,7 @@ import { useSheetForm } from '@/hooks/useSheetForm';
 import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
 
 import { shared } from './styles';
+import { copy } from '@/copy/box';
 
 /** Sheet to rename a box, change its color or move it to another room. */
 export function EditBoxSheet({
@@ -29,17 +30,17 @@ export function EditBoxSheet({
   }));
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Edit box">
-      <Input label="Box name" value={name} onChangeText={(name) => patch({ name })} autoFocus />
+    <Sheet visible={visible} onClose={onClose} title={copy.editBox}>
+      <Input label={copy.boxName} value={name} onChangeText={(name) => patch({ name })} autoFocus />
 
-      <Text style={shared.fieldLabel}>Color</Text>
+      <Text style={shared.fieldLabel}>{copy.color}</Text>
       <View style={shared.palette}>
         {BOX_COLORS.map((c) => (
           <ColorDot key={c} color={c} size={28} selected={c === color} onPress={() => patch({ color: c })} />
         ))}
       </View>
 
-      <Text style={shared.fieldLabel}>Room</Text>
+      <Text style={shared.fieldLabel}>{copy.room}</Text>
       <View style={styles.roomPickRow}>
         {rooms.map((r) => {
           const on = r.id === roomId;

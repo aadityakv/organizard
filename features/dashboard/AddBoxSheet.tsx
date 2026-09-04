@@ -9,6 +9,7 @@ import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
 
 import { openBox } from './openBox';
 import { shared, sheetForm } from './styles';
+import { copy } from '@/copy/dashboard';
 
 /** Sheet to create a box: name, color and room. */
 export function AddBoxSheet({
@@ -42,16 +43,16 @@ export function AddBoxSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="New box">
+    <Sheet visible={visible} onClose={onClose} title={copy.newBox}>
       <Input
-        label="What's in it?"
+        label={copy.whatSInIt}
         value={name}
         onChangeText={(name) => patch({ name })}
-        placeholder="e.g. Kitchen essentials"
+        placeholder={copy.eGKitchenEssentials}
         autoFocus
       />
 
-      <Text style={sheetForm.fieldLabel}>Color</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.color}</Text>
       <View style={sheetForm.colorRow}>
         {BOX_COLORS.map((hue) => (
           <ColorDot
@@ -64,14 +65,12 @@ export function AddBoxSheet({
         ))}
       </View>
 
-      <Text style={sheetForm.fieldLabel}>Room</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.room}</Text>
       {rooms.length === 0 ? (
         <View style={styles.noRoomsHint}>
-          <Text style={styles.noRoomsText}>
-            Boxes live inside a room. Add your first room to start packing.
-          </Text>
+          <Text style={styles.noRoomsText}>{copy.boxesLiveInsideARoom}</Text>
           <Button variant="secondary" size="md" iconLeft="plus" onPress={onAddRoom}>
-            New room
+            {copy.newRoom}
           </Button>
         </View>
       ) : (
@@ -112,7 +111,7 @@ export function AddBoxSheet({
           ]}
         >
           <Icon name="plus" size={20} color={colors.textOnBrand} />
-          <Text style={sheetForm.ctaText}>Add box</Text>
+          <Text style={sheetForm.ctaText}>{copy.addBox}</Text>
         </Pressable>
       )}
     </Sheet>

@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button, Icon, LockNote } from '@/components';
 import { colors, fonts, fontSize, gutter, palette, space } from '@/theme';
 import { countOf } from '@/lib/text';
+import { copy } from '@/copy/addItem';
 
 /** Sticky footer: Save / Save & add another / Save changes, or a lock note for viewers. */
 export function SaveFooter({
@@ -32,12 +33,12 @@ export function SaveFooter({
       {canEdit ? (
         isEdit ? (
           <Button variant="primary" size="lg" fullWidth onPress={onSaveEdit}>
-            Save changes
+            {copy.saveChanges}
           </Button>
         ) : (
           <View style={styles.actionRow}>
             <Button variant="secondary" size="lg" onPress={() => onSave(false)} style={styles.saveBtn}>
-              Save
+              {copy.save}
             </Button>
             <Button
               variant="primary"
@@ -46,12 +47,12 @@ export function SaveFooter({
               onPress={() => onSave(true)}
               style={styles.saveAnotherBtn}
             >
-              Save & add another
+              {copy.saveAddAnother}
             </Button>
           </View>
         )
       ) : (
-        <LockNote>You can view and scan, but only an editor can add items.</LockNote>
+        <LockNote>{copy.youCanViewAndScan}</LockNote>
       )}
     </View>
   );

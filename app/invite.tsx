@@ -11,6 +11,7 @@ import { appleSignInAvailable, signInWithApple } from '@/services/auth';
 import { useStore } from '@/store/useStore';
 import { colors, fonts } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/onboarding';
 
 const FRIENDLY: Record<string, string> = {
   INVITE_INVALID: "That invite link isn't valid.",
@@ -66,7 +67,7 @@ export default function InviteAccept() {
       {outcome.status === 'working' ? <ActivityIndicator color={colors.brand} /> : null}
       <Text style={styles.text}>{outcome.status === 'error' ? outcome.message : 'Joining…'}</Text>
       {outcome.status === 'error' ? (
-        <Button onPress={() => router.replace(routes.moves)}>Back to moves</Button>
+        <Button onPress={() => router.replace(routes.moves)}>{copy.backToMoves}</Button>
       ) : null}
     </View>
   );

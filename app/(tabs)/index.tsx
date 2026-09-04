@@ -25,6 +25,7 @@ import { money } from '@/lib/money';
 import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
 import { GROUP_VIEW } from '@/features/dashboard/constants';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/dashboard';
 
 /** Boxes tab: the open move at a glance, grouped by room, status or value, with add/edit sheets. */
 export default function Dashboard() {
@@ -125,10 +126,10 @@ export default function Dashboard() {
         ) : (
           <>
             <View style={styles.totalsCard}>
-              <ValueStat value={money(totals.value)} label="Estimated value" tone="brand" />
+              <ValueStat value={money(totals.value)} label={copy.estimatedValue} tone="brand" />
               <View style={styles.totalsDivider} />
-              <ValueStat value={totals.boxes} label="Boxes" />
-              <ValueStat value={totals.items} label="Items" />
+              <ValueStat value={totals.boxes} label={copy.boxes} />
+              <ValueStat value={totals.items} label={copy.items} />
             </View>
 
             <View style={styles.controlRow}>
@@ -168,11 +169,11 @@ export default function Dashboard() {
                       ]}
                     >
                       <Icon name="plus" size={20} color={palette.green600} />
-                      <Text style={styles.addBtnText}>Add room</Text>
+                      <Text style={styles.addBtnText}>{copy.addRoom}</Text>
                     </Pressable>
                   </View>
                 ) : (
-                  <LockNote>Viewers can browse and scan — ask the owner to add boxes.</LockNote>
+                  <LockNote>{copy.viewersCanBrowseAndScan}</LockNote>
                 )}
               </View>
             ) : view === GROUP_VIEW.status ? (

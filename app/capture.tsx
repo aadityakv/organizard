@@ -10,6 +10,7 @@ import { Button, Icon } from '@/components';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/stream';
 
 /** Capture entry: pick a box, then continue to the single-item or streaming capture flow. */
 export default function Capture() {
@@ -27,13 +28,13 @@ export default function Capture() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
         <Button variant="ghost" iconLeft="x" onPress={() => router.back()}>
-          Close
+          {copy.close}
         </Button>
       </View>
       <View style={styles.empty}>
         <Icon name="package" size={32} color={palette.ink400} />
-        <Text style={styles.emptyText}>No boxes yet — add a box first, then capture into it.</Text>
-        <Button onPress={() => router.back()}>Back</Button>
+        <Text style={styles.emptyText}>{copy.noBoxesYetAddA}</Text>
+        <Button onPress={() => router.back()}>{copy.back}</Button>
       </View>
     </SafeAreaView>
   );

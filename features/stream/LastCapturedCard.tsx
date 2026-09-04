@@ -7,6 +7,7 @@ import { boxColor, boxTint, colors, fonts, palette } from '@/theme';
 
 import { sharedStyles } from './styles';
 import type { SItem } from './types';
+import { copy } from '@/copy/stream';
 
 type Props = {
   item: SItem;
@@ -29,16 +30,16 @@ export function LastCapturedCard({ item, colorOf, onEdit, onUndo }: Props) {
         <View style={styles.chipRow}>
           {item.qty && item.qty > 1 ? <Text style={sharedStyles.qtyChip}>×{item.qty}</Text> : null}
           {item.value != null ? <Text style={sharedStyles.valChip}>{money(item.value)}</Text> : null}
-          <Text style={styles.fixHint}>Tap to fix</Text>
+          <Text style={styles.fixHint}>{copy.tapToFix}</Text>
         </View>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4 }}>
         <View style={styles.addedRow}>
           <Icon name="check" size={14} color={palette.green700} />
-          <Text style={styles.addedText}>Added</Text>
+          <Text style={styles.addedText}>{copy.added}</Text>
         </View>
         <Pressable accessibilityRole="button" onPress={onUndo}>
-          <Text style={styles.undo}>Undo</Text>
+          <Text style={styles.undo}>{copy.undo}</Text>
         </Pressable>
       </View>
     </Pressable>

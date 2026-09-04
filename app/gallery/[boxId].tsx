@@ -22,6 +22,7 @@ import { photoSource } from '@/lib/photos';
 import { boxPhotos, useStore } from '@/store/useStore';
 import { fonts, fontSize, palette, radius, space, tap, alpha } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/item';
 
 /** Full-screen photo viewer for a box: the cover and every item photo, swipeable. */
 export default function GalleryScreen() {
@@ -125,7 +126,7 @@ export default function GalleryScreen() {
         {current.kind === 'box' ? (
           <View style={styles.labelPill}>
             <Icon name="package" size={15} color={palette.white} />
-            <Text style={styles.labelText}>Box photo</Text>
+            <Text style={styles.labelText}>{copy.boxPhoto}</Text>
           </View>
         ) : (
           <Pressable

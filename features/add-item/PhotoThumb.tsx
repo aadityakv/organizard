@@ -8,6 +8,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
 import { colors, fonts, palette, radius, shadow, alpha } from '@/theme';
+import { copy } from '@/copy/addItem';
 
 /** One captured photo in the strip, with cover badge and remove button. */
 export function PhotoThumb({
@@ -39,7 +40,7 @@ export function PhotoThumb({
       )}
       {isCover ? (
         <View style={styles.coverBadge}>
-          <Text style={styles.coverBadgeText}>Cover</Text>
+          <Text style={styles.coverBadgeText}>{copy.cover}</Text>
         </View>
       ) : null}
       <Pressable

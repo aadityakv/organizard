@@ -15,6 +15,7 @@ import { printLabels } from '@/services/print';
 import { useStore } from '@/store/useStore';
 import type { Box } from '@/data/types';
 import { countOf } from '@/lib/text';
+import { copy } from '@/copy/labels';
 
 /** Print labels: pick boxes and share a PDF sheet of their QR labels. */
 export default function PrintLabels() {
@@ -70,7 +71,7 @@ export default function PrintLabels() {
         </Pressable>
 
         <Text style={styles.title} numberOfLines={1}>
-          Print labels
+          {copy.printLabels}
         </Text>
 
         {boxes.length > 0 ? (
@@ -91,8 +92,8 @@ export default function PrintLabels() {
       {boxes.length === 0 ? (
         <View style={styles.empty}>
           <Icon name="printer" size={32} color={palette.ink400} />
-          <Text style={styles.emptyTitle}>No boxes to print</Text>
-          <Text style={styles.emptyBody}>Add a box first, then come back to print its label.</Text>
+          <Text style={styles.emptyTitle}>{copy.noBoxesToPrint}</Text>
+          <Text style={styles.emptyBody}>{copy.addABoxFirstThen}</Text>
         </View>
       ) : (
         <ScrollView
@@ -100,9 +101,7 @@ export default function PrintLabels() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.blurb}>
-            Each label has the box&apos;s QR code — scan it to jump straight to the box.
-          </Text>
+          <Text style={styles.blurb}>{copy.eachLabelHasTheBox}</Text>
           {boxes.map((b) => (
             <BoxRow
               key={b.id}

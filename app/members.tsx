@@ -16,6 +16,7 @@ import { useStore } from '@/store/useStore';
 import { colors, fonts, fontSize, palette, radius } from '@/theme';
 import { ROLES } from '@/shared';
 import { MOVE_MODE } from '@/store/library';
+import { copy } from '@/copy/members';
 
 const FRIENDLY_ERROR: Record<string, string> = {
   ENTITLEMENT_REQUIRED: 'A Tuck subscription is required to share a move.',
@@ -98,20 +99,15 @@ export default function Members() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title="Share & members" subtitle={moveName} onBack={() => router.back()} />
+      <Header title={copy.shareMembers} subtitle={moveName} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {!session ? (
-          <AuthPanel
-            title="Sign in to share"
-            subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner."
-          />
+          <AuthPanel title={copy.signInToShare} subtitle={copy.sharingAMoveKeepsIt} />
         ) : activeMode === MOVE_MODE.local ? (
           <>
             <Card style={styles.card}>
               <Text style={styles.h}>Share “{moveName}”</Text>
-              <Text style={styles.p}>
-                This uploads the move so your partner can view and edit it in sync. You stay the owner.
-              </Text>
+              <Text style={styles.p}>{copy.thisUploadsTheMoveSo}</Text>
               <Button onPress={doShare} disabled={busy} fullWidth iconLeft="users" style={styles.cta}>
                 {busy ? 'Sharing…' : 'Share this move'}
               </Button>
@@ -120,10 +116,10 @@ export default function Members() {
         ) : (
           <>
             <Card style={styles.card}>
-              <Text style={styles.h}>Invite a packing buddy</Text>
+              <Text style={styles.h}>{copy.inviteAPackingBuddy}</Text>
               {canManage ? (
                 <>
-                  <Text style={styles.label}>They join as</Text>
+                  <Text style={styles.label}>{copy.theyJoinAs}</Text>
                   <Segmented
                     options={[
                       { value: ROLES.editor, label: 'Editor' },
@@ -139,7 +135,7 @@ export default function Members() {
                     iconLeft="user-plus"
                     style={styles.cta}
                   >
-                    Create invite link
+                    {copy.createInviteLink}
                   </Button>
                   {inviteLink ? (
                     <Text selectable style={styles.link}>
@@ -148,11 +144,11 @@ export default function Members() {
                   ) : null}
                 </>
               ) : (
-                <LockNote>Only the owner can invite people.</LockNote>
+                <LockNote>{copy.onlyTheOwnerCanInvite}</LockNote>
               )}
             </Card>
 
-            <Text style={styles.section}>Members</Text>
+            <Text style={styles.section}>{copy.members}</Text>
             {members.map((mem) => (
               <MemberRow
                 key={mem.id}

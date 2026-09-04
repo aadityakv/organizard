@@ -10,6 +10,7 @@ import type { Room } from '@/data/types';
 import { allIndexedItems, useStore } from '@/store/useStore';
 import { fonts, palette, radius } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/dashboard';
 
 const SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];
 
@@ -39,8 +40,8 @@ export default function Find() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
-        title="Find"
-        subtitle="Where's my…?"
+        title={copy.find}
+        subtitle={copy.whereSMy}
         trailing={
           <IconButton
             icon="scan-line"
@@ -56,7 +57,7 @@ export default function Find() {
         <Input
           value={query}
           onChangeText={setQuery}
-          placeholder="Find an item — “Where's my…?”"
+          placeholder={copy.findAnItemWhereS}
           autoFocus
           style={styles.searchInput}
         />
@@ -73,7 +74,7 @@ export default function Find() {
       >
         {!q ? (
           <View style={styles.suggest}>
-            <Text style={styles.suggestTitle}>Try</Text>
+            <Text style={styles.suggestTitle}>{copy.try}</Text>
             <View style={styles.chips}>
               {SUGGESTIONS.map((s) => (
                 <Pressable accessibilityRole="button" key={s} onPress={() => setQuery(s)} style={styles.chip}>
@@ -85,7 +86,7 @@ export default function Find() {
         ) : items.length === 0 && matchedBoxes.length === 0 ? (
           <View style={styles.empty}>
             <Icon name="search-x" size={32} color={palette.ink400} />
-            <Text style={styles.emptyTitle}>Nothing found</Text>
+            <Text style={styles.emptyTitle}>{copy.nothingFound}</Text>
             <Text style={styles.emptyBody}>No items or boxes match “{query}”.</Text>
           </View>
         ) : (

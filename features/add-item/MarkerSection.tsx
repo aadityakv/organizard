@@ -5,6 +5,7 @@ import { MarkerChip } from '@/components';
 import type { Marker } from '@/data/types';
 
 import { sharedStyles } from './styles';
+import { copy } from '@/copy/addItem';
 
 /** Toggleable marker chips for the item. */
 export function MarkerSection({
@@ -19,7 +20,7 @@ export function MarkerSection({
   if (choices.length === 0) return null;
   return (
     <View style={sharedStyles.chipSection}>
-      <Text style={sharedStyles.sectionHeading}>Markers (optional)</Text>
+      <Text style={sharedStyles.sectionHeading}>{copy.markersOptional}</Text>
       <View style={sharedStyles.chipWrap}>
         {choices.map((m) => (
           <MarkerChip

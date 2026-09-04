@@ -7,6 +7,7 @@ import type { Marker } from '@/data/types';
 import { BOX_COLORS, palette, radius } from '@/theme';
 
 import { shared } from './styles';
+import { copy } from '@/copy/box';
 
 /** Sheet to toggle the box's handling markers or create a custom one. */
 export function MarkersSheet({
@@ -36,10 +37,8 @@ export function MarkersSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={close} title="Markers">
-      <Text style={shared.sheetBlurb}>
-        Handling flags for this box — fragile, open first, heavy&hellip; Tap to toggle.
-      </Text>
+    <Sheet visible={visible} onClose={close} title={copy.markers}>
+      <Text style={shared.sheetBlurb}>{copy.handlingFlagsForThisBox}</Text>
       <View style={styles.markerSheetWrap}>
         {allMarkers.map((m) => (
           <MarkerChip
@@ -56,13 +55,13 @@ export function MarkersSheet({
       {adding ? (
         <View style={styles.markerCreate}>
           <Input
-            label="New marker"
+            label={copy.newMarker}
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Do not stack, Sell, Donate"
+            placeholder={copy.eGDoNotStack}
             autoFocus
           />
-          <Text style={shared.fieldLabel}>Color</Text>
+          <Text style={shared.fieldLabel}>{copy.color}</Text>
           <View style={shared.palette}>
             {BOX_COLORS.map((c) => (
               <ColorDot key={c} color={c} size={30} selected={c === color} onPress={() => setColor(c)} />
@@ -71,7 +70,7 @@ export function MarkersSheet({
           <View style={shared.sheetActions}>
             <View style={shared.flex1}>
               <Button variant="ghost" size="md" fullWidth onPress={() => setAdding(false)}>
-                Cancel
+                {copy.cancel}
               </Button>
             </View>
             <View style={shared.flex1}>
@@ -100,13 +99,13 @@ export function MarkersSheet({
           style={({ pressed }) => [shared.dashed, pressed && shared.pressed]}
         >
           <Icon name="plus" size={18} color={palette.green600} />
-          <Text style={shared.dashedText}>Create a new marker</Text>
+          <Text style={shared.dashedText}>{copy.createANewMarker}</Text>
         </Pressable>
       )}
 
       <View style={shared.doneButton}>
         <Button variant="secondary" size="lg" fullWidth onPress={close}>
-          Done
+          {copy.done}
         </Button>
       </View>
     </Sheet>

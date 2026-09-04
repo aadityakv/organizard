@@ -37,6 +37,7 @@ import { colors, fonts, palette, DEFAULT_HUE, alpha } from '@/theme';
 import { MIC, STREAM_VIEW } from '@/features/stream/types';
 import { routes } from '@/lib/routes';
 import { countOf } from '@/lib/text';
+import { copy } from '@/copy/stream';
 
 /** Capture screen: free single-item capture and the Pro streaming session, flipped in place. */
 export default function StreamSession() {
@@ -294,17 +295,17 @@ export default function StreamSession() {
         <View style={styles.summaryScrim}>
           <View style={styles.summaryCard}>
             <SlothGlyph />
-            <Text style={styles.summaryTitle}>Nice streak!</Text>
+            <Text style={styles.summaryTitle}>{copy.niceStreak}</Text>
             <Text style={styles.summaryLabel}>{summaryLabel}</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 10, width: '100%' }}>
               <View style={{ flex: 1 }}>
                 <Button variant="secondary" fullWidth onPress={() => setSummaryOpen(false)}>
-                  Keep going
+                  {copy.keepGoing}
                 </Button>
               </View>
               <View style={{ flex: 1 }}>
                 <Button fullWidth onPress={finish}>
-                  Done
+                  {copy.done}
                 </Button>
               </View>
             </View>

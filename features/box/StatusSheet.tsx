@@ -7,6 +7,7 @@ import type { Status } from '@/data/types';
 import { BOX_COLORS, fonts, palette, radius } from '@/theme';
 
 import { shared } from './styles';
+import { copy } from '@/copy/box';
 
 /** Sheet to pick the box status or create a custom one. */
 export function StatusSheet({
@@ -55,7 +56,7 @@ export function StatusSheet({
                   ]}
                 >
                   <StatusChip label={s.label} color={s.color} />
-                  {s.custom ? <Text style={styles.customTag}>Custom</Text> : null}
+                  {s.custom ? <Text style={styles.customTag}>{copy.custom}</Text> : null}
                   {active ? (
                     <View style={styles.optionCheck}>
                       <Icon name="check" size={20} color={palette.green600} />
@@ -72,32 +73,32 @@ export function StatusSheet({
             style={({ pressed }) => [shared.dashed, pressed && shared.pressed]}
           >
             <Icon name="plus" size={18} color={palette.green600} />
-            <Text style={shared.dashedText}>New status&hellip;</Text>
+            <Text style={shared.dashedText}>{copy.newStatus}</Text>
           </Pressable>
         </View>
       ) : (
         <View>
           <Input
-            label="Name"
+            label={copy.name}
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Storage unit, Sell, Trash"
+            placeholder={copy.eGStorageUnitSell}
             autoFocus
           />
-          <Text style={shared.fieldLabel}>Color</Text>
+          <Text style={shared.fieldLabel}>{copy.color}</Text>
           <View style={shared.palette}>
             {BOX_COLORS.map((c) => (
               <ColorDot key={c} color={c} size={30} selected={c === color} onPress={() => setColor(c)} />
             ))}
           </View>
           <View style={styles.previewRow}>
-            <Text style={styles.previewLabel}>Preview</Text>
+            <Text style={styles.previewLabel}>{copy.preview}</Text>
             <StatusChip label={name.trim() || 'New status'} color={color} />
           </View>
           <View style={shared.sheetActions}>
             <View style={shared.flex1}>
               <Button variant="ghost" size="md" fullWidth onPress={() => setCreating(false)}>
-                Cancel
+                {copy.cancel}
               </Button>
             </View>
             <View style={shared.flex1}>

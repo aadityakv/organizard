@@ -21,6 +21,7 @@ import type { MoveSummary } from '@/store/library';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette, space } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/moves';
 
 const EMPTY_MOVE: Move = { name: '', from: '', to: '', target: '' };
 
@@ -79,10 +80,10 @@ export default function Moves() {
 
   const confirmDelete = (move: MoveSummary) => {
     setMenuFor(null);
-    Alert.alert('Delete move?', `“${move.name}” and its boxes will be permanently deleted.`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(copy.deleteMove, `“${move.name}” and its boxes will be permanently deleted.`, [
+      { text: copy.cancel, style: 'cancel' },
       {
-        text: 'Delete',
+        text: copy.delete,
         style: 'destructive',
         onPress: () => {
           void deleteMove(move.id);
@@ -111,16 +112,16 @@ export default function Moves() {
               <SlothMark size={96} />
             </View>
             <Text style={styles.wordmark}>
-              <Text style={styles.wordmarkInk}>Tuck</Text>
+              <Text style={styles.wordmarkInk}>{copy.tuck}</Text>
             </Text>
-            <Text style={styles.tagline}>Pack fast. Find anything. Share the load.</Text>
+            <Text style={styles.tagline}>{copy.packFastFindAnythingShare}</Text>
           </View>
           <View style={styles.emptyActions}>
             <Button size="lg" fullWidth iconLeft="plus" onPress={() => router.push(routes.newMove)}>
-              Create a move
+              {copy.createAMove}
             </Button>
             <Button variant="secondary" size="lg" fullWidth iconLeft="link" onPress={() => setJoinOpen(true)}>
-              Join a move
+              {copy.joinAMove}
             </Button>
           </View>
         </View>
@@ -132,7 +133,7 @@ export default function Moves() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
-        title="Your moves"
+        title={copy.yourMoves}
         leading={accountButton}
         trailing={
           <IconButton
@@ -156,7 +157,7 @@ export default function Moves() {
           onPress={() => setJoinOpen(true)}
           style={styles.joinCta}
         >
-          Join a move
+          {copy.joinAMove}
         </Button>
 
         {archived.length > 0 && (

@@ -43,6 +43,7 @@ hooks/        generic React hooks (sheet form state)
 store/        Zustand store (persisted to AsyncStorage), slices + selectors
 services/     orchestration: auth, share/sync engine, photo upload, printing
 lib/          pure helpers: api/ client · photos/ refs · voice/ parsing · qr/ codes and labels · money, text, routes
+copy/         user-facing strings, one file per screen group (the step before i18n)
 data/         client domain types and the starter statuses/markers
 shared/       the client<->server contract: wire models + the Mutation union
 modules/      local Expo native modules (Swift): address autocomplete, speech recognizer

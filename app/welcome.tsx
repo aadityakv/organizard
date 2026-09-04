@@ -7,6 +7,7 @@ import { Button, SlothMark } from '@/components';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/onboarding';
 
 /** First-launch onboarding: sign in, or continue as a guest. */
 export default function Welcome() {
@@ -23,20 +24,18 @@ export default function Welcome() {
         <View style={styles.markGlow}>
           <SlothMark size={104} />
         </View>
-        <Text style={styles.wordmark}>Tuck</Text>
-        <Text style={styles.tagline}>Pack fast. Find anything. Share the load.</Text>
+        <Text style={styles.wordmark}>{copy.tuck}</Text>
+        <Text style={styles.tagline}>{copy.packFastFindAnythingShare}</Text>
       </View>
 
       <View style={styles.actions}>
         <Button size="lg" fullWidth onPress={() => router.push(routes.signIn)}>
-          Log in or sign up
+          {copy.logInOrSignUp}
         </Button>
         <Button variant="ghost" size="lg" fullWidth onPress={continueAsGuest}>
-          Continue as guest
+          {copy.continueAsGuest}
         </Button>
-        <Text style={styles.fine}>
-          Guest moves stay on this device. Make an account anytime to share a move.
-        </Text>
+        <Text style={styles.fine}>{copy.guestMovesStayOnThis}</Text>
       </View>
     </SafeAreaView>
   );

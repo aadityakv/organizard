@@ -9,6 +9,7 @@ import { flushAndSignOut } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
 import { routes } from '@/lib/routes';
+import { copy } from '@/copy/moves';
 
 /** Account sheet: who is signed in, sign out, and account deletion. */
 export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
@@ -16,29 +17,22 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
   const session = useStore((s) => s.session);
 
   const onDeleteAccount = () =>
-    Alert.alert(
-      'Delete account?',
-      'This permanently deletes your account and any moves saved to it. This can’t be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            onClose();
-            deleteAccount().catch((e) =>
-              Alert.alert(
-                'Could not delete account',
-                e instanceof Error ? e.message : 'Something went wrong.',
-              ),
-            );
-          },
+    Alert.alert(copy.deleteAccount2, copy.thisPermanentlyDeletesYourAccount, [
+      { text: copy.cancel, style: 'cancel' },
+      {
+        text: copy.delete,
+        style: 'destructive',
+        onPress: () => {
+          onClose();
+          deleteAccount().catch((e) =>
+            Alert.alert(copy.couldNotDeleteAccount, e instanceof Error ? e.message : 'Something went wrong.'),
+          );
         },
-      ],
-    );
+      },
+    ]);
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Account">
+    <Sheet visible={visible} onClose={onClose} title={copy.account}>
       <View style={styles.accountSheet}>
         {session ? (
           <>
@@ -67,15 +61,12 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
               Sign out
             </Button>
             <Button variant="danger" fullWidth iconLeft="trash-2" onPress={onDeleteAccount}>
-              Delete account
+              {copy.deleteAccount}
             </Button>
           </>
         ) : (
           <>
-            <Text style={styles.guestNote}>
-              You’re using Tuck as a guest — your moves are saved on this device only. Sign in to back them up
-              and sync across your devices.
-            </Text>
+            <Text style={styles.guestNote}>{copy.youReUsingTuckAs}</Text>
             <Button
               fullWidth
               iconLeft="log-in"
