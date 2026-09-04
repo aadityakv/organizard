@@ -12,7 +12,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**'],
-      exclude: ['src/defaults.ts', 'src/index.ts'],
+      // The real-world adapters behind Deps (D1 driver, Apple JWKS, crypto ids) are
+      // replaced by fakes in the harness, so they are not measured.
+      exclude: ['src/defaults.ts', 'src/index.ts', 'src/db/client.ts', 'src/lib/apple.ts', 'src/lib/ids.ts'],
       thresholds: { lines: 85, branches: 75, functions: 85 },
     },
   },
