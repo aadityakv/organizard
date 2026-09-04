@@ -1,4 +1,7 @@
-// Member avatar: photo when available, otherwise initials on a deterministic color.
+// Avatar: a member's face in rosters and the account sheet (Members, Moves, AccountSheet).
+// Shows the photo when a URI is given, otherwise the initials of the display name on a
+// box-palette hue. The hue is derived from the name with a stable hash unless `color`
+// is passed, so the same person always gets the same colour across screens.
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';

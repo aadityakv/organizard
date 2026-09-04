@@ -1,4 +1,5 @@
-// Session tokens in KV: create, resolve, revoke one or all.
+// Session tokens in KV. A token maps to a user id with a TTL; per-user index lets
+// "sign out everywhere" and account deletion revoke every session at once.
 import type { Env } from '../types';
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 60; // 60 days

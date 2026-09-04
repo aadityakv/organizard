@@ -1,4 +1,6 @@
-// Invite deep-link handler.
+// Invite deep link (tuck://invite?token=…). Signs the user in with Apple if there is
+// no session, redeems the token, adds the shared move to the library and opens it.
+// Errors show a friendly message with a way back to the library.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';

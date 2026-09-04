@@ -1,4 +1,5 @@
-// Move-membership middleware for /:id routes: loads the caller's role or returns 403/404.
+// Move-membership middleware for /v1/moves/:id routes. Loads the caller's role in the
+// move onto the context; non-members get 404 so move existence isn't leaked.
 import { createMiddleware } from 'hono/factory';
 
 import type { Deps } from '../deps';

@@ -1,4 +1,7 @@
-// The design-system button: variants, sizes, icons and press feedback.
+// Button: the app's one text button. Four variants (primary green, secondary outlined,
+// ghost, danger), three sizes, optional leading/trailing Lucide icons, fullWidth, and a
+// scale-down on press. `sm` keeps a 44pt hit area even though it draws at 36.
+// Every CTA in sheets, footers and empty states goes through this component.
 import React from 'react';
 import {
   Pressable,

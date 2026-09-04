@@ -1,4 +1,6 @@
-// /v1/moves: the move resource and everything under it.
+// /v1/moves: create a move, fetch its snapshot or changes, apply a mutation batch,
+// delete it, manage members and invites, and reserve photo records. Everything under
+// /:id runs behind the membership middleware.
 import { ROLE_REQUIRED, type Mutation, type Role } from '@shared/index';
 import { Hono } from 'hono';
 

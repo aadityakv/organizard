@@ -1,4 +1,5 @@
-// Bearer-session middleware: resolves the token to a user or returns 401.
+// Bearer-session middleware. Resolves the Authorization token to a user row and
+// puts it on the context; missing or unknown tokens get a 401.
 import { createMiddleware } from 'hono/factory';
 
 import type { Deps } from '../deps';

@@ -1,4 +1,4 @@
-// /v1/invites: accept an invite token.
+// /v1/invites/:token/accept: redeem an invite and return the move snapshot.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';

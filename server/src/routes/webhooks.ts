@@ -1,4 +1,5 @@
-// /v1/webhooks: RevenueCat entitlement events.
+// /v1/webhooks/revenuecat: entitlement events from RevenueCat (shared-secret bearer) that grant or
+// revoke a user's sharing entitlement. Inert while billing is off.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';

@@ -1,4 +1,7 @@
-// Small tonal label pill.
+// Badge: a small tonal pill for short status words ("Archived", "3 to fix").
+// Six tones (neutral / brand / success / warning / danger / info) map to the semantic
+// wash + text colour pairs in the theme; two sizes. Display-only — for a tappable
+// pill use MarkerChip, for box lifecycle use StatusChip.
 import React from 'react';
 import { StyleSheet, Text, View, StyleProp, ViewStyle } from 'react-native';
 import { colors, palette, radius, fonts, fontSize } from '@/theme';

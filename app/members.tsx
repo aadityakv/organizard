@@ -1,4 +1,6 @@
-// Members & sharing screen for the open move.
+// Members & sharing for the open move. Lists the roster with role badges, lets the
+// owner change roles and remove members, creates invite links at a chosen role, and
+// hosts the "share this move" upgrade for a local move.
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

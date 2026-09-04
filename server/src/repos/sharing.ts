@@ -1,4 +1,5 @@
-// Invites and memberships.
+// Invites and memberships: mint single-use invite tokens at a role, redeem them into
+// a membership, look up the owner, change a member's role, remove a member.
 import type { Role } from '@shared/index';
 import { and, eq } from 'drizzle-orm';
 
