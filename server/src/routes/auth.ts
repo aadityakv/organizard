@@ -17,22 +17,19 @@ import {
   upsertEmailUser,
 } from '../repos/users';
 import type { Env } from '../types';
+import { appleLoginBody, emailStartBody, loginBody, parseBody, registerBody } from '../validation';
 
 const MAGIC_TTL_SECONDS = 60 * 15; // 15 minutes
 const magicKey = (token: string) => `maglink:${token}`;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PASSWORD_MIN = 8;
-const PASSWORD_MAX = 200;
 
 /** Sign-in, sign-out and account-deletion routes. */
 export function authRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: AuthVars }>();
 
   r.post('/apple', async (c) => {
-    const { identityToken } = await c.req
-      .json<{ identityToken?: string }>()
-      .catch(() => ({ identityToken: undefined }));
-    if (!identityToken) return c.json({ error: 'MISSING_TOKEN' }, 400);
+    const body = await parseBody(c, appleLoginBody);
+    if (!body.ok) return c.json({ error: 'MISSING_TOKEN' }, 400);
+    const { identityToken } = body.data;
 
     let identity;
     try {
@@ -56,9 +53,9 @@ export function authRoutes(deps: Deps) {
 
   // Email magic link — step 1: send the link. Never reveal whether the email exists.
   r.post('/email/start', async (c) => {
-    const { email } = await c.req.json<{ email?: string }>().catch(() => ({ email: undefined }));
-    const normalized = email?.trim().toLowerCase();
-    if (!normalized || !EMAIL_RE.test(normalized)) return c.json({ error: 'INVALID_EMAIL' }, 400);
+    const body = await parseBody(c, emailStartBody);
+    if (!body.ok) return c.json({ error: 'INVALID_EMAIL' }, 400);
+    const normalized = body.data.email;
 
     // Throttle to curb abuse / email-relay spam (per address + per IP, 15-min window).
     const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
@@ -95,13 +92,10 @@ export function authRoutes(deps: Deps) {
   });
 
   r.post('/email/register', async (c) => {
-    const { email, password } = await c.req
-      .json<{ email?: string; password?: string }>()
-      .catch(() => ({}) as { email?: string; password?: string });
-    const normalized = email?.trim().toLowerCase();
-    if (!normalized || !EMAIL_RE.test(normalized)) return c.json({ error: 'INVALID_EMAIL' }, 400);
-    if (!password || password.length < PASSWORD_MIN || password.length > PASSWORD_MAX)
-      return c.json({ error: 'WEAK_PASSWORD' }, 400);
+    const body = await parseBody(c, registerBody);
+    if (!body.ok)
+      return c.json({ error: body.field === 'password' ? 'WEAK_PASSWORD' : 'INVALID_EMAIL' }, 400);
+    const { email: normalized, password } = body.data;
 
     // Curb automated signup abuse (per IP, hourly).
     const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
@@ -124,12 +118,11 @@ export function authRoutes(deps: Deps) {
 
   // Email + password — sign in. Generic 401 so we don't reveal which part was wrong.
   r.post('/email/login', async (c) => {
-    const { email, password } = await c.req
-      .json<{ email?: string; password?: string }>()
-      .catch(() => ({}) as { email?: string; password?: string });
-    const normalized = email?.trim().toLowerCase();
-    if (!normalized || !EMAIL_RE.test(normalized) || !password)
-      return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
+    // A malformed body gets the same generic 401 as a wrong password: nothing about
+    // the request shape may reveal whether an account exists.
+    const body = await parseBody(c, loginBody);
+    if (!body.ok) return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
+    const { email: normalized, password } = body.data;
 
     // Throttle brute-force (per address + per IP, 15-min window).
     const ip = c.req.header('cf-connecting-ip') ?? 'unknown';

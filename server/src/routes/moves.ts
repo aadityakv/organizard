@@ -21,7 +21,14 @@ import {
 } from '../repos/sharing';
 import { isEntitledNow } from '../repos/users';
 import type { Env } from '../types';
-import { mutationsBodySchema } from '../validation';
+import {
+  createMoveBody,
+  inviteBody,
+  memberRoleBody,
+  mutationsBodySchema,
+  parseBody,
+  photoLinkBody,
+} from '../validation';
 import { ROLES } from '@shared/index';
 
 /** Move routes: create, snapshot, changes, mutations, members, invites and photos. */
@@ -34,19 +41,13 @@ export function moveRoutes(deps: Deps) {
   r.post('/', async (c) => {
     if (billingEnabled(c.env) && !isEntitledNow(c.get('user'), deps.now()))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
-    type CreateBody = {
-      name?: string;
-      from?: string | null;
-      to?: string | null;
-      targetDate?: string | null;
-      seed?: boolean;
-    };
-    const body = await c.req.json<CreateBody>().catch(() => ({}) as CreateBody);
-    if (!body.name || !body.name.trim()) return c.json({ error: 'INVALID_NAME' }, 400);
+    const parsed = await parseBody(c, createMoveBody);
+    if (!parsed.ok) return c.json({ error: 'INVALID_NAME' }, 400);
+    const body = parsed.data;
 
     const db = deps.getDb(c.env);
     const moveId = await createMove(db, deps, {
-      name: body.name.trim(),
+      name: body.name,
       from: body.from,
       to: body.to,
       targetDate: body.targetDate,
@@ -70,8 +71,8 @@ export function moveRoutes(deps: Deps) {
 
   r.post('/:id/mutations', membershipMiddleware(deps), async (c) => {
     // Validate shape/types/bounds before anything is applied.
-    const parsed = mutationsBodySchema.safeParse(await c.req.json().catch(() => ({})));
-    if (!parsed.success) return c.json({ error: 'BAD_MUTATION' }, 400);
+    const parsed = await parseBody(c, mutationsBodySchema);
+    if (!parsed.ok) return c.json({ error: 'BAD_MUTATION' }, 400);
     const mutations = parsed.data.mutations as Mutation[];
     const role = c.get('member').role;
 
@@ -103,8 +104,9 @@ export function moveRoutes(deps: Deps) {
     if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now())))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
-    const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
-    const role: Role = body.role ?? ROLES.viewer;
+    const body = await parseBody(c, inviteBody);
+    if (!body.ok) return c.json({ error: 'INVALID_ROLE' }, 400);
+    const role: Role = body.data.role;
     const invite = await createInvite(deps.getDb(c.env), deps, {
       moveId: c.req.param('id'),
       role,
@@ -118,12 +120,10 @@ export function moveRoutes(deps: Deps) {
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
     const userId = c.req.param('userId');
-    const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
-    // Only editor/viewer are assignable; ownership transfer is not a role change.
-    if (body.role !== ROLES.editor && body.role !== ROLES.viewer)
-      return c.json({ error: 'INVALID_ROLE' }, 400);
+    const body = await parseBody(c, memberRoleBody);
+    if (!body.ok) return c.json({ error: 'INVALID_ROLE' }, 400);
     if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_CHANGE_OWNER' }, 400);
-    await changeMemberRole(db, { moveId, userId, role: body.role });
+    await changeMemberRole(db, { moveId, userId, role: body.data.role });
     return c.json({ ok: true });
   });
 
@@ -143,9 +143,9 @@ export function moveRoutes(deps: Deps) {
     const moveId = c.req.param('id');
     if (billingEnabled(c.env) && !(await isOwnerEntitled(db, moveId, deps.now())))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
-    const body = await c.req
-      .json<{ itemId?: string; boxId?: string }>()
-      .catch(() => ({}) as { itemId?: string; boxId?: string });
+    const parsed = await parseBody(c, photoLinkBody);
+    if (!parsed.ok) return c.json({ error: 'INVALID_BODY' }, 400);
+    const body = parsed.data;
     // The linked item/box must belong to this move (no cross-move photo linking).
     if (body.itemId && !(await itemInMove(db, moveId, body.itemId)))
       return c.json({ error: 'NOT_FOUND' }, 404);
