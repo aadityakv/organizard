@@ -24,7 +24,6 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
     DB: undefined as unknown as D1Database,
     PHOTOS: r2,
     SESSIONS: kv,
-    APP_URL: 'organizard://auth',
     REVENUECAT_WEBHOOK_SECRET: 'test-secret',
     // Default billing ON in tests so entitlement paths stay exercised; flip off
     // with makeHarness({ billing: false }) to test the free (default-prod) path.
