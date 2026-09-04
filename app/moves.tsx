@@ -62,7 +62,8 @@ export default function Moves() {
   };
 
   const submitJoin = () => {
-    const t = pasted.split('token=')[1]?.trim() ?? pasted.trim();
+    // `token=…` may carry trailing query params; keep only the token itself.
+    const t = pasted.split('token=')[1]?.split('&')[0].trim() ?? pasted.trim();
     if (t) {
       setJoinOpen(false);
       setPasted('');

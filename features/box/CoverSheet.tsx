@@ -1,11 +1,10 @@
 // Cover sheet — snap a box photo (expo-camera) with a friendly permission fallback.
-import { useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView } from 'expo-camera';
 import * as Linking from 'expo-linking';
 
 import { Button, Sheet } from '@/components';
-import { persistCapture } from '@/lib/photos';
+import { useCameraCapture } from '@/hooks/useCameraCapture';
 import { palette, radius } from '@/theme';
 
 import { shared } from './styles';
@@ -25,22 +24,11 @@ export function CoverSheet({
   onRemove: () => void;
   onClose: () => void;
 }) {
-  const [permission, requestPermission] = useCameraPermissions();
-  const cameraRef = useRef<CameraView>(null);
-  const [busy, setBusy] = useState(false);
+  const { cameraRef, permission, requestPermission, busy, snap } = useCameraCapture();
 
   const capture = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const pic = await cameraRef.current?.takePictureAsync({ quality: 0.6 });
-      if (pic?.uri) {
-        const ref = await persistCapture(pic.uri);
-        onCapture(ref);
-      }
-    } finally {
-      setBusy(false);
-    }
+    const ref = await snap();
+    if (ref != null) onCapture(ref);
   };
 
   return (

@@ -47,6 +47,7 @@ export default function NewMove() {
             onChangeText={setName}
             placeholder={copy.newMoveNamePlaceholder}
             autoFocus
+            maxLength={120}
           />
           <View style={styles.gap} />
           <AddressField

@@ -106,6 +106,7 @@ export function RoomSheet({
         onChangeText={(name) => patch({ name })}
         placeholder={copy.roomNamePlaceholder}
         autoFocus
+        maxLength={200}
       />
       <View style={styles.fieldGap} />
       <Input
@@ -113,6 +114,7 @@ export function RoomSheet({
         value={dest}
         onChangeText={(dest) => patch({ dest })}
         placeholder={copy.destinationPlaceholder}
+        maxLength={4000}
       />
 
       <Text style={sheetForm.fieldLabel}>{copy.iconLabel}</Text>

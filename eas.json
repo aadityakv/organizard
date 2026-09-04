@@ -11,7 +11,7 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "staging"
       }
     },
     "preview": {
@@ -20,7 +20,7 @@
         "simulator": false
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "staging"
       }
     },
     "production": {

@@ -2,7 +2,7 @@
 // one shutter. Snap → name it in Add-item, one at a time.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Icon } from '@/components';
+import { Icon, ProBadge } from '@/components';
 import { colors, fonts, palette, alpha } from '@/theme';
 
 import { sharedStyles } from './styles';
@@ -23,11 +23,7 @@ export function CaptureView({ isPro, onSwitchToStream, onCapture }: Props) {
         <Pressable onPress={onSwitchToStream} style={styles.streamPill} accessibilityLabel="Switch to Stream">
           <Icon name="zap" size={17} color={colors.brand} />
           <Text style={styles.streamPillText}>{copy.switchToStreamButton}</Text>
-          {!isPro ? (
-            <View style={styles.proBadge}>
-              <Text style={styles.proBadgeText}>{copy.proBadge}</Text>
-            </View>
-          ) : null}
+          {!isPro ? <ProBadge label={copy.proBadge} /> : null}
           <Icon name="chevron-right" size={16} color="rgba(255,255,255,0.7)" />
         </Pressable>
       </View>
@@ -53,12 +49,5 @@ const styles = StyleSheet.create({
     backgroundColor: alpha(palette.white, 0.14),
   },
   streamPillText: { color: palette.white, fontFamily: fonts.body.extra, fontSize: 14.5 },
-  proBadge: {
-    backgroundColor: palette.amber400,
-    borderRadius: 999,
-    paddingHorizontal: 7,
-    paddingVertical: 1,
-  },
-  proBadgeText: { fontSize: 10, fontFamily: fonts.body.extra, color: palette.ink900, letterSpacing: 0.3 },
   captureBottom: { position: 'absolute', left: 0, right: 0, bottom: 36, alignItems: 'center' },
 });

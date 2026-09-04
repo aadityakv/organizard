@@ -21,6 +21,8 @@ export type InputProps = {
   textContentType?: 'none' | 'emailAddress' | 'password' | 'newPassword' | 'username';
   /** iOS: attach a keyboard accessory (e.g. a Done bar) by nativeID. */
   inputAccessoryViewID?: string;
+  /** Cap the text length (keeps inputs under the server's field caps). */
+  maxLength?: number;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -38,6 +40,7 @@ export function Input({
   autoCapitalize = 'sentences',
   textContentType,
   inputAccessoryViewID,
+  maxLength,
   style,
 }: InputProps) {
   const [focused, setFocused] = useState(false);
@@ -97,6 +100,7 @@ export function Input({
           secureTextEntry={secureTextEntry}
           textContentType={textContentType}
           inputAccessoryViewID={inputAccessoryViewID}
+          maxLength={maxLength}
           onFocus={handleFocus}
           onBlur={handleBlur}
           // Prevent iOS zoom: ensure font size >= 16 is set via style

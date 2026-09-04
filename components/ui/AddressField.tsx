@@ -2,7 +2,7 @@
 // (MKLocalSearchCompleter) suggestions as you type via the local `address-autocomplete`
 // native module; on Android (no native module) it degrades to a plain field. Both
 // platforms get a "Use my location" button (expo-location reverse-geocode).
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 
@@ -28,19 +28,33 @@ export function AddressField({ label, value, onChangeText, placeholder }: Addres
   const [open, setOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards against out-of-order responses: only the latest query may set suggestions.
+  const searchSeq = useRef(0);
   // After we fill the field programmatically (pick / use-location), the resulting
   // onChangeText would re-trigger a search; skip that one pass so the list stays closed.
   const suppress = useRef(false);
 
+  useEffect(
+    () => () => {
+      // Unmount cancels a pending debounce AND a possibly in-flight search.
+      if (debounce.current) clearTimeout(debounce.current);
+      searchSeq.current += 1;
+    },
+    [],
+  );
+
   const runSearch = useCallback((text: string) => {
     if (debounce.current) clearTimeout(debounce.current);
     if (!hasNativeAddressAutocomplete || text.trim().length < 3) {
+      searchSeq.current += 1;
       setSuggestions([]);
       setOpen(false);
       return;
     }
+    const seq = ++searchSeq.current;
     debounce.current = setTimeout(async () => {
       const res = await searchAddresses(text);
+      if (seq !== searchSeq.current) return; // a newer query (or unmount) won
       setSuggestions(res);
       setOpen(res.length > 0);
     }, 250);

@@ -7,7 +7,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/ui/Icon';
 import { Sheet } from '@/components/ui/Sheet';
-import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
+import { colors, fonts, fontSize, palette, radius, space, pressed } from '@/theme';
 
 export type DateFieldProps = {
   label?: string;
@@ -46,9 +46,12 @@ const MONTHS = [
 const sameDay = (a: Date, b: Date): boolean =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
-/** Date picker field with a self-contained calendar sheet (no native picker dependency). */
-export function DateField({ label, value, onChange, placeholder = 'Pick a date' }: DateFieldProps) {
-  const [open, setOpen] = useState(false);
+/**
+ * The month grid inside the sheet. Mounted only while the sheet is open, so its
+ * view-month state is (re)initialized from the CURRENT value on every open — a
+ * value changed after mount can't leave the calendar on a stale month.
+ */
+function Calendar({ value, onPick }: { value: Date | null; onPick: (d: Date) => void }) {
   const [view, setView] = useState<Date>(() => {
     const base = value ?? new Date();
     return new Date(base.getFullYear(), base.getMonth(), 1);
@@ -75,10 +78,79 @@ export function DateField({ label, value, onChange, placeholder = 'Pick a date' 
   for (let i = 0; i < padded.length; i += 7) weeks.push(padded.slice(i, i + 7));
 
   const shiftMonth = (delta: number) => setView(new Date(year, month + delta, 1));
-  const pick = (day: number) => {
-    onChange(new Date(year, month, day));
-    setOpen(false);
-  };
+
+  return (
+    <>
+      <View style={styles.calHeader}>
+        <Pressable
+          accessibilityLabel="Previous month"
+          onPress={() => shiftMonth(-1)}
+          hitSlop={8}
+          style={({ pressed }) => [styles.navBtn, pressed && styles.pressed]}
+        >
+          <Icon name="chevron-left" size={20} color={palette.ink700} />
+        </Pressable>
+        <Text style={styles.monthLabel}>
+          {MONTHS[month]} {year}
+        </Text>
+        <Pressable
+          accessibilityLabel="Next month"
+          onPress={() => shiftMonth(1)}
+          hitSlop={8}
+          style={({ pressed }) => [styles.navBtn, pressed && styles.pressed]}
+        >
+          <Icon name="chevron-right" size={20} color={palette.ink700} />
+        </Pressable>
+      </View>
+
+      <View style={styles.weekRow}>
+        {WEEKDAYS.map((d, i) => (
+          <Text key={i} style={styles.weekday}>
+            {d}
+          </Text>
+        ))}
+      </View>
+
+      <View style={styles.grid}>
+        {weeks.map((week, wi) => (
+          <View key={wi} style={styles.week}>
+            {week.map((day, di) => {
+              if (day === null) return <View key={di} style={styles.cell} />;
+              const date = new Date(year, month, day);
+              const selected = value != null && sameDay(date, value);
+              const isToday = sameDay(date, today);
+              return (
+                <Pressable
+                  key={di}
+                  accessibilityRole="button"
+                  accessibilityLabel={formatTargetDate(date)}
+                  onPress={() => onPick(date)}
+                  style={({ pressed }) => [styles.cell, pressed && styles.cellPressed]}
+                >
+                  <View style={[styles.dayDot, selected && styles.daySelected]}>
+                    <Text
+                      style={[
+                        styles.dayText,
+                        selected && styles.dayTextSelected,
+                        isToday && !selected && styles.dayToday,
+                      ]}
+                    >
+                      {day}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
+      </View>
+    </>
+  );
+}
+
+/** Date picker field with a self-contained calendar sheet (no native picker dependency). */
+export function DateField({ label, value, onChange, placeholder = 'Pick a date' }: DateFieldProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <View>
@@ -98,69 +170,15 @@ export function DateField({ label, value, onChange, placeholder = 'Pick a date' 
       </Pressable>
 
       <Sheet visible={open} onClose={() => setOpen(false)} title="Target date">
-        <View style={styles.calHeader}>
-          <Pressable
-            accessibilityLabel="Previous month"
-            onPress={() => shiftMonth(-1)}
-            hitSlop={8}
-            style={({ pressed }) => [styles.navBtn, pressed && styles.pressed]}
-          >
-            <Icon name="chevron-left" size={20} color={palette.ink700} />
-          </Pressable>
-          <Text style={styles.monthLabel}>
-            {MONTHS[month]} {year}
-          </Text>
-          <Pressable
-            accessibilityLabel="Next month"
-            onPress={() => shiftMonth(1)}
-            hitSlop={8}
-            style={({ pressed }) => [styles.navBtn, pressed && styles.pressed]}
-          >
-            <Icon name="chevron-right" size={20} color={palette.ink700} />
-          </Pressable>
-        </View>
-
-        <View style={styles.weekRow}>
-          {WEEKDAYS.map((d, i) => (
-            <Text key={i} style={styles.weekday}>
-              {d}
-            </Text>
-          ))}
-        </View>
-
-        <View style={styles.grid}>
-          {weeks.map((week, wi) => (
-            <View key={wi} style={styles.week}>
-              {week.map((day, di) => {
-                if (day === null) return <View key={di} style={styles.cell} />;
-                const date = new Date(year, month, day);
-                const selected = value != null && sameDay(date, value);
-                const isToday = sameDay(date, today);
-                return (
-                  <Pressable
-                    key={di}
-                    accessibilityRole="button"
-                    accessibilityLabel={formatTargetDate(date)}
-                    onPress={() => pick(day)}
-                    style={({ pressed }) => [styles.cell, pressed && styles.cellPressed]}
-                  >
-                    <View style={[styles.dayDot, selected && styles.daySelected]}>
-                      <Text
-                        style={[
-                          styles.dayText,
-                          selected && styles.dayTextSelected,
-                          isToday && !selected && styles.dayToday,
-                        ]}
-                      >
-                        {day}
-                      </Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          ))}
-        </View>
+        {open ? (
+          <Calendar
+            value={value}
+            onPick={(d) => {
+              onChange(d);
+              setOpen(false);
+            }}
+          />
+        ) : null}
       </Sheet>
     </View>
   );
@@ -184,7 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: palette.white,
   },
-  pressed: { opacity: 0.7 },
+  pressed,
   value: { flex: 1, fontFamily: fonts.body.semibold, fontSize: fontSize.base, color: palette.ink900 },
   placeholder: { color: palette.ink400, fontFamily: fonts.body.semibold },
 

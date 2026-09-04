@@ -42,6 +42,7 @@ export function ItemFields({
         // Only pop the keyboard when CREATING a new item. When editing an
         // existing one you're usually just glancing/tweaking — don't hijack focus.
         autoFocus={!isEdit}
+        maxLength={200}
       />
 
       <View style={styles.fieldRow}>
@@ -77,6 +78,7 @@ export function ItemFields({
         placeholder={copy.notesPlaceholder}
         inputAccessoryViewID={KBD_ACCESSORY}
         multiline
+        maxLength={4000}
       />
     </>
   );

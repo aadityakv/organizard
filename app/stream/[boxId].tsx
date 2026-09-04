@@ -6,7 +6,7 @@
 //     in a ledger (tap to fix) and Done commits the session through addItem.
 // Free users start in capture and reach stream only through the gated upsell.
 // The pieces live in features/stream; this file is the layout and orchestration.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -64,6 +64,14 @@ export default function StreamSession() {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const session = useStreamSession();
+  // The delayed begin-listen timer (see onCapture), cancelled when the screen goes away.
+  const listenDelay = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (listenDelay.current) clearTimeout(listenDelay.current);
+    },
+    [],
+  );
   // Destructured so render only touches plain values (the linter rightly objects to
   // reaching through an object that also carries the camera ref).
   const { cameraRef, cameraGranted, flash, snapForNextItem, snapOnce, takePendingPhoto, invalidatePending } =
@@ -133,7 +141,11 @@ export default function StreamSession() {
       dictation.beginListen(null, true);
     } else {
       snapForNextItem();
-      setTimeout(() => dictation.beginListen(null, false), 230);
+      // Cancelled on unmount: a bare timer here could start a native speech session
+      // after this screen's cleanup already ran, with no UI and no stop path.
+      // Clear any prior timer too — two taps inside 230 ms must not stack listeners.
+      if (listenDelay.current) clearTimeout(listenDelay.current);
+      listenDelay.current = setTimeout(() => dictation.beginListen(null, false), 230);
     }
   };
 

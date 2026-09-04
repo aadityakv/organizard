@@ -3,12 +3,13 @@
 // read-only but can still scan, view the QR, and print the label.
 //
 // This route composes the pieces in features/box; the data lives in useBoxDetail.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { Button, Icon, LockNote, MarkerChip, StreamUpsell } from '@/components';
+import { Button, Icon, LockNote, MarkerChip, ProBadge, StreamUpsell } from '@/components';
+import { useStore } from '@/store/useStore';
 import {
   BoxHero,
   CoverCard,
@@ -40,6 +41,20 @@ export default function BoxDetail() {
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const [streamUpsell, setStreamUpsell] = useState(false);
   const [photosExpanded, setPhotosExpanded] = useState(false);
+  const library = useStore((s) => s.library);
+  const currentMoveId = useStore((s) => s.currentMoveId);
+  const switchMove = useStore((s) => s.switchMove);
+
+  // A printed label scanned with the SYSTEM camera deep-links here, for a box that
+  // may live in another move on this device. Switch to the owning move instead of
+  // showing "not found" (the in-app scanner already does this).
+  useEffect(() => {
+    if (box || !boxId || currentMoveId == null) return;
+    const owner = Object.values(library).find(
+      (b) => b.id !== currentMoveId && b.boxes.some((x) => x.id === boxId),
+    );
+    if (owner) switchMove(owner.id);
+  }, [box, boxId, currentMoveId, library, switchMove]);
 
   if (!box) return <MissingBox />;
 
@@ -145,11 +160,7 @@ export default function BoxDetail() {
                 <Button variant="primary" size="lg" fullWidth iconLeft="audio-lines" onPress={startStreaming}>
                   {copy.streamItemsButton}
                 </Button>
-                {!isPro ? (
-                  <View style={styles.proBadge}>
-                    <Text style={styles.proBadgeText}>{copy.proBadge}</Text>
-                  </View>
-                ) : null}
+                {!isPro ? <ProBadge label={copy.proBadge} style={styles.proBadgePos} /> : null}
               </View>
             </View>
           ) : (
@@ -242,14 +253,5 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', gap: 10 },
   addItem: { flex: 1 },
   streamItems: { flex: 1.25 },
-  proBadge: {
-    position: 'absolute',
-    top: -7,
-    right: 8,
-    backgroundColor: palette.amber400,
-    borderRadius: 999,
-    paddingHorizontal: 7,
-    paddingVertical: 1,
-  },
-  proBadgeText: { fontSize: 10, fontFamily: fonts.body.extra, color: palette.ink900, letterSpacing: 0.3 },
+  proBadgePos: { position: 'absolute', top: -7, right: 8 },
 });

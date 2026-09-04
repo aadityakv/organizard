@@ -27,7 +27,9 @@ export function Sheet({ visible, onClose, title, children }: SheetProps) {
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* iOS: 'padding'; Android (edge-to-edge): 'height' — undefined there is a no-op
+          and sheet inputs sit under the keyboard. */}
+      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Close" />
         <View style={[styles.panel, { paddingBottom: insets.bottom + space[5] }]}>
           <View style={styles.grabber} />

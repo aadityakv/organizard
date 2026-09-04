@@ -20,7 +20,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
 import { boxPhotos, useStore } from '@/store/useStore';
-import { fonts, fontSize, palette, radius, space, tap, alpha } from '@/theme';
+import { fonts, fontSize, palette, radius, space, tap, alpha, pressed } from '@/theme';
 import { routes } from '@/lib/routes';
 import { copy } from '@/copy/item';
 
@@ -210,5 +210,5 @@ const styles = StyleSheet.create({
     color: palette.white,
   },
 
-  pressed: { opacity: 0.7 },
+  pressed,
 });

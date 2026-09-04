@@ -1,10 +1,10 @@
 // Edit box sheet — rename, recolor, and move the box to another room.
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Button, ColorDot, Input, RoomGlyph, Sheet } from '@/components';
+import { Button, ColorDot, Input, RoomPicker, Sheet } from '@/components';
 import type { Box, Room } from '@/data/types';
 import { useSheetForm } from '@/hooks/useSheetForm';
-import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
+import { BOX_COLORS } from '@/theme';
 
 import { shared } from './styles';
 import { copy } from '@/copy/box';
@@ -31,7 +31,13 @@ export function EditBoxSheet({
 
   return (
     <Sheet visible={visible} onClose={onClose} title={copy.editBoxTitle}>
-      <Input label={copy.boxNameLabel} value={name} onChangeText={(name) => patch({ name })} autoFocus />
+      <Input
+        label={copy.boxNameLabel}
+        value={name}
+        onChangeText={(name) => patch({ name })}
+        autoFocus
+        maxLength={200}
+      />
 
       <Text style={shared.fieldLabel}>{copy.colorLabel}</Text>
       <View style={shared.palette}>
@@ -41,25 +47,7 @@ export function EditBoxSheet({
       </View>
 
       <Text style={shared.fieldLabel}>{copy.roomLabel}</Text>
-      <View style={styles.roomPickRow}>
-        {rooms.map((r) => {
-          const on = r.id === roomId;
-          return (
-            <Pressable
-              key={r.id}
-              accessibilityRole="button"
-              accessibilityState={{ selected: on }}
-              onPress={() => patch({ roomId: r.id })}
-              style={({ pressed }) => [styles.roomPick, on && styles.roomPickOn, pressed && shared.pressed]}
-            >
-              <RoomGlyph icon={r.icon} color={r.color} size={22} />
-              <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
-                {r.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <RoomPicker rooms={rooms} selectedId={roomId} onSelect={(roomId) => patch({ roomId })} />
 
       <View style={shared.doneButton}>
         <Button
@@ -75,28 +63,3 @@ export function EditBoxSheet({
     </Sheet>
   );
 }
-
-const styles = StyleSheet.create({
-  roomPickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  roomPick: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    borderWidth: 1.5,
-    borderColor: palette.sand300,
-    backgroundColor: colors.surfaceCard,
-  },
-  roomPickOn: {
-    borderColor: colors.brand,
-    backgroundColor: palette.green50,
-  },
-  roomPickText: {
-    fontFamily: fonts.body.bold,
-    fontSize: fontSize.sm,
-    color: palette.ink500,
-  },
-  roomPickTextOn: { color: palette.green700 },
-});

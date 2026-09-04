@@ -59,6 +59,7 @@ export function EditMoveSheet({
         onChangeText={(name) => patch({ name })}
         placeholder={copy.moveNamePlaceholder}
         autoFocus
+        maxLength={120}
       />
       <View style={styles.fieldGap} />
       <Text style={styles.editLabel}>{copy.fromLabel}</Text>

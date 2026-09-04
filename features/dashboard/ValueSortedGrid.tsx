@@ -13,8 +13,10 @@ import { shared } from './styles';
 export function ValueSortedGrid({ boxes }: { boxes: Box[] }) {
   const itemsByBox = useStore((s) => s.itemsByBox);
   const sorted = useMemo<Box[]>(() => {
+    // Sort by the same total the cards display (price × quantity), so the order
+    // never disagrees with the numbers on screen.
     const valueOf = (b: Box): number =>
-      (itemsByBox[b.id] ?? []).reduce((sum, it) => sum + (it.value || 0), 0);
+      (itemsByBox[b.id] ?? []).reduce((sum, it) => sum + (it.value || 0) * (it.qty || 1), 0);
     return [...boxes].sort((a, b) => valueOf(b) - valueOf(a));
   }, [boxes, itemsByBox]);
 

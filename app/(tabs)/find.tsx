@@ -5,9 +5,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
-import { Header, Icon, IconButton, Input, RoomGlyph, Thumb } from '@/components';
+import { Header, Icon, IconButton, RoomGlyph, SearchField, Thumb } from '@/components';
 import type { Room } from '@/data/types';
-import { allIndexedItems, useStore, searchSuggestions } from '@/store/useStore';
+import { allIndexedItems, searchMove, searchSuggestions, useStore } from '@/store/useStore';
 import { fonts, palette, radius } from '@/theme';
 import { routes } from '@/lib/routes';
 import { copy } from '@/copy/dashboard';
@@ -27,17 +27,11 @@ export default function Find() {
     [boxes, itemsByBox, markers],
   );
   const [query, setQuery] = useState('');
-  const q = query.trim().toLowerCase();
   const roomFor = (id: string): Room | undefined => rooms.find((r) => r.id === id);
-  const markerLabel = (id: string): string => markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
-
-  const items = q
-    ? indexed.filter(
-        (it) =>
-          it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
-      )
-    : [];
-  const matchedBoxes = q ? boxes.filter((b) => b.name.toLowerCase().includes(q)) : [];
+  const { items, boxes: matchedBoxes } = useMemo(
+    () => searchMove({ boxes, markers }, indexed, query),
+    [boxes, markers, indexed, query],
+  );
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -54,27 +48,19 @@ export default function Find() {
           />
         }
       />
-      <View style={styles.searchField}>
-        <Icon name="search" size={18} color={palette.ink400} />
-        <Input
-          value={query}
-          onChangeText={setQuery}
-          placeholder={copy.searchLabel}
-          autoFocus
-          style={styles.searchInput}
-        />
-        {query ? (
-          <Pressable accessibilityRole="button" onPress={() => setQuery('')} hitSlop={8}>
-            <Icon name="x" size={18} color={palette.ink400} />
-          </Pressable>
-        ) : null}
-      </View>
+      <SearchField
+        value={query}
+        onChangeText={setQuery}
+        placeholder={copy.searchLabel}
+        autoFocus
+        style={styles.searchField}
+      />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {!q ? (
+        {!query.trim() ? (
           suggestions.length > 0 && (
             <View style={styles.suggest}>
               <Text style={styles.suggestTitle}>{copy.suggestionsPrefix}</Text>
@@ -181,7 +167,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: palette.sand300,
   },
-  searchInput: { flex: 1 },
   content: { padding: 16, paddingBottom: 60 },
   suggest: { marginTop: 8 },
   suggestTitle: {

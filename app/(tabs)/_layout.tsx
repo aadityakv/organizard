@@ -69,7 +69,6 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
 }
 
 /** Tab navigator for an open move: Boxes · Capture · Find, with the custom raised center button. */
-/** Tab navigator for an open move: Boxes · Capture · Find, with the custom raised center button. */
 export default function TabsLayout() {
   return (
     <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>

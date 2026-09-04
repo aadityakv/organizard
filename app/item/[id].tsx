@@ -17,6 +17,7 @@ import {
   shadow,
   type as typeTokens,
   alpha,
+  pressed,
 } from '@/theme';
 import { money } from '@/lib/money';
 import { photoSource } from '@/lib/photos';
@@ -361,5 +362,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  pressed: { opacity: 0.7 },
+  pressed,
 });

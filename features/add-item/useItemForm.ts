@@ -96,8 +96,18 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
 
   const parsedValue = (() => {
     const n = Number(value.replace(/[^0-9.]/g, ''));
-    return Number.isFinite(n) ? n : 0;
+    if (!Number.isFinite(n)) return 0;
+    // Keep the line under the server's valueCents cap (1e9) so an extreme paste
+    // can't turn into a rejected mutation that silently reverts on the next pull.
+    return Math.min(n, 9_999_999);
   })();
+
+  /** Whether the photo set was edited (order-insensitive), vs the item as loaded. */
+  const photosChanged = () => {
+    const before = [...(editing?.photos ?? [])].sort().join('\u0000');
+    const after = [...photos].sort().join('\u0000');
+    return before !== after;
+  };
 
   const save = (another: boolean) => {
     if (!boxId || !canEdit) return;
@@ -125,9 +135,13 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
       name: name.trim() || 'Untitled item',
       qty,
       value: parsedValue,
-      note: note.trim() || undefined,
+      // null (not undefined) when cleared, so the server records the note removal.
+      note: note.trim() || null,
       markers: selectedMarkers,
-      photos,
+      // photoIds is a full replace-set on the server: only include it when the user
+      // actually changed the photos, so an untouched edit can't unlink photos this
+      // device hasn't seen yet (a collaborator's, added since the last pull).
+      ...(photosChanged() ? { photos } : {}),
     });
     if (targetBoxId !== boxId) {
       moveItem(boxId, targetBoxId, itemId);

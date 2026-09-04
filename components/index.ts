@@ -19,6 +19,7 @@ export { Avatar, type AvatarProps } from '@/components/domain/Avatar';
 
 // Design-system primitives (forms)
 export { Input, type InputProps } from '@/components/ui/Input';
+export { SearchField, type SearchFieldProps } from '@/components/ui/SearchField';
 export { AuthPanel } from '@/components/brand/AuthPanel';
 export { StreamUpsell } from '@/components/brand/StreamUpsell';
 export { Stepper, type StepperProps } from '@/components/ui/Stepper';
@@ -29,7 +30,9 @@ export { DateField, formatTargetDate, parseTargetDate, type DateFieldProps } fro
 // Design-system primitives (domain)
 export { BoxCard, type BoxCardProps } from '@/components/domain/BoxCard';
 export { RoomGlyph, type RoomGlyphProps } from '@/components/domain/RoomGlyph';
+export { RoomPicker, type RoomPickerProps } from '@/components/domain/RoomPicker';
 export { RoleBadge, type RoleBadgeProps } from '@/components/domain/RoleBadge';
 export { MarkerChip, type MarkerChipProps } from '@/components/domain/MarkerChip';
 export { ColorDot, type ColorDotProps } from '@/components/domain/ColorDot';
 export { ValueStat, type ValueStatProps } from '@/components/domain/ValueStat';
+export { ProBadge, type ProBadgeProps } from '@/components/domain/ProBadge';

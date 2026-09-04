@@ -21,6 +21,7 @@ import {
   space,
   DEFAULT_HUE,
   alpha,
+  pressed,
 } from '@/theme';
 import { money } from '@/lib/money';
 import { routes } from '@/lib/routes';
@@ -448,5 +449,5 @@ const styles = StyleSheet.create({
     marginTop: space[2],
   },
 
-  pressed: { opacity: 0.7 },
+  pressed,
 });

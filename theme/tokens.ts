@@ -95,6 +95,9 @@ export const DEFAULT_HUE: BoxColor = 'green';
 /** Neutral hue: the default for rooms and missing statuses. */
 export const NEUTRAL_HUE: BoxColor = 'slate';
 
+/** The standard press feedback for tappable rows/cards/chips (scale-based variants stay local). */
+export const pressed = { opacity: 0.7 } as const;
+
 /** Solid hue for a box-palette color name. Falls back to green. */
 export const boxColor = (name: string): string =>
   boxPalette[name as BoxColor]?.solid ?? boxPalette.green.solid;

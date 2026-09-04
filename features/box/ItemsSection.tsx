@@ -1,9 +1,9 @@
 // The "Items" section: count badge, search toggle + sort control, then the list
 // (or one of the two empty states). Filtering/sorting lives in useVisibleItems.
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 
-import { Badge, Icon, IconButton, Input, Segmented, Thumb } from '@/components';
+import { Badge, Icon, IconButton, SearchField, Segmented, Thumb } from '@/components';
 import type { Item, Marker } from '@/data/types';
 import { colors, fonts, palette, radius, shadow, space } from '@/theme';
 
@@ -54,26 +54,13 @@ export function ItemsSection({
       {items.length > 0 && (
         <View style={styles.itemControls}>
           {searching && (
-            <View style={styles.searchField}>
-              <Icon name="search" size={18} color={palette.ink400} />
-              <Input
-                value={query}
-                onChangeText={setQuery}
-                placeholder={copy.searchPlaceholder}
-                autoFocus
-                style={styles.searchInput}
-              />
-              {query.length > 0 && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Clear search"
-                  onPress={() => setQuery('')}
-                  hitSlop={8}
-                >
-                  <Icon name="x" size={18} color={palette.ink400} />
-                </Pressable>
-              )}
-            </View>
+            <SearchField
+              value={query}
+              onChangeText={setQuery}
+              placeholder={copy.searchPlaceholder}
+              autoFocus
+              style={styles.searchField}
+            />
           )}
           <Segmented
             options={SORT_OPTIONS}
@@ -124,7 +111,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space[2],
   },
-  searchInput: { flex: 1 },
   itemList: { gap: 8 },
   empty: {
     alignItems: 'center',

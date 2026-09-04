@@ -2,10 +2,10 @@
 // component lives next to that component.
 import { StyleSheet } from 'react-native';
 
-import { fonts, palette, radius } from '@/theme';
+import { fonts, palette, radius, pressed } from '@/theme';
 
 export const shared = StyleSheet.create({
-  pressed: { opacity: 0.7 },
+  pressed,
 
   sectionHead: {
     flexDirection: 'row',

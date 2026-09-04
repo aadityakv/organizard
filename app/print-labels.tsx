@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { Button, Icon } from '@/components';
-import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
+import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space, pressed } from '@/theme';
 import type { LabelInput } from '@/lib/qr/labels';
 import { printLabels } from '@/services/print';
 import { useStore } from '@/store/useStore';
@@ -312,5 +312,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceApp,
   },
 
-  pressed: { opacity: 0.7 },
+  pressed,
 });

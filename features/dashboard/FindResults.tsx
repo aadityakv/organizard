@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { Icon, RoomGlyph, Thumb } from '@/components';
 import type { Box, IndexedItem, Room } from '@/data/types';
-import { allIndexedItems, boxStats, useStore } from '@/store/useStore';
+import { allIndexedItems, boxStats, searchMove, useStore } from '@/store/useStore';
 import { boxColor, colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { openBox } from './openBox';
@@ -23,15 +23,10 @@ export function FindResults({ query }: { query: string }) {
   // Derive off stable slices (allIndexedItems builds new objects, so it can't be a live selector).
   const indexed = useMemo(() => allIndexedItems({ boxes, rooms, itemsByBox }), [boxes, rooms, itemsByBox]);
 
-  const q = query.trim().toLowerCase();
-
-  const markerLabel = (id: string): string => markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
-
-  const items = indexed.filter(
-    (it) =>
-      it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
+  const { items, boxes: matchedBoxes } = useMemo(
+    () => searchMove({ boxes, markers }, indexed, query),
+    [boxes, markers, indexed, query],
   );
-  const matchedBoxes = boxes.filter((b) => b.name.toLowerCase().includes(q));
   const roomFor = (id: string): Room | undefined => rooms.find((r) => r.id === id);
 
   if (items.length === 0 && matchedBoxes.length === 0) {

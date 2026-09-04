@@ -62,14 +62,17 @@ export function useStreamSession() {
   /** Undo the last captured item. */
   const undo = () => {
     setSession((prev) => prev.filter((it) => it.id !== lastId));
+    if (lastBatchIds.includes(lastId ?? '')) setLastBatchIds([]); // the batch is no longer retractable as a whole
     setLastId(null);
   };
 
   /** Write every captured item into the store. */
   const commit = () => {
-    const add = useStore.getState().addItem;
+    const st = useStore.getState();
     for (const it of session) {
-      add(it.boxId, {
+      // A collaborator may have deleted the box mid-session; don't mint orphan items.
+      if (!st.boxes.some((b) => b.id === it.boxId)) continue;
+      st.addItem(it.boxId, {
         name: it.name?.trim() || 'Untitled item',
         qty: it.qty ?? undefined,
         value: it.value ?? undefined,

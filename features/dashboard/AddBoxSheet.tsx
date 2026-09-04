@@ -1,14 +1,14 @@
 // Add-box sheet — gated to Owner/Editor by the caller.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Button, ColorDot, Icon, Input, RoomGlyph, Sheet } from '@/components';
+import { Button, ColorDot, Icon, Input, RoomPicker, Sheet } from '@/components';
 import type { Room } from '@/data/types';
 import { useSheetForm } from '@/hooks/useSheetForm';
 import { useStore } from '@/store/useStore';
 import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
 
 import { openBox } from './openBox';
-import { shared, sheetForm } from './styles';
+import { sheetForm } from './styles';
 import { copy } from '@/copy/dashboard';
 
 /** Sheet to create a box: name, color and room. */
@@ -50,6 +50,7 @@ export function AddBoxSheet({
         onChangeText={(name) => patch({ name })}
         placeholder={copy.boxNamePlaceholder}
         autoFocus
+        maxLength={200}
       />
 
       <Text style={sheetForm.fieldLabel}>{copy.colorLabel}</Text>
@@ -74,29 +75,7 @@ export function AddBoxSheet({
           </Button>
         </View>
       ) : (
-        <View style={styles.pickRow}>
-          {rooms.map((r) => {
-            const on = r.id === roomId;
-            return (
-              <Pressable
-                key={r.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                onPress={() => patch({ roomId: r.id })}
-                style={({ pressed }) => [
-                  styles.roomPick,
-                  on && styles.roomPickOn,
-                  pressed && shared.pressedSoft,
-                ]}
-              >
-                <RoomGlyph icon={r.icon} color={r.color} size={22} />
-                <Text style={[styles.roomPickText, on && styles.roomPickTextOn]} numberOfLines={1}>
-                  {r.name}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <RoomPicker rooms={rooms} selectedId={roomId ?? ''} onSelect={(roomId) => patch({ roomId })} />
       )}
 
       {rooms.length > 0 && (
@@ -133,30 +112,4 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     color: palette.ink500,
   },
-  pickRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  roomPick: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    borderWidth: 1.5,
-    borderColor: palette.sand300,
-    backgroundColor: colors.surfaceCard,
-  },
-  roomPickOn: {
-    borderColor: colors.brand,
-    backgroundColor: palette.green50,
-  },
-  roomPickText: {
-    fontFamily: fonts.body.bold,
-    fontSize: fontSize.sm,
-    color: palette.ink500,
-  },
-  roomPickTextOn: { color: palette.green700 },
 });

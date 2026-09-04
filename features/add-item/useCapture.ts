@@ -1,25 +1,20 @@
 // The inline camera: permission, open/close, flashOn, and taking a picture. Each
 // capture is copied to the document dir (a stable `local:` ref) and handed to the
 // form through `onPhoto`.
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { LayoutAnimation } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 
-import { persistCapture } from '@/lib/photos';
+import { useCameraCapture } from '@/hooks/useCameraCapture';
 
 import { FLASH_CONFIG } from './constants';
 
 /** Camera permission, open/close state and capture-to-persisted-ref for the item form. */
 export function useCapture(onPhoto: (ref: string) => void) {
-  const cameraRef = useRef<CameraView>(null);
-  const [permission, requestPermission] = useCameraPermissions();
+  const { cameraRef, permission, permissionGranted, permissionDenied, requestPermission, busy, snap } =
+    useCameraCapture();
   const [flashOn, setFlashOn] = useState(false);
-  const [capturing, setCapturing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
-
-  const permissionGranted = permission?.granted ?? false;
-  const permissionDenied = permission != null && !permission.granted && !permission.canAskAgain;
 
   // Open the inline camera card. If the user hasn't granted access yet, ask —
   // and whatever the outcome, surface the card so they see the inline prompt.
@@ -38,20 +33,11 @@ export function useCapture(onPhoto: (ref: string) => void) {
   const toggleFlash = () => setFlashOn((on) => !on);
 
   const capture = async () => {
-    if (!cameraRef.current || capturing) return;
-    setCapturing(true);
-    try {
-      const pic = await cameraRef.current.takePictureAsync({ quality: 0.6 });
-      if (pic?.uri) {
-        const ref = await persistCapture(pic.uri);
-        LayoutAnimation.configureNext(FLASH_CONFIG);
-        onPhoto(ref);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-      }
-    } catch {
-      // capture can fail if the camera is mid-teardown — keep the UI calm.
-    } finally {
-      setCapturing(false);
+    const ref = await snap();
+    if (ref != null) {
+      LayoutAnimation.configureNext(FLASH_CONFIG);
+      onPhoto(ref);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
   };
 
@@ -63,7 +49,7 @@ export function useCapture(onPhoto: (ref: string) => void) {
     requestPermission,
     flashOn,
     toggleFlash,
-    capturing,
+    capturing: busy,
     capture,
     cameraOpen,
     openCamera,

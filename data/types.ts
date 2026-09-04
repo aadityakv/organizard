@@ -68,9 +68,10 @@ export interface Item {
   value: number;
   /** Lucide glyph used when no photo is present. */
   icon?: string;
-  note?: string;
+  /** Free-text note; null after an explicit clear (distinct from "unchanged"). */
+  note?: string | null;
   markers?: string[]; // Marker ids
-  /** Captured photo URIs (expo-camera). */
+  /** Captured photo refs (local: uris before upload, server ids after). */
   photos?: string[];
 }
 
@@ -78,8 +79,6 @@ export interface Member {
   id: string;
   name: string;
   role: Role;
-  /** True for the signed-in user. */
-  you?: boolean;
 }
 
 /** A flattened item with its location breadcrumb — powers "Find". */
