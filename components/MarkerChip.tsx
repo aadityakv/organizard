@@ -1,4 +1,7 @@
-// Handling-marker pill, display-only or toggleable.
+// MarkerChip: a handling marker (Fragile, Open first, Heavy, …) as an icon + label pill
+// in the marker's hue. Display-only on cards and rows; with `onPress` it becomes a
+// toggle whose `selected` state fills the pill, used in the markers sheet and the
+// add-item marker section.
 import React from 'react';
 import { Pressable, View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, boxTint, colors, radius, fonts, fontSize } from '@/theme';

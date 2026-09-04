@@ -1,4 +1,6 @@
-// /v1/auth: Apple, email/password, magic-link verify, logout and account deletion.
+// /v1/auth: Sign in with Apple, email/password register + login, legacy magic-link
+// verify, logout (one or all sessions) and account deletion. Sign-in endpoints are
+// rate-limited per address and per IP and never reveal whether an email exists.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';

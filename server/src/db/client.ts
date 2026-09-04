@@ -1,4 +1,4 @@
-// Drizzle client over the D1 binding.
+// Drizzle client over the D1 binding, typed with the schema so repos get inferred rows.
 import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1';
 
 import type { Env } from '../types';

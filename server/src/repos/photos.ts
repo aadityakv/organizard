@@ -1,4 +1,5 @@
-// Photo rows (metadata + links to items/boxes); bytes live in R2.
+// Photo rows: metadata plus the link to an item or box. Bytes live in R2 under the
+// photo id; creating a record reserves the key before the upload happens.
 import { and, eq } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';

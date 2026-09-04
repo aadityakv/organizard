@@ -1,4 +1,6 @@
-// Numeric stepper with a typeable field.
+// Stepper: quantity control for the item form. Minus / plus buttons step within
+// [min, max], and the number itself is a text field so large counts can be typed
+// instead of tapped. Typing is clamped on blur; an empty field is allowed mid-edit.
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { colors, palette, space, radius, fonts, fontSize } from '@/theme';

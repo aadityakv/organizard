@@ -1,4 +1,6 @@
-// Sign in with Apple: identity-token verification against Apple's JWKS.
+// Sign in with Apple: verifies the identity token the app receives against Apple's
+// published JWKS (signature, issuer, audience = our bundle id) and returns the
+// stable Apple user id plus email when Apple shares it.
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 export type AppleIdentity = { sub: string; email?: string | null };

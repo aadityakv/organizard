@@ -1,4 +1,7 @@
-// Labelled text input with an animated focus ring.
+// Input: the labelled text field used by every form and sheet. Wraps TextInput with an
+// eyebrow label, optional prefix (e.g. "$"), multiline mode, and an animated border that
+// tints green on focus. Font size is pinned to 16 so iOS does not zoom the page on
+// focus. `inputAccessoryViewID` attaches an iOS keyboard bar (see KeyboardDoneBar).
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, StyleProp, ViewStyle, Animated } from 'react-native';
 import { colors, radius, space, fonts, fontSize } from '@/theme';

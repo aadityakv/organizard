@@ -1,4 +1,6 @@
-// Move persistence: create, snapshot, changes-since, delete, and the user's move list.
+// Move persistence: create (with owner membership and seeded statuses/markers), the
+// full snapshot a client opens with, changes-since-cursor for delta sync, hard delete
+// in FK-safe order, and the list of moves a user belongs to.
 import type { Box, Item, Marker, Member, Move, Role, Room, Status } from '@shared/index';
 import { and, eq, gt, inArray, isNull } from 'drizzle-orm';
 

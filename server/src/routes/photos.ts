@@ -1,4 +1,5 @@
-// /v1/photos: upload and serve photo bytes from R2.
+// /v1/photos/:photoId: PUT uploads bytes to R2 and GET streams them back, both scoped
+// to the caller's membership in the photo's move.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
