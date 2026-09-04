@@ -29,7 +29,7 @@
     "eslint": "^9.39.5",
     "prettier": "^3.9.6",
     "sql.js": "^1.12.0",
-    "typescript": "^5.7.2",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.69.0",
     "vitest": "^2.1.8",
     "wrangler": "^4.129.0"
