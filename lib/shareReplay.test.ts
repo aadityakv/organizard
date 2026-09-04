@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildMigrationBatch } from './migration';
+import { buildShareReplayBatch } from './shareReplay';
 import type { SliceData } from '@/store/library';
 
 const slice = (over: Partial<SliceData> = {}): SliceData => ({
@@ -42,9 +42,9 @@ const slice = (over: Partial<SliceData> = {}): SliceData => ({
   ...over,
 });
 
-describe('buildMigrationBatch', () => {
+describe('buildShareReplayBatch', () => {
   it('replays every entity, parents before children', () => {
-    const batch = buildMigrationBatch(slice());
+    const batch = buildShareReplayBatch(slice());
     expect(batch.map((m) => m.type)).toEqual([
       'addStatus',
       'addMarker',
@@ -56,7 +56,7 @@ describe('buildMigrationBatch', () => {
   });
 
   it('keeps client ids stable per row and maps cents/join fields', () => {
-    const batch = buildMigrationBatch(slice());
+    const batch = buildShareReplayBatch(slice());
     const item = batch.find((m) => m.type === 'addItem');
     expect(item && 'payload' in item && item.payload).toMatchObject({
       id: 'i1',
@@ -81,7 +81,7 @@ describe('buildMigrationBatch', () => {
       statuses: [],
       markers: [],
     });
-    expect(buildMigrationBatch(empty)).toEqual([]);
+    expect(buildShareReplayBatch(empty)).toEqual([]);
     const sparse = slice({
       boxes: [
         {
@@ -97,7 +97,7 @@ describe('buildMigrationBatch', () => {
       ],
       itemsByBox: { b2: [{ id: 'i2', boxId: 'b2', name: 'Cables', qty: 1, value: 0 }] },
     });
-    const batch = buildMigrationBatch(sparse);
+    const batch = buildShareReplayBatch(sparse);
     const item = batch.find((m) => m.type === 'addItem');
     expect(item && 'payload' in item && item.payload).toMatchObject({
       valueCents: 0,

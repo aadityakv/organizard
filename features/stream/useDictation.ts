@@ -1,11 +1,11 @@
 // The mic state machine. Owns the dictation session, the interim transcript, the
 // "got it / didn't catch that" beat and its timer. It parses what was heard and hands
 // the result to the caller; what happens to the ledger is the caller's business.
-// Dictation is simulated where the native recognizer is unavailable (lib/dictation).
 import { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 
-import { listen, isDictationSimulated, type DictationSession } from '@/lib/voice/dictation';
+import { DICTATION_ERROR, isDictationSimulated, listen, type DictationSession } from '@/lib/voice/dictation';
+import { copy } from '@/copy/stream';
 import { parseList, parseUtterance, type ParsedItem } from '@/lib/voice/streamParse';
 
 import type { Mic } from './types';
@@ -101,20 +101,20 @@ export function useDictation(handlers: DictationHandlers) {
           finalize(t);
         },
         onError: (e) => {
-          // Only the mic/speech-permission denial needs special handling — it must NOT
-          // create a fake item. Genuine recognition errors are followed by onEnd →
-          // finalize, which captures whatever was heard, so we let those fall through.
-          if (!(e instanceof Error && e.message === 'PERMISSION')) return;
+          // Permission refused or no recognizer on this device: stop cleanly and say so.
+          // Genuine recognition errors are followed by onEnd → finalize, which keeps
+          // whatever was heard, so those fall through.
+          const code = e instanceof Error ? e.message : '';
+          if (code !== DICTATION_ERROR.permission && code !== DICTATION_ERROR.unavailable) return;
           dictRef.current = null;
           if (gotitTmo.current) clearTimeout(gotitTmo.current);
           targetRef.current = null;
           listModeRef.current = false;
           setTranscript('');
           setMic(MIC.ready);
-          Alert.alert(
-            'Microphone access needed',
-            'Tuck needs microphone and speech access to add items by voice. Turn them on in Settings › Tuck, then try again.',
-          );
+          if (code === DICTATION_ERROR.permission)
+            Alert.alert(copy.micPermissionTitle, copy.micPermissionBody);
+          else Alert.alert(copy.micUnavailableTitle, copy.micUnavailableBody);
         },
       },
     );

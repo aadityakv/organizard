@@ -216,12 +216,12 @@ export default function StreamSession() {
               mode={photoMode ? 'frame' : 'voice'}
               hint={
                 dictation.mic === MIC.listening
-                  ? 'Listening… tap the button when you’re done'
+                  ? copy.listeningHint
                   : voiceMode
-                    ? 'Tap, then name everything in the box'
-                    : 'Snap, then say what it is'
+                    ? copy.voiceModeHint
+                    : copy.snapModeHint
               }
-              note={dictation.simulated ? 'Mic unavailable here — simulating dictation' : null}
+              note={dictation.simulated ? copy.simulatedDictationNote : null}
             />
 
             <MicPills

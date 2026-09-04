@@ -8,7 +8,7 @@ export const ID_PREFIX = {
   marker: 'mk',
   move: 'mv',
   mutation: 'c',
-  migration: 'mig',
+  replay: 'mig',
   photo: 'ph',
   streamItem: 's',
   voiceItem: 'v',

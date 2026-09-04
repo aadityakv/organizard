@@ -1,36 +1,14 @@
-// Dictation seam for Streaming Mode. The streaming screen talks only to `listen()`
-// and `isDictationSimulated()` — it doesn't care whether speech is real or faked.
-//
-// On a device with the native on-device speech module (iOS, mic+speech granted),
-// `listen()` streams real recognition. Otherwise (simulator, Android, permission
-// denied) it falls back to a simulated path that streams a sample utterance — so the
-// whole capture flow stays testable on the simulator (where the mic doesn't work).
+// Dictation seam for Streaming Mode. The streaming screen talks only to `listen()`:
+// on iOS with the native on-device recognizer it streams real recognition; anywhere
+// the recognizer is missing (Android, a build without the module) it reports
+// UNAVAILABLE and captures nothing. Development builds substitute the simulator from
+// dictation.simulated.ts so the flow can be exercised where there is no microphone.
 import { isSpeechAvailable, requestSpeechPermissions, startSpeech } from '@/modules/speech-recognizer';
 
-// Sample utterances for the simulated fallback: single items (photos on) and whole
-// boxes (voice only).
-const SAMPLES = [
-  'stand mixer, two hundred twenty dollars',
-  'stoneware mugs, six of them, fifty four dollars',
-  'cast iron skillet, eighty bucks',
-  'dinner plates, eight of them, ninety six dollars',
-  'chef knife set, one hundred forty dollars',
-  'table lamp, twenty five dollars',
-  'wool coats, three of them, two hundred dollars',
-];
-const SAMPLES_LIST = [
-  'paperbacks, a desk lamp, three coffee mugs, and a phone charger',
-  'winter coats, two scarves, a pair of boots, and a wool blanket',
-  'dinner plates, six wine glasses, a salad bowl, and a cheese board',
-  'board games, a bluetooth speaker, four picture frames, and a throw pillow',
-  'a cast iron skillet, two cutting boards, a stand mixer, and a kettle',
-];
+import { simulatedListen } from './dictation.simulated';
 
-let singleIdx = -1;
-let listIdx = -1;
-// Set when the native module exists but mic/speech permission was denied, so the
-// fallback note can still surface.
-let permissionDenied = false;
+/** Error messages `listen` reports through onError; callers switch on these. */
+export const DICTATION_ERROR = { permission: 'PERMISSION', unavailable: 'UNAVAILABLE' } as const;
 
 export type DictationSession = {
   /** Discard the utterance (no onFinal). */
@@ -44,59 +22,22 @@ export type DictationCallbacks = {
   onError?: (e: unknown) => void;
 };
 
-/** True while the mic is faked (no native speech module / not available / denied). */
+/** True only in a development build that is faking the mic (simulator, no recognizer). */
 export function isDictationSimulated(): boolean {
-  return !isSpeechAvailable() || permissionDenied;
+  return __DEV__ && !isSpeechAvailable();
 }
 
-function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): DictationSession {
-  const pool = opts.listMode ? SAMPLES_LIST : SAMPLES;
-  const idx = opts.listMode
-    ? (listIdx = (listIdx + 1) % pool.length)
-    : (singleIdx = (singleIdx + 1) % pool.length);
-  const text = pool[idx];
-
-  let cancelled = false;
-  let done = false;
-  let i = 0;
-  let finishTimer: ReturnType<typeof setTimeout> | undefined;
-  const fire = () => {
-    if (done || cancelled) return;
-    done = true;
-    cb.onFinal(text);
-  };
-  const iv = setInterval(() => {
-    if (cancelled || done) return;
-    i += 2;
-    cb.onInterim?.(text.slice(0, i));
-    if (i >= text.length) {
-      clearInterval(iv);
-      finishTimer = setTimeout(fire, SILENCE_MS);
-    }
-  }, 48);
-  const clear = () => {
-    clearInterval(iv);
-    if (finishTimer) clearTimeout(finishTimer);
-  };
-
-  return {
-    cancel: () => {
-      cancelled = true;
-      clear();
-    },
-    stop: () => {
-      clear();
-      fire();
-    }, // finalize immediately with the full sample
-  };
-}
-
-/** Listen for one utterance: interim text via onInterim, then onFinal with the full transcript. */
-/** Pause after the last words that ends an utterance. */
-const SILENCE_MS = 420;
-
+/**
+ * Listen for one utterance: interim text via onInterim, then onFinal with the full
+ * transcript. Without the native recognizer this reports UNAVAILABLE (or, in a
+ * development build, hands over to the simulator so the flow can still be tried).
+ */
 export function listen(opts: { listMode?: boolean }, cb: DictationCallbacks): DictationSession {
-  if (!isSpeechAvailable()) return simulate(opts, cb);
+  if (!isSpeechAvailable()) {
+    if (__DEV__) return simulatedListen(opts, cb);
+    queueMicrotask(() => cb.onError?.(new Error(DICTATION_ERROR.unavailable)));
+    return { cancel: () => {}, stop: () => {} };
+  }
 
   let cancelled = false;
   let done = false;
@@ -133,13 +74,11 @@ export function listen(opts: { listMode?: boolean }, cb: DictationCallbacks): Di
       if (!granted) {
         // Real device, mic/speech denied — surface it instead of faking items.
         // (Simulated dictation only makes sense where the native module is absent.)
-        permissionDenied = true;
         done = true;
         clearTimers();
-        cb.onError?.(new Error('PERMISSION'));
+        cb.onError?.(new Error(DICTATION_ERROR.permission));
         return;
       }
-      permissionDenied = false;
       speech = startSpeech(
         (transcript) => {
           if (cancelled) return;

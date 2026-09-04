@@ -3,7 +3,7 @@
 import type { Role } from '@/shared';
 
 import { api } from '@/lib/api';
-import { buildMigrationBatch } from '@/lib/migration';
+import { buildShareReplayBatch } from '@/lib/shareReplay';
 import { clearSession } from '@/lib/session';
 import { syncActiveMove } from '@/services/sync';
 import { extractSlice } from '@/store/shape';
@@ -30,7 +30,7 @@ export async function shareMove(): Promise<{ moveId: string }> {
   // nothing half-done: the batch is persisted and retried like any other edit, ahead of
   // anything captured afterwards.
   useStore.getState().goShared(serverMoveId);
-  for (const m of buildMigrationBatch(extractSlice(useStore.getState()))) useStore.getState().enqueue(m);
+  for (const m of buildShareReplayBatch(extractSlice(useStore.getState()))) useStore.getState().enqueue(m);
   void syncActiveMove();
   return { moveId: serverMoveId };
 }
