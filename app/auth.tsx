@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { completeEmailSignIn } from '@/services/auth';
 import { colors, fonts } from '@/theme';
 
+/** Completes a magic-link sign-in from its deep link, then routes into the app. */
 export default function AuthVerify() {
   const { token } = useLocalSearchParams<{ token?: string }>();
   const [failed, setFailed] = useState(false);

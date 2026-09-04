@@ -7,6 +7,7 @@ import { Button, SlothMark } from '@/components';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette } from '@/theme';
 
+/** First-launch onboarding: sign in, or continue as a guest. */
 export default function Welcome() {
   const setOnboarded = useStore((s) => s.setOnboarded);
 

@@ -4,6 +4,7 @@ import { Redirect } from 'expo-router';
 
 import { useStore } from '@/store/useStore';
 
+/** Entry redirect: onboarding, the open move, or the library. */
 export default function Index() {
   const currentMoveId = useStore((s) => s.currentMoveId);
   const onboarded = useStore((s) => s.onboarded);

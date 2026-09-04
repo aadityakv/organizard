@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthPanel, Header } from '@/components';
 import { colors } from '@/theme';
 
+/** Sign-in screen reached from onboarding. */
 export default function SignIn() {
   const done = () => {
     // Land in the library; any shared moves pulled on sign-in appear there.
