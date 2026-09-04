@@ -210,7 +210,6 @@ const styles = StyleSheet.create({
     // overflow: hidden keeps the pill shape clean on Android
     overflow: 'hidden',
   },
-  // sm buttons: enlarge the hit area to meet the 44px minimum
   smTapTarget: {
     minHeight: tap.min,
   },

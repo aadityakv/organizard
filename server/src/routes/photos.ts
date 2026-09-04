@@ -16,7 +16,6 @@ export function photoBlobRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: AuthVars }>();
   r.use('*', authMiddleware(deps));
 
-  // Upload the bytes for a previously-created photo record.
   r.put('/:photoId', async (c) => {
     const db = deps.getDb(c.env);
     const photo = await getPhoto(db, c.req.param('photoId'));

@@ -21,7 +21,6 @@ export function useVisibleItems(items: Item[], allMarkers: Marker[]) {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
 
-  // Opening the search shows the field; closing it also clears the query.
   const toggleSearching = () =>
     setSearching((prev) => {
       if (prev) setQuery('');
@@ -45,7 +44,6 @@ export function useVisibleItems(items: Item[], allMarkers: Marker[]) {
     if (sortMode === 'recent') return next.reverse();
     if (sortMode === 'az')
       return next.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    // 'value' — by the item's displayed value, high → low.
     return next.sort((a, b) => (b.value || 0) - (a.value || 0));
   }, [items, query, sortMode, allMarkers]);
 

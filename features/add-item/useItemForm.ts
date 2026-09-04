@@ -15,7 +15,6 @@ import { FLASH_CONFIG } from './constants';
 export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: string; photo?: string }) {
   const isEdit = !!itemId;
 
-  // ── Store: box context, markers, role, the add action ──────────────────────
   const box = useStore((s) => (boxId ? boxById(s, boxId) : undefined));
   const role = useStore(currentRole);
   const allMarkers = useStore((s) => s.markers);
@@ -29,7 +28,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
   const addItem = useStore((s) => s.addItem);
   const session = useStore((s) => s.session);
 
-  // ── Edit mode: the item being edited + actions and the move picker ──────────
   const editing = useStore((s) =>
     itemId ? (s.itemsByBox[boxId] ?? []).find((it) => it.id === itemId) : undefined,
   );
@@ -40,7 +38,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
 
   const canEdit = PERM.canEdit(role);
 
-  // ── Form state ───────────────────────────────────────────────────────────--
   const [photos, setPhotos] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [value, setValue] = useState('');
@@ -48,10 +45,8 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
   const [note, setNote] = useState('');
   const [selectedMarkers, setSelectedMarkers] = useState<string[]>([]);
   const [addedCount, setAddedCount] = useState(0);
-  // Destination box for the move picker (edit mode). Defaults to the current box.
   const [targetBoxId, setTargetBoxId] = useState(boxId);
 
-  // ── One-time prefill when editing ────────────────────────────────────────────
   const prefilled = useRef(false);
   useEffect(() => {
     if (!itemId || !editing || prefilled.current) return;
@@ -66,7 +61,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemId]);
 
-  // Prefill a photo captured in the quick single-capture flow (create mode only).
   const photoPrefilled = useRef(false);
   useEffect(() => {
     if (isEdit || !photo || photoPrefilled.current) return;
@@ -124,7 +118,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
     }
   };
 
-  // Edit mode: persist the patch, then move the (already-edited) item if needed.
   const saveEdit = () => {
     if (!boxId || !itemId || !canEdit) return;
     updateItem(boxId, itemId, {
@@ -161,7 +154,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
     );
   };
 
-  // ── Box subtitle line (header) ───────────────────────────────────────────────
   const boxLabel = box
     ? isEdit
       ? `Edit item · Box #${box.number}`

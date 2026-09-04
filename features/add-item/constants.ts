@@ -10,7 +10,6 @@ export const KBD_ACCESSORY_ID = 'add-item-kbd';
 /** The accessory id to hand to inputs: only iOS has InputAccessoryView. */
 export const KBD_ACCESSORY = Platform.OS === 'ios' ? KBD_ACCESSORY_ID : undefined;
 
-// A friendly press animation for the captured layout when photos arrive.
 export const FLASH_CONFIG: LayoutAnimationConfig = LayoutAnimation.create(
   180,
   LayoutAnimation.Types.easeInEaseOut,

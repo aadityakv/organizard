@@ -9,7 +9,6 @@ import { ROLE_LABEL, ROLE_BLURB, ROLE_ICON } from '@/lib/permissions';
 import type { Role } from '@/data/types';
 import { Icon } from '@/components/Icon';
 
-// ─── prop contract (§8 exact) ─────────────────────────────────────────────────
 export type RoleBadgeProps = {
   role: Role;
   size?: 'sm' | 'md';
@@ -17,7 +16,6 @@ export type RoleBadgeProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-// ─── per-role colour tokens ───────────────────────────────────────────────────
 type RoleTokens = {
   iconColor: string;
   wash: string;
@@ -55,7 +53,6 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
   const isSm = size === 'sm';
 
   if (withBlurb) {
-    // ── Row variant: circle icon + label + blurb description ──
     const circleSize = isSm ? 28 : 36;
     const iconSize = isSm ? 13 : 16;
 
@@ -93,7 +90,6 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
     );
   }
 
-  // ── Pill variant: compact chip with icon + label ──
   const pillHeight = isSm ? 22 : 26;
   const pillPaddingH = isSm ? space[2] : 11;
   const pillPaddingIconH = isSm ? space[2] : 9;

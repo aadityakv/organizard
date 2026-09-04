@@ -138,7 +138,6 @@ export default function Dashboard() {
               />
             </View>
 
-            {/* Grouped body */}
             {view === 'room' ? (
               <View>
                 {rooms.map((room) => (

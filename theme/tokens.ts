@@ -48,8 +48,6 @@ export const palette = {
   red600: '#C0392C',
 } as const;
 
-// CATEGORICAL BOX PALETTE — the organizing principle (12 hues).
-// Each hue has a solid (block / chip) and a soft tint (card wash).
 const boxPalette = {
   coral: { solid: '#F2746B', tint: '#FCE7E4' },
   amber: { solid: '#F2A23C', tint: '#FBEBD5' },
@@ -78,14 +76,12 @@ export const boxColor = (name: string): string =>
 export const boxTint = (name: string): string => boxPalette[name as BoxColor]?.tint ?? boxPalette.green.tint;
 
 export const colors = {
-  // surfaces
   surfaceApp: palette.cream100, // app background (warm cream)
   surfaceCard: palette.white, // cards (white, so photos pop)
   surfaceSunken: palette.cream200,
   surfaceInverse: palette.ink900,
   scrim: 'rgba(42, 39, 34, 0.45)',
 
-  // text — warm near-black, never pure #000
   textStrong: palette.ink900,
   textBody: palette.ink700,
   textMuted: palette.ink500,
@@ -94,18 +90,15 @@ export const colors = {
   textOnDark: palette.cream50,
   textLink: palette.green700,
 
-  // borders — warm hairlines, used sparingly
   borderSubtle: palette.sand300,
   borderStrong: palette.sand400,
   borderFocus: palette.green500,
 
-  // brand / interactive
   brand: palette.green500,
   brandHover: palette.green600,
   brandPressed: palette.green700,
   brandWash: palette.green50,
 
-  // semantic status
   success: palette.green600,
   successWash: palette.green50,
   warning: palette.amber500,
@@ -116,7 +109,6 @@ export const colors = {
   infoWash: palette.blue50,
 } as const;
 
-// SPACING — 4px grid
 export const space = {
   0: 0,
   1: 4,
@@ -135,7 +127,6 @@ export const space = {
 /** Screen edge padding. */
 export const gutter = 16;
 
-// RADIUS — generous, friendly rounding
 export const radius = {
   xs: 6,
   sm: 10,
@@ -146,7 +137,6 @@ export const radius = {
   pill: 999, // chips, buttons
 } as const;
 
-// SHADOWS — soft, warm-tinted (RN iOS shadow + Android elevation)
 type Shadow = {
   shadowColor: string;
   shadowOpacity: number;

@@ -69,7 +69,6 @@ async function req<T>(path: string, init: RequestInit, session: string | null): 
 }
 
 export const api = {
-  // --- auth ---
   appleLogin: (identityToken: string) =>
     req<AuthResult>('/v1/auth/apple', { method: 'POST', body: JSON.stringify({ identityToken }) }, null),
   emailStart: (email: string) =>
@@ -92,7 +91,6 @@ export const api = {
   logout: (session: string) => req<{ ok: true }>('/v1/auth/logout', { method: 'POST' }, session),
   deleteAccount: (session: string) => req<{ ok: true }>('/v1/auth/account', { method: 'DELETE' }, session),
 
-  // --- moves / sync ---
   createMove: (
     session: string,
     body: {
@@ -116,7 +114,6 @@ export const api = {
   deleteMove: (session: string, moveId: string) =>
     req<{ ok: true }>(`/v1/moves/${moveId}`, { method: 'DELETE' }, session),
 
-  // --- sharing ---
   createInvite: (session: string, moveId: string, role: Role) =>
     req<InviteResult>(
       `/v1/moves/${moveId}/invites`,
@@ -134,7 +131,6 @@ export const api = {
   removeMember: (session: string, moveId: string, userId: string) =>
     req<{ ok: true }>(`/v1/moves/${moveId}/members/${userId}`, { method: 'DELETE' }, session),
 
-  // --- photos ---
   createPhoto: (session: string, moveId: string, link: { itemId?: string; boxId?: string }) =>
     req<{ photoId: string; uploadPath: string }>(
       `/v1/moves/${moveId}/photos`,

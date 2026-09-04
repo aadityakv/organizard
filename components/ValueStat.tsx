@@ -54,15 +54,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   value: {
-    // type.numeral = Fredoka_700Bold, fontSize 30, lineHeight not set (defaults to auto)
     fontFamily: fonts.display.bold,
-    fontSize: fontSize['2xl'], // 30
+    fontSize: fontSize['2xl'],
     lineHeight: 34,
     includeFontPadding: false,
   },
   label: {
-    fontFamily: fonts.body.extra, // Nunito_800ExtraBold — matches the bold eyebrow feel
-    fontSize: fontSize.xs, // 12
+    fontFamily: fonts.body.extra,
+    fontSize: fontSize.xs,
     lineHeight: 16,
     color: colors.textMuted,
     includeFontPadding: false,

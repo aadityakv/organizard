@@ -36,7 +36,6 @@ export default function BoxDetail() {
 
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const [streamUpsell, setStreamUpsell] = useState(false);
-  // Photo gallery starts collapsed; tapping the header chevron expands it.
   const [photosExpanded, setPhotosExpanded] = useState(false);
 
   if (!box) return <MissingBox />;
@@ -88,7 +87,6 @@ export default function BoxDetail() {
         <CoverCard box={box} session={session} canEdit={canEdit} onEdit={() => setSheet('cover')} />
         <QrLabelCard box={box} roomName={room?.name} />
 
-        {/* Photo gallery — cover + all item photos, collapsed by default */}
         {d.photos.length > 0 && (
           <PhotoGallery
             photos={d.photos}
@@ -232,13 +230,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surfaceApp },
   scroll: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 },
 
-  // Markers
   editLink: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6 },
   editLinkText: { fontFamily: fonts.body.bold, fontSize: 13.5, color: palette.green700 },
   markerWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 },
   markerEmpty: { fontFamily: fonts.body.semibold, fontSize: 13.5, color: palette.ink400 },
 
-  // Bottom
   bottom: { marginTop: 20 },
   actionRow: { flexDirection: 'row', gap: 10 },
   addItem: { flex: 1 },

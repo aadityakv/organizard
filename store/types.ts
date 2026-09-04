@@ -14,7 +14,6 @@ export type State = {
   /** Local Pro entitlement: a 7-day trial expiry (ms). Real billing sets this later. */
   proTrialUntil: number | null;
 
-  // --- the live slice: the move that is currently open ---
   move: Move;
   rooms: Room[];
   boxes: Box[];
@@ -23,7 +22,6 @@ export type State = {
   members: Member[];
   itemsByBox: Record<string, Item[]>;
 
-  // --- sync layer (dormant for local moves) ---
   /** Signed-in account (null until the user authenticates). */
   account: Account | null;
   /** In-memory session token (loaded from secure-store at boot). */
@@ -36,7 +34,6 @@ export type State = {
   /** Server timestamp of the last successful delta pull. */
   lastSyncTs: number;
 
-  // --- library ---
   /** All moves you have, keyed by local id. */
   library: Record<string, MoveBundle>;
   /**

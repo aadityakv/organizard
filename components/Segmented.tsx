@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fonts.body.bold,
-    // fontSize applied inline from size prop
   },
   labelActive: {
     color: colors.textStrong,

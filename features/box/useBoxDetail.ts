@@ -39,7 +39,6 @@ export function useBoxDetail(boxId: string) {
   const deleteBox = useStore((s) => s.deleteBox);
   const updateBox = useStore((s) => s.updateBox);
 
-  // Resolve recipe — turn the box's ids into display data.
   const status = useStore((s) => (box ? statusById(s, box.status) : undefined));
   const room = useStore((s) => (box ? roomById(s, box.roomId) : undefined));
   const allStatuses = useStore((s) => s.statuses);

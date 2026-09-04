@@ -33,8 +33,6 @@ export type BoxCardProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-// MarkerChip inline (tiny pill, no onPress needed here — display-only)
-// The full MarkerChip with toggle affordance lives in MarkerChip.tsx.
 type MarkerPill = { label: string; color: string; icon: string };
 
 function InlineMarker({ label, color: hue }: MarkerPill) {
@@ -131,7 +129,6 @@ export function BoxCard({
             />
           ) : null}
 
-          {/* scrim over photo so text stays legible */}
           {cover ? <View style={styles.bandScrim} /> : null}
 
           {number != null ? (
@@ -206,11 +203,9 @@ const styles = StyleSheet.create({
   },
 
   numberBadge: {
-    // transparent by default (no cover)
     borderRadius: radius.pill,
     paddingHorizontal: 0,
     paddingVertical: 0,
-    // ensure above the scrim
     zIndex: 1,
   },
 

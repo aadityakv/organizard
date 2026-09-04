@@ -28,7 +28,6 @@ export function RoomSheet({
   const updateRoom = useStore((s) => s.updateRoom);
   const deleteRoom = useStore((s) => s.deleteRoom);
   const role = useStore(currentRole);
-  // Read for the cascade-delete copy + gating (counts boxes & items in this room).
   const boxes = useStore((s) => s.boxes);
   const itemsByBox = useStore((s) => s.itemsByBox);
 

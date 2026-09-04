@@ -13,7 +13,7 @@ import { fonts, palette } from '@/theme';
 /** Capture entry: pick a box, then continue to the single-item or streaming capture flow. */
 export default function Capture() {
   const boxes = useStore((s) => s.boxes);
-  const target = boxes[boxes.length - 1]?.id; // most recently added box
+  const target = boxes[boxes.length - 1]?.id;
 
   useEffect(() => {
     if (target) router.replace(`/stream/${target}?view=capture`);

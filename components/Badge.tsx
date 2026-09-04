@@ -42,30 +42,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 
-  // Size: sm — 18px height, padX 8
   containerSm: {
     height: 18,
     paddingHorizontal: 8,
   },
 
-  // Size: md — 22px height, padX 10
   containerMd: {
     height: 22,
     paddingHorizontal: 10,
   },
 
-  // Text: sm — 11px, Nunito ExtraBold (weight 800 equiv)
   textSm: {
     fontFamily: fonts.body.extra,
-    fontSize: fontSize['2xs'], // 11
+    fontSize: fontSize['2xs'],
     lineHeight: 14,
     letterSpacing: 0.1,
   },
 
-  // Text: md — 12px, Nunito ExtraBold
   textMd: {
     fontFamily: fonts.body.extra,
-    fontSize: fontSize.xs, // 12
+    fontSize: fontSize.xs,
     lineHeight: 16,
     letterSpacing: 0.1,
   },

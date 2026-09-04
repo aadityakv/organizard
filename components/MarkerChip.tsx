@@ -29,7 +29,6 @@ export function MarkerChip({
 }: MarkerChipProps) {
   const isSm = size === 'sm';
 
-  // Dimensions derived from the design prototype dims object
   const height = isSm ? 26 : 30;
   const paddingHorizontal = isSm ? 9 : 11;
   const gap = isSm ? 5 : 6;

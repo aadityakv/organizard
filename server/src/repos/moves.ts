@@ -116,8 +116,6 @@ async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
   }));
 }
 
-// --- DTO mappers -----------------------------------------------------------
-
 const toRoom = (r: typeof s.rooms.$inferSelect): Room => ({
   id: r.id,
   moveId: r.moveId,

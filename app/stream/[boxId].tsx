@@ -111,7 +111,6 @@ export default function StreamSession() {
   }, [voiceMode, view, invalidatePending]);
 
   const photoMode = !voiceMode;
-  // Camera is live in capture view, and in stream view only with Photos on.
   const cameraOn = cameraGranted && (view === 'capture' || photoMode);
   const box = boxes.find((b) => b.id === boxId) ?? boxes[0];
   const lastIt = session.lastIt;
@@ -119,7 +118,6 @@ export default function StreamSession() {
   const resayActive = voiceMode ? session.lastBatchIds.length > 0 : !!session.lastId;
   const summaryLabel = `${session.session.length} ${session.session.length === 1 ? 'item' : 'items'} tucked into ${session.boxCount} ${session.boxCount === 1 ? 'box' : 'boxes'} — ${money(session.sessionValue)} packed.`;
 
-  // The big button: tap to capture, tap again to stop (finish the utterance now).
   const onCapture = () => {
     if (dictation.mic === 'listening') {
       dictation.stop();
@@ -144,7 +142,6 @@ export default function StreamSession() {
     router.push({ pathname: '/add-item', params: photo ? { boxId, photo } : { boxId } });
   };
 
-  // Switch to Stream in place (no navigation). Free users get the upsell first.
   const onSwitchToStream = () => {
     if (isPro) setView('stream');
     else setUpsellOpen(true);
@@ -184,7 +181,6 @@ export default function StreamSession() {
 
   return (
     <View style={styles.root}>
-      {/* Live camera behind capture / photo-mode UI; dark backdrop otherwise. */}
       {cameraOn ? (
         <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" enableTorch={torch} />
       ) : null}
@@ -311,7 +307,6 @@ export default function StreamSession() {
         </View>
       ) : null}
 
-      {/* Pro upsell for the capture-view "Switch to Stream" pill (free users) */}
       <StreamUpsell
         visible={upsellOpen}
         onClose={() => setUpsellOpen(false)}
@@ -331,7 +326,6 @@ export default function StreamSession() {
 }
 
 function SlothGlyph() {
-  // The sloth-in-a-box mark (same art as the app icon).
   return (
     <View style={{ width: 84, height: 84, alignItems: 'center', justifyContent: 'center' }}>
       <Icon name="package-check" size={68} color={colors.brand} />

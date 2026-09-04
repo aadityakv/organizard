@@ -26,7 +26,6 @@ export type DictationHandlers = {
 export function useDictation(handlers: DictationHandlers) {
   const [mic, setMic] = useState<Mic>('ready');
   const [transcript, setTranscript] = useState('');
-  // Size of the last spoken batch, for the "Added N items" pill.
   const [lastBatch, setLastBatch] = useState(0);
 
   const dictRef = useRef<DictationSession | null>(null);

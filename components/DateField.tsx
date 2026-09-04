@@ -49,7 +49,6 @@ const sameDay = (a: Date, b: Date): boolean =>
 /** Date picker field with a self-contained calendar sheet (no native picker dependency). */
 export function DateField({ label, value, onChange, placeholder = 'Pick a date' }: DateFieldProps) {
   const [open, setOpen] = useState(false);
-  // The month currently shown in the grid (defaults to the selection or today).
   const [view, setView] = useState<Date>(() => {
     const base = value ?? new Date();
     return new Date(base.getFullYear(), base.getMonth(), 1);
@@ -60,7 +59,6 @@ export function DateField({ label, value, onChange, placeholder = 'Pick a date' 
   const month = view.getMonth();
   const firstWeekday = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  // Leading blanks for alignment, then the days.
   const cells: (number | null)[] = [
     ...Array.from({ length: firstWeekday }, () => null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
@@ -190,7 +188,6 @@ const styles = StyleSheet.create({
   value: { flex: 1, fontFamily: fonts.body.semibold, fontSize: fontSize.base, color: palette.ink900 },
   placeholder: { color: palette.ink400, fontFamily: fonts.body.semibold },
 
-  // Calendar
   calHeader: {
     flexDirection: 'row',
     alignItems: 'center',

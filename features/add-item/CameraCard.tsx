@@ -23,7 +23,6 @@ export function CameraCard({ capture }: { capture: Capture }) {
             facing="back"
             enableTorch={capture.flash === 'on'}
           />
-          {/* dim wash so the controls stay legible over any scene */}
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.cameraScrim]} />
 
           <View style={styles.cameraControls}>
@@ -180,7 +179,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 
-  // Permission states (inside the camera card)
   permStack: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
