@@ -3,7 +3,7 @@
 // Bearer session, aborts after the timeout, and turns non-2xx into a typed ApiError.
 import type { Box, Item, Marker, Member, Move, Mutation, Role, Room, Status } from '@/shared';
 
-export type PublicUser = {
+type PublicUser = {
   id: string;
   name: string;
   email: string | null;
@@ -150,5 +150,3 @@ export function createApi(baseUrl: string, fetchImpl: typeof fetch = fetch, time
       ),
   };
 }
-
-export type Api = ReturnType<typeof createApi>;

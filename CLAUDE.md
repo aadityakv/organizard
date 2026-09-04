@@ -16,8 +16,9 @@ Data hierarchy: **Move › Room › Box › Item**.
 A move's nav (build 17) is **Boxes · Capture · Find** (`app/(tabs)/_layout.tsx`):
 Capture is a free single-item verb (→ box picker → Add item), Find is item/box search
 + scan-to-find, Scan/Share are no longer tabs. **Streaming Mode** (Pro) is rapid capture
-— snap/speak items, parsed by `lib/streamParse.ts`; voice is *simulated* until the
-on-device mic native module lands. See the streaming-mode auto-memory.
+— snap/speak items, parsed by `lib/streamParse.ts`; speech is on-device via
+`modules/speech-recognizer` (SFSpeechRecognizer) with a simulated fallback on the
+simulator (`lib/dictation.ts`). See the streaming-mode auto-memory.
 
 **Product model (as of build 16):** account-based sync, Spotify-style. First launch
 shows onboarding: **log in / sign up**, or **continue as guest**.
