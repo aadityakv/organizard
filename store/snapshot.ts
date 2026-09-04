@@ -2,7 +2,7 @@
 import type { Item, Move } from '@/data/types';
 import type { ServerSnapshot } from '@/lib/api';
 
-import { newBundle, type MoveBundle } from './library';
+import { MOVE_MODE, newBundle, type MoveBundle } from './library';
 import {
   toClientBox,
   toClientItem,
@@ -43,7 +43,7 @@ export function bundleFromSnapshot(
 ): MoveBundle {
   return {
     ...newBundle(id, moveFromSnapshot(snap), now),
-    activeMode: 'shared',
+    activeMode: MOVE_MODE.shared,
     serverMoveId,
     statuses: snap.statuses.map(toClientStatus),
     markers: snap.markers.map(toClientMarker),

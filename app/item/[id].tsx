@@ -24,6 +24,7 @@ import { PERM } from '@/lib/permissions';
 import { boxPhotos, currentRole, findItem, markerById, roomById, useStore } from '@/store/useStore';
 import { useShallow } from 'zustand/react/shallow';
 import type { Marker } from '@/data/types';
+import { routes } from '@/lib/routes';
 
 /** Item detail: photos, fields, markers and breadcrumb, with edit as a secondary action. */
 export default function ItemDetail() {
@@ -77,7 +78,7 @@ export default function ItemDetail() {
   const hue = boxColor(box.color);
   const subtitle = box.name;
 
-  const goEdit = () => router.push({ pathname: '/add-item', params: { boxId: box.id, itemId: item.id } });
+  const goEdit = () => router.push({ pathname: routes.addItem, params: { boxId: box.id, itemId: item.id } });
 
   const confirmDelete = () => {
     Alert.alert(`Delete "${item.name}"?`, "This removes the item from the box. This can't be undone.", [
@@ -154,7 +155,7 @@ export default function ItemDetail() {
                   accessibilityRole="imagebutton"
                   accessibilityLabel={`View photo ${i + 1} of ${photos.length}`}
                   onPress={() =>
-                    router.push({ pathname: `/gallery/${box.id}`, params: { start: String(start) } })
+                    router.push({ pathname: routes.gallery(box.id), params: { start: String(start) } })
                   }
                   style={({ pressed }) => [styles.photo, pressed && styles.pressed]}
                 >
@@ -210,7 +211,7 @@ export default function ItemDetail() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Open Box #${box.number}, ${box.name}`}
-          onPress={() => router.push(`/box/${box.id}`)}
+          onPress={() => router.push(routes.box(box.id))}
           style={({ pressed }) => [styles.crumb, pressed && styles.pressed]}
         >
           <Icon name="package" size={18} color={hue} />

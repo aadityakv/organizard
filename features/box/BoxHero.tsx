@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { Header, Icon, IconButton, RoomGlyph, StatusChip } from '@/components';
 import type { Box, Room, Status } from '@/data/types';
 import { money } from '@/lib/money';
-import { boxColor, boxTint, fonts, palette, space } from '@/theme';
+import { boxColor, boxTint, fonts, palette, space, NEUTRAL_HUE } from '@/theme';
 
 import { shared } from './styles';
 
@@ -32,7 +32,7 @@ export function BoxHero({
 }) {
   const hue = boxColor(box.color);
   const subtitle = room ? (room.dest ? `${room.name} · ${room.dest}` : room.name) : '';
-  const chip = <StatusChip label={status?.label ?? '—'} color={status?.color ?? 'slate'} />;
+  const chip = <StatusChip label={status?.label ?? '—'} color={status?.color ?? NEUTRAL_HUE} />;
 
   return (
     <View style={[styles.hero, { backgroundColor: boxTint(box.color) }]}>

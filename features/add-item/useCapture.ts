@@ -1,4 +1,4 @@
-// The inline camera: permission, open/close, flash, and taking a picture. Each
+// The inline camera: permission, open/close, flashOn, and taking a picture. Each
 // capture is copied to the document dir (a stable `local:` ref) and handed to the
 // form through `onPhoto`.
 import { useRef, useState } from 'react';
@@ -14,7 +14,7 @@ import { FLASH_CONFIG } from './constants';
 export function useCapture(onPhoto: (ref: string) => void) {
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [flash, setFlash] = useState<'off' | 'on'>('off');
+  const [flashOn, setFlashOn] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
 
@@ -35,7 +35,7 @@ export function useCapture(onPhoto: (ref: string) => void) {
   };
 
   const closeCamera = () => setCameraOpen(false);
-  const toggleFlash = () => setFlash((f) => (f === 'on' ? 'off' : 'on'));
+  const toggleFlash = () => setFlashOn((on) => !on);
 
   const capture = async () => {
     if (!cameraRef.current || capturing) return;
@@ -61,7 +61,7 @@ export function useCapture(onPhoto: (ref: string) => void) {
     permissionGranted,
     permissionDenied,
     requestPermission,
-    flash,
+    flashOn,
     toggleFlash,
     capturing,
     capture,

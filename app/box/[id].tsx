@@ -24,8 +24,10 @@ import {
 } from '@/features/box';
 import { shared } from '@/features/box/styles';
 import { colors, fonts, palette } from '@/theme';
+import { routes } from '@/lib/routes';
 
-type SheetKind = 'status' | 'markers' | 'cover' | 'edit';
+const SHEET = { status: 'status', markers: 'markers', cover: 'cover', edit: 'edit' } as const;
+type SheetKind = (typeof SHEET)[keyof typeof SHEET];
 
 /** Box detail: hero, cover, QR label, items with search/sort, and the status/markers/cover/edit sheets. */
 export default function BoxDetail() {
@@ -62,13 +64,13 @@ export default function BoxDetail() {
 
   const onMore = () => {
     const options: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
-    if (canEdit) options.push({ text: 'Edit box', onPress: () => setSheet('edit') });
+    if (canEdit) options.push({ text: 'Edit box', onPress: () => setSheet(SHEET.edit) });
     if (canDelete) options.push({ text: 'Delete box', style: 'destructive', onPress: confirmDelete });
     options.push({ text: 'Cancel', style: 'cancel' });
     Alert.alert(box.name, undefined, options);
   };
 
-  const startStreaming = () => (isPro ? router.push(`/stream/${box.id}`) : setStreamUpsell(true));
+  const startStreaming = () => (isPro ? router.push(routes.stream(box.id)) : setStreamUpsell(true));
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
@@ -80,11 +82,11 @@ export default function BoxDetail() {
         canEdit={canEdit}
         showMenu={canEdit || canDelete}
         onMenu={onMore}
-        onChangeStatus={() => setSheet('status')}
+        onChangeStatus={() => setSheet(SHEET.status)}
       />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <CoverCard box={box} session={session} canEdit={canEdit} onEdit={() => setSheet('cover')} />
+        <CoverCard box={box} session={session} canEdit={canEdit} onEdit={() => setSheet(SHEET.cover)} />
         <QrLabelCard box={box} roomName={room?.name} />
 
         {d.photos.length > 0 && (
@@ -92,7 +94,7 @@ export default function BoxDetail() {
             photos={d.photos}
             expanded={photosExpanded}
             onToggle={() => setPhotosExpanded((v) => !v)}
-            onOpen={(i) => router.push({ pathname: `/gallery/${box.id}`, params: { start: String(i) } })}
+            onOpen={(i) => router.push({ pathname: routes.gallery(box.id), params: { start: String(i) } })}
           />
         )}
 
@@ -102,7 +104,7 @@ export default function BoxDetail() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Edit markers"
-              onPress={() => setSheet('markers')}
+              onPress={() => setSheet(SHEET.markers)}
               style={({ pressed }) => [styles.editLink, pressed && shared.pressed]}
             >
               <Icon name="plus" size={16} color={palette.green600} />
@@ -133,7 +135,7 @@ export default function BoxDetail() {
                   size="lg"
                   fullWidth
                   iconLeft="plus"
-                  onPress={() => router.push({ pathname: '/add-item', params: { boxId: box.id } })}
+                  onPress={() => router.push({ pathname: routes.addItem, params: { boxId: box.id } })}
                 >
                   Add item
                 </Button>
@@ -162,16 +164,16 @@ export default function BoxDetail() {
           setStreamUpsell(false);
           // Pro is account-tied — a guest must sign in before starting the trial.
           if (!session) {
-            router.push('/sign-in');
+            router.push(routes.signIn);
             return;
           }
           actions.startProTrial();
-          router.push(`/stream/${box.id}`);
+          router.push(routes.stream(box.id));
         }}
       />
 
       <StatusSheet
-        visible={sheet === 'status'}
+        visible={sheet === SHEET.status}
         statuses={d.allStatuses}
         currentId={box.status}
         onClose={closeSheet}
@@ -187,7 +189,7 @@ export default function BoxDetail() {
       />
 
       <MarkersSheet
-        visible={sheet === 'markers'}
+        visible={sheet === SHEET.markers}
         allMarkers={d.allMarkers}
         selected={box.markers}
         onClose={closeSheet}
@@ -199,7 +201,7 @@ export default function BoxDetail() {
       />
 
       <CoverSheet
-        visible={sheet === 'cover'}
+        visible={sheet === SHEET.cover}
         hasCover={!!box.cover}
         onClose={closeSheet}
         onCapture={(uri) => {
@@ -213,7 +215,7 @@ export default function BoxDetail() {
       />
 
       <EditBoxSheet
-        visible={sheet === 'edit'}
+        visible={sheet === SHEET.edit}
         box={box}
         rooms={d.rooms}
         onClose={closeSheet}

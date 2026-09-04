@@ -2,7 +2,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';
-import { boxColor, fonts, palette } from '@/theme';
+import { boxColor, fonts, palette, DEFAULT_HUE } from '@/theme';
 
 import { boxLabel, type BoxRef } from './types';
 
@@ -23,7 +23,7 @@ export function TopBar({ box, cameraOn, torch, onClose, onPickBox, onToggleTorch
         <Icon name="x" size={19} color="#fff" />
       </Pressable>
       <Pressable onPress={onPickBox} style={styles.boxChip}>
-        <View style={[styles.dot, { backgroundColor: boxColor(box?.color ?? 'green') }]} />
+        <View style={[styles.dot, { backgroundColor: boxColor(box?.color ?? DEFAULT_HUE) }]} />
         <Text style={styles.boxChipText} numberOfLines={1}>
           {boxLabel(box)}
         </Text>

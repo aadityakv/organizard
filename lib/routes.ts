@@ -1,0 +1,19 @@
+// Every navigable path in one place, so screens never assemble URL strings by hand.
+export const routes = {
+  welcome: '/welcome',
+  signIn: '/sign-in',
+  moves: '/moves',
+  newMove: '/new-move',
+  tabs: '/(tabs)',
+  members: '/members',
+  printLabels: '/print-labels',
+  scan: '/scan',
+  addItem: '/add-item',
+  box: (id: string) => `/box/${id}`,
+  item: (id: string) => `/item/${id}`,
+  qr: (boxId: string) => `/qr/${boxId}`,
+  gallery: (boxId: string) => `/gallery/${boxId}`,
+  stream: (boxId: string) => `/stream/${boxId}`,
+  streamCapture: (boxId: string) => `/stream/${boxId}?view=capture`,
+  invite: (token: string) => `/invite?token=${encodeURIComponent(token)}`,
+} as const;

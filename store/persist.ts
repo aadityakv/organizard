@@ -4,7 +4,7 @@ import type { Box, Item, Marker, Member, Move, Room, Status } from '@/data/types
 import { uid } from '@/lib/uid';
 import type { Mutation } from '@/shared';
 
-import type { MoveBundle } from './library';
+import { MOVE_MODE, type MoveBundle } from './library';
 import { KNOWN_MUTATION_TYPES } from './mutation';
 import { EMPTY_MOVE } from './shape';
 import type { State, Store } from './types';
@@ -43,7 +43,7 @@ export function migrate(persisted: unknown, version: number): Store {
   const outbox = Array.isArray(st.outbox)
     ? (st.outbox as Mutation[]).filter((m) => KNOWN_MUTATION_TYPES.has(m.type))
     : [];
-  const isRealShared = st.activeMode === 'shared' && Boolean(st.serverMoveId);
+  const isRealShared = st.activeMode === MOVE_MODE.shared && Boolean(st.serverMoveId);
   const now = Date.now();
 
   if (isRealShared) {
@@ -60,7 +60,7 @@ export function migrate(persisted: unknown, version: number): Store {
       markers: (st.markers as Marker[]) ?? [...STARTER_MARKERS],
       members: (st.members as Member[]) ?? [],
       itemsByBox: (st.itemsByBox as Record<string, Item[]>) ?? {},
-      activeMode: 'shared',
+      activeMode: MOVE_MODE.shared,
       serverMoveId: st.serverMoveId as string,
       outbox,
       lastSyncTs: (st.lastSyncTs as number) ?? 0,
@@ -81,7 +81,7 @@ export function migrate(persisted: unknown, version: number): Store {
     markers: [...STARTER_MARKERS],
     members: [],
     itemsByBox: {},
-    activeMode: 'local',
+    activeMode: MOVE_MODE.local,
     serverMoveId: null,
     outbox: [],
     lastSyncTs: 0,

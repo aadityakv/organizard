@@ -2,7 +2,9 @@
 // so the two can't drift. Money is integer cents; mutable rows carry
 // updatedAt (ms) + deletedAt (tombstone) for last-write-wins delta sync.
 
-export type Role = 'owner' | 'editor' | 'viewer';
+export const ROLES = { owner: 'owner', editor: 'editor', viewer: 'viewer' } as const;
+export type Role = (typeof ROLES)[keyof typeof ROLES];
+export const ROLE_LIST = Object.values(ROLES) as [Role, ...Role[]];
 
 export interface Move {
   id: string;

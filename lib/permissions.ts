@@ -1,14 +1,15 @@
 // Permission model — the differentiator.
 // Owner / Editor / Viewer. Affordances appear & disappear by role.
 import type { Role } from '@/data/types';
+import { ROLES } from '@/shared';
 
 export const PERM = {
   /** Add / edit / delete boxes & items. */
-  canEdit: (role: Role) => role === 'owner' || role === 'editor',
+  canEdit: (role: Role) => role === ROLES.owner || role === ROLES.editor,
   /** Manage members & roles. */
-  canManage: (role: Role) => role === 'owner',
+  canManage: (role: Role) => role === ROLES.owner,
   /** Delete a box / the move. */
-  canDelete: (role: Role) => role === 'owner',
+  canDelete: (role: Role) => role === ROLES.owner,
 };
 
 export const ROLE_LABEL: Record<Role, string> = {

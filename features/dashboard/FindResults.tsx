@@ -10,6 +10,7 @@ import { allIndexedItems, boxStats, useStore } from '@/store/useStore';
 import { boxColor, colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { openBox } from './openBox';
+import { routes } from '@/lib/routes';
 
 /** Search results for the dashboard: matching items and boxes with breadcrumbs. */
 export function FindResults({ query }: { query: string }) {
@@ -89,7 +90,7 @@ function ItemResultRow({ item, room }: { item: IndexedItem; room?: Room }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Open ${item.name} in box ${item.boxNumber}`}
-      onPress={() => router.push(`/item/${item.id}`)}
+      onPress={() => router.push(routes.item(item.id))}
       style={({ pressed }) => [styles.resultRow, pressed && styles.resultRowPressed]}
     >
       <Thumb color={item.boxColor} icon={item.icon ?? 'image'} size={48} />

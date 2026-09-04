@@ -11,6 +11,7 @@ import { AddressField, Button, Card, DateField, formatTargetDate, Header, Input 
 import { shareMove } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { colors } from '@/theme';
+import { routes } from '@/lib/routes';
 
 /** Create-move modal: name, from/to addresses and target date; syncs up when signed in. */
 export default function NewMove() {
@@ -31,7 +32,7 @@ export default function NewMove() {
     if (useStore.getState().session) {
       void shareMove().catch((e) => console.warn('new move: server sync failed (stays local)', e));
     }
-    router.replace('/(tabs)');
+    router.replace(routes.tabs);
   };
 
   return (

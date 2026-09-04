@@ -14,10 +14,12 @@ export type SItem = {
 };
 
 /** Mic state machine: idle → listening → (gotit | fail) → idle after a beat. */
-export type Mic = 'ready' | 'listening' | 'gotit' | 'fail';
+export const MIC = { ready: 'ready', listening: 'listening', gotIt: 'gotit', fail: 'fail' } as const;
+export type Mic = (typeof MIC)[keyof typeof MIC];
 
 /** The two views of the one screen, flipped in place. */
-export type StreamView = 'capture' | 'stream';
+export const STREAM_VIEW = { capture: 'capture', stream: 'stream' } as const;
+export type StreamView = (typeof STREAM_VIEW)[keyof typeof STREAM_VIEW];
 
 export type BoxRef = Pick<Box, 'id' | 'number' | 'name' | 'color'>;
 

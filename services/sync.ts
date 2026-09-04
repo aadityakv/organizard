@@ -8,6 +8,7 @@ import { api, ApiError } from '@/lib/api';
 import { uploadPendingPhotos } from '@/services/photos';
 import { clearSession } from '@/lib/session';
 import { useStore } from '@/store/useStore';
+import { MOVE_MODE } from '@/store/library';
 
 const POLL_MS = 15_000;
 const MAX_BACKOFF_MS = 60_000;
@@ -26,7 +27,7 @@ export const setMigrating = (v: boolean): void => {
 /** One sync pass: flush pending mutations (in order), then merge the delta. */
 export async function syncActiveMove(): Promise<void> {
   const st = useStore.getState();
-  if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session || syncing || migrating) return;
+  if (st.activeMode !== MOVE_MODE.shared || !st.serverMoveId || !st.session || syncing || migrating) return;
   if (Date.now() < nextAllowedAt) return; // backing off after repeated failures
 
   syncing = true;
@@ -81,7 +82,7 @@ export async function syncActiveMove(): Promise<void> {
 
 async function fullResync(): Promise<void> {
   const st = useStore.getState();
-  if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session) return;
+  if (st.activeMode !== MOVE_MODE.shared || !st.serverMoveId || !st.session) return;
   pendingFull = true; // consumed by syncActiveMove inside its mutex (survives an in-flight pass)
   await syncActiveMove();
 }
@@ -116,7 +117,7 @@ export function useSync(): void {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (activeMode !== 'shared' || !serverMoveId || !session) return;
+    if (activeMode !== MOVE_MODE.shared || !serverMoveId || !session) return;
 
     void syncActiveMove();
     timer.current = setInterval(() => void syncActiveMove(), POLL_MS);

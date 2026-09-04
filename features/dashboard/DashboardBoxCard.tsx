@@ -9,6 +9,7 @@ import { boxStats, markerById, roomById, statusById, useStore } from '@/store/us
 
 import { openBox } from './openBox';
 import { shared } from './styles';
+import { NEUTRAL_HUE } from '@/theme';
 
 /** BoxCard wired to the store for the dashboard grid. */
 export function DashboardBoxCard({ box }: { box: Box }) {
@@ -32,7 +33,7 @@ export function DashboardBoxCard({ box }: { box: Box }) {
       itemCount={count}
       value={value}
       statusLabel={status?.label ?? '—'}
-      statusColor={status?.color ?? 'slate'}
+      statusColor={status?.color ?? NEUTRAL_HUE}
       markers={markerDefs.map((m) => ({ label: m.label, color: m.color, icon: m.icon }))}
       cover={coverSrc?.uri ?? null}
       coverHeaders={coverSrc?.headers}

@@ -1,7 +1,17 @@
 // Move persistence: create (with owner membership and seeded statuses/markers), the
 // full snapshot a client opens with, changes-since-cursor for delta sync, hard delete
 // in FK-safe order, and the list of moves a user belongs to.
-import type { Box, Item, Marker, Member, Move, Role, Room, Status } from '@shared/index';
+import {
+  ROLES,
+  type Box,
+  type Item,
+  type Marker,
+  type Member,
+  type Move,
+  type Role,
+  type Room,
+  type Status,
+} from '@shared/index';
 import { and, eq, gt, inArray, isNull } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
@@ -72,7 +82,7 @@ export async function createMove(
   });
   await db
     .insert(s.members)
-    .values({ id: deps.newId(), moveId, userId: args.ownerId, role: 'owner', createdAt: now });
+    .values({ id: deps.newId(), moveId, userId: args.ownerId, role: ROLES.owner, createdAt: now });
 
   if (args.seed !== false) {
     for (const st of DEFAULT_STATUSES) {
@@ -383,6 +393,6 @@ export async function getUserMoves(db: AppDb, userId: string): Promise<(Move & {
     targetDate: m.targetDate,
     ownerId: m.ownerId,
     updatedAt: m.updatedAt,
-    role: roleByMove.get(m.id) ?? 'viewer',
+    role: roleByMove.get(m.id) ?? ROLES.viewer,
   }));
 }

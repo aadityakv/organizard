@@ -8,12 +8,13 @@ import { clearSession } from '@/lib/session';
 import { setMigrating, syncActiveMove } from '@/services/sync';
 import { extractSlice } from '@/store/shape';
 import { useStore } from '@/store/useStore';
+import { MOVE_MODE } from '@/store/library';
 
 /** Upgrade the active local move to shared. Requires a signed-in session. */
 export async function shareMove(): Promise<{ moveId: string }> {
   const s = useStore.getState();
   if (!s.session) throw new Error('Sign in first');
-  if (s.activeMode === 'shared' && s.serverMoveId) return { moveId: s.serverMoveId };
+  if (s.activeMode === MOVE_MODE.shared && s.serverMoveId) return { moveId: s.serverMoveId };
 
   const snap = await api.createMove(s.session, {
     name: s.move.name,
@@ -43,7 +44,7 @@ export async function syncLocalMovesUp(): Promise<void> {
   if (!useStore.getState().session) return;
   const startId = useStore.getState().currentMoveId;
   const localIds = Object.values(useStore.getState().library)
-    .filter((b) => b.activeMode === 'local')
+    .filter((b) => b.activeMode === MOVE_MODE.local)
     .map((b) => b.id);
   for (const id of localIds) {
     try {

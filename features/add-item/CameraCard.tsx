@@ -21,7 +21,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
             ref={cameraRef}
             style={StyleSheet.absoluteFill}
             facing="back"
-            enableTorch={capture.flash === 'on'}
+            enableTorch={capture.flashOn}
           />
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.cameraScrim]} />
 
@@ -29,15 +29,15 @@ export function CameraCard({ capture }: { capture: Capture }) {
             <Pressable
               onPress={capture.toggleFlash}
               accessibilityRole="button"
-              accessibilityLabel={capture.flash === 'on' ? 'Turn flash off' : 'Turn flash on'}
+              accessibilityLabel={capture.flashOn ? 'Turn flash off' : 'Turn flash on'}
               hitSlop={8}
               style={({ pressed }) => [
                 styles.glassBtn,
-                capture.flash === 'on' && styles.glassBtnActive,
+                capture.flashOn && styles.glassBtnActive,
                 pressed && styles.glassBtnPressed,
               ]}
             >
-              <Icon name={capture.flash === 'on' ? 'zap' : 'zap-off'} size={18} color={palette.white} />
+              <Icon name={capture.flashOn ? 'zap' : 'zap-off'} size={18} color={palette.white} />
             </Pressable>
 
             <Pressable

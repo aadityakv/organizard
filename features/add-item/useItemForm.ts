@@ -10,6 +10,7 @@ import { PERM } from '@/lib/permissions';
 import { boxById, currentRole, markerById, useStore } from '@/store/useStore';
 
 import { FLASH_CONFIG } from './constants';
+import { DEFAULT_HUE } from '@/theme';
 
 /** State and actions for the add/edit item form, backed by the store. */
 export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: string; photo?: string }) {
@@ -167,7 +168,7 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
     canEdit,
     box,
     boxLabel,
-    hueName: box?.color ?? 'green',
+    hueName: box?.color ?? DEFAULT_HUE,
     boxes,
     session,
     markerChoices,

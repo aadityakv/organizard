@@ -10,8 +10,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Icon, SlothMark } from '@/components';
 import { classifyScan, type ScanCandidateMove, type ScanResult } from '@/lib/qr';
 import { useStore, boxById, roomById, boxStats, statusById, type Store } from '@/store/useStore';
-import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
+import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space, DEFAULT_HUE } from '@/theme';
 import { money } from '@/lib/money';
+import { routes } from '@/lib/routes';
 
 type ResultView = {
   icon: string;
@@ -147,7 +148,7 @@ export default function Scan() {
   const jumpToMove = useCallback(
     (moveId: string, boxId: string) => {
       switchMove(moveId);
-      router.replace(`/box/${boxId}`);
+      router.replace(routes.box(boxId));
     },
     [switchMove],
   );
@@ -214,8 +215,8 @@ function buildView(
     const room = box ? roomById(store, box.roomId) : undefined;
     const status = box ? statusById(store, box.status) : undefined;
     const stats = box ? boxStats(store, box.id) : { count: 0, value: 0 };
-    const hue = box?.color ?? 'green';
-    const open = () => router.push(`/box/${result.boxId}`);
+    const hue = box?.color ?? DEFAULT_HUE;
+    const open = () => router.push(routes.box(result.boxId));
     return {
       icon: 'package-check',
       iconWash: boxTint(hue),

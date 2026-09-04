@@ -9,6 +9,7 @@ import { listen, isDictationSimulated, type DictationSession } from '@/lib/dicta
 import { parseList, parseUtterance, type ParsedItem } from '@/lib/streamParse';
 
 import type { Mic } from './types';
+import { MIC } from './types';
 
 const GOTIT_BEAT_MS = 2000;
 
@@ -24,7 +25,7 @@ export type DictationHandlers = {
 
 /** Mic state machine over lib/dictation: start/stop listening, transcript, parse on final. */
 export function useDictation(handlers: DictationHandlers) {
-  const [mic, setMic] = useState<Mic>('ready');
+  const [mic, setMic] = useState<Mic>(MIC.ready);
   const [transcript, setTranscript] = useState('');
   const [lastBatch, setLastBatch] = useState(0);
 
@@ -51,7 +52,7 @@ export function useDictation(handlers: DictationHandlers) {
 
   const scheduleReady = () => {
     if (gotitTmo.current) clearTimeout(gotitTmo.current);
-    gotitTmo.current = setTimeout(() => setMic((m) => (m === 'listening' ? m : 'ready')), GOTIT_BEAT_MS);
+    gotitTmo.current = setTimeout(() => setMic((m) => (m === MIC.listening ? m : MIC.ready)), GOTIT_BEAT_MS);
   };
 
   const finalizeList = (raw: string) => {
@@ -59,13 +60,13 @@ export function useDictation(handlers: DictationHandlers) {
     const parsed = parseList(raw);
     if (gotitTmo.current) clearTimeout(gotitTmo.current);
     if (!parsed.length) {
-      setMic('fail');
+      setMic(MIC.fail);
       setTranscript('');
       scheduleReady();
       return;
     }
     handlersRef.current.onList(parsed);
-    setMic('gotit');
+    setMic(MIC.gotIt);
     setTranscript('');
     setLastBatch(parsed.length);
     scheduleReady();
@@ -78,7 +79,7 @@ export function useDictation(handlers: DictationHandlers) {
     const target = targetRef.current;
     targetRef.current = null;
     handlersRef.current.onUtterance(p, target);
-    setMic(p.name ? 'gotit' : 'fail');
+    setMic(p.name ? MIC.gotIt : MIC.fail);
     setTranscript('');
     scheduleReady();
   };
@@ -87,7 +88,7 @@ export function useDictation(handlers: DictationHandlers) {
   const beginListen = (targetId: string | null, listMode = false) => {
     targetRef.current = targetId;
     listModeRef.current = listMode;
-    setMic('listening');
+    setMic(MIC.listening);
     setTranscript('');
     setLastBatch(0);
     dictRef.current?.cancel();
@@ -109,7 +110,7 @@ export function useDictation(handlers: DictationHandlers) {
           targetRef.current = null;
           listModeRef.current = false;
           setTranscript('');
-          setMic('ready');
+          setMic(MIC.ready);
           Alert.alert(
             'Microphone access needed',
             'Tuck needs microphone and speech access to add items by voice. Turn them on in Settings › Tuck, then try again.',
@@ -126,7 +127,7 @@ export function useDictation(handlers: DictationHandlers) {
   const cancel = () => {
     dictRef.current?.cancel();
     dictRef.current = null;
-    setMic('ready');
+    setMic(MIC.ready);
   };
 
   return { mic, setMic, transcript, lastBatch, simulated, beginListen, stop, cancel };

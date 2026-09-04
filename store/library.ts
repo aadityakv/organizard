@@ -3,8 +3,10 @@
 import type { Box, Item, Marker, Member, Move, Role, Room, Status } from '@/data/types';
 import { STARTER_MARKERS, STARTER_STATUSES } from '@/data/defaults';
 import type { Mutation } from '@/shared';
+import { ROLES } from '@/shared';
 
-export type MoveMode = 'local' | 'shared';
+export const MOVE_MODE = { local: 'local', shared: 'shared' } as const;
+export type MoveMode = (typeof MOVE_MODE)[keyof typeof MOVE_MODE];
 
 /** The per-move fields mirrored into the store's live "active slice". */
 export type SliceData = {
@@ -71,7 +73,7 @@ export function newBundle(id: string, move: Move, now: number): MoveBundle {
     markers: [...STARTER_MARKERS],
     members: [],
     itemsByBox: {},
-    activeMode: 'local',
+    activeMode: MOVE_MODE.local,
     serverMoveId: null,
     outbox: [],
     lastSyncTs: 0,
@@ -111,6 +113,6 @@ export function summarize(b: MoveBundle, accountId: string | null = null): MoveS
 
 /** Derived role: local ⇒ owner; shared ⇒ your membership role (default viewer). */
 export function roleFor(mode: MoveMode, members: Member[], accountId: string | null): Role {
-  if (mode === 'local') return 'owner';
-  return members.find((m) => m.id === accountId)?.role ?? 'viewer';
+  if (mode === MOVE_MODE.local) return ROLES.owner;
+  return members.find((m) => m.id === accountId)?.role ?? ROLES.viewer;
 }

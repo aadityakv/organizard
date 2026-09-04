@@ -9,6 +9,7 @@ import { API_URL } from '@/lib/config';
 import { isLocalRef } from '@/lib/photoRef';
 import { photoSource } from '@/lib/photos';
 import { useStore } from '@/store/useStore';
+import { MOVE_MODE } from '@/store/library';
 
 const inFlight = new Set<string>();
 
@@ -40,7 +41,7 @@ async function uploadPhoto(
 /** Upload any not-yet-uploaded local item photos AND box covers for the active shared move. */
 export async function uploadPendingPhotos(): Promise<void> {
   const s = useStore.getState();
-  if (s.activeMode !== 'shared' || !s.session || !s.serverMoveId) return;
+  if (s.activeMode !== MOVE_MODE.shared || !s.session || !s.serverMoveId) return;
   const { session, serverMoveId } = s;
 
   for (const [boxId, items] of Object.entries(s.itemsByBox)) {

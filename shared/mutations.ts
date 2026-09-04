@@ -1,6 +1,7 @@
 // The mutation contract — the heart of the sync engine. The client applies a
 // mutation optimistically + queues it; the Worker re-applies it (role-checked,
 // last-write-wins) when the outbox flushes. clientId makes retries idempotent.
+import { ROLES } from './models';
 
 export type Mutation =
   | {
@@ -97,7 +98,7 @@ export type Mutation =
 export type MutationType = Mutation['type'];
 
 /** Minimum role each mutation requires. Enforced server-side (client gating is UX only). */
-export type RoleRequirement = 'canEdit' | 'owner';
+export type RoleRequirement = 'canEdit' | typeof ROLES.owner;
 
 export const ROLE_REQUIRED: Record<MutationType, RoleRequirement> = {
   addRoom: 'canEdit',
@@ -105,7 +106,7 @@ export const ROLE_REQUIRED: Record<MutationType, RoleRequirement> = {
   deleteRoom: 'canEdit',
   addBox: 'canEdit',
   updateBox: 'canEdit',
-  deleteBox: 'owner',
+  deleteBox: ROLES.owner,
   setBoxStatus: 'canEdit',
   setBoxCover: 'canEdit',
   setBoxMarker: 'canEdit',

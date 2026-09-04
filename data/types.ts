@@ -1,7 +1,9 @@
 // Organizard — domain types
 // Hierarchy: Move › Room › Box › Item. Destination is optional.
 
-export type Role = 'owner' | 'editor' | 'viewer';
+import type { Role } from '@/shared';
+
+export type { Role };
 
 export interface Move {
   name: string;

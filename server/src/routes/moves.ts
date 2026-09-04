@@ -22,6 +22,7 @@ import {
 import { isEntitledNow } from '../repos/users';
 import type { Env } from '../types';
 import { mutationsBodySchema } from '../validation';
+import { ROLES } from '@shared/index';
 
 /** Move routes: create, snapshot, changes, mutations, members, invites and photos. */
 export function moveRoutes(deps: Deps) {
@@ -77,7 +78,7 @@ export function moveRoutes(deps: Deps) {
     // Enforce role server-side per mutation (client gating is UX only).
     for (const m of mutations) {
       const need = ROLE_REQUIRED[m.type];
-      const ok = need === 'owner' ? role === 'owner' : role === 'owner' || role === 'editor';
+      const ok = need === ROLES.owner ? role === ROLES.owner : role === ROLES.owner || role === ROLES.editor;
       if (!ok) return c.json({ error: 'FORBIDDEN_ROLE', type: m.type }, 403);
     }
 
@@ -93,17 +94,17 @@ export function moveRoutes(deps: Deps) {
   // Owner-only: hard-delete the move and all its data. membershipMiddleware
   // returns 404 for non-members so move existence isn't leaked.
   r.delete('/:id', membershipMiddleware(deps), async (c) => {
-    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     await deleteMove(deps.getDb(c.env), c.req.param('id'));
     return c.json({ ok: true });
   });
 
   r.post('/:id/invites', membershipMiddleware(deps), async (c) => {
-    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now())))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
-    const role: Role = body.role ?? 'viewer';
+    const role: Role = body.role ?? ROLES.viewer;
     const invite = await createInvite(deps.getDb(c.env), deps, {
       moveId: c.req.param('id'),
       role,
@@ -113,20 +114,21 @@ export function moveRoutes(deps: Deps) {
   });
 
   r.patch('/:id/members/:userId', membershipMiddleware(deps), async (c) => {
-    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
     const userId = c.req.param('userId');
     const body = await c.req.json<{ role?: Role }>().catch(() => ({}) as { role?: Role });
     // Only editor/viewer are assignable; ownership transfer is not a role change.
-    if (body.role !== 'editor' && body.role !== 'viewer') return c.json({ error: 'INVALID_ROLE' }, 400);
+    if (body.role !== ROLES.editor && body.role !== ROLES.viewer)
+      return c.json({ error: 'INVALID_ROLE' }, 400);
     if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_CHANGE_OWNER' }, 400);
     await changeMemberRole(db, { moveId, userId, role: body.role });
     return c.json({ ok: true });
   });
 
   r.delete('/:id/members/:userId', membershipMiddleware(deps), async (c) => {
-    if (c.get('member').role !== 'owner') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
     const userId = c.req.param('userId');
@@ -136,7 +138,7 @@ export function moveRoutes(deps: Deps) {
   });
 
   r.post('/:id/photos', membershipMiddleware(deps), async (c) => {
-    if (c.get('member').role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (c.get('member').role === ROLES.viewer) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
     if (billingEnabled(c.env) && !(await isOwnerEntitled(db, moveId, deps.now())))

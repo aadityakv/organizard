@@ -6,6 +6,7 @@ import { Icon } from '@/components';
 import { colors, fonts, palette } from '@/theme';
 
 import type { Mic, SItem } from './types';
+import { MIC } from './types';
 
 type Props = {
   mic: Mic;
@@ -19,7 +20,7 @@ type Props = {
 export function MicPills({ mic, transcript, lastBatch, lastIt, onFixLast }: Props) {
   return (
     <View style={styles.pillRow}>
-      {mic === 'listening' ? (
+      {mic === MIC.listening ? (
         <View style={styles.pillListening}>
           <View style={styles.wave}>
             {[14, 9, 15, 11].map((h, i) => (
@@ -31,7 +32,7 @@ export function MicPills({ mic, transcript, lastBatch, lastIt, onFixLast }: Prop
           </Text>
         </View>
       ) : null}
-      {mic === 'gotit' && (lastBatch > 1 || (lastIt && !lastIt.needsFix)) ? (
+      {mic === MIC.gotIt && (lastBatch > 1 || (lastIt && !lastIt.needsFix)) ? (
         <View style={styles.pillGot}>
           <Icon name="check" size={16} color={palette.green700} />
           <Text style={styles.pillGotText}>
@@ -39,7 +40,7 @@ export function MicPills({ mic, transcript, lastBatch, lastIt, onFixLast }: Prop
           </Text>
         </View>
       ) : null}
-      {mic === 'fail' ? (
+      {mic === MIC.fail ? (
         <Pressable onPress={onFixLast} style={styles.pillFail}>
           <Icon name="ear" size={16} color={palette.amber600} />
           <Text style={styles.pillFailText}>Hmm — didn&apos;t catch a name. Tap to type it.</Text>

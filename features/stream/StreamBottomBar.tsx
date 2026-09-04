@@ -7,6 +7,7 @@ import { boxColor, boxTint, fonts, palette } from '@/theme';
 
 import { sharedStyles } from './styles';
 import type { Mic, SItem } from './types';
+import { MIC } from './types';
 
 type Props = {
   session: SItem[];
@@ -30,7 +31,7 @@ export function StreamBottomBar({
   onCapture,
   onResay,
 }: Props) {
-  const listening = mic === 'listening';
+  const listening = mic === MIC.listening;
   return (
     <View style={styles.bottom}>
       <View style={styles.bottomSide}>
