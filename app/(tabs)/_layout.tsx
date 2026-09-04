@@ -1,3 +1,6 @@
+// Bottom nav: Boxes · Capture (center, raised verb) · Find. The center button is a
+// VERB (free single-item capture → /capture picker), not a tab. Scan folds into Find;
+// Share lives in the Boxes header. (Claude Design "Nav Rethink" — Option A.)
 import { Tabs, router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,9 +10,6 @@ import { Icon } from '@/components/Icon';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
-// Bottom nav: Boxes · Capture (center, raised verb) · Find. The center button is a
-// VERB (free single-item capture → /capture picker), not a tab. Scan folds into Find;
-// Share lives in the Boxes header. (Claude Design "Nav Rethink" — Option A.)
 const TABS: { name: string; icon: string; label: string; center?: boolean }[] = [
   { name: 'index', icon: 'package', label: 'Boxes' },
   { name: 'capture', icon: 'camera', label: 'Capture', center: true },

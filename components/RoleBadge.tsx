@@ -45,6 +45,7 @@ const ROLE_TOKENS: Record<Role, RoleTokens> = {
     blurbColor: palette.ink400,
   },
 };
+/** Member role as a colored pill, or a row with a plain-language blurb. */
 export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleBadgeProps) {
   const tokens = ROLE_TOKENS[role] ?? ROLE_TOKENS.viewer;
   const label = ROLE_LABEL[role];

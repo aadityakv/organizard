@@ -1,3 +1,4 @@
+// First-launch onboarding: log in / sign up, or continue as a guest (local-first).
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,7 +7,6 @@ import { Button, SlothMark } from '@/components';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette } from '@/theme';
 
-// First-launch onboarding: log in / sign up, or continue as a guest (local-first).
 export default function Welcome() {
   const setOnboarded = useStore((s) => s.setOnboarded);
 

@@ -1,3 +1,4 @@
+// Standalone auth screen reached from onboarding ("Log in or sign up").
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -5,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthPanel, Header } from '@/components';
 import { colors } from '@/theme';
 
-// Standalone auth screen reached from onboarding ("Log in or sign up").
 export default function SignIn() {
   const done = () => {
     // Land in the library; any shared moves pulled on sign-in appear there.

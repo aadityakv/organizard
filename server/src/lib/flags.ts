@@ -1,3 +1,4 @@
+// Feature flags read from Worker vars.
 import type { Env } from '../types';
 
 /**

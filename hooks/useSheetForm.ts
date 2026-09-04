@@ -1,3 +1,4 @@
+// Form state for bottom sheets that re-initialises on every open.
 import { useState } from 'react';
 
 /**
