@@ -25,7 +25,8 @@
     },
     "android": {
       "package": "com.organizard.app",
-      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"],
+      "softwareKeyboardLayoutMode": "resize"
     },
     "plugins": [
       "expo-router",

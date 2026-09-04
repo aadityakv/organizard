@@ -39,6 +39,7 @@ jobs:
           cache-dependency-path: server/package-lock.json
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run lint
       - run: npm test
       - name: Apply D1 migrations
         run: npx wrangler d1 migrations apply DB --remote $WRANGLER_ENV
