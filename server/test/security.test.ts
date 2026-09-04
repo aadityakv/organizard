@@ -27,7 +27,6 @@ describe('security — cross-move isolation (IDOR)', () => {
     const a = await create(h, owner.session);
     const b = await create(h, owner.session);
 
-    // set up a real box + marker in B
     const bMarker = b.markers[0].id;
     await h.json(
       `/v1/moves/${b.move.id}/mutations`,

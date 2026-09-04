@@ -25,7 +25,6 @@ export function ValueStat({ value, label, icon, tone = 'default', align = 'left'
 
   return (
     <View style={[styles.container, { alignItems }, style]}>
-      {/* Value row: optional icon + the big numeral */}
       <View style={[styles.valueRow, { justifyContent: alignItems as 'center' | 'flex-start' }]}>
         {icon ? <Icon name={icon} size={20} color={valueColor} strokeWidth={2.5} /> : null}
         <Text
@@ -36,7 +35,6 @@ export function ValueStat({ value, label, icon, tone = 'default', align = 'left'
         </Text>
       </View>
 
-      {/* Caption label */}
       <Text style={styles.label} numberOfLines={1}>
         {label}
       </Text>

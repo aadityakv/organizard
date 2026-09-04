@@ -28,7 +28,6 @@ export type State = {
   account: Account | null;
   /** In-memory session token (loaded from secure-store at boot). */
   session: string | null;
-  /** Mode of the active move. */
   activeMode: MoveMode;
   /** Server id of the active move when shared. */
   serverMoveId: string | null;

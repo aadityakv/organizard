@@ -15,7 +15,6 @@ describe('delta — large change set', () => {
       (await (await h.json('/v1/moves', { name: 'M' }, auth(session))).json()) as { move: { id: string } }
     ).move.id;
 
-    // 250 rooms in one batch
     const muts = Array.from({ length: 250 }, (_, i) =>
       m('addRoom', { id: `r${i}`, name: `R${i}`, icon: 'box' }, `c${i}`),
     );

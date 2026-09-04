@@ -20,14 +20,12 @@ describe('e2e — subscribe → share → collaborate → lapse → renew', () =
     const moveId = snap0.move.id;
     const statusId = snap0.statuses[0].id;
 
-    // owner invites an editor; the editor accepts
     const inv = (await (
       await h.json(`/v1/moves/${moveId}/invites`, { role: 'editor' }, auth(owner.session))
     ).json()) as { token: string };
     const ed = await h.login('ed', 'ed@x.com');
     expect((await h.json(`/v1/invites/${inv.token}/accept`, {}, auth(ed.session))).status).toBe(200);
 
-    // editor adds a box + item
     expect(
       (
         await h.json(

@@ -95,7 +95,6 @@ describe('sharing — member management (owner only)', () => {
       ).status,
     ).toBe(403);
 
-    // promote to editor
     const patch = await h.request(`/v1/moves/${moveId}/members/${v.user.id}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: 'editor' }),
@@ -112,7 +111,6 @@ describe('sharing — member management (owner only)', () => {
       ).status,
     ).toBe(200);
 
-    // can't change the owner's role
     const protectOwner = await h.request(`/v1/moves/${moveId}/members/${owner.user.id}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: 'viewer' }),
@@ -120,7 +118,6 @@ describe('sharing — member management (owner only)', () => {
     });
     expect(protectOwner.status).toBe(400);
 
-    // remove the member -> loses access
     const del = await h.request(`/v1/moves/${moveId}/members/${v.user.id}`, {
       method: 'DELETE',
       headers: auth(owner.session).headers,

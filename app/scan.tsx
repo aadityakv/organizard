@@ -194,7 +194,6 @@ export default function Scan() {
       <View style={styles.dim} pointerEvents="none" />
 
       <SafeAreaView style={styles.overlay} edges={['top', 'bottom']}>
-        {/* Top bar */}
         <View style={styles.topBar}>
           <Pressable
             onPress={() => router.back()}
@@ -207,7 +206,6 @@ export default function Scan() {
           <Text style={styles.topTitle}>Scan a box</Text>
         </View>
 
-        {/* Scan window */}
         <View style={styles.windowWrap} pointerEvents="none">
           <View style={styles.window}>
             <View style={[styles.corner, styles.cornerTL]} />

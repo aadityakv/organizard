@@ -110,7 +110,6 @@ export default function ItemDetail() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      {/* Tinted hero header */}
       <View style={[styles.hero, { backgroundColor: boxTint(box.color) }]}>
         <Header
           title={item.name}
@@ -130,7 +129,6 @@ export default function ItemDetail() {
           }
         />
 
-        {/* Value strip */}
         <View style={styles.heroStrip}>
           <View style={[styles.heroDot, { backgroundColor: hue }]} />
           <Text style={styles.heroQty}>{item.qty > 1 ? `Qty ${item.qty}` : 'Qty 1'}</Text>
@@ -139,7 +137,6 @@ export default function ItemDetail() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Photos */}
         {photos.length > 0 ? (
           <ScrollView
             horizontal
@@ -176,7 +173,6 @@ export default function ItemDetail() {
           </View>
         )}
 
-        {/* Fields */}
         <View style={styles.fieldCard}>
           <View style={styles.fieldRow}>
             <Text style={styles.fieldLabel}>Price (each)</Text>
@@ -203,7 +199,6 @@ export default function ItemDetail() {
           ) : null}
         </View>
 
-        {/* Markers */}
         {itemMarkers.length > 0 ? (
           <View style={styles.markerSection}>
             <Text style={styles.sectionTitle}>Markers</Text>
@@ -215,7 +210,6 @@ export default function ItemDetail() {
           </View>
         ) : null}
 
-        {/* Breadcrumb → box */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Open Box #${box.number}, ${box.name}`}
@@ -230,7 +224,6 @@ export default function ItemDetail() {
           <Icon name="chevron-right" size={18} color={palette.ink400} />
         </Pressable>
 
-        {/* Bottom action — editors only */}
         {canEdit ? (
           <View style={styles.bottom}>
             <Button variant="primary" size="lg" fullWidth iconLeft="pencil" onPress={goEdit}>

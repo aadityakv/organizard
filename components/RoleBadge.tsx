@@ -62,7 +62,6 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
 
     return (
       <View style={[styles.row, style]}>
-        {/* Icon circle */}
         <View
           style={[
             styles.iconCircle,
@@ -77,7 +76,6 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
           <Icon name={iconName} size={iconSize} color={tokens.iconColor} strokeWidth={2.2} />
         </View>
 
-        {/* Label + blurb stack */}
         <View style={styles.textStack}>
           <Text
             style={[styles.rowLabel, isSm && styles.rowLabelSm, { color: colors.textStrong }]}

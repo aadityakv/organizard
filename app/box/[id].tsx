@@ -97,7 +97,6 @@ export default function BoxDetail() {
           />
         )}
 
-        {/* Markers */}
         <View style={shared.sectionHead}>
           <Text style={shared.sectionTitle}>Markers</Text>
           {canEdit && (
@@ -126,7 +125,6 @@ export default function BoxDetail() {
 
         <ItemsSection items={d.items} allMarkers={d.allMarkers} boxColor={box.color} canEdit={canEdit} />
 
-        {/* Bottom action */}
         <View style={styles.bottom}>
           {canEdit ? (
             <View style={styles.actionRow}>

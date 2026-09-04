@@ -19,7 +19,6 @@ export default function PrintLabels() {
   const boxes = useStore((s) => s.boxes);
   const rooms = useStore((s) => s.rooms);
 
-  // Selection: a Set of box ids. Start with everything checked.
   const [selected, setSelected] = useState<Set<string>>(() => new Set(boxes.map((b) => b.id)));
 
   const roomName = (roomId: string): string | undefined => rooms.find((r) => r.id === roomId)?.name;
@@ -57,7 +56,6 @@ export default function PrintLabels() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      {/* Top bar: close · title · select-all */}
       <View style={styles.topBar}>
         <Pressable
           onPress={close}
@@ -115,7 +113,6 @@ export default function PrintLabels() {
         </ScrollView>
       )}
 
-      {/* Footer action */}
       {boxes.length > 0 ? (
         <View style={styles.footer}>
           <Button

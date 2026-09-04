@@ -148,7 +148,6 @@ export function BoxCard({
           {/* scrim over photo so text stays legible */}
           {cover ? <View style={styles.bandScrim} /> : null}
 
-          {/* box number */}
           {number != null ? (
             <View style={[styles.numberBadge, cover ? styles.numberBadgeDark : null]}>
               <Text style={[styles.numberText, { color: cover ? colors.textOnDark : solid }]}>
@@ -160,7 +159,6 @@ export function BoxCard({
             <View />
           )}
 
-          {/* status chip */}
           <StatusChip label={statusLabel} color={statusColor} size="sm" />
         </View>
 
@@ -171,14 +169,12 @@ export function BoxCard({
             {name}
           </Text>
 
-          {/* room eyebrow */}
           {room ? (
             <Text style={styles.room} numberOfLines={1}>
               {room}
             </Text>
           ) : null}
 
-          {/* count + value row */}
           <View style={styles.statsRow}>
             <Text style={styles.count}>
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
@@ -186,7 +182,6 @@ export function BoxCard({
             <Text style={styles.value}>{money(value)}</Text>
           </View>
 
-          {/* marker chips (up to 3) */}
           {visibleMarkers.length > 0 ? (
             <View style={styles.markersRow}>
               {visibleMarkers.map((m, i) => (

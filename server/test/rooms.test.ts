@@ -23,7 +23,6 @@ describe('rooms — color field', () => {
     const snap0 = await createMove(h, session);
     const moveId = snap0.move.id;
 
-    // addRoom with an explicit color
     await h.json(
       `/v1/moves/${moveId}/mutations`,
       {
@@ -36,7 +35,6 @@ describe('rooms — color field', () => {
     expect(snap.rooms).toHaveLength(1);
     expect(snap.rooms[0].color).toBe('teal');
 
-    // updateRoom changes the color
     await h.json(
       `/v1/moves/${moveId}/mutations`,
       { mutations: [m('updateRoom', { id: 'room1', color: 'rose' }, 'c2')] },

@@ -52,13 +52,11 @@ describe('photos', () => {
     };
     expect(created.photoId).toBeTruthy();
 
-    // the item now carries the photo id in the snapshot
     const snap = (await (await h.request(`/v1/moves/${moveId}`, auth(session))).json()) as {
       items: { id: string; photoIds: string[] }[];
     };
     expect(snap.items.find((it) => it.id === 'item1')?.photoIds).toEqual([created.photoId]);
 
-    // upload bytes, then read them back
     const put = await h.request(created.uploadPath, {
       method: 'PUT',
       body: 'JPEGDATA',
