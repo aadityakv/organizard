@@ -28,3 +28,8 @@ bucket_name = "organizard-photos"
 [[kv_namespaces]]
 binding = "SESSIONS"
 id = "a5c68a99c85e428b863f10ee2df03eaa"
+
+# Workers Logs: one line per request + console output, viewable in the Cloudflare
+# dashboard and via `wrangler tail`. No code needed beyond the request-log middleware.
+[observability]
+enabled = true

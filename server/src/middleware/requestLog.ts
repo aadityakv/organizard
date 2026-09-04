@@ -1,0 +1,49 @@
+import { createMiddleware } from 'hono/factory';
+
+import type { Env } from '../types';
+import type { AuthVars } from './auth';
+
+/**
+ * One structured JSON line per request → Workers Logs (`[observability]` in
+ * wrangler.toml). Logs method/path/status/duration/userId only — never bodies
+ * or query strings (invite codes and tokens can appear there). Thrown errors
+ * are logged with their stack before being rethrown, so Hono's default error
+ * handler still produces the 500 response.
+ *
+ * `user` is read AFTER `next()` resolves (auth middleware sets it on the way
+ * in), so it is populated for authed routes and undefined for public ones.
+ */
+export function requestLogMiddleware() {
+  return createMiddleware<{ Bindings: Env; Variables: AuthVars }>(async (c, next) => {
+    const start = Date.now();
+    try {
+      await next();
+    } catch (e) {
+      console.error(
+        JSON.stringify({
+          evt: 'http',
+          method: c.req.method,
+          path: c.req.path,
+          status: 500,
+          ms: Date.now() - start,
+          userId: c.get('user')?.id,
+          error: e instanceof Error ? e.message : String(e),
+          stack: e instanceof Error ? e.stack?.split('\n').slice(0, 6).join(' | ') : undefined,
+        }),
+      );
+      throw e;
+    }
+    // Keep vitest output readable; logging is behavior-neutral so nothing is lost.
+    if (process.env.VITEST) return;
+    console.log(
+      JSON.stringify({
+        evt: 'http',
+        method: c.req.method,
+        path: c.req.path,
+        status: c.res.status,
+        ms: Date.now() - start,
+        userId: c.get('user')?.id,
+      }),
+    );
+  });
+}
