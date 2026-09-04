@@ -70,8 +70,10 @@ aren't shipped; cross-platform code should degrade gracefully on Android, not br
 ## How we test & verify
 
 - **Unit tests: `npm test`** at the root (vitest, covers the pure/testable modules)
-  and in `server/` (vitest, full server suite). **`npm run typecheck`** in both. These
-  must be green before shipping.
+  and in `server/` (vitest, full server suite); `npm run test:coverage` enforces the
+  thresholds CI uses. **Component tests: `npm run test:ui`** (jest-expo + Testing
+  Library, files named `*.ui.test.tsx`). **`npm run typecheck`** in both. All green
+  before shipping.
 - The store is assembled by `store/createStore.ts` with an **injected storage**, so the
   whole thing (slices, delta merge, sign-out, persist migration) is unit-tested in node
   (`store/createStore.test.ts`). **Screens** are still verified on the **simulator**.
@@ -101,9 +103,10 @@ The full pipeline is documented in the auto-memory; the shape:
    `eas build --platform ios --profile production --local --output /tmp/Organizard.ipa`.
 3. **Validate + upload via `xcrun altool`** (NOT `eas submit`); then poll App Store
    Connect until the build is `VALID`.
-4. **If the Worker/D1 changed**, do the server side first: apply the prod D1 migration
-   (`wrangler d1 migrations apply <db> --remote`), then `wrangler deploy`. An old Worker
-   rejects unknown mutation types, breaking shared-move sync.
+4. **If the Worker/D1 changed**, the server ships first: the `deploy.yml` workflow runs
+   on pushes to `main` touching `server/` or `shared/` (migrate, then deploy), or manually
+   for staging. An old Worker rejects unknown mutation types, breaking shared-move sync.
+   Staging is `wrangler --env staging`; the `preview`/`development` EAS profiles use it.
 
 Git: work on `main` (or a short-lived branch), keep `main` pushed to the private
 GitHub remote. Commit/push when the work is real and verified.

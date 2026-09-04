@@ -111,11 +111,24 @@ npm run dev                 # wrangler dev with local D1 / R2 / KV emulation
 
 The client's API URL is set in `app.json` under `expo.extra.apiUrl`.
 
+## Environments
+
+| APP_ENV | Backend | Used by |
+|---|---|---|
+| `production` | `organizard-api` Worker | `eas build --profile production` (default) |
+| `staging` | `organizard-api-staging` Worker (`wrangler --env staging`) | the `development` and `preview` profiles |
+| `local` | `http://localhost:8787` (`npm run dev` in `server/`) | set `APP_ENV=local` for a dev client |
+
+`app.config.ts` maps the profile to the API URL; `server/wrangler.toml` defines both
+Workers. Crash reporting is off unless `SENTRY_DSN` (and, for native symbolication,
+`SENTRY_ORG` / `SENTRY_PROJECT`) are present at build time.
+
 ## Test and verify
 
 ```bash
-npm run typecheck && npm test            # client: tsc + vitest (pure modules)
-cd server && npm run typecheck && npm test   # server: tsc + the full HTTP suite
+npm run typecheck && npm run test:coverage   # client logic: tsc + vitest with coverage thresholds
+npm run test:ui                              # client components: jest-expo + Testing Library
+cd server && npm run typecheck && npm run test:coverage   # server: the full HTTP suite
 ```
 
 The store is built by a factory that takes its storage backend, so the whole store
@@ -125,9 +138,13 @@ library) is unit tested the same way. Screens are verified on the simulator.
 
 ## Shipping
 
-Builds are made **locally** with `eas build --local` and uploaded with `xcrun altool`;
-if the Worker or a D1 migration changed, the server is migrated and deployed first
-so an old Worker never rejects new mutation types.
+The Worker deploys from GitHub Actions (`deploy.yml`): every push to `main` that touches
+`server/` or `shared/` runs the tests, applies D1 migrations and deploys production; the
+manual trigger targets staging or production. It needs `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` as repository secrets. Server first, always: an old Worker
+rejects mutation types a newer client sends.
+
+iOS builds are made **locally** with `eas build --local` and uploaded with `xcrun altool`.
 
 ## License
 
