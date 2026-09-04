@@ -47,7 +47,7 @@ export class ApiError extends Error {
 }
 
 /** Requests that hang would hold the sync mutex forever; abort them instead. */
-export const REQUEST_TIMEOUT_MS = 15_000;
+const REQUEST_TIMEOUT_MS = 15_000;
 
 export function createApi(baseUrl: string, fetchImpl: typeof fetch = fetch, timeoutMs = REQUEST_TIMEOUT_MS) {
   async function req<T>(path: string, init: RequestInit, session: string | null): Promise<T> {
