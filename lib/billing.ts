@@ -8,6 +8,7 @@ const API_KEY = (Constants.expoConfig?.extra?.revenueCatKey as string | undefine
 const ENTITLEMENT = 'sharing';
 let configured = false;
 
+/** True when a RevenueCat key is configured for this build. */
 export const billingConfigured = (): boolean => API_KEY.length > 0;
 
 /** Configure RevenueCat with our user id (so the webhook's app_user_id matches). */
@@ -21,6 +22,7 @@ export function configureBilling(userId: string): void {
   }
 }
 
+/** Whether the current customer holds the sharing entitlement. */
 export async function isEntitled(): Promise<boolean> {
   if (!billingConfigured()) return false;
   try {

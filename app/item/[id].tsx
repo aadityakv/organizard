@@ -25,6 +25,7 @@ import { boxPhotos, currentRole, findItem, markerById, roomById, useStore } from
 import { useShallow } from 'zustand/react/shallow';
 import type { Marker } from '@/data/types';
 
+/** Item detail: photos, fields, markers and breadcrumb, with edit as a secondary action. */
 export default function ItemDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const itemId = id ?? '';
@@ -56,8 +57,6 @@ export default function ItemDetail() {
 
   const canEdit = found ? PERM.canEdit(role) : false;
   const canDelete = found ? PERM.canDelete(role) : false;
-
-  // ── Item not found ────────────────────────────────────────────────────────
   if (!found) {
     return (
       <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>

@@ -1,3 +1,4 @@
+// Selectable color swatch used in the box palette pickers.
 import React from 'react';
 import { Pressable, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, palette, tap } from '@/theme';

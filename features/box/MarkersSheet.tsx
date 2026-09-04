@@ -8,6 +8,7 @@ import { BOX_COLORS, palette, radius } from '@/theme';
 
 import { shared } from './styles';
 
+/** Sheet to toggle the box's handling markers or create a custom one. */
 export function MarkersSheet({
   visible,
   allMarkers,

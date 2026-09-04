@@ -1,3 +1,4 @@
+// Sign in with Apple: identity-token verification against Apple's JWKS.
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 export type AppleIdentity = { sub: string; email?: string | null };

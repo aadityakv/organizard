@@ -12,6 +12,7 @@ import { ItemRow } from './ItemRow';
 import { shared } from './styles';
 import { SORT_OPTIONS, type SortMode, useVisibleItems } from './useVisibleItems';
 
+/** The box's item list with search, sort and empty states. */
 export function ItemsSection({
   items,
   allMarkers,

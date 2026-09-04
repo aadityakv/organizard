@@ -11,6 +11,7 @@ import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
 import { openBox } from './openBox';
 import { shared, sheetForm } from './styles';
 
+/** Sheet to create a box: name, color and room. */
 export function AddBoxSheet({
   visible,
   onClose,

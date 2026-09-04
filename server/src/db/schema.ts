@@ -29,6 +29,7 @@ export const moves = sqliteTable('moves', {
   updatedAt: integer('updated_at').notNull(),
 });
 
+/** Move membership with role; one row per (move, user). */
 export const members = sqliteTable(
   'members',
   {
@@ -117,6 +118,7 @@ export const items = sqliteTable('items', {
   deletedAt: integer('deleted_at'),
 });
 
+/** Join table: markers applied to a box. */
 export const boxMarkers = sqliteTable(
   'box_markers',
   {
@@ -130,6 +132,7 @@ export const boxMarkers = sqliteTable(
   (t) => ({ pk: primaryKey({ columns: [t.boxId, t.markerId] }) }),
 );
 
+/** Join table: markers applied to an item. */
 export const itemMarkers = sqliteTable(
   'item_markers',
   {

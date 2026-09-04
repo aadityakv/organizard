@@ -8,6 +8,7 @@ import { BOX_COLORS, fonts, palette, radius } from '@/theme';
 
 import { shared } from './styles';
 
+/** Sheet to pick the box status or create a custom one. */
 export function StatusSheet({
   visible,
   statuses,

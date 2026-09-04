@@ -22,6 +22,7 @@ export type DictationHandlers = {
   onList: (parsed: ParsedItem[]) => void;
 };
 
+/** Mic state machine over lib/dictation: start/stop listening, transcript, parse on final. */
 export function useDictation(handlers: DictationHandlers) {
   const [mic, setMic] = useState<Mic>('ready');
   const [transcript, setTranscript] = useState('');

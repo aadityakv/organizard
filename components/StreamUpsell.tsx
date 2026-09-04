@@ -14,6 +14,7 @@ const PERKS: { icon: string; label: string }[] = [
   { icon: 'badge-check', label: 'Value & quantity parsed from your voice' },
 ];
 
+/** Pro upsell sheet for Streaming Mode with a start-trial action. */
 export function StreamUpsell({
   visible,
   onClose,

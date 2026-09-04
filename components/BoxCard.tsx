@@ -77,6 +77,7 @@ const markerStyles = StyleSheet.create({
   },
 });
 
+/** Grid card for a box: color rail, cover or tint band, name, room, status and marker chips. */
 export function BoxCard({
   name,
   number,

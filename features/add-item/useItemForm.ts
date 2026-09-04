@@ -11,6 +11,7 @@ import { boxById, currentRole, markerById, useStore } from '@/store/useStore';
 
 import { FLASH_CONFIG } from './constants';
 
+/** State and actions for the add/edit item form, backed by the store. */
 export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: string; photo?: string }) {
   const isEdit = !!itemId;
 
@@ -76,8 +77,6 @@ export function useItemForm({ boxId, itemId, photo }: { boxId: string; itemId?: 
   // Which marker chips to show: the box's own markers first, else the full set
   // so a Viewer-less owner can still tag the item meaningfully.
   const markerChoices = boxMarkerDefs.length > 0 ? boxMarkerDefs : allMarkers;
-
-  // ── Actions ────────────────────────────────────────────────────────────────
   const resetForm = () => {
     setPhotos([]);
     setName('');

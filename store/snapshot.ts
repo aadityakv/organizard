@@ -16,6 +16,7 @@ import {
 export const isLocalUri = (p: string): boolean =>
   p.startsWith('file://') || p.startsWith('content://') || p.startsWith('/');
 
+/** Move details from a server snapshot. */
 export function moveFromSnapshot(snap: ServerSnapshot): Move {
   return {
     name: snap.move.name,
@@ -25,6 +26,7 @@ export function moveFromSnapshot(snap: ServerSnapshot): Move {
   };
 }
 
+/** Items from a snapshot grouped by box id (every box present, even if empty). */
 export function snapItemsByBox(snap: ServerSnapshot): Record<string, Item[]> {
   const out: Record<string, Item[]> = {};
   for (const b of snap.boxes) out[b.id] = [];

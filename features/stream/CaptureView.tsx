@@ -14,6 +14,7 @@ type Props = {
   onCapture: () => void;
 };
 
+/** Free single-item capture view with the gated "Switch to Stream" pill. */
 export function CaptureView({ isPro, onSwitchToStream, onCapture }: Props) {
   return (
     <>

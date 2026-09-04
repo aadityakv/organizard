@@ -14,6 +14,7 @@ import { BOX_COLORS, colors, fonts, fontSize, palette, radius, space } from '@/t
 import { ROOM_ICONS } from './constants';
 import { shared, sheetForm } from './styles';
 
+/** Sheet to create or edit a room, including the role-gated cascade delete. */
 export function RoomSheet({
   visible,
   onClose,

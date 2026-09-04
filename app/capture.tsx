@@ -10,6 +10,7 @@ import { Button, Icon } from '@/components';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
 
+/** Capture entry: pick a box, then continue to the single-item or streaming capture flow. */
 export default function Capture() {
   const boxes = useStore((s) => s.boxes);
   const target = boxes[boxes.length - 1]?.id; // most recently added box

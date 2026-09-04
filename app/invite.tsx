@@ -1,3 +1,4 @@
+// Invite deep-link handler.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -44,6 +45,7 @@ async function joinMove(token: string | undefined): Promise<Outcome> {
   }
 }
 
+/** Invite deep link (tuck://invite?token=…): signs in if needed, joins the move, opens it. */
 export default function InviteAccept() {
   const { token } = useLocalSearchParams<{ token?: string }>();
   const [outcome, setOutcome] = useState<Outcome>({ status: 'working' });

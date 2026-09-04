@@ -12,6 +12,7 @@ type Props = {
   note?: string | null;
 };
 
+/** Viewfinder frame with the mode hint and an optional note. */
 export function Viewfinder({ mode, hint, note }: Props) {
   return (
     <View style={styles.viewfinder}>

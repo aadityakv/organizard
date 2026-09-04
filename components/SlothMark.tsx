@@ -4,6 +4,7 @@
 import React from 'react';
 import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
+/** The Tuck sloth mascot as an inline SVG. */
 export function SlothMark({ size = 40 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 120 120" fill="none">

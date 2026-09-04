@@ -19,6 +19,7 @@ import {
 } from '@/features/add-item';
 import { boxColor, colors, fonts, fontSize, gutter, palette, radius, space } from '@/theme';
 
+/** Add / edit item modal. Params: boxId, optional itemId (edit) and photo (prefilled capture). */
 export default function AddItem() {
   const params = useLocalSearchParams<{ boxId: string; itemId?: string; photo?: string }>();
   const form = useItemForm(params);

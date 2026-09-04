@@ -15,6 +15,7 @@ export const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: 'value', label: 'Value' },
 ];
 
+/** Search and sort state for a box's items, returning the list to render. */
 export function useVisibleItems(items: Item[], allMarkers: Marker[]) {
   const [sortMode, setSortMode] = useState<SortMode>('added');
   const [searching, setSearching] = useState(false);

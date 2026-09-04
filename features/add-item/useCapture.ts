@@ -10,6 +10,7 @@ import { persistCapture } from '@/lib/photos';
 
 import { FLASH_CONFIG } from './constants';
 
+/** Camera permission, open/close state and capture-to-persisted-ref for the item form. */
 export function useCapture(onPhoto: (ref: string) => void) {
   const cameraRef = useRef<CameraView>(null);
   const [permission, requestPermission] = useCameraPermissions();

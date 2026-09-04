@@ -22,6 +22,7 @@ export type AddressFieldProps = {
   placeholder?: string;
 };
 
+/** Address input with Apple Maps autocomplete suggestions (plain input where the module is absent). */
 export function AddressField({ label, value, onChangeText, placeholder }: AddressFieldProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [open, setOpen] = useState(false);

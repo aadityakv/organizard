@@ -1,3 +1,4 @@
+// /v1/moves: the move resource and everything under it.
 import { ROLE_REQUIRED, type Mutation, type Role } from '@shared/index';
 import { Hono } from 'hono';
 
@@ -20,6 +21,7 @@ import { isEntitledNow } from '../repos/users';
 import type { Env } from '../types';
 import { mutationsBodySchema } from '../validation';
 
+/** Move routes: create, snapshot, changes, mutations, members, invites and photos. */
 export function moveRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: MemberVars }>();
   r.use('*', authMiddleware(deps));

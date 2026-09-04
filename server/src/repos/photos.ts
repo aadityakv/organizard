@@ -1,3 +1,4 @@
+// Photo rows (metadata + links to items/boxes); bytes live in R2.
 import { and, eq } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
@@ -42,6 +43,7 @@ export async function createPhotoRecord(
   return { photoId: id, r2Key };
 }
 
+/** Photo row by id. */
 export async function getPhoto(db: AppDb, photoId: string): Promise<PhotoRow | undefined> {
   return (await db.select().from(s.photos).where(eq(s.photos.id, photoId)).limit(1))[0];
 }

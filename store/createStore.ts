@@ -11,6 +11,7 @@ import { createLibrarySlice } from './slices/library';
 import { createSyncSlice } from './slices/sync';
 import type { Store } from './types';
 
+/** Build the persisted store against the given storage (AsyncStorage in the app, memory in tests). */
 export function createAppStore(storage: StateStorage) {
   return create<Store>()(
     persist(

@@ -12,6 +12,7 @@ import { shareMove } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { colors } from '@/theme';
 
+/** Create-move modal: name, from/to addresses and target date; syncs up when signed in. */
 export default function NewMove() {
   const [name, setName] = useState('');
   const [from, setFrom] = useState('');

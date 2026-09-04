@@ -10,6 +10,7 @@ import { flushAndSignOut } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
 
+/** Account sheet: who is signed in, sign out, and account deletion. */
 export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const account = useStore((s) => s.account);
   const session = useStore((s) => s.session);

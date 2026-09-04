@@ -12,6 +12,7 @@ import { boxById, roomById, useStore } from '@/store/useStore';
 import { encodeBoxQR } from '@/lib/qr';
 import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space, tap, type } from '@/theme';
 
+/** Full-screen QR label for one box, for scanning from another device. */
 export default function QRScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const box = useStore((s) => boxById(s, id));

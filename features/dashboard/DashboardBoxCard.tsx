@@ -10,6 +10,7 @@ import { boxStats, markerById, roomById, statusById, useStore } from '@/store/us
 import { openBox } from './openBox';
 import { shared } from './styles';
 
+/** BoxCard wired to the store for the dashboard grid. */
 export function DashboardBoxCard({ box }: { box: Box }) {
   const status = useStore((s) => statusById(s, box.status));
   const room = useStore((s) => roomById(s, box.roomId));

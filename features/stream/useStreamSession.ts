@@ -7,6 +7,7 @@ import { useStore } from '@/store/useStore';
 
 import type { SItem } from './types';
 
+/** The session ledger: captured items, last capture/batch, undo and commit to the store. */
 export function useStreamSession() {
   const [session, setSession] = useState<SItem[]>([]);
   const [lastId, setLastId] = useState<string | null>(null);

@@ -8,6 +8,7 @@ import type { MoveSummary } from '@/store/library';
 import { useStore } from '@/store/useStore';
 import { space } from '@/theme';
 
+/** Per-move menu: edit, archive/unarchive, delete. */
 export function MoveMenuSheet({
   move,
   onClose,

@@ -1,3 +1,4 @@
+// Session tokens in KV: create, resolve, revoke one or all.
 import type { Env } from '../types';
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 60; // 60 days
@@ -6,6 +7,7 @@ const sessKey = (token: string) => `session:${token}`;
 // Per-user index so all of a user's sessions can be revoked at once.
 const indexKey = (userId: string, token: string) => `usess:${userId}:${token}`;
 
+/** Store a session token → user id mapping in KV. */
 export async function createSession(env: Env, token: string, userId: string, now: number): Promise<void> {
   await env.SESSIONS.put(sessKey(token), JSON.stringify({ userId, createdAt: now }), {
     expirationTtl: SESSION_TTL_SECONDS,
@@ -13,6 +15,7 @@ export async function createSession(env: Env, token: string, userId: string, now
   await env.SESSIONS.put(indexKey(userId, token), '1', { expirationTtl: SESSION_TTL_SECONDS });
 }
 
+/** Resolve a session token to its user id, or null. */
 export async function getSessionUserId(env: Env, token: string): Promise<string | null> {
   const raw = await env.SESSIONS.get(sessKey(token));
   if (!raw) return null;
@@ -23,6 +26,7 @@ export async function getSessionUserId(env: Env, token: string): Promise<string 
   }
 }
 
+/** Revoke one session token. */
 export async function deleteSession(env: Env, token: string): Promise<void> {
   const userId = await getSessionUserId(env, token);
   await env.SESSIONS.delete(sessKey(token));

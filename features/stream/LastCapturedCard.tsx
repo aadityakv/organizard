@@ -15,6 +15,7 @@ type Props = {
   onUndo: () => void;
 };
 
+/** Card for the most recent capture with edit and undo actions. */
 export function LastCapturedCard({ item, colorOf, onEdit, onUndo }: Props) {
   return (
     <Pressable onPress={onEdit} style={styles.lastCard}>

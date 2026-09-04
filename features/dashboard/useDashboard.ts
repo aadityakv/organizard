@@ -9,6 +9,7 @@ import { currentRole, moveProgress, moveTotals, useStore } from '@/store/useStor
 
 import { STATUS_ORDER, type GroupView } from './constants';
 
+/** Store subscriptions, progress and the box ordering for the chosen dashboard view. */
 export function useDashboard(view: GroupView) {
   const role = useStore(currentRole);
   const move = useStore((s) => s.move);

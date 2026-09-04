@@ -15,6 +15,7 @@ type Props = {
   onFixLast: () => void;
 };
 
+/** Mic state pills: ready, listening with live transcript, got it, or fix-last. */
 export function MicPills({ mic, transcript, lastBatch, lastIt, onFixLast }: Props) {
   return (
     <View style={styles.pillRow}>

@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { Button, Header, Thumb } from '@/components';
 import { colors, fonts, fontSize, palette, radius, type as typeTokens } from '@/theme';
 
+/** Fallback screen when the route's box id no longer exists. */
 export function MissingBox() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>

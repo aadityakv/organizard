@@ -12,6 +12,7 @@ type Props = {
   onToggleVoiceMode: () => void;
 };
 
+/** Row to leave stream view or toggle photos on/off. */
 export function ModeSwitchRow({ voiceMode, listening, onBackToCapture, onToggleVoiceMode }: Props) {
   return (
     <View style={styles.streamSwitchRow}>

@@ -1,11 +1,9 @@
+// Icon-only button with a 44pt hit target.
 import React from 'react';
 import { Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 import { colors, palette, radius, tap, shadow } from '@/theme';
 import { Icon } from '@/components/Icon';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export type IconButtonProps = {
   /** Lucide kebab-case icon name, e.g. "x", "more-horizontal", "camera". */
   icon: string;
@@ -25,9 +23,6 @@ export type IconButtonProps = {
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 };
-
-// ─── Size map ─────────────────────────────────────────────────────────────────
-
 const SIZE_MAP: Record<
   NonNullable<IconButtonProps['size']>,
   { box: number; icon: number; borderRadius: number }
@@ -36,9 +31,6 @@ const SIZE_MAP: Record<
   md: { box: tap.md, icon: 22, borderRadius: radius.md },
   lg: { box: tap.lg, icon: 24, borderRadius: radius.lg },
 };
-
-// ─── Variant map ─────────────────────────────────────────────────────────────
-
 type VariantTokens = {
   bg: string;
   bgPressed: string;
@@ -69,9 +61,6 @@ const VARIANT_MAP: Record<NonNullable<IconButtonProps['variant']>, VariantTokens
     iconColor: colors.danger,
   },
 };
-
-// ─── Component ───────────────────────────────────────────────────────────────
-
 export function IconButton({
   icon,
   onPress,
@@ -116,9 +105,6 @@ export function IconButton({
     </Pressable>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',

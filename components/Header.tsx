@@ -13,6 +13,7 @@ export type HeaderProps = {
   onBack?: () => void;
 };
 
+/** Screen header: optional back button, title/subtitle and leading/trailing slots. */
 export function Header({ title, subtitle, leading, trailing, onBack }: HeaderProps) {
   return (
     <View style={styles.row}>

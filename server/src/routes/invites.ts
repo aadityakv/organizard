@@ -1,3 +1,4 @@
+// /v1/invites: accept an invite token.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';

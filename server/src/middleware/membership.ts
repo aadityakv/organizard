@@ -1,3 +1,4 @@
+// Move-membership middleware for /:id routes: loads the caller's role or returns 403/404.
 import { createMiddleware } from 'hono/factory';
 
 import type { Deps } from '../deps';

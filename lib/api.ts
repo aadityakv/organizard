@@ -35,6 +35,7 @@ export type ServerChanges = {
 };
 export type InviteResult = { token: string; role: Role; expiresAt: number; url: string };
 
+/** Non-2xx response from the API, carrying the HTTP status and the server's error code. */
 export class ApiError extends Error {
   constructor(
     public status: number,

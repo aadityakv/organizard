@@ -6,6 +6,7 @@ import { and, eq } from 'drizzle-orm';
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
 
+/** Whether the room belongs to the move. */
 export const roomInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean(
     (
@@ -17,6 +18,7 @@ export const roomInMove = async (db: AppDb, moveId: string, id: string): Promise
     )[0],
   );
 
+/** Whether the box belongs to the move. */
 export const boxInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean(
     (
@@ -28,6 +30,7 @@ export const boxInMove = async (db: AppDb, moveId: string, id: string): Promise<
     )[0],
   );
 
+/** Whether the status belongs to the move. */
 export const statusInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean(
     (
@@ -39,6 +42,7 @@ export const statusInMove = async (db: AppDb, moveId: string, id: string): Promi
     )[0],
   );
 
+/** Whether the marker belongs to the move. */
 export const markerInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean(
     (
@@ -50,6 +54,7 @@ export const markerInMove = async (db: AppDb, moveId: string, id: string): Promi
     )[0],
   );
 
+/** Whether the item belongs to the move. */
 export const itemInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean(
     (
@@ -61,6 +66,7 @@ export const itemInMove = async (db: AppDb, moveId: string, id: string): Promise
     )[0],
   );
 
+/** Whether the photo belongs to the move. */
 export const photoInMove = async (db: AppDb, moveId: string, id: string): Promise<boolean> =>
   Boolean(
     (

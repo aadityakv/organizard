@@ -13,6 +13,7 @@ import type { InventoryActions, Store } from '../types';
 
 export type InventorySlice = StateCreator<Store, [['zustand/persist', unknown]], [], InventoryActions>;
 
+/** Actions that edit the open move. */
 export const createInventorySlice: InventorySlice = (set, get) => ({
   addRoom: ({ name, dest = null, icon = 'box', color = 'slate' }) => {
     const id = uid('r');

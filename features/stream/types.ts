@@ -21,5 +21,6 @@ export type StreamView = 'capture' | 'stream';
 
 export type BoxRef = Pick<Box, 'id' | 'number' | 'name' | 'color'>;
 
+/** Display label for a box in the session UI ("Box #3 · Kitchen"). */
 export const boxLabel = (b?: { number: number; name: string }): string =>
   b ? `Box #${b.number} · ${b.name}` : 'Box';

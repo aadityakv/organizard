@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button, Icon, LockNote } from '@/components';
 import { colors, fonts, fontSize, gutter, palette, space } from '@/theme';
 
+/** Sticky footer: Save / Save & add another / Save changes, or a lock note for viewers. */
 export function SaveFooter({
   canEdit,
   isEdit,

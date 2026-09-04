@@ -1,3 +1,4 @@
+// Bearer-session middleware: resolves the token to a user or returns 401.
 import { createMiddleware } from 'hono/factory';
 
 import type { Deps } from '../deps';

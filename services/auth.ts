@@ -21,8 +21,10 @@ async function adoptSession(
   await syncLocalMovesUp();
 }
 
+/** Whether Sign in with Apple is available on this device. */
 export const appleSignInAvailable = (): Promise<boolean> => AppleAuthentication.isAvailableAsync();
 
+/** Run the Apple sign-in flow and adopt the resulting session. */
 export async function signInWithApple(): Promise<void> {
   const credential = await AppleAuthentication.signInAsync({
     requestedScopes: [

@@ -1,3 +1,4 @@
+// Numeric stepper with a typeable field.
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { colors, palette, space, radius, fonts, fontSize } from '@/theme';
@@ -12,6 +13,7 @@ export type StepperProps = {
   inputAccessoryViewID?: string;
 };
 
+/** Numeric stepper with +/- buttons and a directly editable, clamped text field. */
 export function Stepper({
   value,
   onChange,

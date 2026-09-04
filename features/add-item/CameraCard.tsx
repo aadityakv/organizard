@@ -10,6 +10,7 @@ import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme
 import { CAMERA_CARD_H } from './constants';
 import type { Capture } from './useCapture';
 
+/** Inline camera card for the item form: live viewfinder with capture controls, or the permission prompt. */
 export function CameraCard({ capture }: { capture: Capture }) {
   const { cameraRef, permission, permissionGranted, permissionDenied, requestPermission } = capture;
   return (

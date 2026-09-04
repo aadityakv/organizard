@@ -8,6 +8,7 @@ import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 
 import { KBD_ACCESSORY } from './constants';
 
+/** The item form fields: name, price, quantity, computed total and notes. */
 export function ItemFields({
   isEdit,
   name,

@@ -8,6 +8,7 @@ import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 import { SEARCH_SUGGESTIONS } from './constants';
 import { shared } from './styles';
 
+/** Dashboard search field with suggestion pills. */
 export function SearchBar({ query, onChange }: { query: string; onChange: (q: string) => void }) {
   const isSearching = query.trim().length > 0;
   return (

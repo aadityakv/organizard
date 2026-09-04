@@ -13,6 +13,7 @@ import { shared } from './styles';
 
 const GALLERY_PEEK = 4;
 
+/** Collapsible strip of the box's photos (cover first, then item photos). */
 export function PhotoGallery({
   photos,
   expanded,
