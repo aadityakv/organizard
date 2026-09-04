@@ -1,4 +1,6 @@
-// Root layout for the whole app: fonts, session restore, sync engine and the navigator.
+// Root layout. Loads the Fredoka/Nunito fonts, waits for the persisted store and the
+// keychain session (photos need the token before first render), starts the sync
+// engine, then mounts the router Stack with per-screen presentation options.
 import { useEffect, useState } from 'react';
 import {
   Fredoka_400Regular,
@@ -55,7 +57,7 @@ export default function RootLayout() {
   useEffect(() => {
     loadSession()
       .then((t) => {
-        if (t) useStore.setState({ session: t });
+        if (t) useStore.getState().restoreSession(t);
       })
       .finally(() => setSessionRestored(true));
   }, []);

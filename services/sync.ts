@@ -33,7 +33,7 @@ export async function syncActiveMove(): Promise<void> {
   syncing = true;
   if (pendingFull) {
     pendingFull = false;
-    useStore.setState({ lastSyncTs: 0 }); // consumed inside the mutex, so it can't be clobbered
+    useStore.getState().resetSyncCursor(); // consumed inside the mutex, so it can't be clobbered
   }
   const { session, serverMoveId } = st;
   try {

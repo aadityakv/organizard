@@ -39,9 +39,11 @@ Two deployables in one repo, sharing one contract.
 app/          expo-router screens (file-based navigation) — thin compositions
 features/     per-screen pieces: sheets, hooks and styles, grouped by feature
 components/   design-system primitives and shared chrome
+hooks/        generic React hooks (sheet form state)
 store/        Zustand store (persisted to AsyncStorage), slices + selectors
 services/     orchestration: auth, share/sync engine, photo upload, printing
-lib/          pure helpers (labels, money, QR, parsing, migration batch)
+lib/          pure helpers (labels, money, QR, parsing, migration batch, routes)
+data/         client domain types and the starter statuses/markers
 shared/       the client<->server contract: wire models + the Mutation union
 modules/      local Expo native modules (Swift): address autocomplete, speech recognizer
 plugins/      Expo config plugins applied on every prebuild

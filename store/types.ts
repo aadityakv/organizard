@@ -83,6 +83,10 @@ export type SyncActions = {
   /** Start the Pro free trial (gate-UI-now; real billing wires in later). */
   startProTrial: () => void;
   setSession: (session: string, account: Account) => void;
+  /** Put a token restored from the keychain into memory at boot (account is already persisted). */
+  restoreSession: (session: string) => void;
+  /** Force the next pull to start from zero (a full re-sync). */
+  resetSyncCursor: () => void;
   /**
    * Drop the account from this device: synced moves go (they live in the cloud and
    * are pulled again on the next sign-in), local-only moves stay. State only — the
