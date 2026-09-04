@@ -38,39 +38,39 @@ export default function NewMove() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title={copy.newMove} onBack={() => router.back()} />
+      <Header title={copy.newMoveButton} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Card style={styles.card}>
           <Input
-            label={copy.name}
+            label={copy.nameLabel}
             value={name}
             onChangeText={setName}
-            placeholder={copy.eGApartmentMove}
+            placeholder={copy.newMoveNamePlaceholder}
             autoFocus
           />
           <View style={styles.gap} />
           <AddressField
-            label={copy.fromOptional}
+            label={copy.fromOptionalLabel}
             value={from}
             onChangeText={setFrom}
-            placeholder={copy.searchAnAddress}
+            placeholder={copy.addressPlaceholder}
           />
           <View style={styles.gap} />
           <AddressField
-            label={copy.toOptional}
+            label={copy.toOptionalLabel}
             value={to}
             onChangeText={setTo}
-            placeholder={copy.searchAnAddress}
+            placeholder={copy.addressPlaceholder}
           />
           <View style={styles.gap} />
           <DateField
-            label={copy.targetDateOptional}
+            label={copy.targetDateOptionalLabel}
             value={targetDate}
             onChange={setTargetDate}
-            placeholder={copy.pickADate}
+            placeholder={copy.datePlaceholder}
           />
           <Button fullWidth iconLeft="plus" onPress={onCreate} disabled={!name.trim()} style={styles.cta}>
-            {copy.createMove}
+            {copy.createMoveTitle}
           </Button>
         </Card>
       </ScrollView>

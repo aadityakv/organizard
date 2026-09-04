@@ -33,12 +33,12 @@ export function SaveFooter({
       {canEdit ? (
         isEdit ? (
           <Button variant="primary" size="lg" fullWidth onPress={onSaveEdit}>
-            {copy.saveChanges}
+            {copy.saveChangesButton}
           </Button>
         ) : (
           <View style={styles.actionRow}>
             <Button variant="secondary" size="lg" onPress={() => onSave(false)} style={styles.saveBtn}>
-              {copy.save}
+              {copy.saveButton}
             </Button>
             <Button
               variant="primary"
@@ -47,12 +47,12 @@ export function SaveFooter({
               onPress={() => onSave(true)}
               style={styles.saveAnotherBtn}
             >
-              {copy.saveAddAnother}
+              {copy.saveAndAddAnotherButton}
             </Button>
           </View>
         )
       ) : (
-        <LockNote>{copy.youCanViewAndScan}</LockNote>
+        <LockNote>{copy.viewerLockNote}</LockNote>
       )}
     </View>
   );

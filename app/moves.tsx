@@ -80,10 +80,10 @@ export default function Moves() {
 
   const confirmDelete = (move: MoveSummary) => {
     setMenuFor(null);
-    Alert.alert(copy.deleteMove, `“${move.name}” and its boxes will be permanently deleted.`, [
-      { text: copy.cancel, style: 'cancel' },
+    Alert.alert(copy.deleteMoveConfirmTitle, `“${move.name}” and its boxes will be permanently deleted.`, [
+      { text: copy.cancelButton, style: 'cancel' },
       {
-        text: copy.delete,
+        text: copy.deleteButton,
         style: 'destructive',
         onPress: () => {
           void deleteMove(move.id);
@@ -112,16 +112,16 @@ export default function Moves() {
               <SlothMark size={96} />
             </View>
             <Text style={styles.wordmark}>
-              <Text style={styles.wordmarkInk}>{copy.tuck}</Text>
+              <Text style={styles.wordmarkInk}>{copy.appName}</Text>
             </Text>
-            <Text style={styles.tagline}>{copy.packFastFindAnythingShare}</Text>
+            <Text style={styles.tagline}>{copy.tagline}</Text>
           </View>
           <View style={styles.emptyActions}>
             <Button size="lg" fullWidth iconLeft="plus" onPress={() => router.push(routes.newMove)}>
-              {copy.createAMove}
+              {copy.createMoveButton}
             </Button>
             <Button variant="secondary" size="lg" fullWidth iconLeft="link" onPress={() => setJoinOpen(true)}>
-              {copy.joinAMove}
+              {copy.joinTitle}
             </Button>
           </View>
         </View>
@@ -133,7 +133,7 @@ export default function Moves() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
-        title={copy.yourMoves}
+        title={copy.libraryTitle}
         leading={accountButton}
         trailing={
           <IconButton
@@ -157,7 +157,7 @@ export default function Moves() {
           onPress={() => setJoinOpen(true)}
           style={styles.joinCta}
         >
-          {copy.joinAMove}
+          {copy.joinTitle}
         </Button>
 
         {archived.length > 0 && (

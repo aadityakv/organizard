@@ -24,18 +24,18 @@ export default function Welcome() {
         <View style={styles.markGlow}>
           <SlothMark size={104} />
         </View>
-        <Text style={styles.wordmark}>{copy.tuck}</Text>
-        <Text style={styles.tagline}>{copy.packFastFindAnythingShare}</Text>
+        <Text style={styles.wordmark}>{copy.appName}</Text>
+        <Text style={styles.tagline}>{copy.tagline}</Text>
       </View>
 
       <View style={styles.actions}>
         <Button size="lg" fullWidth onPress={() => router.push(routes.signIn)}>
-          {copy.logInOrSignUp}
+          {copy.signInButton}
         </Button>
         <Button variant="ghost" size="lg" fullWidth onPress={continueAsGuest}>
-          {copy.continueAsGuest}
+          {copy.guestButton}
         </Button>
-        <Text style={styles.fine}>{copy.guestMovesStayOnThis}</Text>
+        <Text style={styles.fine}>{copy.guestHint}</Text>
       </View>
     </SafeAreaView>
   );

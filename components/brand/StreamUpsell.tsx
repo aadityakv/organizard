@@ -30,7 +30,7 @@ export function StreamUpsell({
         <View style={styles.tile}>
           <Icon name="zap" size={28} color={palette.green700} />
         </View>
-        <Text style={styles.title}>{copy.pack10FasterWithStream}</Text>
+        <Text style={styles.title}>{copy.upsellTitle}</Text>
         <Text style={styles.sub}>{copy.snapOrSpeakItemAfter}</Text>
       </View>
       <View style={styles.perks}>
@@ -44,7 +44,7 @@ export function StreamUpsell({
         ))}
       </View>
       <Button fullWidth size="lg" onPress={onTryPro}>
-        {copy.tryProFreeFor7}
+        {copy.upsellButton}
       </Button>
       <Button variant="ghost" fullWidth onPress={onClose} style={{ marginTop: 4 }}>
         Maybe later

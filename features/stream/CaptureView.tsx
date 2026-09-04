@@ -22,16 +22,16 @@ export function CaptureView({ isPro, onSwitchToStream, onCapture }: Props) {
       <View style={styles.captureSwitchWrap}>
         <Pressable onPress={onSwitchToStream} style={styles.streamPill} accessibilityLabel="Switch to Stream">
           <Icon name="zap" size={17} color={colors.brand} />
-          <Text style={styles.streamPillText}>{copy.switchToStream}</Text>
+          <Text style={styles.streamPillText}>{copy.switchToStreamButton}</Text>
           {!isPro ? (
             <View style={styles.proBadge}>
-              <Text style={styles.proBadgeText}>{copy.pro}</Text>
+              <Text style={styles.proBadgeText}>{copy.proBadge}</Text>
             </View>
           ) : null}
           <Icon name="chevron-right" size={16} color="rgba(255,255,255,0.7)" />
         </Pressable>
       </View>
-      <Viewfinder mode="frame" hint={copy.snapAnItemThenName} />
+      <Viewfinder mode="frame" hint={copy.captureHint} />
       <View style={styles.captureBottom}>
         <Pressable onPress={onCapture} style={sharedStyles.shutter} accessibilityLabel="Capture">
           <Icon name="camera" size={30} color="#fff" />

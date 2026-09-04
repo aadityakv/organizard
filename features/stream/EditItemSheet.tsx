@@ -18,22 +18,22 @@ type Props = {
 /** Sheet to fix a captured item's name, quantity or value, or remove it. */
 export function EditItemSheet({ item, onPatch, onRemove, onClose }: Props) {
   return (
-    <Sheet visible={!!item} onClose={onClose} title={copy.fixThisItem}>
+    <Sheet visible={!!item} onClose={onClose} title={copy.fixItemTitle}>
       {item ? (
         <View style={{ gap: 14 }}>
           <View style={{ gap: 6 }}>
-            <Text style={styles.fieldLabel}>{copy.itemName}</Text>
+            <Text style={styles.fieldLabel}>{copy.itemNameLabel}</Text>
             <TextInput
               value={item.name === 'Untitled item' && item.needsFix ? '' : item.name}
               onChangeText={(v) => onPatch({ name: v, icon: iconFor(v), needsFix: false })}
-              placeholder={copy.eGCastIronSkillet}
+              placeholder={copy.itemNamePlaceholder}
               placeholderTextColor={palette.ink400}
               style={styles.input}
             />
           </View>
           <View style={{ flexDirection: 'row', gap: 14 }}>
             <View style={{ flex: 1, gap: 6 }}>
-              <Text style={styles.fieldLabel}>{copy.value}</Text>
+              <Text style={styles.fieldLabel}>{copy.valueLabel}</Text>
               <View style={styles.valInputWrap}>
                 <Text style={styles.dollar}>$</Text>
                 <TextInput
@@ -50,7 +50,7 @@ export function EditItemSheet({ item, onPatch, onRemove, onClose }: Props) {
               </View>
             </View>
             <View style={{ gap: 6 }}>
-              <Text style={styles.fieldLabel}>{copy.quantity}</Text>
+              <Text style={styles.fieldLabel}>{copy.quantityLabel}</Text>
               <View style={styles.stepper}>
                 <Pressable
                   accessibilityRole="button"
@@ -72,7 +72,7 @@ export function EditItemSheet({ item, onPatch, onRemove, onClose }: Props) {
           </View>
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
             <Button variant="danger" iconLeft="trash-2" onPress={onRemove}>
-              {copy.remove}
+              {copy.removeButton}
             </Button>
             <View style={{ flex: 1 }}>
               <Button

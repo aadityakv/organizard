@@ -38,7 +38,7 @@ export function FindResults({ query }: { query: string }) {
     return (
       <View style={styles.empty}>
         <Icon name="search-x" size={32} color={palette.ink400} />
-        <Text style={styles.emptyTitle}>{copy.nothingFound}</Text>
+        <Text style={styles.emptyTitle}>{copy.noResults}</Text>
         <Text style={styles.emptyBody}>No items or boxes match “{query}”.</Text>
       </View>
     );

@@ -23,13 +23,13 @@ type Props = {
 /** Sheet listing everything captured this session, with tap-to-fix. */
 export function LedgerSheet({ visible, session, sessionValue, fixCount, colorOf, onEdit, onClose }: Props) {
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.thisSession}>
+    <Sheet visible={visible} onClose={onClose} title={copy.ledgerTitle}>
       <Text style={styles.ledgerTotals}>
         {countOf(session.length, 'item')} · {money(sessionValue)}
         {fixCount ? ` · ${fixCount} to fix` : ''}
       </Text>
       <ScrollView style={{ maxHeight: 320 }}>
-        {session.length === 0 ? <Text style={styles.empty}>{copy.nothingYetSnapYourFirst}</Text> : null}
+        {session.length === 0 ? <Text style={styles.empty}>{copy.emptyLedger}</Text> : null}
         {[...session].reverse().map((it) => (
           <Pressable
             accessibilityRole="button"
@@ -44,7 +44,7 @@ export function LedgerSheet({ visible, session, sessionValue, fixCount, colorOf,
               <Text numberOfLines={1} style={[styles.ledgerName, it.needsFix && { color: palette.amber600 }]}>
                 {it.name}
               </Text>
-              {it.needsFix ? <Text style={styles.ledgerFix}>{copy.thatDoesnTLookRight}</Text> : null}
+              {it.needsFix ? <Text style={styles.ledgerFix}>{copy.needsFixHint}</Text> : null}
             </View>
             {it.qty && it.qty > 1 ? <Text style={sharedStyles.qtyChip}>×{it.qty}</Text> : null}
             {it.value != null ? <Text style={sharedStyles.valChip}>{money(it.value)}</Text> : null}

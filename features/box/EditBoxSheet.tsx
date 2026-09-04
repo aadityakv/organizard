@@ -30,17 +30,17 @@ export function EditBoxSheet({
   }));
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.editBox}>
-      <Input label={copy.boxName} value={name} onChangeText={(name) => patch({ name })} autoFocus />
+    <Sheet visible={visible} onClose={onClose} title={copy.editBoxTitle}>
+      <Input label={copy.boxNameLabel} value={name} onChangeText={(name) => patch({ name })} autoFocus />
 
-      <Text style={shared.fieldLabel}>{copy.color}</Text>
+      <Text style={shared.fieldLabel}>{copy.colorLabel}</Text>
       <View style={shared.palette}>
         {BOX_COLORS.map((c) => (
           <ColorDot key={c} color={c} size={28} selected={c === color} onPress={() => patch({ color: c })} />
         ))}
       </View>
 
-      <Text style={shared.fieldLabel}>{copy.room}</Text>
+      <Text style={shared.fieldLabel}>{copy.roomLabel}</Text>
       <View style={styles.roomPickRow}>
         {rooms.map((r) => {
           const on = r.id === roomId;

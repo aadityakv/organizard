@@ -52,14 +52,14 @@ export default function QRScreen() {
 
             <View style={styles.hint}>
               <Icon name="info" size={15} color={colors.textPlaceholder} />
-              <Text style={styles.hintText}>{copy.holdSteadyAnyoneOnThe}</Text>
+              <Text style={styles.hintText}>{copy.qrScreenHint}</Text>
             </View>
           </View>
         ) : (
           <View style={styles.center}>
             <View style={[styles.dot, { backgroundColor: colors.borderStrong }]} />
-            <Text style={styles.number}>{copy.boxNotFound}</Text>
-            <Text style={styles.subtitle}>{copy.thatBoxIsnTPart}</Text>
+            <Text style={styles.number}>{copy.boxNotFoundHeader}</Text>
+            <Text style={styles.subtitle}>{copy.qrBoxMissingBody}</Text>
           </View>
         )}
       </View>

@@ -64,7 +64,7 @@ export function RoomGroup({
               style={({ pressed }) => [shared.gridCard, styles.addBoxTile, pressed && shared.pressedSoft]}
             >
               <Icon name="plus" size={22} color={palette.green600} />
-              <Text style={styles.addBoxTileText}>{copy.addBox}</Text>
+              <Text style={styles.addBoxTileText}>{copy.addBoxButton}</Text>
             </Pressable>
           ) : null}
         </View>

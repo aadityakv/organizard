@@ -11,13 +11,13 @@ import { copy } from '@/copy/box';
 export function MissingBox() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
-      <Header title={copy.boxNotFound} onBack={() => router.back()} />
+      <Header title={copy.boxNotFoundHeader} onBack={() => router.back()} />
       <View style={styles.missing}>
         <Thumb color="slate" icon="package-x" size={72} radius={radius.pill} />
-        <Text style={styles.missingTitle}>{copy.weCouldnTFindThat}</Text>
-        <Text style={styles.missingBody}>{copy.itMayHaveBeenDeleted}</Text>
+        <Text style={styles.missingTitle}>{copy.missingBoxTitle}</Text>
+        <Text style={styles.missingBody}>{copy.missingBoxBody}</Text>
         <Button variant="secondary" size="md" iconLeft="arrow-left" onPress={() => router.back()}>
-          {copy.goBack}
+          {copy.goBackButton}
         </Button>
       </View>
     </SafeAreaView>

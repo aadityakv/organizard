@@ -31,7 +31,7 @@ export function QrLabelCard({ box, roomName }: { box: Box; roomName?: string }) 
           iconLeft="scan-line"
           onPress={() => router.push(routes.qr(box.id))}
         >
-          {copy.showFullScreen}
+          {copy.showQrFullScreenButton}
         </Button>
         <Button
           variant="ghost"

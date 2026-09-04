@@ -99,10 +99,10 @@ export default function Members() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title={copy.shareMembers} subtitle={moveName} onBack={() => router.back()} />
+      <Header title={copy.screenTitle} subtitle={moveName} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {!session ? (
-          <AuthPanel title={copy.signInToShare} subtitle={copy.sharingAMoveKeepsIt} />
+          <AuthPanel title={copy.signInToShareButton} subtitle={copy.shareExplainer} />
         ) : activeMode === MOVE_MODE.local ? (
           <>
             <Card style={styles.card}>
@@ -116,10 +116,10 @@ export default function Members() {
         ) : (
           <>
             <Card style={styles.card}>
-              <Text style={styles.h}>{copy.inviteAPackingBuddy}</Text>
+              <Text style={styles.h}>{copy.inviteTitle}</Text>
               {canManage ? (
                 <>
-                  <Text style={styles.label}>{copy.theyJoinAs}</Text>
+                  <Text style={styles.label}>{copy.inviteRoleLabel}</Text>
                   <Segmented
                     options={[
                       { value: ROLES.editor, label: 'Editor' },
@@ -135,7 +135,7 @@ export default function Members() {
                     iconLeft="user-plus"
                     style={styles.cta}
                   >
-                    {copy.createInviteLink}
+                    {copy.createInviteButton}
                   </Button>
                   {inviteLink ? (
                     <Text selectable style={styles.link}>
@@ -144,11 +144,11 @@ export default function Members() {
                   ) : null}
                 </>
               ) : (
-                <LockNote>{copy.onlyTheOwnerCanInvite}</LockNote>
+                <LockNote>{copy.inviteLockNote}</LockNote>
               )}
             </Card>
 
-            <Text style={styles.section}>{copy.members}</Text>
+            <Text style={styles.section}>{copy.membersHeading}</Text>
             {members.map((mem) => (
               <MemberRow
                 key={mem.id}

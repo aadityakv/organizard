@@ -40,8 +40,8 @@ export default function Find() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
-        title={copy.find}
-        subtitle={copy.whereSMy}
+        title={copy.findHeading}
+        subtitle={copy.searchPlaceholder}
         trailing={
           <IconButton
             icon="scan-line"
@@ -57,7 +57,7 @@ export default function Find() {
         <Input
           value={query}
           onChangeText={setQuery}
-          placeholder={copy.findAnItemWhereS}
+          placeholder={copy.searchLabel}
           autoFocus
           style={styles.searchInput}
         />
@@ -74,7 +74,7 @@ export default function Find() {
       >
         {!q ? (
           <View style={styles.suggest}>
-            <Text style={styles.suggestTitle}>{copy.try}</Text>
+            <Text style={styles.suggestTitle}>{copy.suggestionsPrefix}</Text>
             <View style={styles.chips}>
               {SUGGESTIONS.map((s) => (
                 <Pressable accessibilityRole="button" key={s} onPress={() => setQuery(s)} style={styles.chip}>
@@ -86,7 +86,7 @@ export default function Find() {
         ) : items.length === 0 && matchedBoxes.length === 0 ? (
           <View style={styles.empty}>
             <Icon name="search-x" size={32} color={palette.ink400} />
-            <Text style={styles.emptyTitle}>{copy.nothingFound}</Text>
+            <Text style={styles.emptyTitle}>{copy.noResults}</Text>
             <Text style={styles.emptyBody}>No items or boxes match “{query}”.</Text>
           </View>
         ) : (

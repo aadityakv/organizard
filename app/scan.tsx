@@ -68,7 +68,7 @@ function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: () => voi
             accessibilityRole="button"
           >
             <Icon name="scan-line" size={16} color={palette.ink500} />
-            <Text style={styles.rescanText}>{copy.scanAgain}</Text>
+            <Text style={styles.rescanText}>{copy.scanAgainButton}</Text>
           </Pressable>
         )}
       </View>
@@ -83,7 +83,7 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
         <View style={styles.permIconWrap}>
           <SlothMark size={56} />
         </View>
-        <Text style={styles.permTitle}>{copy.pointYourCameraAtA}</Text>
+        <Text style={styles.permTitle}>{copy.permissionTitle}</Text>
         <Text style={styles.permBody}>{copy.tuckNeedsYourCameraSo}</Text>
         {denied ? (
           <Button
@@ -93,14 +93,14 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
             iconLeft="settings"
             onPress={() => Linking.openSettings()}
           >
-            {copy.openSettings}
+            {copy.openSettingsButton}
           </Button>
         ) : (
           <Button variant="primary" size="lg" fullWidth iconLeft="camera" onPress={onRequest}>
-            {copy.turnOnTheCamera}
+            {copy.enableCameraButton}
           </Button>
         )}
-        {denied && <Text style={styles.permHint}>{copy.cameraAccessIsOffTurn}</Text>}
+        {denied && <Text style={styles.permHint}>{copy.permissionDeniedBody}</Text>}
       </ScrollView>
     </SafeAreaView>
   );
@@ -189,7 +189,7 @@ export default function Scan() {
           >
             <Icon name="chevron-left" size={22} color={palette.white} />
           </Pressable>
-          <Text style={styles.topTitle}>{copy.scanABox}</Text>
+          <Text style={styles.topTitle}>{copy.screenTitle}</Text>
         </View>
 
         <View style={styles.windowWrap} pointerEvents="none">
@@ -200,7 +200,7 @@ export default function Scan() {
             <View style={[styles.corner, styles.cornerBR]} />
             {!result && <View style={styles.scanLine} />}
           </View>
-          {!result && <Text style={styles.windowHint}>{copy.lineUpABoxS}</Text>}
+          {!result && <Text style={styles.windowHint}>{copy.viewfinderHint}</Text>}
         </View>
       </SafeAreaView>
 

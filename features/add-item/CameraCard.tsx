@@ -71,10 +71,10 @@ export function CameraCard({ capture }: { capture: Capture }) {
             <Icon name="camera" size={24} color={palette.white} />
           </View>
           {permission == null ? (
-            <Text style={styles.permTitle}>{copy.gettingTheCameraReady}</Text>
+            <Text style={styles.permTitle}>{copy.cameraStarting}</Text>
           ) : permissionDenied ? (
             <>
-              <Text style={styles.permTitle}>{copy.cameraAccessIsOff}</Text>
+              <Text style={styles.permTitle}>{copy.cameraDeniedTitle}</Text>
               <Text style={styles.permBody}>{copy.turnItOnInSettings}</Text>
               <Button
                 variant="secondary"
@@ -83,12 +83,12 @@ export function CameraCard({ capture }: { capture: Capture }) {
                 onPress={() => Linking.openSettings()}
                 style={styles.permBtn}
               >
-                {copy.openSettings}
+                {copy.openSettingsButton}
               </Button>
             </>
           ) : (
             <>
-              <Text style={styles.permTitle}>{copy.snapAPhotoAsYou}</Text>
+              <Text style={styles.permTitle}>{copy.cameraPromptTitle}</Text>
               <Text style={styles.permBody}>{copy.aQuickPictureMakesItems}</Text>
               <Button
                 variant="secondary"
@@ -97,7 +97,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
                 onPress={requestPermission}
                 style={styles.permBtn}
               >
-                {copy.allowCamera}
+                {copy.allowCameraButton}
               </Button>
             </>
           )}
@@ -108,7 +108,7 @@ export function CameraCard({ capture }: { capture: Capture }) {
             hitSlop={8}
             style={({ pressed }) => [styles.notNowBtn, pressed && styles.notNowBtnPressed]}
           >
-            <Text style={styles.notNowText}>{copy.notNow}</Text>
+            <Text style={styles.notNowText}>{copy.skipCameraButton}</Text>
           </Pressable>
         </View>
       )}

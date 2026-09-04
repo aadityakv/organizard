@@ -44,9 +44,9 @@ export function CoverSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.boxPhoto}>
+    <Sheet visible={visible} onClose={onClose} title={copy.coverPhotoLabel}>
       {!permission ? (
-        <Text style={shared.sheetBlurb}>{copy.gettingTheCameraReady}</Text>
+        <Text style={shared.sheetBlurb}>{copy.cameraStarting}</Text>
       ) : !permission.granted ? (
         <View>
           <Text style={shared.sheetBlurb}>
@@ -81,7 +81,7 @@ export function CoverSheet({
       {hasCover ? (
         <View style={styles.removeCover}>
           <Button variant="ghost" size="md" fullWidth iconLeft="trash-2" onPress={onRemove}>
-            {copy.removePhoto}
+            {copy.removeCoverButton}
           </Button>
         </View>
       ) : null}

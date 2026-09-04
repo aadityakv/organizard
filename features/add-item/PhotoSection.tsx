@@ -26,7 +26,7 @@ export function PhotoSection({
   const capture = useCapture(onAddPhoto);
   return (
     <View style={styles.photoSection}>
-      <Text style={sharedStyles.sectionHeading}>{copy.photosOptional}</Text>
+      <Text style={sharedStyles.sectionHeading}>{copy.photosLabel}</Text>
 
       {photos.length > 0 ? (
         <ScrollView

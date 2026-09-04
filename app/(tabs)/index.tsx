@@ -126,10 +126,10 @@ export default function Dashboard() {
         ) : (
           <>
             <View style={styles.totalsCard}>
-              <ValueStat value={money(totals.value)} label={copy.estimatedValue} tone="brand" />
+              <ValueStat value={money(totals.value)} label={copy.estimatedValueLabel} tone="brand" />
               <View style={styles.totalsDivider} />
-              <ValueStat value={totals.boxes} label={copy.boxes} />
-              <ValueStat value={totals.items} label={copy.items} />
+              <ValueStat value={totals.boxes} label={copy.boxesStatLabel} />
+              <ValueStat value={totals.items} label={copy.itemsStatLabel} />
             </View>
 
             <View style={styles.controlRow}>
@@ -169,11 +169,11 @@ export default function Dashboard() {
                       ]}
                     >
                       <Icon name="plus" size={20} color={palette.green600} />
-                      <Text style={styles.addBtnText}>{copy.addRoom}</Text>
+                      <Text style={styles.addBtnText}>{copy.addRoomButton}</Text>
                     </Pressable>
                   </View>
                 ) : (
-                  <LockNote>{copy.viewersCanBrowseAndScan}</LockNote>
+                  <LockNote>{copy.viewerLockNote}</LockNote>
                 )}
               </View>
             ) : view === GROUP_VIEW.status ? (

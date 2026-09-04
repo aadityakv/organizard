@@ -20,11 +20,11 @@ export function JoinSheet({
   onSubmit: () => void;
 }) {
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.joinAMove}>
-      <Text style={styles.sheetBody}>{copy.pasteTheInviteLinkOr}</Text>
-      <Input value={value} onChangeText={onChange} placeholder={copy.pasteInviteLinkOrCode} autoFocus />
+    <Sheet visible={visible} onClose={onClose} title={copy.joinTitle}>
+      <Text style={styles.sheetBody}>{copy.joinHint}</Text>
+      <Input value={value} onChangeText={onChange} placeholder={copy.joinPlaceholder} autoFocus />
       <Button fullWidth iconLeft="link" onPress={onSubmit} disabled={!value.trim()} style={styles.sheetCta}>
-        {copy.join}
+        {copy.joinButton}
       </Button>
     </Sheet>
   );

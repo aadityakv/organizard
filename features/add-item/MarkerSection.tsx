@@ -20,7 +20,7 @@ export function MarkerSection({
   if (choices.length === 0) return null;
   return (
     <View style={sharedStyles.chipSection}>
-      <Text style={sharedStyles.sectionHeading}>{copy.markersOptional}</Text>
+      <Text style={sharedStyles.sectionHeading}>{copy.markersLabel}</Text>
       <View style={sharedStyles.chipWrap}>
         {choices.map((m) => (
           <MarkerChip

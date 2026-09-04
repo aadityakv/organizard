@@ -56,7 +56,7 @@ export function StatusSheet({
                   ]}
                 >
                   <StatusChip label={s.label} color={s.color} />
-                  {s.custom ? <Text style={styles.customTag}>{copy.custom}</Text> : null}
+                  {s.custom ? <Text style={styles.customTag}>{copy.customStatusLabel}</Text> : null}
                   {active ? (
                     <View style={styles.optionCheck}>
                       <Icon name="check" size={20} color={palette.green600} />
@@ -73,32 +73,32 @@ export function StatusSheet({
             style={({ pressed }) => [shared.dashed, pressed && shared.pressed]}
           >
             <Icon name="plus" size={18} color={palette.green600} />
-            <Text style={shared.dashedText}>{copy.newStatus}</Text>
+            <Text style={shared.dashedText}>{copy.newStatusPlaceholder}</Text>
           </Pressable>
         </View>
       ) : (
         <View>
           <Input
-            label={copy.name}
+            label={copy.nameLabel}
             value={name}
             onChangeText={setName}
-            placeholder={copy.eGStorageUnitSell}
+            placeholder={copy.statusNamePlaceholder}
             autoFocus
           />
-          <Text style={shared.fieldLabel}>{copy.color}</Text>
+          <Text style={shared.fieldLabel}>{copy.colorLabel}</Text>
           <View style={shared.palette}>
             {BOX_COLORS.map((c) => (
               <ColorDot key={c} color={c} size={30} selected={c === color} onPress={() => setColor(c)} />
             ))}
           </View>
           <View style={styles.previewRow}>
-            <Text style={styles.previewLabel}>{copy.preview}</Text>
+            <Text style={styles.previewLabel}>{copy.previewLabel}</Text>
             <StatusChip label={name.trim() || 'New status'} color={color} />
           </View>
           <View style={shared.sheetActions}>
             <View style={shared.flex1}>
               <Button variant="ghost" size="md" fullWidth onPress={() => setCreating(false)}>
-                {copy.cancel}
+                {copy.cancelButton}
               </Button>
             </View>
             <View style={shared.flex1}>

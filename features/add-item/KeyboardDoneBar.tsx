@@ -20,7 +20,7 @@ export function KeyboardDoneBar() {
           hitSlop={8}
           style={({ pressed }) => [styles.kbdDone, pressed && styles.kbdDonePressed]}
         >
-          <Text style={styles.kbdDoneText}>{copy.done}</Text>
+          <Text style={styles.kbdDoneText}>{copy.doneButton}</Text>
         </Pressable>
       </View>
     </InputAccessoryView>

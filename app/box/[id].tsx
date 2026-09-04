@@ -50,9 +50,9 @@ export default function BoxDetail() {
       `Delete "${box.name}"?`,
       'This removes the box and everything packed inside. This can’t be undone.',
       [
-        { text: copy.keepIt, style: 'cancel' },
+        { text: copy.keepButton, style: 'cancel' },
         {
-          text: copy.deleteBox,
+          text: copy.deleteBoxButton,
           style: 'destructive',
           onPress: () => {
             actions.deleteBox(box.id);
@@ -65,9 +65,9 @@ export default function BoxDetail() {
 
   const onMore = () => {
     const options: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
-    if (canEdit) options.push({ text: copy.editBox, onPress: () => setSheet(SHEET.edit) });
-    if (canDelete) options.push({ text: copy.deleteBox, style: 'destructive', onPress: confirmDelete });
-    options.push({ text: copy.cancel, style: 'cancel' });
+    if (canEdit) options.push({ text: copy.editBoxTitle, onPress: () => setSheet(SHEET.edit) });
+    if (canDelete) options.push({ text: copy.deleteBoxButton, style: 'destructive', onPress: confirmDelete });
+    options.push({ text: copy.cancelButton, style: 'cancel' });
     Alert.alert(box.name, undefined, options);
   };
 
@@ -100,7 +100,7 @@ export default function BoxDetail() {
         )}
 
         <View style={shared.sectionHead}>
-          <Text style={shared.sectionTitle}>{copy.markers}</Text>
+          <Text style={shared.sectionTitle}>{copy.markersHeading}</Text>
           {canEdit && (
             <Pressable
               accessibilityRole="button"
@@ -109,7 +109,7 @@ export default function BoxDetail() {
               style={({ pressed }) => [styles.editLink, pressed && shared.pressed]}
             >
               <Icon name="plus" size={16} color={palette.green600} />
-              <Text style={styles.editLinkText}>{copy.editMarkers}</Text>
+              <Text style={styles.editLinkText}>{copy.editMarkersButton}</Text>
             </Pressable>
           )}
         </View>
@@ -143,17 +143,17 @@ export default function BoxDetail() {
               </View>
               <View style={styles.streamItems}>
                 <Button variant="primary" size="lg" fullWidth iconLeft="audio-lines" onPress={startStreaming}>
-                  {copy.streamItems}
+                  {copy.streamItemsButton}
                 </Button>
                 {!isPro ? (
                   <View style={styles.proBadge}>
-                    <Text style={styles.proBadgeText}>{copy.pro}</Text>
+                    <Text style={styles.proBadgeText}>{copy.proBadge}</Text>
                   </View>
                 ) : null}
               </View>
             </View>
           ) : (
-            <LockNote>{copy.youReViewingAsA}</LockNote>
+            <LockNote>{copy.guestLockNote}</LockNote>
           )}
         </View>
       </ScrollView>

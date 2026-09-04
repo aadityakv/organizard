@@ -28,13 +28,13 @@ export default function Capture() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
         <Button variant="ghost" iconLeft="x" onPress={() => router.back()}>
-          {copy.close}
+          {copy.closeButton}
         </Button>
       </View>
       <View style={styles.empty}>
         <Icon name="package" size={32} color={palette.ink400} />
-        <Text style={styles.emptyText}>{copy.noBoxesYetAddA}</Text>
-        <Button onPress={() => router.back()}>{copy.back}</Button>
+        <Text style={styles.emptyText}>{copy.noBoxesHint}</Text>
+        <Button onPress={() => router.back()}>{copy.backButton}</Button>
       </View>
     </SafeAreaView>
   );

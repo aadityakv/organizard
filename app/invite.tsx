@@ -67,7 +67,7 @@ export default function InviteAccept() {
       {outcome.status === 'working' ? <ActivityIndicator color={colors.brand} /> : null}
       <Text style={styles.text}>{outcome.status === 'error' ? outcome.message : 'Joining…'}</Text>
       {outcome.status === 'error' ? (
-        <Button onPress={() => router.replace(routes.moves)}>{copy.backToMoves}</Button>
+        <Button onPress={() => router.replace(routes.moves)}>{copy.backToMovesButton}</Button>
       ) : null}
     </View>
   );

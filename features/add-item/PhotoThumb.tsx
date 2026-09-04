@@ -40,7 +40,7 @@ export function PhotoThumb({
       )}
       {isCover ? (
         <View style={styles.coverBadge}>
-          <Text style={styles.coverBadgeText}>{copy.cover}</Text>
+          <Text style={styles.coverBadgeText}>{copy.coverBadge}</Text>
         </View>
       ) : null}
       <Pressable

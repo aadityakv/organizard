@@ -18,7 +18,7 @@ export function SearchBar({ query, onChange }: { query: string; onChange: (q: st
         <Input
           value={query}
           onChangeText={onChange}
-          placeholder={copy.findAnItemWhereS}
+          placeholder={copy.searchLabel}
           autoFocus
           style={styles.searchInput}
         />

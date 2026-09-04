@@ -30,16 +30,16 @@ export function LastCapturedCard({ item, colorOf, onEdit, onUndo }: Props) {
         <View style={styles.chipRow}>
           {item.qty && item.qty > 1 ? <Text style={sharedStyles.qtyChip}>×{item.qty}</Text> : null}
           {item.value != null ? <Text style={sharedStyles.valChip}>{money(item.value)}</Text> : null}
-          <Text style={styles.fixHint}>{copy.tapToFix}</Text>
+          <Text style={styles.fixHint}>{copy.tapToFixHint}</Text>
         </View>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4 }}>
         <View style={styles.addedRow}>
           <Icon name="check" size={14} color={palette.green700} />
-          <Text style={styles.addedText}>{copy.added}</Text>
+          <Text style={styles.addedText}>{copy.addedLabel}</Text>
         </View>
         <Pressable accessibilityRole="button" onPress={onUndo}>
-          <Text style={styles.undo}>{copy.undo}</Text>
+          <Text style={styles.undo}>{copy.undoButton}</Text>
         </Pressable>
       </View>
     </Pressable>

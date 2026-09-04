@@ -71,7 +71,7 @@ export default function PrintLabels() {
         </Pressable>
 
         <Text style={styles.title} numberOfLines={1}>
-          {copy.printLabels}
+          {copy.printLabelsTitle}
         </Text>
 
         {boxes.length > 0 ? (
@@ -92,8 +92,8 @@ export default function PrintLabels() {
       {boxes.length === 0 ? (
         <View style={styles.empty}>
           <Icon name="printer" size={32} color={palette.ink400} />
-          <Text style={styles.emptyTitle}>{copy.noBoxesToPrint}</Text>
-          <Text style={styles.emptyBody}>{copy.addABoxFirstThen}</Text>
+          <Text style={styles.emptyTitle}>{copy.emptyTitle}</Text>
+          <Text style={styles.emptyBody}>{copy.emptyBody}</Text>
         </View>
       ) : (
         <ScrollView
@@ -101,7 +101,7 @@ export default function PrintLabels() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.blurb}>{copy.eachLabelHasTheBox}</Text>
+          <Text style={styles.blurb}>{copy.intro}</Text>
           {boxes.map((b) => (
             <BoxRow
               key={b.id}

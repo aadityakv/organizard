@@ -52,25 +52,29 @@ export function EditMoveSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.editMove}>
+    <Sheet visible={visible} onClose={onClose} title={copy.editMoveTitle}>
       <Input
-        label={copy.moveName}
+        label={copy.moveNameLabel}
         value={name}
         onChangeText={(name) => patch({ name })}
-        placeholder={copy.eGNycMove}
+        placeholder={copy.moveNamePlaceholder}
         autoFocus
       />
       <View style={styles.fieldGap} />
-      <Text style={styles.editLabel}>{copy.from}</Text>
-      <AddressField value={from} onChangeText={(from) => patch({ from })} placeholder={copy.currentAddress} />
+      <Text style={styles.editLabel}>{copy.fromLabel}</Text>
+      <AddressField
+        value={from}
+        onChangeText={(from) => patch({ from })}
+        placeholder={copy.fromPlaceholder}
+      />
       <View style={styles.fieldGap} />
       <Text style={styles.editLabel}>To</Text>
-      <AddressField value={to} onChangeText={(to) => patch({ to })} placeholder={copy.newAddress} />
+      <AddressField value={to} onChangeText={(to) => patch({ to })} placeholder={copy.toPlaceholder} />
       <View style={styles.fieldGap} />
-      <Text style={styles.editLabel}>{copy.targetDate}</Text>
-      <DateField value={date} onChange={(date) => patch({ date })} placeholder={copy.pickAMoveDate} />
+      <Text style={styles.editLabel}>{copy.targetDateLabel}</Text>
+      <DateField value={date} onChange={(date) => patch({ date })} placeholder={copy.targetDatePlaceholder} />
       <Button fullWidth iconLeft="check" onPress={save} disabled={!canSave} style={styles.sheetCta}>
-        {copy.saveChanges}
+        {copy.saveChangesButton}
       </Button>
     </Sheet>
   );

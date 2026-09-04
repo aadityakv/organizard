@@ -32,7 +32,7 @@ export function ItemsSection({
     <>
       <View style={shared.sectionHead}>
         <View style={styles.itemsTitleRow}>
-          <Text style={styles.itemsTitle}>{copy.items}</Text>
+          <Text style={styles.itemsTitle}>{copy.itemsHeading}</Text>
           <Badge
             label={
               query.trim().length > 0 ? `${visibleItems.length} of ${items.length}` : String(items.length)
@@ -59,7 +59,7 @@ export function ItemsSection({
               <Input
                 value={query}
                 onChangeText={setQuery}
-                placeholder={copy.searchItemsInThisBox}
+                placeholder={copy.searchPlaceholder}
                 autoFocus
                 style={styles.searchInput}
               />
@@ -87,7 +87,7 @@ export function ItemsSection({
       {items.length === 0 ? (
         <View style={styles.empty}>
           <Thumb color={boxColor} icon="package-open" size={64} radius={radius.pill} />
-          <Text style={styles.emptyTitle}>{copy.noItemsYet}</Text>
+          <Text style={styles.emptyTitle}>{copy.emptyItemsTitle}</Text>
           <Text style={styles.emptyBody}>
             {canEdit ? 'No items yet — add your first one to start packing.' : 'Nothing packed in here yet.'}
           </Text>
@@ -95,7 +95,7 @@ export function ItemsSection({
       ) : visibleItems.length === 0 ? (
         <View style={styles.empty}>
           <Icon name="search-x" size={32} color={palette.ink400} />
-          <Text style={styles.emptyTitle}>{copy.noItemsMatch}</Text>
+          <Text style={styles.emptyTitle}>{copy.noSearchMatches}</Text>
           <Text style={styles.emptyBody}>Nothing in this box matches “{query.trim()}”.</Text>
         </View>
       ) : (

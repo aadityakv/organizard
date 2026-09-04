@@ -44,7 +44,7 @@ export function MicPills({ mic, transcript, lastBatch, lastIt, onFixLast }: Prop
       {mic === MIC.fail ? (
         <Pressable accessibilityRole="button" onPress={onFixLast} style={styles.pillFail}>
           <Icon name="ear" size={16} color={palette.amber600} />
-          <Text style={styles.pillFailText}>{copy.hmmDidnTCatchA}</Text>
+          <Text style={styles.pillFailText}>{copy.noNameHeardHint}</Text>
         </Pressable>
       ) : null}
     </View>

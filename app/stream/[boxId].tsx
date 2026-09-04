@@ -295,17 +295,17 @@ export default function StreamSession() {
         <View style={styles.summaryScrim}>
           <View style={styles.summaryCard}>
             <SlothGlyph />
-            <Text style={styles.summaryTitle}>{copy.niceStreak}</Text>
+            <Text style={styles.summaryTitle}>{copy.streakTitle}</Text>
             <Text style={styles.summaryLabel}>{summaryLabel}</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 10, width: '100%' }}>
               <View style={{ flex: 1 }}>
                 <Button variant="secondary" fullWidth onPress={() => setSummaryOpen(false)}>
-                  {copy.keepGoing}
+                  {copy.keepGoingButton}
                 </Button>
               </View>
               <View style={{ flex: 1 }}>
                 <Button fullWidth onPress={finish}>
-                  {copy.done}
+                  {copy.doneButton}
                 </Button>
               </View>
             </View>

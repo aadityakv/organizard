@@ -21,7 +21,7 @@ export function MoveToBoxPicker({
   if (boxes.length <= 1) return null;
   return (
     <View style={sharedStyles.chipSection}>
-      <Text style={sharedStyles.sectionHeading}>{copy.moveToBox}</Text>
+      <Text style={sharedStyles.sectionHeading}>{copy.moveToBoxLabel}</Text>
       <View style={sharedStyles.chipWrap}>
         {boxes.map((b) => {
           const on = b.id === targetBoxId;

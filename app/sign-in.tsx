@@ -17,9 +17,9 @@ export default function SignIn() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header title={copy.welcomeToTuck} subtitle={copy.logInOrCreateAn} onBack={() => router.back()} />
+      <Header title={copy.signInTitle} subtitle={copy.signInSubtitle} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <AuthPanel title={copy.logInOrSignUp} subtitle={copy.signInToShareMoves} onAuthed={done} />
+        <AuthPanel title={copy.signInButton} subtitle={copy.signInToShareMoves} onAuthed={done} />
       </ScrollView>
     </SafeAreaView>
   );

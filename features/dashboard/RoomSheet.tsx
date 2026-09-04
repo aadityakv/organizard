@@ -58,9 +58,9 @@ export function RoomSheet({
     // Empty room — a simple, low-stakes delete any editor may perform.
     if (roomBoxes.length === 0) {
       Alert.alert(`Delete “${room.name}”?`, "This removes the room. This can't be undone.", [
-        { text: copy.keepIt, style: 'cancel' },
+        { text: copy.keepButton, style: 'cancel' },
         {
-          text: copy.deleteRoom,
+          text: copy.deleteRoomButton,
           style: 'destructive',
           onPress: () => {
             deleteRoom(room.id);
@@ -73,7 +73,9 @@ export function RoomSheet({
 
     // Cascade — destroys boxes + items. Owner-only.
     if (!PERM.canDelete(role)) {
-      Alert.alert(copy.onlyTheOwnerCanDelete, copy.askTheMoveOwnerOr, [{ text: copy.ok }]);
+      Alert.alert(copy.cascadeDeleteForbiddenTitle, copy.cascadeDeleteForbiddenBody, [
+        { text: copy.okButton },
+      ]);
       return;
     }
 
@@ -83,9 +85,9 @@ export function RoomSheet({
       `Delete “${room.name}” and everything in it?`,
       `This permanently removes the room, its ${roomBoxes.length} ${boxWord}, and ${itemCount} ${itemWord}. This can't be undone.`,
       [
-        { text: copy.cancel, style: 'cancel' },
+        { text: copy.cancelButton, style: 'cancel' },
         {
-          text: copy.deleteAll,
+          text: copy.deleteAllButton,
           style: 'destructive',
           onPress: () => {
             deleteRoom(room.id);
@@ -99,21 +101,21 @@ export function RoomSheet({
   return (
     <Sheet visible={visible} onClose={onClose} title={isEdit ? 'Edit room' : 'New room'}>
       <Input
-        label={copy.roomName}
+        label={copy.roomNameLabel}
         value={name}
         onChangeText={(name) => patch({ name })}
-        placeholder={copy.eGGarageNurseryOffice}
+        placeholder={copy.roomNamePlaceholder}
         autoFocus
       />
       <View style={styles.fieldGap} />
       <Input
-        label={copy.destinationOptional}
+        label={copy.destinationLabel}
         value={dest}
         onChangeText={(dest) => patch({ dest })}
-        placeholder={copy.whereItLandsEG}
+        placeholder={copy.destinationPlaceholder}
       />
 
-      <Text style={sheetForm.fieldLabel}>{copy.icon}</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.iconLabel}</Text>
       <View style={styles.iconRow}>
         {ROOM_ICONS.map((ic) => {
           const on = ic === icon;
@@ -136,7 +138,7 @@ export function RoomSheet({
         })}
       </View>
 
-      <Text style={sheetForm.fieldLabel}>{copy.color}</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.colorLabel}</Text>
       <View style={sheetForm.colorRow}>
         {BOX_COLORS.map((hue) => (
           <ColorDot
@@ -171,7 +173,7 @@ export function RoomSheet({
           style={({ pressed }) => [styles.deleteRow, pressed && shared.pressedSoft]}
         >
           <Icon name="trash-2" size={18} color={colors.danger} />
-          <Text style={styles.deleteText}>{copy.deleteRoom}</Text>
+          <Text style={styles.deleteText}>{copy.deleteRoomButton}</Text>
         </Pressable>
       )}
     </Sheet>

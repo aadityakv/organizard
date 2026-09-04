@@ -60,13 +60,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return (
       <SafeAreaView style={styles.screen}>
         <SlothMark size={72} />
-        <Text style={styles.title}>{copy.wellThisIsAwkward}</Text>
-        <Text style={styles.body}>{copy.somethingBrokeOnThisScreen}</Text>
-        <Button onPress={this.restart}>{copy.restartTheApp}</Button>
+        <Text style={styles.title}>{copy.crashTitle}</Text>
+        <Text style={styles.body}>{copy.crashBody}</Text>
+        <Button onPress={this.restart}>{copy.restartButton}</Button>
         <View style={styles.codeChip}>
           <Text style={styles.code}>error code {this.state.digest}</Text>
         </View>
-        <Text style={styles.hint}>{copy.ifItKeepsHappeningQuote}</Text>
+        <Text style={styles.hint}>{copy.crashHint}</Text>
       </SafeAreaView>
     );
   }

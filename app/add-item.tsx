@@ -97,7 +97,7 @@ export default function AddItem() {
                 style={({ pressed }) => [styles.deleteBtn, pressed && styles.deleteBtnPressed]}
               >
                 <Icon name="trash-2" size={18} color={colors.danger} />
-                <Text style={styles.deleteText}>{copy.deleteItem}</Text>
+                <Text style={styles.deleteText}>{copy.deleteItemButton}</Text>
               </Pressable>
             </>
           ) : null}

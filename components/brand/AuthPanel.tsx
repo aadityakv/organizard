@@ -86,7 +86,7 @@ export function AuthPanel({
           onPress={() => run(signInWithApple, 'Sign-in failed')}
         />
       ) : null}
-      <Text style={styles.or}>{copy.orUseEmail}</Text>
+      <Text style={styles.or}>{copy.emailDivider}</Text>
       <Segmented
         options={[
           { value: AUTH_MODE.login, label: 'Log in' },
@@ -99,7 +99,7 @@ export function AuthPanel({
         <Input
           value={email}
           onChangeText={setEmail}
-          placeholder={copy.youEmailCom}
+          placeholder={copy.emailPlaceholder}
           keyboardType="email-address"
           autoCapitalize="none"
           textContentType="emailAddress"
@@ -107,7 +107,7 @@ export function AuthPanel({
         <Input
           value={password}
           onChangeText={setPassword}
-          placeholder={copy.password}
+          placeholder={copy.passwordLabel}
           secureTextEntry
           autoCapitalize="none"
           textContentType={authMode === AUTH_MODE.signup ? 'newPassword' : 'password'}
@@ -121,7 +121,7 @@ export function AuthPanel({
       >
         {authMode === AUTH_MODE.signup ? 'Create account' : 'Log in'}
       </Button>
-      {authMode === AUTH_MODE.signup ? <Text style={styles.hint}>{copy.useAtLeast8Characters}</Text> : null}
+      {authMode === AUTH_MODE.signup ? <Text style={styles.hint}>{copy.passwordHint}</Text> : null}
     </Card>
   );
 }

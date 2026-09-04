@@ -43,16 +43,16 @@ export function AddBoxSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.newBox}>
+    <Sheet visible={visible} onClose={onClose} title={copy.newBoxTitle}>
       <Input
-        label={copy.whatSInIt}
+        label={copy.boxNameLabel}
         value={name}
         onChangeText={(name) => patch({ name })}
-        placeholder={copy.eGKitchenEssentials}
+        placeholder={copy.boxNamePlaceholder}
         autoFocus
       />
 
-      <Text style={sheetForm.fieldLabel}>{copy.color}</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.colorLabel}</Text>
       <View style={sheetForm.colorRow}>
         {BOX_COLORS.map((hue) => (
           <ColorDot
@@ -65,12 +65,12 @@ export function AddBoxSheet({
         ))}
       </View>
 
-      <Text style={sheetForm.fieldLabel}>{copy.room}</Text>
+      <Text style={sheetForm.fieldLabel}>{copy.roomLabel}</Text>
       {rooms.length === 0 ? (
         <View style={styles.noRoomsHint}>
-          <Text style={styles.noRoomsText}>{copy.boxesLiveInsideARoom}</Text>
+          <Text style={styles.noRoomsText}>{copy.noRoomsHint}</Text>
           <Button variant="secondary" size="md" iconLeft="plus" onPress={onAddRoom}>
-            {copy.newRoom}
+            {copy.newRoomButton}
           </Button>
         </View>
       ) : (
@@ -111,7 +111,7 @@ export function AddBoxSheet({
           ]}
         >
           <Icon name="plus" size={20} color={colors.textOnBrand} />
-          <Text style={sheetForm.ctaText}>{copy.addBox}</Text>
+          <Text style={sheetForm.ctaText}>{copy.addBoxButton}</Text>
         </Pressable>
       )}
     </Sheet>

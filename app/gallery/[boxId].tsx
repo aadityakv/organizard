@@ -126,7 +126,7 @@ export default function GalleryScreen() {
         {current.kind === 'box' ? (
           <View style={styles.labelPill}>
             <Icon name="package" size={15} color={palette.white} />
-            <Text style={styles.labelText}>{copy.boxPhoto}</Text>
+            <Text style={styles.labelText}>{copy.coverPhotoLabel}</Text>
           </View>
         ) : (
           <Pressable

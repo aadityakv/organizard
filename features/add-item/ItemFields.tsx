@@ -38,7 +38,7 @@ export function ItemFields({
         label={copy.itemName}
         value={name}
         onChangeText={onName}
-        placeholder={copy.eGCastIronSkillet}
+        placeholder={copy.itemNamePlaceholder}
         // Only pop the keyboard when CREATING a new item. When editing an
         // existing one you're usually just glancing/tweaking — don't hijack focus.
         autoFocus={!isEdit}
@@ -46,7 +46,7 @@ export function ItemFields({
 
       <View style={styles.fieldRow}>
         <Input
-          label={copy.priceEach}
+          label={copy.priceLabel}
           value={value}
           onChangeText={onValue}
           placeholder="0"
@@ -71,10 +71,10 @@ export function ItemFields({
       ) : null}
 
       <Input
-        label={copy.notesOptional}
+        label={copy.notesLabel}
         value={note}
         onChangeText={onNote}
-        placeholder={copy.fragileWhichTowelItS}
+        placeholder={copy.notesPlaceholder}
         inputAccessoryViewID={KBD_ACCESSORY}
         multiline
       />

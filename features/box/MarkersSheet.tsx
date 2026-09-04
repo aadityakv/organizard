@@ -37,8 +37,8 @@ export function MarkersSheet({
   };
 
   return (
-    <Sheet visible={visible} onClose={close} title={copy.markers}>
-      <Text style={shared.sheetBlurb}>{copy.handlingFlagsForThisBox}</Text>
+    <Sheet visible={visible} onClose={close} title={copy.markersHeading}>
+      <Text style={shared.sheetBlurb}>{copy.markersSheetHint}</Text>
       <View style={styles.markerSheetWrap}>
         {allMarkers.map((m) => (
           <MarkerChip
@@ -55,13 +55,13 @@ export function MarkersSheet({
       {adding ? (
         <View style={styles.markerCreate}>
           <Input
-            label={copy.newMarker}
+            label={copy.newMarkerButton}
             value={name}
             onChangeText={setName}
-            placeholder={copy.eGDoNotStack}
+            placeholder={copy.markerNamePlaceholder}
             autoFocus
           />
-          <Text style={shared.fieldLabel}>{copy.color}</Text>
+          <Text style={shared.fieldLabel}>{copy.colorLabel}</Text>
           <View style={shared.palette}>
             {BOX_COLORS.map((c) => (
               <ColorDot key={c} color={c} size={30} selected={c === color} onPress={() => setColor(c)} />
@@ -70,7 +70,7 @@ export function MarkersSheet({
           <View style={shared.sheetActions}>
             <View style={shared.flex1}>
               <Button variant="ghost" size="md" fullWidth onPress={() => setAdding(false)}>
-                {copy.cancel}
+                {copy.cancelButton}
               </Button>
             </View>
             <View style={shared.flex1}>
@@ -99,13 +99,13 @@ export function MarkersSheet({
           style={({ pressed }) => [shared.dashed, pressed && shared.pressed]}
         >
           <Icon name="plus" size={18} color={palette.green600} />
-          <Text style={shared.dashedText}>{copy.createANewMarker}</Text>
+          <Text style={shared.dashedText}>{copy.newMarkerTitle}</Text>
         </Pressable>
       )}
 
       <View style={shared.doneButton}>
         <Button variant="secondary" size="lg" fullWidth onPress={close}>
-          {copy.done}
+          {copy.doneButton}
         </Button>
       </View>
     </Sheet>

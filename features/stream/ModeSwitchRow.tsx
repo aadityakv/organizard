@@ -24,7 +24,7 @@ export function ModeSwitchRow({ voiceMode, listening, onBackToCapture, onToggleV
         accessibilityLabel="Single item"
       >
         <Icon name="chevron-left" size={15} color="#fff" />
-        <Text style={styles.backPillText}>{copy.singleItem}</Text>
+        <Text style={styles.backPillText}>{copy.singleItemMode}</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"

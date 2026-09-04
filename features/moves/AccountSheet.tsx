@@ -17,22 +17,25 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
   const session = useStore((s) => s.session);
 
   const onDeleteAccount = () =>
-    Alert.alert(copy.deleteAccount2, copy.thisPermanentlyDeletesYourAccount, [
-      { text: copy.cancel, style: 'cancel' },
+    Alert.alert(copy.deleteAccountConfirmTitle, copy.thisPermanentlyDeletesYourAccount, [
+      { text: copy.cancelButton, style: 'cancel' },
       {
-        text: copy.delete,
+        text: copy.deleteButton,
         style: 'destructive',
         onPress: () => {
           onClose();
           deleteAccount().catch((e) =>
-            Alert.alert(copy.couldNotDeleteAccount, e instanceof Error ? e.message : 'Something went wrong.'),
+            Alert.alert(
+              copy.deleteAccountFailedTitle,
+              e instanceof Error ? e.message : 'Something went wrong.',
+            ),
           );
         },
       },
     ]);
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={copy.account}>
+    <Sheet visible={visible} onClose={onClose} title={copy.accountTitle}>
       <View style={styles.accountSheet}>
         {session ? (
           <>
@@ -61,7 +64,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
               Sign out
             </Button>
             <Button variant="danger" fullWidth iconLeft="trash-2" onPress={onDeleteAccount}>
-              {copy.deleteAccount}
+              {copy.deleteAccountButton}
             </Button>
           </>
         ) : (
