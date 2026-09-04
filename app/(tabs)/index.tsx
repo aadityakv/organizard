@@ -1,6 +1,6 @@
 // Dashboard (home) — totals, room/status/value grouping, color-coded box grid,
 // and Find. Role-aware: Owner/Editor get create affordances; Viewers see a LockNote.
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -25,11 +25,24 @@ import { money } from '@/lib/money';
 import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
 import { GROUP_VIEW } from '@/features/dashboard/constants';
 import { routes } from '@/lib/routes';
+import { searchSuggestions, useStore } from '@/store/useStore';
 import { copy } from '@/copy/dashboard';
 
 /** Boxes tab: the open move at a glance, grouped by room, status or value, with add/edit sheets. */
 export default function Dashboard() {
   const [view, setView] = useState<GroupView>(GROUP_VIEW.room);
+  const boxesForSuggest = useStore((s) => s.boxes);
+  const itemsByBoxForSuggest = useStore((s) => s.itemsByBox);
+  const markersForSuggest = useStore((s) => s.markers);
+  const suggestions = useMemo(
+    () =>
+      searchSuggestions({
+        boxes: boxesForSuggest,
+        itemsByBox: itemsByBoxForSuggest,
+        markers: markersForSuggest,
+      }),
+    [boxesForSuggest, itemsByBoxForSuggest, markersForSuggest],
+  );
   const { move, rooms, boxes, progress, totals, canEdit, pct, sortedBoxes } = useDashboard(view);
 
   const [query, setQuery] = useState('');
@@ -119,7 +132,7 @@ export default function Dashboard() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {searching && <SearchBar query={query} onChange={setQuery} />}
+        {searching && <SearchBar query={query} onChange={setQuery} suggestions={suggestions} />}
 
         {isSearching ? (
           <FindResults query={query} />

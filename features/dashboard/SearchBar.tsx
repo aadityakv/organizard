@@ -1,15 +1,22 @@
-// The Find field shown when search is open, with quick suggestions while empty.
+// The Find field shown when search is open, with suggestions from the user's own data while empty.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon, Input } from '@/components';
 import { colors, fonts, fontSize, palette, radius, space } from '@/theme';
 
-import { SEARCH_SUGGESTIONS } from './constants';
 import { shared } from './styles';
 import { copy } from '@/copy/dashboard';
 
 /** Dashboard search field with suggestion pills. */
-export function SearchBar({ query, onChange }: { query: string; onChange: (q: string) => void }) {
+export function SearchBar({
+  query,
+  onChange,
+  suggestions,
+}: {
+  query: string;
+  onChange: (q: string) => void;
+  suggestions: string[];
+}) {
   const isSearching = query.trim().length > 0;
   return (
     <View style={styles.searchBlock}>
@@ -33,9 +40,9 @@ export function SearchBar({ query, onChange }: { query: string; onChange: (q: st
           </Pressable>
         )}
       </View>
-      {!isSearching && (
+      {!isSearching && suggestions.length > 0 && (
         <View style={styles.suggestRow}>
-          {SEARCH_SUGGESTIONS.map((s) => (
+          {suggestions.map((s) => (
             <Pressable
               key={s}
               accessibilityRole="button"

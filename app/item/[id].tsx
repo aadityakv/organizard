@@ -1,6 +1,5 @@
 // Item detail — read-only hub for a single item. Tapping an item row opens this
 // instead of the edit form; editing is a secondary action (Owner/Editor only).
-// This view is where the photo gallery and in-box search will later link in.
 import { useMemo } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

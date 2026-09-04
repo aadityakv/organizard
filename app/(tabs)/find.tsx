@@ -7,12 +7,10 @@ import { router } from 'expo-router';
 
 import { Header, Icon, IconButton, Input, RoomGlyph, Thumb } from '@/components';
 import type { Room } from '@/data/types';
-import { allIndexedItems, useStore } from '@/store/useStore';
+import { allIndexedItems, useStore, searchSuggestions } from '@/store/useStore';
 import { fonts, palette, radius } from '@/theme';
 import { routes } from '@/lib/routes';
 import { copy } from '@/copy/dashboard';
-
-const SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];
 
 /** Find tab: search every item and box in the move, or scan a label to jump to a box. */
 export default function Find() {
@@ -23,6 +21,10 @@ export default function Find() {
   const indexed = useMemo(
     () => allIndexedItems({ boxes, rooms, itemsByBox } as Parameters<typeof allIndexedItems>[0]),
     [boxes, rooms, itemsByBox],
+  );
+  const suggestions = useMemo(
+    () => searchSuggestions({ boxes, itemsByBox, markers }),
+    [boxes, itemsByBox, markers],
   );
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
@@ -73,16 +75,23 @@ export default function Find() {
         showsVerticalScrollIndicator={false}
       >
         {!q ? (
-          <View style={styles.suggest}>
-            <Text style={styles.suggestTitle}>{copy.suggestionsPrefix}</Text>
-            <View style={styles.chips}>
-              {SUGGESTIONS.map((s) => (
-                <Pressable accessibilityRole="button" key={s} onPress={() => setQuery(s)} style={styles.chip}>
-                  <Text style={styles.chipText}>{s}</Text>
-                </Pressable>
-              ))}
+          suggestions.length > 0 && (
+            <View style={styles.suggest}>
+              <Text style={styles.suggestTitle}>{copy.suggestionsPrefix}</Text>
+              <View style={styles.chips}>
+                {suggestions.map((s) => (
+                  <Pressable
+                    accessibilityRole="button"
+                    key={s}
+                    onPress={() => setQuery(s)}
+                    style={styles.chip}
+                  >
+                    <Text style={styles.chipText}>{s}</Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
-          </View>
+          )
         ) : items.length === 0 && matchedBoxes.length === 0 ? (
           <View style={styles.empty}>
             <Icon name="search-x" size={32} color={palette.ink400} />

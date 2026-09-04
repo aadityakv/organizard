@@ -6,7 +6,7 @@ import type { Box as WireBox, Item as WireItem, Room as WireRoom } from '@/share
 
 import { createAppStore } from './createStore';
 import { migrate, STORE_KEY } from './persist';
-import { moveSummaries } from './selectors';
+import { moveSummaries, searchSuggestions } from './selectors';
 
 /** Synchronous in-memory storage: the store hydrates before the first read. */
 function memoryStorage(seed: Record<string, string> = {}): StateStorage & { data: Record<string, string> } {
@@ -333,5 +333,18 @@ describe('persistence', () => {
     expect(migrated.library).toEqual({});
     expect(migrated.boxes).toEqual([]);
     expect(migrated.currentMoveId).toBeNull();
+  });
+});
+
+describe('searchSuggestions', () => {
+  it('offers the newest item names, then markers in use, and nothing for an empty move', () => {
+    const store = createAppStore(memoryStorage());
+    expect(searchSuggestions(store.getState())).toEqual([]);
+    const roomId = store.getState().addRoom({ name: 'Kitchen' });
+    const boxId = store.getState().addBox({ name: 'Pans', color: 'amber', roomId });
+    store.getState().addItem(boxId, { name: 'Skillet' });
+    store.getState().addItem(boxId, { name: 'Kettle' });
+    store.getState().toggleBoxMarker(boxId, 'mk_fragile');
+    expect(searchSuggestions(store.getState())).toEqual(['Kettle', 'Skillet', 'Fragile']);
   });
 });

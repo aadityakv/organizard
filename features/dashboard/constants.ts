@@ -32,5 +32,3 @@ export const ROOM_ICONS = [
   'car',
   'dumbbell',
 ];
-
-export const SEARCH_SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];

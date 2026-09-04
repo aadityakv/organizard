@@ -128,6 +128,31 @@ export const moveSummaries = (s: MoveSummaryInputs): MoveSummary[] => {
 };
 
 /** The signed-in user's role in the open move (owner for local moves). */
+/**
+ * Up to three things the user might search for, drawn from their own data: the most
+ * recently added item names, then labels of markers actually in use. Fresh array: useMemo.
+ */
+export const searchSuggestions = (
+  s: Pick<State, 'boxes' | 'itemsByBox' | 'markers'>,
+  limit = 3,
+): string[] => {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (label: string) => {
+    const key = label.trim().toLowerCase();
+    if (!key || seen.has(key) || out.length >= limit) return;
+    seen.add(key);
+    out.push(label.trim());
+  };
+  const items = Object.values(s.itemsByBox).flat();
+  for (let i = items.length - 1; i >= 0; i--) add(items[i].name);
+  const usedMarkers = new Set(
+    s.boxes.flatMap((b) => b.markers).concat(items.flatMap((it) => it.markers ?? [])),
+  );
+  for (const m of s.markers) if (usedMarkers.has(m.id)) add(m.label);
+  return out;
+};
+
 export const currentRole = (s: State): Role => roleFor(s.activeMode, s.members, s.account?.id ?? null);
 
 /** The data of any move: the live slice for the open one, the bundle otherwise. */

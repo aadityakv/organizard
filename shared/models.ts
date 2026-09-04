@@ -1,4 +1,4 @@
-// Shared domain models — imported by BOTH the Worker and (later) the client,
+// Shared domain models — imported by both the Worker and the client,
 // so the two can't drift. Money is integer cents; mutable rows carry
 // updatedAt (ms) + deletedAt (tombstone) for last-write-wins delta sync.
 
