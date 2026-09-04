@@ -16,7 +16,12 @@ export function makeMemoryR2(): R2Bucket {
     get: async (key: string) => {
       const e = store.get(key);
       if (!e) return null;
-      return { arrayBuffer: async () => e.body, httpMetadata: { contentType: e.contentType } };
+      // Real R2 objects expose both a stream and arrayBuffer(); the route streams.
+      return {
+        body: new Blob([e.body]).stream(),
+        arrayBuffer: async () => e.body,
+        httpMetadata: { contentType: e.contentType },
+      };
     },
     delete: async (key: string) => {
       store.delete(key);
