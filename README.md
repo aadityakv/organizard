@@ -89,7 +89,7 @@ file drives server-side authorization.
 
 - **Hono** routes, **Drizzle** repositories, and a middleware layer for sessions and
   move membership. Everything that touches the outside world (database, clock, id
-  generation, Apple token verification, email) goes through one injectable `Deps`
+  generation, Apple token verification, logging) goes through one injectable `Deps`
   object so the whole Worker is tested in-process without Miniflare.
 - Public privacy and support pages are served by the same Worker so the App Store
   listing needs no extra hosting.
@@ -110,7 +110,7 @@ npm install
 npm run dev                 # wrangler dev with local D1 / R2 / KV emulation
 ```
 
-The client's API URL is set in `app.json` under `expo.extra.apiUrl`.
+The client's API URL comes from `app.config.ts`, chosen by `APP_ENV` (see Environments).
 
 ## Run on your iPhone
 

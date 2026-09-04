@@ -4,9 +4,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    groups:
-      expo:
-        patterns: ['expo*', 'react-native*', '@expo/*']
+    # Expo, React Native and React move together with the SDK (npx expo install
+    # --fix), not one package at a time; leave them to the SDK upgrade.
+    ignore:
+      - dependency-name: 'expo*'
+      - dependency-name: '@expo/*'
+      - dependency-name: 'react-native*'
+      - dependency-name: '@react-native/*'
+      - dependency-name: 'react'
+      - dependency-name: 'react-dom'
+      - dependency-name: '@types/react'
+      - dependency-name: '@sentry/react-native'
   - package-ecosystem: npm
     directory: /server
     schedule:

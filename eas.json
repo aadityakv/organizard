@@ -32,15 +32,5 @@
         "APP_ENV": "production"
       }
     }
-  },
-  "submit": {
-    "production": {
-      "ios": {
-        "ascAppId": "REDACTED-see-local-notes",
-        "ascApiKeyPath": "./credentials/asc_api_key.p8",
-        "ascApiKeyId": "REDACTED-see-local-notes",
-        "ascApiKeyIssuerId": "REDACTED-see-local-notes"
-      }
-    }
   }
 }
