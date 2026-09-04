@@ -1,6 +1,6 @@
 // Value view needs live per-box value, which lives in the store; resolve it
 // here, then sort descending.
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { View } from 'react-native';
 
 import type { Box } from '@/data/types';

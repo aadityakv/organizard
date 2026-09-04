@@ -2,7 +2,7 @@
 // module — avoids the New-Architecture/Fabric coupling that ships-broken on this
 // app's New-Arch-OFF setup). Tapping the field opens a Sheet with a tappable
 // month grid; the chosen date is surfaced to the parent as a Date.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from './Icon';

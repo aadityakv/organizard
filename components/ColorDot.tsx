@@ -2,7 +2,6 @@
 // edit box, room, status and marker sheets). Plain circle when unselected; when
 // `selected`, a white gap ring plus an outer ring in the same hue. With `onPress` it
 // becomes a Pressable whose hit area is padded up to 44pt regardless of `size`.
-import React from 'react';
 import { Pressable, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, palette, tap, DEFAULT_HUE, alpha } from '@/theme';
 

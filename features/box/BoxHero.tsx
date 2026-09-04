@@ -1,5 +1,4 @@
 // Tinted hero header: title/room, the "more" menu, and the status + value strip.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 

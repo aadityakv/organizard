@@ -1,7 +1,6 @@
 // Dual-mode room sheet. No `room` prop → CREATE; with `room` → EDIT (prefilled,
 // "Save changes" CTA, plus a Delete control gated by role/cascade size).
 // Gated to Owner/Editor by the caller.
-import React from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ColorDot, Icon, Input, Sheet } from '@/components';

@@ -61,7 +61,7 @@ export default function Find() {
           style={styles.searchInput}
         />
         {query ? (
-          <Pressable onPress={() => setQuery('')} hitSlop={8}>
+          <Pressable accessibilityRole="button" onPress={() => setQuery('')} hitSlop={8}>
             <Icon name="x" size={18} color={palette.ink400} />
           </Pressable>
         ) : null}
@@ -76,7 +76,7 @@ export default function Find() {
             <Text style={styles.suggestTitle}>Try</Text>
             <View style={styles.chips}>
               {SUGGESTIONS.map((s) => (
-                <Pressable key={s} onPress={() => setQuery(s)} style={styles.chip}>
+                <Pressable accessibilityRole="button" key={s} onPress={() => setQuery(s)} style={styles.chip}>
                   <Text style={styles.chipText}>{s}</Text>
                 </Pressable>
               ))}
@@ -95,6 +95,7 @@ export default function Find() {
                 <Text style={styles.heading}>Items · {items.length}</Text>
                 {items.map((it) => (
                   <Pressable
+                    accessibilityRole="button"
                     key={it.id}
                     onPress={() => router.push(routes.item(it.id))}
                     style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
@@ -131,6 +132,7 @@ export default function Find() {
                 <Text style={styles.heading}>Boxes · {matchedBoxes.length}</Text>
                 {matchedBoxes.map((b) => (
                   <Pressable
+                    accessibilityRole="button"
                     key={b.id}
                     onPress={() => router.push(routes.box(b.id))}
                     style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}

@@ -1,7 +1,6 @@
 // RoomGlyph — a room icon inside a small rounded tile tinted with the room's
 // box-palette hue. Legacy rooms (persisted before `color` existed) rehydrate
 // without a color, so we coalesce to the neutral hue rather than the brand fallback.
-import React from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
 
 import { boxColor, boxTint, radius, NEUTRAL_HUE } from '@/theme';

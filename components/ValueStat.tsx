@@ -1,5 +1,4 @@
 // Big-number stat with caption.
-import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 import { colors, fonts, fontSize, space } from '@/theme';

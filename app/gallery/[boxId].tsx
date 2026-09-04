@@ -2,7 +2,7 @@
 // Shows the box cover + every item photo on a dark background. Swipe between
 // pages (a paging ScrollView — no swiper dependency). Each page is labelled
 // "Box photo" or a tappable "From: <item>" pill that links to the item detail.
-import React, { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Image,
   type NativeScrollEvent,

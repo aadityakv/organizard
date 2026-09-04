@@ -1,5 +1,4 @@
 // Add-box sheet — gated to Owner/Editor by the caller.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, ColorDot, Icon, Input, RoomGlyph, Sheet } from '@/components';

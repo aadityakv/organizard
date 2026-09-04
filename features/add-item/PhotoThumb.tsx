@@ -2,7 +2,7 @@
 // first one, and an obvious remove button. Falls back to a placeholder glyph if
 // the image can't load (e.g. a not-yet-resolved server photo) so the tile never
 // renders as floating badges over a blank box.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components';

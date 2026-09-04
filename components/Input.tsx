@@ -2,9 +2,9 @@
 // eyebrow label, optional prefix (e.g. "$"), multiline mode, and an animated border that
 // tints green on focus. Font size is pinned to 16 so iOS does not zoom the page on
 // focus. `inputAccessoryViewID` attaches an iOS keyboard bar (see KeyboardDoneBar).
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, StyleProp, ViewStyle, Animated } from 'react-native';
-import { colors, radius, space, fonts, fontSize } from '@/theme';
+import { colors, radius, space, fonts, fontSize, motion } from '@/theme';
 
 export type InputProps = {
   value: string;
@@ -48,7 +48,7 @@ export function Input({
     setFocused(true);
     Animated.timing(animBorder, {
       toValue: 1,
-      duration: 120,
+      duration: motion.focusMs,
       useNativeDriver: false,
     }).start();
   };
@@ -57,7 +57,7 @@ export function Input({
     setFocused(false);
     Animated.timing(animBorder, {
       toValue: 0,
-      duration: 120,
+      duration: motion.focusMs,
       useNativeDriver: false,
     }).start();
   };

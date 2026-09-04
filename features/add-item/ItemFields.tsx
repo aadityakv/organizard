@@ -1,5 +1,4 @@
 // The item's own fields: name, price (each), quantity, and notes.
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Input, Stepper } from '@/components';

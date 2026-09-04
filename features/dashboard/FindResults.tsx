@@ -1,5 +1,5 @@
 // Find — searches items + boxes across the whole move, with a Room › Box crumb.
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';

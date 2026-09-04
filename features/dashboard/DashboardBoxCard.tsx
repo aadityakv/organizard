@@ -1,5 +1,4 @@
 // Card factory — resolves a box's status + markers + room for <BoxCard>.
-import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { BoxCard } from '@/components';

@@ -81,6 +81,15 @@ export type BoxColor = keyof typeof boxPalette;
 
 /** Ordered hue list — for color pickers (statuses, markers, boxes). */
 export const BOX_COLORS = Object.keys(boxPalette) as BoxColor[];
+/** Press feedback shared by every tappable surface. */
+export const motion = {
+  pressScale: 0.97,
+  pressCardScale: 0.985,
+  pressInMs: 100,
+  pressOutMs: 120,
+  focusMs: 120,
+} as const;
+
 /** Brand hue: the default for boxes and anything unset. */
 export const DEFAULT_HUE: BoxColor = 'green';
 /** Neutral hue: the default for rooms and missing statuses. */

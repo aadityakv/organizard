@@ -52,13 +52,18 @@ export function EditItemSheet({ item, onPatch, onRemove, onClose }: Props) {
               <Text style={styles.fieldLabel}>Quantity</Text>
               <View style={styles.stepper}>
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => onPatch({ qty: Math.max(1, (item.qty || 1) - 1) })}
                   style={styles.stepBtn}
                 >
                   <Text style={styles.stepTxt}>−</Text>
                 </Pressable>
                 <Text style={styles.qtyVal}>{item.qty || 1}</Text>
-                <Pressable onPress={() => onPatch({ qty: (item.qty || 1) + 1 })} style={styles.stepBtn}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => onPatch({ qty: (item.qty || 1) + 1 })}
+                  style={styles.stepBtn}
+                >
                   <Text style={styles.stepTxt}>+</Text>
                 </Pressable>
               </View>

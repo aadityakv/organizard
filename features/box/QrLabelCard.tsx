@@ -1,5 +1,4 @@
 // QR label card: the scannable code plus full-screen and print actions.
-import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import QRCode from 'react-native-qrcode-svg';

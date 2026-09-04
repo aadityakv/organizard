@@ -17,6 +17,7 @@ export function ModeSwitchRow({ voiceMode, listening, onBackToCapture, onToggleV
   return (
     <View style={styles.streamSwitchRow}>
       <Pressable
+        accessibilityRole="button"
         onPress={() => !listening && onBackToCapture()}
         style={styles.backPill}
         accessibilityLabel="Single item"
@@ -24,7 +25,11 @@ export function ModeSwitchRow({ voiceMode, listening, onBackToCapture, onToggleV
         <Icon name="chevron-left" size={15} color="#fff" />
         <Text style={styles.backPillText}>Single item</Text>
       </Pressable>
-      <Pressable onPress={() => !listening && onToggleVoiceMode()} style={styles.switchBtn}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => !listening && onToggleVoiceMode()}
+        style={styles.switchBtn}
+      >
         <Icon
           name={voiceMode ? 'camera-off' : 'camera'}
           size={17}

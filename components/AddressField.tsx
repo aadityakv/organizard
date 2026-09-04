@@ -2,7 +2,7 @@
 // (MKLocalSearchCompleter) suggestions as you type via the local `address-autocomplete`
 // native module; on Android (no native module) it degrades to a plain field. Both
 // platforms get a "Use my location" button (expo-location reverse-geocode).
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 

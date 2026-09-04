@@ -71,7 +71,7 @@ function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): Dictati
     cb.onInterim?.(text.slice(0, i));
     if (i >= text.length) {
       clearInterval(iv);
-      finishTimer = setTimeout(fire, 420);
+      finishTimer = setTimeout(fire, SILENCE_MS);
     }
   }, 48);
   const clear = () => {
@@ -92,6 +92,9 @@ function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): Dictati
 }
 
 /** Listen for one utterance: interim text via onInterim, then onFinal with the full transcript. */
+/** Pause after the last words that ends an utterance. */
+const SILENCE_MS = 420;
+
 export function listen(opts: { listMode?: boolean }, cb: DictationCallbacks): DictationSession {
   if (!isSpeechAvailable()) return simulate(opts, cb);
 

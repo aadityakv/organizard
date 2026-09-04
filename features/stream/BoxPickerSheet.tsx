@@ -27,6 +27,7 @@ export function BoxPickerSheet({ visible, view, boxes, selectedId, onSelect, onC
       <View style={{ gap: 6 }}>
         {boxes.map((b) => (
           <Pressable
+            accessibilityRole="button"
             key={b.id}
             onPress={() => onSelect(b.id)}
             style={[styles.pickRow, b.id === selectedId && { backgroundColor: palette.green50 }]}

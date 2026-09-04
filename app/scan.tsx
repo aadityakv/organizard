@@ -1,7 +1,7 @@
 // Scan a box — QR viewfinder + the four result states (this move / another
 // move / no access / unknown). Works for viewers too. Translated from the
 // design prototype (ui_kits/packing/Scan.jsx) into Expo / React Native.
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';

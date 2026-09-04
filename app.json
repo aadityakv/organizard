@@ -4,7 +4,6 @@
     "slug": "organizard",
     "scheme": "tuck",
     "version": "1.0.0",
-    "newArchEnabled": false,
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "backgroundColor": "#F7F6F2",
@@ -18,7 +17,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Tuck uses the camera to photograph your items and scan box QR labels.",
         "NSLocationWhenInUseUsageDescription": "Tuck uses your location to fill in the move's from/to addresses.",
-        "NSMicrophoneUsageDescription": "Tuck uses the microphone for hands-free Streaming Mode — say an item and it's added to the box.",
+        "NSMicrophoneUsageDescription": "Tuck uses the microphone for hands-free Streaming Mode \u2014 say an item and it's added to the box.",
         "NSSpeechRecognitionUsageDescription": "Tuck transcribes your voice on-device in Streaming Mode to fill in item names, quantities and values.",
         "NSPhotoLibraryUsageDescription": "Tuck can access your photo library to attach existing photos to your items.",
         "ITSAppUsesNonExemptEncryption": false

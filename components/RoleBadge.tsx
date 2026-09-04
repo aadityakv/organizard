@@ -1,7 +1,6 @@
 // RoleBadge — surfaces a member's permission level in plain language.
 // owner = brand green, editor = info blue, viewer = muted/neutral tones.
 // Compact pill (default) or expanded row with blurb when withBlurb=true.
-import React from 'react';
 import { StyleSheet, View, Text, type StyleProp, type ViewStyle } from 'react-native';
 
 import { colors, palette, radius, space, fonts, fontSize } from '@/theme';

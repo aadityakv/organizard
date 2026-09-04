@@ -2,7 +2,6 @@
 // Shows the photo when a URI is given, otherwise the initials of the display name on a
 // box-palette hue. The hue is derived from the name with a stable hash unless `color`
 // is passed, so the same person always gets the same colour across screens.
-import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 

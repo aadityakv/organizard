@@ -1,5 +1,4 @@
 // Edit box sheet — rename, recolor, and move the box to another room.
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, ColorDot, Input, RoomGlyph, Sheet } from '@/components';

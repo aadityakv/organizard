@@ -1,6 +1,6 @@
 // Dashboard (home) — totals, room/status/value grouping, color-coded box grid,
 // and Find. Role-aware: Owner/Editor get create affordances; Viewers see a LockNote.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';

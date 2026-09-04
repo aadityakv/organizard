@@ -18,7 +18,7 @@ type Props = {
 /** Card for the most recent capture with edit and undo actions. */
 export function LastCapturedCard({ item, colorOf, onEdit, onUndo }: Props) {
   return (
-    <Pressable onPress={onEdit} style={styles.lastCard}>
+    <Pressable accessibilityRole="button" onPress={onEdit} style={styles.lastCard}>
       <View style={[sharedStyles.itemIcon, { backgroundColor: boxTint(colorOf(item.boxId)) }]}>
         <Icon name={item.icon} size={22} color={boxColor(colorOf(item.boxId))} />
       </View>
@@ -37,7 +37,7 @@ export function LastCapturedCard({ item, colorOf, onEdit, onUndo }: Props) {
           <Icon name="check" size={14} color={palette.green700} />
           <Text style={styles.addedText}>Added</Text>
         </View>
-        <Pressable onPress={onUndo}>
+        <Pressable accessibilityRole="button" onPress={onUndo}>
           <Text style={styles.undo}>Undo</Text>
         </Pressable>
       </View>

@@ -1,6 +1,5 @@
 // Account sheet on the library: signed-in users can sign out or delete their
 // account; guests are offered sign-in (their moves stay on-device until then).
-import React from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 

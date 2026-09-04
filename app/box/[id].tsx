@@ -3,7 +3,7 @@
 // read-only but can still scan, view the QR, and print the label.
 //
 // This route composes the pieces in features/box; the data lives in useBoxDetail.
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
