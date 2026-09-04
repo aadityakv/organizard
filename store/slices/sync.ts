@@ -30,6 +30,8 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
   setOnboarded: (v) => set({ onboarded: v }),
   startProTrial: () => set({ proTrialUntil: Date.now() + TRIAL_MS }),
   setSession: (session, account) => set({ session, account }),
+  restoreSession: (session) => set({ session }),
+  resetSyncCursor: () => set({ lastSyncTs: 0 }),
 
   signOut: () =>
     set((s) => {

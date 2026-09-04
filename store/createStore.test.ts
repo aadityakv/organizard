@@ -249,6 +249,16 @@ describe('library', () => {
   });
 });
 
+describe('session', () => {
+  it('restores a keychain token without touching the persisted account', () => {
+    const store = createAppStore(memoryStorage());
+    store.getState().setSession('old', { id: 'u1', name: 'Me', email: null });
+    store.getState().restoreSession('new');
+    expect(store.getState().session).toBe('new');
+    expect(store.getState().account?.id).toBe('u1');
+  });
+});
+
 describe('signOut', () => {
   it('drops synced moves, keeps local ones, and returns to the guest state', () => {
     const store = createAppStore(memoryStorage());

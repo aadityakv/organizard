@@ -1,6 +1,7 @@
 // Public component surface. Screens import from '@/components'.
 
 // Shared app chrome (foundation)
+export { ErrorBoundary } from './ErrorBoundary';
 export { Icon, type IconProps } from './Icon';
 export { SlothMark } from './SlothMark';
 export { Card } from './Card';

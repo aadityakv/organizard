@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "knip": "knip"
   },
   "dependencies": {
     "@expo-google-fonts/fredoka": "^0.2.3",
