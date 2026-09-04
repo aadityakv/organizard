@@ -112,6 +112,19 @@ npm run dev                 # wrangler dev with local D1 / R2 / KV emulation
 
 The client's API URL is set in `app.json` under `expo.extra.apiUrl`.
 
+## Run on your iPhone
+
+```bash
+npx expo run:ios --device --port 8082
+```
+
+Debug builds sign with the explicit "Organizard Development" profile (see
+`plugins/withDevSigning.js`); Xcode's automatic signing would pick the team wildcard
+profile, which cannot carry the Sign in with Apple entitlement. The profile must be
+installed on the Mac (`~/Library/MobileDevice/Provisioning Profiles/`) and the phone
+registered on the team; a new phone means a new device on the profile. Metro runs on
+8082 because 8081 is taken on this machine.
+
 ## Environments
 
 | APP_ENV | Backend | Used by |

@@ -39,6 +39,7 @@
       ],
       "./plugins/withFmtConstevalFix",
       "./plugins/withDisableDebugDylib",
+      "./plugins/withDevSigning",
       "expo-image",
       "expo-secure-store",
       "expo-splash-screen",
