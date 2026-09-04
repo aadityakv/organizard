@@ -42,11 +42,7 @@ export async function getMembership(db: AppDb, moveId: string, userId: string): 
   return row ? { role: row.role } : null;
 }
 
-/**
- * Create a shared move with the owner membership. Seeds default statuses/markers
- * unless `seed: false` — migration from a local move replays its OWN statuses/markers
- * (keeping their ids), so it skips seeding to avoid duplicates.
- */
+/** Create a shared move with its owner membership, seeding default statuses/markers unless `seed: false`. */
 export async function createMove(
   db: AppDb,
   deps: Deps,
@@ -104,7 +100,6 @@ export async function createMove(
   return moveId;
 }
 
-/** Members of a move with display names (small list — returned in full on each delta). */
 async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
   const memberRows = await db.select().from(s.members).where(eq(s.members.moveId, moveId));
   const userIds = memberRows.map((m) => m.userId);
@@ -280,13 +275,7 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
   };
 }
 
-/**
- * Delta since a cursor — all rows changed after `since` (incl. tombstones).
- * Unbounded: moves are small (a two-person move), so a full delta is fine and
- * avoids the correctness traps of timestamp pagination. `serverTime` is captured
- * up front and returned as the next cursor. A periodic client full-resync (since=0)
- * is the backstop for the rare cross-table read race under concurrent writers.
- */
+/** All rows changed after `since`, including tombstones. Unbounded: moves are small. */
 export async function getChangesSince(
   db: AppDb,
   deps: Deps,
@@ -350,17 +339,7 @@ export async function getChangesSince(
   };
 }
 
-/**
- * Hard-delete a move and all its children. No `onDelete: cascade` FKs exist, so
- * we remove rows in FK-safe order (join tables first, keyed off this move's
- * box/item ids, then leaf tables, then the move itself). Drizzle's D1 driver has
- * no interactive transaction here (and neither does the sql.js test driver), so
- * the deletes are issued in order — matching the rest of this repo.
- *
- * Known limitation: this removes the `photos` rows but NOT the underlying R2
- * blobs under `moves/<moveId>/…` (there is no photo-deletion path anywhere yet).
- * The move-id-prefixed keys make a future `R2.list({ prefix })` + bulk delete clean.
- */
+/** Hard-delete a move and its children in FK-safe order (there are no cascade FKs). */
 export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
   const boxIds = (await db.select({ id: s.boxes.id }).from(s.boxes).where(eq(s.boxes.moveId, moveId))).map(
     (r) => r.id,

@@ -131,10 +131,7 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
     })),
 });
 
-/**
- * Ids with a pending outbox mutation, per collection. Tracked separately so an item
- * edit doesn't suppress an unrelated server update to its box row, and vice-versa.
- */
+/** Ids with pending outbox mutations, per collection, so an item edit doesn't suppress an unrelated update to its box row. */
 function dirtyRows(outbox: Store['outbox']) {
   const rooms = new Set<string>();
   const statuses = new Set<string>();

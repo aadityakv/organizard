@@ -7,11 +7,7 @@ import type { Mutation } from '@/shared';
 import { uid } from '@/lib/uid';
 import type { SliceData } from '@/store/library';
 
-/**
- * Mutations that recreate a move on the server: statuses and markers first, then
- * rooms, then boxes (with their markers), then every item. Order matters — the
- * server verifies parent references, so children must come after parents.
- */
+/** Mutations that recreate a move on the server, ordered so every reference exists before it is used. */
 export function buildMigrationBatch(data: SliceData): Mutation[] {
   const out: Mutation[] = [];
   const ts = Date.now();

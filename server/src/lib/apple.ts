@@ -6,11 +6,7 @@ export type AppleIdentity = { sub: string; email?: string | null };
 // Apple's public keys for "Sign in with Apple" identity tokens.
 const APPLE_JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'));
 
-/**
- * Verify an Apple identity token's signature, issuer, and (if provided) audience.
- * Returns the stable `sub` (Apple user id) + optional email.
- * Throws if the token is invalid/expired.
- */
+/** Verify an Apple identity token's signature, issuer and audience; returns the stable user id and email. */
 export async function verifyAppleToken(
   identityToken: string,
   bundleId: string | undefined,

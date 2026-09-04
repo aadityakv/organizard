@@ -34,11 +34,7 @@ export const fontSize = {
   display: 46,
 } as const;
 
-/**
- * Semantic type roles as ready-to-spread RN TextStyle objects.
- * Use these instead of hand-setting fontFamily/fontSize so headers
- * stay Fredoka and data stays Nunito.
- */
+/** Semantic type roles as spreadable TextStyle objects. */
 export const type = {
   /** Hero value numbers, big brand moments. */
   display: { fontFamily: fonts.display.bold, fontSize: fontSize.display, lineHeight: 50 } as TextStyle,

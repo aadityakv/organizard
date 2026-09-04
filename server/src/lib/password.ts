@@ -29,7 +29,6 @@ async function derive(password: string, salt: Uint8Array, iterations: number): P
   return new Uint8Array(bits);
 }
 
-/** Constant-time compare to avoid leaking the hash via timing. */
 function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;

@@ -17,10 +17,6 @@ const FRIENDLY: Record<string, string> = {
 
 type Outcome = { status: 'working' } | { status: 'joined' } | { status: 'error'; message: string };
 
-/**
- * Accept an invite token: signs in with Apple first if there is no session, then
- * imports the shared move. Never throws; the caller renders the outcome.
- */
 async function joinMove(token: string | undefined): Promise<Outcome> {
   try {
     let session = useStore.getState().session;

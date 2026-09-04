@@ -49,10 +49,7 @@ export async function loginWithEmail(email: string, password: string): Promise<v
   await adoptSession(session, user);
 }
 
-/**
- * Permanently delete the signed-in account and all server data, then clear the
- * local session. The active local move data (if any) stays on the device.
- */
+/** Delete the signed-in account server-side, then sign out locally; local-only moves stay. */
 export async function deleteAccount(): Promise<void> {
   const { session, signOut } = useStore.getState();
   if (session) await api.deleteAccount(session);

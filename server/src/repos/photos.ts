@@ -7,10 +7,7 @@ import type { Deps } from '../deps';
 
 export type PhotoRow = typeof s.photos.$inferSelect;
 
-/**
- * Create the photo record (R2 key reserved) and bump its linked item/box so the
- * delta resends it — the snapshot derives `photoIds` from this table.
- */
+/** Reserve a photo record and bump its linked item/box so the next delta resends it. */
 export async function createPhotoRecord(
   db: AppDb,
   deps: Deps,

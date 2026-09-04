@@ -11,9 +11,5 @@ export function mutation<T extends MutationType>(type: T, payload: PayloadOf<T>)
   return { type, clientId: uid('c'), ts: Date.now(), payload } as Extract<Mutation, { type: T }>;
 }
 
-/**
- * Mutation types this build understands. Derived from the contract so a new type is
- * automatically "known"; used by the persist migration to drop legacy/poison outbox
- * entries that would otherwise wedge sync forever.
- */
+/** Mutation types this build understands; the persist migration drops outbox entries outside this set. */
 export const KNOWN_MUTATION_TYPES: ReadonlySet<string> = new Set(Object.keys(ROLE_REQUIRED));
