@@ -9,6 +9,7 @@ import type {
   Status as SStatus,
 } from '@/shared';
 import type { Box, Item, Marker, Member, Room, Status } from '@/data/types';
+import { NEUTRAL_HUE } from '@/theme';
 
 /** Server room → client room. */
 export const toClientRoom = (r: SRoom): Room => ({
@@ -16,7 +17,7 @@ export const toClientRoom = (r: SRoom): Room => ({
   name: r.name,
   dest: r.dest ?? null,
   icon: r.icon,
-  color: r.color ?? 'slate',
+  color: r.color ?? NEUTRAL_HUE,
 });
 
 /** Server status → client status. */

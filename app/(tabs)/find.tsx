@@ -9,6 +9,7 @@ import { Header, Icon, IconButton, Input, RoomGlyph, Thumb } from '@/components'
 import type { Room } from '@/data/types';
 import { allIndexedItems, useStore } from '@/store/useStore';
 import { fonts, palette, radius } from '@/theme';
+import { routes } from '@/lib/routes';
 
 const SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];
 
@@ -46,7 +47,7 @@ export default function Find() {
             variant="plain"
             size="sm"
             accessibilityLabel="Scan a box"
-            onPress={() => router.push('/scan')}
+            onPress={() => router.push(routes.scan)}
           />
         }
       />
@@ -95,7 +96,7 @@ export default function Find() {
                 {items.map((it) => (
                   <Pressable
                     key={it.id}
-                    onPress={() => router.push(`/item/${it.id}`)}
+                    onPress={() => router.push(routes.item(it.id))}
                     style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
                   >
                     <Thumb color={it.boxColor} icon={it.icon ?? 'image'} size={48} />
@@ -131,7 +132,7 @@ export default function Find() {
                 {matchedBoxes.map((b) => (
                   <Pressable
                     key={b.id}
-                    onPress={() => router.push(`/box/${b.id}`)}
+                    onPress={() => router.push(routes.box(b.id))}
                     style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
                   >
                     <Thumb color={b.color} icon="package" size={48} />

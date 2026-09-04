@@ -9,6 +9,7 @@ import { getMembership } from '../repos/moves';
 import { getPhoto } from '../repos/photos';
 import { isOwnerEntitled } from '../repos/sharing';
 import type { Env } from '../types';
+import { ROLES } from '@shared/index';
 
 // Blob upload/download for photos. Membership is checked via the photo's move
 // (these routes aren't under /moves/:id, so membershipMiddleware doesn't apply).
@@ -22,7 +23,7 @@ export function photoBlobRoutes(deps: Deps) {
     if (!photo) return c.json({ error: 'NOT_FOUND' }, 404);
     const member = await getMembership(db, photo.moveId, c.get('user').id);
     if (!member) return c.json({ error: 'NOT_FOUND' }, 404);
-    if (member.role === 'viewer') return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
+    if (member.role === ROLES.viewer) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     if (billingEnabled(c.env) && !(await isOwnerEntitled(db, photo.moveId, deps.now())))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
 

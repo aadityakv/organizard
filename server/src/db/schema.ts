@@ -2,6 +2,7 @@
 // Conventions: text UUID ids (client may mint them), integer ms timestamps,
 // `updated_at` + nullable `deleted_at` tombstones on synced rows, money as cents.
 import { integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { ROLE_LIST } from '@shared/index';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -40,7 +41,7 @@ export const members = sqliteTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id),
-    role: text('role', { enum: ['owner', 'editor', 'viewer'] }).notNull(),
+    role: text('role', { enum: ROLE_LIST }).notNull(),
     createdAt: integer('created_at').notNull(),
   },
   (t) => ({ moveUser: uniqueIndex('members_move_user').on(t.moveId, t.userId) }),
@@ -167,7 +168,7 @@ export const invites = sqliteTable('invites', {
   moveId: text('move_id')
     .notNull()
     .references(() => moves.id),
-  role: text('role', { enum: ['owner', 'editor', 'viewer'] }).notNull(),
+  role: text('role', { enum: ROLE_LIST }).notNull(),
   token: text('token').notNull().unique(),
   createdBy: text('created_by')
     .notNull()

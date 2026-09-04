@@ -10,12 +10,14 @@ import type { Mutation } from '@/shared';
 import { mutation } from '../mutation';
 import { isLocalUri } from '../snapshot';
 import type { InventoryActions, Store } from '../types';
+import { STATUS_ID } from '@/data/defaults';
+import { NEUTRAL_HUE } from '@/theme';
 
 export type InventorySlice = StateCreator<Store, [['zustand/persist', unknown]], [], InventoryActions>;
 
 /** Actions that edit the open move. */
 export const createInventorySlice: InventorySlice = (set, get) => ({
-  addRoom: ({ name, dest = null, icon = 'box', color = 'slate' }) => {
+  addRoom: ({ name, dest = null, icon = 'box', color = NEUTRAL_HUE }) => {
     const id = uid('r');
     set((s) => ({ rooms: [...s.rooms, { id, name, dest, icon, color }] }));
     get().enqueue(mutation('addRoom', { id, name, dest, icon, color }));
@@ -44,7 +46,7 @@ export const createInventorySlice: InventorySlice = (set, get) => ({
     get().enqueue(mutation('deleteRoom', { id }));
   },
 
-  addBox: ({ name, color, roomId, status = 'packing' }) => {
+  addBox: ({ name, color, roomId, status = STATUS_ID.packing }) => {
     const id = uid('b');
     const number = get().boxes.reduce((max, b) => Math.max(max, b.number), 0) + 1;
     set((s) => ({

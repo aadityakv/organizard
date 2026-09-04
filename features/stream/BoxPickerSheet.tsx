@@ -5,6 +5,7 @@ import { Icon, Sheet } from '@/components';
 import { boxColor, colors, fonts, palette } from '@/theme';
 
 import type { BoxRef, StreamView } from './types';
+import { STREAM_VIEW } from './types';
 
 type Props = {
   visible: boolean;
@@ -21,7 +22,7 @@ export function BoxPickerSheet({ visible, view, boxes, selectedId, onSelect, onC
     <Sheet
       visible={visible}
       onClose={onClose}
-      title={view === 'capture' ? 'Capture into which box?' : 'Stream into which box?'}
+      title={view === STREAM_VIEW.capture ? 'Capture into which box?' : 'Stream into which box?'}
     >
       <View style={{ gap: 6 }}>
         {boxes.map((b) => (

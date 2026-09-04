@@ -3,7 +3,14 @@
 import { STARTER_MARKERS, STARTER_STATUSES } from '@/data/defaults';
 import type { Move } from '@/data/types';
 
-import { newBundle, sliceFromBundle, snapshotInto, type MoveBundle, type SliceData } from './library';
+import {
+  MOVE_MODE,
+  newBundle,
+  sliceFromBundle,
+  snapshotInto,
+  type MoveBundle,
+  type SliceData,
+} from './library';
 import type { State } from './types';
 
 export const EMPTY_MOVE: Move = { name: '', from: '', to: '', target: '' };
@@ -22,7 +29,7 @@ export const initialState: State = {
 
   account: null,
   session: null,
-  activeMode: 'local',
+  activeMode: MOVE_MODE.local,
   serverMoveId: null,
   outbox: [],
   lastSyncTs: 0,

@@ -9,7 +9,7 @@ import type { Room } from '@/data/types';
 import { useSheetForm } from '@/hooks/useSheetForm';
 import { PERM } from '@/lib/permissions';
 import { currentRole, useStore } from '@/store/useStore';
-import { BOX_COLORS, colors, fonts, fontSize, palette, radius, space } from '@/theme';
+import { BOX_COLORS, colors, fonts, fontSize, palette, radius, space, NEUTRAL_HUE } from '@/theme';
 
 import { ROOM_ICONS } from './constants';
 import { shared, sheetForm } from './styles';
@@ -36,7 +36,7 @@ export function RoomSheet({
     name: room?.name ?? '',
     dest: room?.dest ?? '',
     icon: room?.icon ?? 'box',
-    color: room?.color ?? 'slate',
+    color: room?.color ?? NEUTRAL_HUE,
   }));
 
   const canSave = name.trim().length > 0;

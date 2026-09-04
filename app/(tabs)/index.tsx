@@ -23,10 +23,12 @@ import {
 import { EditMoveSheet } from '@/features/moves';
 import { money } from '@/lib/money';
 import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
+import { GROUP_VIEW } from '@/features/dashboard/constants';
+import { routes } from '@/lib/routes';
 
 /** Boxes tab: the open move at a glance, grouped by room, status or value, with add/edit sheets. */
 export default function Dashboard() {
-  const [view, setView] = useState<GroupView>('room');
+  const [view, setView] = useState<GroupView>(GROUP_VIEW.room);
   const { move, rooms, boxes, progress, totals, canEdit, pct, sortedBoxes } = useDashboard(view);
 
   const [query, setQuery] = useState('');
@@ -61,7 +63,7 @@ export default function Dashboard() {
             size="sm"
             accessibilityLabel="Switch move"
             // navigate() (not push) so moves⇄tabs never stacks duplicate navigators.
-            onPress={() => router.navigate('/moves')}
+            onPress={() => router.navigate(routes.moves)}
           />
         }
         title={move.name}
@@ -86,14 +88,14 @@ export default function Dashboard() {
               variant="plain"
               size="sm"
               accessibilityLabel="Share & members"
-              onPress={() => router.push('/members')}
+              onPress={() => router.push(routes.members)}
             />
             <IconButton
               icon="printer"
               variant="plain"
               size="sm"
               accessibilityLabel="Print box labels"
-              onPress={() => router.push('/print-labels')}
+              onPress={() => router.push(routes.printLabels)}
             />
             <IconButton
               icon={searching ? 'x' : 'search'}
@@ -138,7 +140,7 @@ export default function Dashboard() {
               />
             </View>
 
-            {view === 'room' ? (
+            {view === GROUP_VIEW.room ? (
               <View>
                 {rooms.map((room) => (
                   <RoomGroup
@@ -173,7 +175,7 @@ export default function Dashboard() {
                   <LockNote>Viewers can browse and scan — ask the owner to add boxes.</LockNote>
                 )}
               </View>
-            ) : view === 'status' ? (
+            ) : view === GROUP_VIEW.status ? (
               <View style={dashboardStyles.grid}>
                 {sortedBoxes.map((b) => (
                   <DashboardBoxCard key={b.id} box={b} />

@@ -21,6 +21,7 @@ import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
 import { boxPhotos, useStore } from '@/store/useStore';
 import { fonts, fontSize, palette, radius, space, tap } from '@/theme';
+import { routes } from '@/lib/routes';
 
 /** Full-screen photo viewer for a box: the cover and every item photo, swipeable. */
 export default function GalleryScreen() {
@@ -125,7 +126,7 @@ export default function GalleryScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Open ${current.itemName ?? 'item'}`}
-            onPress={() => current.itemId && router.push(`/item/${current.itemId}`)}
+            onPress={() => current.itemId && router.push(routes.item(current.itemId))}
             style={({ pressed }) => [styles.labelPill, styles.labelPillTap, pressed && styles.pressed]}
           >
             <Icon name="package-open" size={15} color={palette.white} />

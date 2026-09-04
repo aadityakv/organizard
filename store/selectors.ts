@@ -7,6 +7,7 @@ import type { Box, IndexedItem, Item, Marker, Role, Room, Status } from '@/data/
 import { roleFor, summarize, type MoveSummary, type SliceData } from './library';
 import { extractSlice } from './shape';
 import type { State } from './types';
+import { STATUS_ID } from '@/data/defaults';
 
 const EMPTY_ITEMS: Item[] = [];
 
@@ -25,7 +26,7 @@ export const boxStats = (s: State, boxId: string): { count: number; value: numbe
 
 /** Builds a fresh object: wrap in useShallow. */
 export const moveProgress = (s: State): { sealed: number; total: number } => ({
-  sealed: s.boxes.filter((b) => b.status === 'sealed').length,
+  sealed: s.boxes.filter((b) => b.status === STATUS_ID.sealed).length,
   total: s.boxes.length,
 });
 

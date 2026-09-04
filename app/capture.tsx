@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { Button, Icon } from '@/components';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
+import { routes } from '@/lib/routes';
 
 /** Capture entry: pick a box, then continue to the single-item or streaming capture flow. */
 export default function Capture() {
@@ -16,7 +17,7 @@ export default function Capture() {
   const target = boxes[boxes.length - 1]?.id;
 
   useEffect(() => {
-    if (target) router.replace(`/stream/${target}?view=capture`);
+    if (target) router.replace(routes.streamCapture(target));
   }, [target]);
 
   // Brief dark hold while forwarding into the (dark) capture screen.

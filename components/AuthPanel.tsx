@@ -13,6 +13,9 @@ import { ApiError } from '@/lib/api';
 import { appleSignInAvailable, loginWithEmail, registerWithEmail, signInWithApple } from '@/services/auth';
 import { fonts, palette } from '@/theme';
 
+const AUTH_MODE = { login: 'login', signup: 'signup' } as const;
+type AuthMode = (typeof AUTH_MODE)[keyof typeof AUTH_MODE];
+
 const FRIENDLY: Record<string, string> = {
   EMAIL_TAKEN: 'An account with that email already exists. Try logging in instead.',
   INVALID_CREDENTIALS: 'That email or password is incorrect.',
@@ -37,7 +40,7 @@ export function AuthPanel({
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<AuthMode>(AUTH_MODE.login);
   const [busy, setBusy] = useState(false);
   const [appleOk, setAppleOk] = useState(false);
 
@@ -63,10 +66,10 @@ export function AuthPanel({
     run(
       async () => {
         const e = email.trim();
-        if (authMode === 'signup') await registerWithEmail(e, password);
+        if (authMode === AUTH_MODE.signup) await registerWithEmail(e, password);
         else await loginWithEmail(e, password);
       },
-      authMode === 'signup' ? 'Could not create account' : 'Could not sign in',
+      authMode === AUTH_MODE.signup ? 'Could not create account' : 'Could not sign in',
     );
 
   return (
@@ -85,11 +88,11 @@ export function AuthPanel({
       <Text style={styles.or}>or use email</Text>
       <Segmented
         options={[
-          { value: 'login', label: 'Log in' },
-          { value: 'signup', label: 'Sign up' },
+          { value: AUTH_MODE.login, label: 'Log in' },
+          { value: AUTH_MODE.signup, label: 'Sign up' },
         ]}
         value={authMode}
-        onChange={(v) => setAuthMode(v as 'login' | 'signup')}
+        onChange={(v) => setAuthMode(v as AuthMode)}
       />
       <View style={styles.fields}>
         <Input
@@ -106,7 +109,7 @@ export function AuthPanel({
           placeholder="Password"
           secureTextEntry
           autoCapitalize="none"
-          textContentType={authMode === 'signup' ? 'newPassword' : 'password'}
+          textContentType={authMode === AUTH_MODE.signup ? 'newPassword' : 'password'}
         />
       </View>
       <Button
@@ -115,9 +118,9 @@ export function AuthPanel({
         fullWidth
         style={styles.cta}
       >
-        {authMode === 'signup' ? 'Create account' : 'Log in'}
+        {authMode === AUTH_MODE.signup ? 'Create account' : 'Log in'}
       </Button>
-      {authMode === 'signup' ? <Text style={styles.hint}>Use at least 8 characters.</Text> : null}
+      {authMode === AUTH_MODE.signup ? <Text style={styles.hint}>Use at least 8 characters.</Text> : null}
     </Card>
   );
 }

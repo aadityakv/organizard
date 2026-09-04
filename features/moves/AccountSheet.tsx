@@ -9,6 +9,7 @@ import { deleteAccount } from '@/services/auth';
 import { flushAndSignOut } from '@/services/share';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
+import { routes } from '@/lib/routes';
 
 /** Account sheet: who is signed in, sign out, and account deletion. */
 export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
@@ -61,7 +62,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
               iconLeft="log-out"
               onPress={() => {
                 onClose();
-                void flushAndSignOut().then(() => router.replace('/welcome'));
+                void flushAndSignOut().then(() => router.replace(routes.welcome));
               }}
             >
               Sign out
@@ -81,7 +82,7 @@ export function AccountSheet({ visible, onClose }: { visible: boolean; onClose: 
               iconLeft="log-in"
               onPress={() => {
                 onClose();
-                router.push('/sign-in');
+                router.push(routes.signIn);
               }}
             >
               Log in or sign up

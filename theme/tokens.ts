@@ -67,6 +67,10 @@ export type BoxColor = keyof typeof boxPalette;
 
 /** Ordered hue list — for color pickers (statuses, markers, boxes). */
 export const BOX_COLORS = Object.keys(boxPalette) as BoxColor[];
+/** Brand hue: the default for boxes and anything unset. */
+export const DEFAULT_HUE: BoxColor = 'green';
+/** Neutral hue: the default for rooms and missing statuses. */
+export const NEUTRAL_HUE: BoxColor = 'slate';
 
 /** Solid hue for a box-palette color name. Falls back to green. */
 export const boxColor = (name: string): string =>

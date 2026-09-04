@@ -11,6 +11,7 @@ import { colors, fonts, palette, radius, shadow, space } from '@/theme';
 import { ItemRow } from './ItemRow';
 import { shared } from './styles';
 import { SORT_OPTIONS, type SortMode, useVisibleItems } from './useVisibleItems';
+import { routes } from '@/lib/routes';
 
 /** The box's item list with search, sort and empty states. */
 export function ItemsSection({
@@ -105,7 +106,7 @@ export function ItemsSection({
               item={it}
               boxColor={boxColor}
               markers={allMarkers}
-              onPress={() => router.push(`/item/${it.id}`)}
+              onPress={() => router.push(routes.item(it.id))}
             />
           ))}
         </View>

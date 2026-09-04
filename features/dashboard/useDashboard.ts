@@ -8,6 +8,7 @@ import { PERM } from '@/lib/permissions';
 import { currentRole, moveProgress, moveTotals, useStore } from '@/store/useStore';
 
 import { STATUS_ORDER, type GroupView } from './constants';
+import { GROUP_VIEW } from './constants';
 
 /** Store subscriptions, progress and the box ordering for the chosen dashboard view. */
 export function useDashboard(view: GroupView) {
@@ -23,7 +24,7 @@ export function useDashboard(view: GroupView) {
 
   const sortedBoxes = useMemo<Box[]>(() => {
     const next = [...boxes];
-    if (view === 'value') {
+    if (view === GROUP_VIEW.value) {
       return next; // sort handled by <ValueSortedGrid> with stats injected via render
     }
     next.sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9));

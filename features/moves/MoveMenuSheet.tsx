@@ -7,6 +7,7 @@ import { PERM } from '@/lib/permissions';
 import type { MoveSummary } from '@/store/library';
 import { useStore } from '@/store/useStore';
 import { space } from '@/theme';
+import { ROLES } from '@/shared';
 
 /** Per-move menu: edit, archive/unarchive, delete. */
 export function MoveMenuSheet({
@@ -60,7 +61,7 @@ export function MoveMenuSheet({
             Archive
           </Button>
         )}
-        {move?.role === 'owner' && (
+        {move?.role === ROLES.owner && (
           <Button
             variant="danger"
             fullWidth

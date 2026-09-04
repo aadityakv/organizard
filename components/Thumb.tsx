@@ -3,7 +3,7 @@
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
-import { boxColor, boxTint, radius as radii } from '@/theme';
+import { boxColor, boxTint, radius as radii, DEFAULT_HUE } from '@/theme';
 import { Icon } from './Icon';
 
 export type ThumbProps = {
@@ -19,7 +19,7 @@ export type ThumbProps = {
 
 /** Square thumbnail: a photo when a URI is given, else a tinted icon placeholder. */
 export function Thumb({
-  color = 'green',
+  color = DEFAULT_HUE,
   icon = 'image',
   size = 56,
   radius = radii.md,

@@ -33,7 +33,9 @@ import { money } from '@/lib/money';
 import { iconFor } from '@/lib/streamParse';
 import { uid } from '@/lib/uid';
 import { isProNow, useStore } from '@/store/useStore';
-import { colors, fonts, palette } from '@/theme';
+import { colors, fonts, palette, DEFAULT_HUE } from '@/theme';
+import { MIC, STREAM_VIEW } from '@/features/stream/types';
+import { routes } from '@/lib/routes';
 
 /** Capture screen: free single-item capture and the Pro streaming session, flipped in place. */
 export default function StreamSession() {
@@ -48,7 +50,9 @@ export default function StreamSession() {
   // the gated "Switch to Stream" pill / upsell. This also clamps a `?view=stream` deep
   // link so it can't drop a free user into the Pro session, bypassing the paywall.
   const [view, setView] = useState<StreamView>(() =>
-    initialView !== 'capture' && isProNow(useStore.getState()) ? 'stream' : 'capture',
+    initialView !== STREAM_VIEW.capture && isProNow(useStore.getState())
+      ? STREAM_VIEW.stream
+      : STREAM_VIEW.capture,
   );
   const [voiceMode, setVoiceMode] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);
@@ -111,15 +115,15 @@ export default function StreamSession() {
   }, [voiceMode, view, invalidatePending]);
 
   const photoMode = !voiceMode;
-  const cameraOn = cameraGranted && (view === 'capture' || photoMode);
+  const cameraOn = cameraGranted && (view === STREAM_VIEW.capture || photoMode);
   const box = boxes.find((b) => b.id === boxId) ?? boxes[0];
   const lastIt = session.lastIt;
-  const colorOf = (id: string) => boxes.find((b) => b.id === id)?.color ?? box?.color ?? 'green';
+  const colorOf = (id: string) => boxes.find((b) => b.id === id)?.color ?? box?.color ?? DEFAULT_HUE;
   const resayActive = voiceMode ? session.lastBatchIds.length > 0 : !!session.lastId;
   const summaryLabel = `${session.session.length} ${session.session.length === 1 ? 'item' : 'items'} tucked into ${session.boxCount} ${session.boxCount === 1 ? 'box' : 'boxes'} — ${money(session.sessionValue)} packed.`;
 
   const onCapture = () => {
-    if (dictation.mic === 'listening') {
+    if (dictation.mic === MIC.listening) {
       dictation.stop();
       return;
     }
@@ -135,20 +139,20 @@ export default function StreamSession() {
     if (!boxId) return;
     // No camera yet — open the form; it has its own photo + permission UI.
     if (!cameraGranted) {
-      router.push({ pathname: '/add-item', params: { boxId } });
+      router.push({ pathname: routes.addItem, params: { boxId } });
       return;
     }
     const photo = await snapOnce();
-    router.push({ pathname: '/add-item', params: photo ? { boxId, photo } : { boxId } });
+    router.push({ pathname: routes.addItem, params: photo ? { boxId, photo } : { boxId } });
   };
 
   const onSwitchToStream = () => {
-    if (isPro) setView('stream');
+    if (isPro) setView(STREAM_VIEW.stream);
     else setUpsellOpen(true);
   };
 
   const onResay = () => {
-    if (dictation.mic === 'listening') return;
+    if (dictation.mic === MIC.listening) return;
     if (voiceMode) {
       if (!session.retractLastBatch()) return;
       dictation.beginListen(null, true);
@@ -159,13 +163,13 @@ export default function StreamSession() {
 
   const onUndo = () => {
     session.undo();
-    dictation.setMic('ready');
+    dictation.setMic(MIC.ready);
   };
 
   const closeStream = () => {
     // Stop a live mic first, so a late onFinal can't append a phantom item after the
     // summary's count is computed (and committed by finish()).
-    if (dictation.mic === 'listening') dictation.cancel();
+    if (dictation.mic === MIC.listening) dictation.cancel();
     if (session.session.length > 0) setSummaryOpen(true);
     else router.back();
   };
@@ -174,7 +178,7 @@ export default function StreamSession() {
     session.commit();
     setSummaryOpen(false);
     router.replace({
-      pathname: `/box/${initialBoxId ?? boxId}`,
+      pathname: routes.box(initialBoxId ?? boxId),
       params: { streamed: String(session.session.length) },
     });
   };
@@ -195,21 +199,21 @@ export default function StreamSession() {
           onToggleTorch={() => setTorch((t) => !t)}
         />
 
-        {view === 'capture' ? (
+        {view === STREAM_VIEW.capture ? (
           <CaptureView isPro={isPro} onSwitchToStream={onSwitchToStream} onCapture={captureSingle} />
         ) : (
           <>
             <ModeSwitchRow
               voiceMode={voiceMode}
-              listening={dictation.mic === 'listening'}
-              onBackToCapture={() => setView('capture')}
+              listening={dictation.mic === MIC.listening}
+              onBackToCapture={() => setView(STREAM_VIEW.capture)}
               onToggleVoiceMode={() => setVoiceMode((v) => !v)}
             />
 
             <Viewfinder
               mode={photoMode ? 'frame' : 'voice'}
               hint={
-                dictation.mic === 'listening'
+                dictation.mic === MIC.listening
                   ? 'Listening… tap the button when you’re done'
                   : voiceMode
                     ? 'Tap, then name everything in the box'
@@ -314,11 +318,11 @@ export default function StreamSession() {
           setUpsellOpen(false);
           // Pro is account-tied — a guest must sign in before starting the trial.
           if (!signedIn) {
-            router.push('/sign-in');
+            router.push(routes.signIn);
             return;
           }
           startProTrial();
-          setView('stream');
+          setView(STREAM_VIEW.stream);
         }}
       />
     </View>

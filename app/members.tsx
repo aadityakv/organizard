@@ -14,6 +14,8 @@ import { createInviteLink, shareMove } from '@/services/share';
 import { syncActiveMove } from '@/services/sync';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, fontSize, palette, radius } from '@/theme';
+import { ROLES } from '@/shared';
+import { MOVE_MODE } from '@/store/library';
 
 const FRIENDLY_ERROR: Record<string, string> = {
   ENTITLEMENT_REQUIRED: 'A Tuck subscription is required to share a move.',
@@ -40,7 +42,7 @@ export default function Members() {
   const moveName = useStore((s) => s.move.name);
 
   const [busy, setBusy] = useState(false);
-  const [inviteRole, setInviteRole] = useState<Role>('editor');
+  const [inviteRole, setInviteRole] = useState<Role>(ROLES.editor);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,8 +50,8 @@ export default function Members() {
   }, [account?.id]);
 
   // Default to the least-privileged role until membership is known (avoids an owner-controls flash).
-  const myRole = members.find((m) => m.id === account?.id)?.role ?? 'viewer';
-  const canManage = myRole === 'owner';
+  const myRole = members.find((m) => m.id === account?.id)?.role ?? ROLES.viewer;
+  const canManage = myRole === ROLES.owner;
 
   const guard = async (fn: () => Promise<void>, label: string) => {
     setBusy(true);
@@ -103,7 +105,7 @@ export default function Members() {
             title="Sign in to share"
             subtitle="Sharing a move keeps it in sync with your packing buddy. You stay the owner."
           />
-        ) : activeMode === 'local' ? (
+        ) : activeMode === MOVE_MODE.local ? (
           <>
             <Card style={styles.card}>
               <Text style={styles.h}>Share “{moveName}”</Text>
@@ -124,8 +126,8 @@ export default function Members() {
                   <Text style={styles.label}>They join as</Text>
                   <Segmented
                     options={[
-                      { value: 'editor', label: 'Editor' },
-                      { value: 'viewer', label: 'Viewer' },
+                      { value: ROLES.editor, label: 'Editor' },
+                      { value: ROLES.viewer, label: 'Viewer' },
                     ]}
                     value={inviteRole}
                     onChange={(v) => setInviteRole(v as Role)}
@@ -156,7 +158,7 @@ export default function Members() {
                 key={mem.id}
                 member={mem}
                 you={mem.id === account?.id}
-                canManage={canManage && mem.role !== 'owner'}
+                canManage={canManage && mem.role !== ROLES.owner}
                 onRole={(r) => changeRole(mem.id, r)}
                 onRemove={() => remove(mem.id)}
               />
@@ -196,10 +198,10 @@ function MemberRow({
           <Segmented
             size="sm"
             options={[
-              { value: 'editor', label: 'Editor' },
-              { value: 'viewer', label: 'Viewer' },
+              { value: ROLES.editor, label: 'Editor' },
+              { value: ROLES.viewer, label: 'Viewer' },
             ]}
-            value={member.role === 'viewer' ? 'viewer' : 'editor'}
+            value={member.role === ROLES.viewer ? ROLES.viewer : ROLES.editor}
             onChange={(v) => onRole(v as Role)}
           />
           <Pressable onPress={onRemove} hitSlop={8} accessibilityLabel="Remove member">

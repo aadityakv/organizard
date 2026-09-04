@@ -1,11 +1,19 @@
 // The lifecycle statuses and handling markers every new move starts with.
 import type { Marker, Status } from './types';
 
+/** Ids of the built-in statuses; the store and selectors refer to these, custom ones are uid-generated. */
+export const STATUS_ID = {
+  packing: 'packing',
+  sealed: 'sealed',
+  transit: 'transit',
+  unpacked: 'unpacked',
+} as const;
+
 export const STARTER_STATUSES: Status[] = [
-  { id: 'packing', label: 'Packing', color: 'amber' },
-  { id: 'sealed', label: 'Sealed', color: 'green' },
-  { id: 'transit', label: 'In transit', color: 'sky' },
-  { id: 'unpacked', label: 'Unpacked', color: 'slate' },
+  { id: STATUS_ID.packing, label: 'Packing', color: 'amber' },
+  { id: STATUS_ID.sealed, label: 'Sealed', color: 'green' },
+  { id: STATUS_ID.transit, label: 'In transit', color: 'sky' },
+  { id: STATUS_ID.unpacked, label: 'Unpacked', color: 'slate' },
 ];
 
 export const STARTER_MARKERS: Marker[] = [

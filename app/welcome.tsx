@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, SlothMark } from '@/components';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette } from '@/theme';
+import { routes } from '@/lib/routes';
 
 /** First-launch onboarding: sign in, or continue as a guest. */
 export default function Welcome() {
@@ -13,7 +14,7 @@ export default function Welcome() {
 
   const continueAsGuest = () => {
     setOnboarded(true);
-    router.replace('/moves');
+    router.replace(routes.moves);
   };
 
   return (
@@ -27,7 +28,7 @@ export default function Welcome() {
       </View>
 
       <View style={styles.actions}>
-        <Button size="lg" fullWidth onPress={() => router.push('/sign-in')}>
+        <Button size="lg" fullWidth onPress={() => router.push(routes.signIn)}>
           Log in or sign up
         </Button>
         <Button variant="ghost" size="lg" fullWidth onPress={continueAsGuest}>

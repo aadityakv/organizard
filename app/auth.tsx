@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { completeEmailSignIn } from '@/services/auth';
 import { colors, fonts } from '@/theme';
+import { routes } from '@/lib/routes';
 
 /** Completes a magic-link sign-in from its deep link, then routes into the app. */
 export default function AuthVerify() {
@@ -18,7 +19,7 @@ export default function AuthVerify() {
       } catch {
         setFailed(true);
       }
-      router.replace('/members');
+      router.replace(routes.members);
     })();
   }, [token]);
 

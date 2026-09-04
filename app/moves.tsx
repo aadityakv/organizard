@@ -20,6 +20,7 @@ import { deleteMove } from '@/services/moves';
 import type { MoveSummary } from '@/store/library';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette, space } from '@/theme';
+import { routes } from '@/lib/routes';
 
 const EMPTY_MOVE: Move = { name: '', from: '', to: '', target: '' };
 
@@ -51,7 +52,7 @@ export default function Moves() {
     // navigate() de-dupes: it pops back to the existing tabs instance instead of
     // stacking a new one (which corrupted touch/tab handling). See the chevron in
     // the dashboard header — both sides of the moves⇄tabs switch must use navigate.
-    router.navigate('/(tabs)');
+    router.navigate(routes.tabs);
   };
 
   const submitJoin = () => {
@@ -59,7 +60,7 @@ export default function Moves() {
     if (t) {
       setJoinOpen(false);
       setPasted('');
-      router.push(`/invite?token=${encodeURIComponent(t)}`);
+      router.push(routes.invite(t));
     }
   };
 
@@ -110,7 +111,7 @@ export default function Moves() {
             <Text style={styles.tagline}>Pack fast. Find anything. Share the load.</Text>
           </View>
           <View style={styles.emptyActions}>
-            <Button size="lg" fullWidth iconLeft="plus" onPress={() => router.push('/new-move')}>
+            <Button size="lg" fullWidth iconLeft="plus" onPress={() => router.push(routes.newMove)}>
               Create a move
             </Button>
             <Button variant="secondary" size="lg" fullWidth iconLeft="link" onPress={() => setJoinOpen(true)}>
@@ -134,7 +135,7 @@ export default function Moves() {
             variant="brand"
             size="sm"
             accessibilityLabel="New move"
-            onPress={() => router.push('/new-move')}
+            onPress={() => router.push(routes.newMove)}
           />
         }
       />

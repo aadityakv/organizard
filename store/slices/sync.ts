@@ -18,7 +18,7 @@ import {
 import { emptyLiveSlice, parkCurrentMove } from '../shape';
 import { isLocalUri, mergeList, moveFromSnapshot, snapItemsByBox } from '../snapshot';
 import type { Store, SyncActions } from '../types';
-import type { MoveBundle } from '../library';
+import { MOVE_MODE, type MoveBundle } from '../library';
 
 export type SyncSlice = StateCreator<Store, [['zustand/persist', unknown]], [], SyncActions>;
 
@@ -44,7 +44,7 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
       return { ...base, currentMoveId: null, ...emptyLiveSlice(now) };
     }),
 
-  enqueue: (m) => set((s) => (s.activeMode === 'shared' ? { outbox: [...s.outbox, m] } : {})),
+  enqueue: (m) => set((s) => (s.activeMode === MOVE_MODE.shared ? { outbox: [...s.outbox, m] } : {})),
   clearOutbox: (clientIds) =>
     set((s) => ({ outbox: s.outbox.filter((m) => !clientIds.includes(m.clientId)) })),
 
@@ -114,11 +114,11 @@ export const createSyncSlice: SyncSlice = (set, get) => ({
     }),
 
   markActiveShared: (serverMoveId, snap) => {
-    set({ activeMode: 'shared', serverMoveId, lastSyncTs: 0, outbox: [] });
+    set({ activeMode: MOVE_MODE.shared, serverMoveId, lastSyncTs: 0, outbox: [] });
     get().applySnapshot(snap);
   },
 
-  goShared: (serverMoveId) => set({ activeMode: 'shared', serverMoveId, lastSyncTs: 0, outbox: [] }),
+  goShared: (serverMoveId) => set({ activeMode: MOVE_MODE.shared, serverMoveId, lastSyncTs: 0, outbox: [] }),
 
   swapItemPhoto: (boxId, itemId, fromUri, toId) =>
     set((s) => ({

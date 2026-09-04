@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Badge, IconButton } from '@/components';
 import type { MoveSummary } from '@/store/library';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
+import { MOVE_MODE } from '@/store/library';
 
 /** One move in the library list with its summary and menu button. */
 export function MoveRow({
@@ -18,7 +19,7 @@ export function MoveRow({
   onMenu: () => void;
 }) {
   const route = move.from && move.to ? `${move.from} → ${move.to}` : move.from || move.to || '';
-  const shared = move.mode === 'shared';
+  const shared = move.mode === MOVE_MODE.shared;
 
   return (
     <View style={styles.row}>
