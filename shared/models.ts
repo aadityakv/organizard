@@ -1,6 +1,6 @@
 // Shared domain models — imported by both the Worker and the client,
 // so the two can't drift. Money is integer cents; mutable rows carry
-// updatedAt (ms) + deletedAt (tombstone) for last-write-wins delta sync.
+// updatedAt (ms) + deletedAt (tombstone) for delta sync.
 
 export const ROLES = { owner: 'owner', editor: 'editor', viewer: 'viewer' } as const;
 export type Role = (typeof ROLES)[keyof typeof ROLES];

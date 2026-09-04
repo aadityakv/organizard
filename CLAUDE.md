@@ -14,7 +14,7 @@ during a stressful move.
 Data hierarchy: **Move › Room › Box › Item**.
 
 A move's nav (build 17) is **Boxes · Capture · Find** (`app/(tabs)/_layout.tsx`):
-Capture is a free single-item verb (→ box picker → Add item), Find is item/box search
+Capture is a free single-item verb targeting the most recent box (→ Add item), Find is item/box search
 + scan-to-find, Scan/Share are no longer tabs. **Streaming Mode** (Pro) is rapid capture
 — snap/speak items, parsed by `lib/voice/streamParse.ts`; speech is on-device via
 `modules/speech-recognizer` (SFSpeechRecognizer); development builds fall back to a
@@ -46,7 +46,8 @@ aren't shipped; cross-platform code should degrade gracefully on Android, not br
   (SQLite), **R2** for photo blobs, **KV** for sessions. Lives in `server/`.
 - **Sync:** local moves never touch the network. A *shared* move applies every
   mutation optimistically and queues it to an outbox; the Worker re-applies mutations
-  (role-checked, last-write-wins, idempotent by client id) and the client pulls deltas.
+  (role-checked; concurrent edits resolve by arrival order; idempotent by client id)
+  and the client pulls deltas.
   The mutation contract is the source of truth shared between client and server.
 
 ## How we build & run

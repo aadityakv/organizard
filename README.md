@@ -42,7 +42,7 @@ components/   ui/ primitives · domain/ pieces that know boxes, rooms and roles 
 hooks/        generic React hooks (sheet form state)
 store/        Zustand store (persisted to AsyncStorage), slices + selectors
 services/     orchestration: auth, share/sync engine, photo upload, printing
-lib/          pure helpers: api/ client · photos/ refs · voice/ parsing · qr/ codes and labels · money, text, routes
+lib/          pure helpers: api/ client · photos/ refs · voice/ parsing · qr/ codes and labels · money, text, routes, navigation
 copy/         user-facing strings, one file per screen group (the step before i18n)
 data/         client domain types and the starter statuses/markers
 shared/       the client<->server contract: wire models + the Mutation union
@@ -52,9 +52,10 @@ theme/        design tokens (colors, 12-hue box palette, type, spacing)
 server/       Cloudflare Worker: Hono + Drizzle over D1, R2 for photos, KV for sessions
 ```
 
-The layering rule: `lib/` is pure (safe to import from node-run tests); anything
-that touches the network, native modules or the store lives in `services/`;
-screens compose `features/`; `app/` holds only routes.
+The layering rule: `lib/` is pure (safe to import from node-run tests — the one
+exception, `lib/navigation.ts`, needs the live router and is imported only by
+screens); anything that touches the network, native modules or the store lives in
+`services/`; screens compose `features/`; `app/` holds only routes.
 
 ### Sync model
 
@@ -63,8 +64,8 @@ A move is either **local** or **synced**.
 - **Local** moves never touch the network. Guests only ever have local moves.
 - **Synced** moves apply every edit optimistically, then append a `Mutation` to an
   outbox. The outbox flushes to the Worker, which re-applies each mutation
-  (role-checked, last-write-wins, idempotent by client id) and the client pulls
-  deltas since its last sync timestamp. Photos upload separately to R2 and are
+  (role-checked; concurrent edits resolve by arrival order; idempotent by client
+  id) and the client pulls deltas since its last sync timestamp. Photos upload separately to R2 and are
   swapped from local file refs to server ids once they land.
 - Signing in **migrates** a guest's local moves up to the account. Signing out drops
   the synced copies from the device (they come back on the next sign-in) and keeps
