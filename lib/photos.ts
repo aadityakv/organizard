@@ -9,14 +9,7 @@ import { API_URL } from '@/lib/config';
 import { uid } from '@/lib/uid';
 import { LOCAL_PREFIX, resolvePhoto } from '@/lib/photoRef';
 
-/**
- * Copy a fresh camera capture out of the (volatile) cache directory into the
- * persistent document directory and return a stable, re-resolvable ref
- * (`local:photos/<id>.jpg`). The ref is RELATIVE — the absolute path is rejoined
- * with the freshly-read documentDirectory at render time so it survives the
- * container-UUID change on reinstall. If the doc dir is unavailable (shouldn't
- * happen on device) we return the source uri unchanged so capture never throws.
- */
+/** Copy a capture out of the volatile cache dir into the document dir and return a relative `local:` ref that survives reinstall. */
 export async function persistCapture(srcUri: string): Promise<string> {
   const docDir = FileSystem.documentDirectory;
   if (!docDir) return srcUri;

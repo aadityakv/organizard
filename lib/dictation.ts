@@ -49,7 +49,6 @@ export function isDictationSimulated(): boolean {
   return !isSpeechAvailable() || permissionDenied;
 }
 
-/** Simulated dictation: stream a sample utterance, then fire onFinal. */
 function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): DictationSession {
   const pool = opts.listMode ? SAMPLES_LIST : SAMPLES;
   const idx = opts.listMode
@@ -92,10 +91,7 @@ function simulate(opts: { listMode?: boolean }, cb: DictationCallbacks): Dictati
   };
 }
 
-/**
- * Listen for one utterance. Streams interim text via onInterim, then onFinal with the
- * full transcript. `listMode` lengthens the capture window (talk a whole box in).
- */
+/** Listen for one utterance: interim text via onInterim, then onFinal with the full transcript. */
 export function listen(opts: { listMode?: boolean }, cb: DictationCallbacks): DictationSession {
   if (!isSpeechAvailable()) return simulate(opts, cb);
 

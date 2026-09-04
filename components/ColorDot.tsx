@@ -15,20 +15,7 @@ export type ColorDotProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-/**
- * ColorDot — a solid box-hue swatch circle.
- *
- * Non-interactive: renders a plain View.
- * Interactive (onPress provided): wraps in a Pressable with a pressed-state
- * scale animation and a minimum 44-pt hit area.
- *
- * Selected state replicates the CSS
- *   box-shadow: 0 0 0 2px white, 0 0 0 4px <solid>
- * by nesting three views:
- *   [outer ring — solid colour, 2 pt thick]
- *     [white gap ring — 2 pt thick]
- *       [inner circle — solid colour]
- */
+/** Box-hue swatch circle; interactive with a selection ring when onPress is given. */
 export function ColorDot({ color = 'green', size = 24, selected = false, onPress, style }: ColorDotProps) {
   const solid = boxColor(color);
 

@@ -52,11 +52,7 @@ export function extractSlice(s: State): SliceData {
 export const emptyLiveSlice = (now: number): SliceData =>
   sliceFromBundle(newBundle('__none__', EMPTY_MOVE, now));
 
-/**
- * A copy of the library with the open move's live state written back into its
- * bundle. Call this before switching away from (or dropping) the current move so
- * nothing edited since it was opened is lost.
- */
+/** The library with the open move's live state written back into its bundle; call before switching away. */
 export function parkCurrentMove(s: State, now: number): Record<string, MoveBundle> {
   const library = { ...s.library };
   if (s.currentMoveId && library[s.currentMoveId]) {

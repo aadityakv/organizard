@@ -3,10 +3,7 @@ import { api } from '@/lib/api';
 import { roleFor } from '@/store/library';
 import { moveData, useStore } from '@/store/useStore';
 
-/**
- * Delete a move. If you own a shared move its server copy is torn down first; a
- * failed teardown is logged and the move is still removed from this device.
- */
+/** Delete a move; an owned shared move is torn down on the server first (failure is logged, local removal still happens). */
 export async function deleteMove(id: string): Promise<void> {
   const s = useStore.getState();
   const data = moveData(s, id);

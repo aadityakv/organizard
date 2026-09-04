@@ -8,11 +8,7 @@
 // render time instead of being persisted.
 export const LOCAL_PREFIX = 'local:';
 
-/**
- * A stored photo ref that lives on this device — needs upload for shared moves,
- * resolves to a local file for display. Covers our `local:` refs plus legacy
- * absolute local paths persisted before the fix (back-compat).
- */
+/** Whether a stored photo ref lives on this device (needs upload for shared moves). */
 export const isLocalRef = (p: string): boolean =>
   p.startsWith(LOCAL_PREFIX) || p.startsWith('file://') || p.startsWith('content://') || p.startsWith('/');
 

@@ -71,11 +71,6 @@ export function wordNum(str: string): number | null {
 
 export type ParsedItem = { name: string; qty: number | null; value: number | null };
 
-/**
- * Find the shortest trailing suffix of `tokens` that's a valid positive number
- * ("cast iron skillet eighty" → 80 from index 3). Lets a spoken value/qty sit
- * after a multi-word name once commas are gone, without swallowing the name.
- */
 function trailingNumber(tokens: string[]): { value: number; fromIndex: number } | null {
   for (let start = 0; start < tokens.length; start++) {
     const v = wordNum(tokens.slice(start).join(' '));

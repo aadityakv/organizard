@@ -24,10 +24,7 @@ export type ScanResult =
 /** Another move on this device that a scanned box might belong to. */
 export type ScanCandidateMove = { id: string; name: string; boxIds: string[] };
 
-/**
- * Classify a scanned value: a box in the current move, a box in another move on
- * this device, a Tuck code we can't see (someone else's move), or not a Tuck code.
- */
+/** Classify a scanned value: a box in this move, in another move on this device, a Tuck code we cannot see, or not a Tuck code. */
 export const classifyScan = (
   value: string,
   currentBoxIds: string[],

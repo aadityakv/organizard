@@ -19,16 +19,11 @@ export type AvatarProps = {
   color?: string;
   style?: StyleProp<ViewStyle>;
 };
-/** Derive initials from a display name (up to 2 words → 2 chars). */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || '?';
 }
 
-/**
- * Deterministic hue name from a display name. Uses the same djb2-style hash
- * as the design prototype, cycling through the 12 box-palette hues.
- */
 function hueForName(name: string): string {
   let h = 0;
   for (let i = 0; i < name.length; i++) {

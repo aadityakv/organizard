@@ -33,7 +33,6 @@ export type LabelInput = {
   room?: string;
 };
 
-/** Build the scannable QR for a box as an inline SVG string (vector, crisp). */
 function qrSvg(boxId: string): string {
   const matrix = QRCodeCore.create(encodeBoxQR(boxId), { errorCorrectionLevel: 'M' });
   // margin:0 — we add our own padding in CSS. light alpha 0 → transparent bg.
@@ -43,7 +42,6 @@ function qrSvg(boxId: string): string {
   });
 }
 
-/** Minimal HTML escaping for box/room names embedded in the sheet. */
 function esc(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -61,11 +59,7 @@ function labelCell(label: LabelInput): string {
     </div>`;
 }
 
-/**
- * Build a print-ready HTML page: a responsive 3-column grid of label cells,
- * each with the box's QR, number, name, and room. Sized for Letter/A4 with
- * page margins; labels avoid breaking across pages.
- */
+/** Print-ready HTML page: a 3-column grid of label cells (QR, number, name, room) sized for Letter/A4. */
 export function buildLabelsHtml(labels: LabelInput[]): string {
   const cells = labels.map(labelCell).join('');
   return `<!DOCTYPE html>

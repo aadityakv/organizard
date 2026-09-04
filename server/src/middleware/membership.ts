@@ -8,10 +8,7 @@ import type { Env } from '../types';
 
 export type MemberVars = { user: UserRow; member: Membership };
 
-/**
- * Requires the caller to be a member of the `:id` move. 404 (not 403) for
- * non-members so move existence isn't leaked. Sets `c.get('member')`.
- */
+/** Requires membership in the `:id` move; 404 rather than 403 so move existence isn't leaked. */
 export function membershipMiddleware(deps: Deps) {
   return createMiddleware<{ Bindings: Env; Variables: MemberVars }>(async (c, next) => {
     const moveId = c.req.param('id');

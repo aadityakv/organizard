@@ -1,9 +1,4 @@
-/**
- * BoxCard — dashboard tile for a single box.
- * White card, 5px top color rail (boxColor), tint/cover band with box number
- * and StatusChip, body with name (Fredoka), room eyebrow, item count + value,
- * and up to 3 MarkerChip pills. Press animates to scale 0.985.
- */
+// Dashboard tile for a box: color rail, cover or tint band, name, room, status and markers.
 import React, { useState } from 'react';
 import { Animated, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 

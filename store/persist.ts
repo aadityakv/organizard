@@ -34,13 +34,7 @@ export const partialize = (s: Store): Partial<State> => ({
 
 type Persisted = Partial<State> & Record<string, unknown>;
 
-/**
- * v2 → v3: the single flat active-move became a library of moves. A real shared
- * move is wrapped into a bundle and kept open; anything else starts over with an
- * empty library (the pre-library builds only ever had demo data locally). Outbox
- * entries this build no longer understands are dropped so a poison mutation can't
- * wedge sync forever.
- */
+/** v2 → v3: the flat active move becomes a library. A shared move is wrapped into a bundle; anything else starts empty; unknown outbox entries are dropped. */
 export function migrate(persisted: unknown, version: number): Store {
   const st = persisted as Persisted | undefined;
   if (!st) return st as unknown as Store;

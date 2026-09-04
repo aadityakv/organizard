@@ -15,12 +15,7 @@ import {
   statusInMove,
 } from '../repos/scope';
 
-/**
- * Apply a batch of mutations to a move. `updatedAt = now` for the batch; the
- * delta is unbounded (no pagination), so rows sharing a timestamp are fine — all
- * are returned together and never split across a page boundary. LWW = apply order.
- * Idempotent: a clientId already in mutation_log is skipped.
- */
+/** Apply a mutation batch in order (last write wins); a clientId already in mutation_log is skipped, so retries are safe. */
 export async function applyMutations(
   db: AppDb,
   deps: Deps,

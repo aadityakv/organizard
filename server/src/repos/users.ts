@@ -22,14 +22,12 @@ const BOX_COLORS = [
   'slate',
 ];
 
-/** Stable avatar hue from a user id. */
 function pickColor(seed: string): string {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return BOX_COLORS[h % BOX_COLORS.length];
 }
 
-/** Friendly display name from an email local-part, or a warm default. */
 function deriveName(email?: string | null): string {
   const local = email?.split('@')[0];
   if (!local) return 'Friend';
@@ -121,11 +119,7 @@ export async function createPasswordUser(
   return row;
 }
 
-/**
- * Delete a user and everything they own (App Store Guideline 5.1.1(v)): their
- * moves are cascade-deleted, their memberships in others' moves are removed, then
- * the account row goes. Sessions live in KV and are revoked separately by the caller.
- */
+/** Delete a user, the moves they own and their memberships (App Store 5.1.1(v)). */
 export async function deleteUserAndData(db: AppDb, userId: string): Promise<void> {
   const owned = await db.select({ id: moves.id }).from(moves).where(eq(moves.ownerId, userId));
   for (const m of owned) await deleteMove(db, m.id);

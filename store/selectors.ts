@@ -95,11 +95,7 @@ export const allIndexedItems = (s: Pick<State, 'boxes' | 'rooms' | 'itemsByBox'>
   return out;
 };
 
-/**
- * Pro = signed in AND an active trial (real billing will also set this later). Pro is
- * account-tied: a signed-out guest is always free, so a stale trial flag can't unlock
- * a guest. Sign-out clears the trial.
- */
+/** Pro = signed in with an active trial. Account-tied, so a guest is always free. */
 export const isProNow = (s: Pick<State, 'proTrialUntil' | 'session'>): boolean =>
   s.session != null && s.proTrialUntil != null && s.proTrialUntil > Date.now();
 
@@ -109,10 +105,7 @@ export type MoveSummaryInputs = Pick<
   'library' | 'currentMoveId' | 'account' | 'move' | 'boxes' | 'itemsByBox' | 'members' | 'activeMode'
 >;
 
-/**
- * One row per move for the library screen, newest-opened first. The open move is
- * summarised from the live slice (its bundle is stale by design). Fresh array: useMemo.
- */
+/** One row per move, newest-opened first; the open move is summarised from the live slice. Fresh array: useMemo. */
 export const moveSummaries = (s: MoveSummaryInputs): MoveSummary[] => {
   const accountId = s.account?.id ?? null;
   const out: MoveSummary[] = [];

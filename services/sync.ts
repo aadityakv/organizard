@@ -79,8 +79,6 @@ export async function syncActiveMove(): Promise<void> {
   }
 }
 
-/** Force a full re-pull (resets the cursor). The backstop that heals any delta the
- * unbounded sync could have missed under a rare concurrent-writer race. */
 async function fullResync(): Promise<void> {
   const st = useStore.getState();
   if (st.activeMode !== 'shared' || !st.serverMoveId || !st.session) return;
@@ -88,11 +86,7 @@ async function fullResync(): Promise<void> {
   await syncActiveMove();
 }
 
-/**
- * After sign-in, pull the account's shared moves into the local library so they
- * appear on this device (without disturbing the currently-open move). Best-effort:
- * a failed snapshot for one move just skips it.
- */
+/** Pull the account's shared moves into the local library without opening them. */
 export async function pullServerMoves(): Promise<void> {
   const { session } = useStore.getState();
   if (!session) return;
