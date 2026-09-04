@@ -1,4 +1,4 @@
-// Drizzle schema for D1 (SQLite). Mirrors design doc §5.
+// Drizzle schema for D1 (SQLite).
 // Conventions: text UUID ids (client may mint them), integer ms timestamps,
 // `updated_at` + nullable `deleted_at` tombstones on synced rows, money as cents.
 import { integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';

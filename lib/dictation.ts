@@ -7,8 +7,8 @@
 // whole capture flow stays testable on the simulator (where the mic doesn't work).
 import { isSpeechAvailable, requestSpeechPermissions, startSpeech } from '@/modules/speech-recognizer';
 
-// Single-item samples (Photos-on mode) and list samples (voice-only mode), from the
-// design prototype — used only by the simulated fallback.
+// Sample utterances for the simulated fallback: single items (photos on) and whole
+// boxes (voice only).
 const SAMPLES = [
   'stand mixer, two hundred twenty dollars',
   'stoneware mugs, six of them, fifty four dollars',

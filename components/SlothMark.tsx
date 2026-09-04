@@ -1,6 +1,6 @@
-// Tuck logomark — a sleepy sloth tucked into a green moving box.
-// Multi-color brand mark; ported 1:1 from the design system's sloth-mark.svg
-// (the same art as the app icon, minus the rose tile, so it sits on app surfaces).
+// Tuck logomark: a sleepy sloth tucked into a green moving box, as inline SVG.
+// The same art as the app icon without the icon's background tile, so it sits on
+// any app surface.
 import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 /** The Tuck sloth mascot as an inline SVG. */

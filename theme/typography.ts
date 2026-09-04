@@ -40,7 +40,7 @@ export const type = {
   display: { fontFamily: fonts.display.bold, fontSize: fontSize.display, lineHeight: 50 } as TextStyle,
   /** Large screen titles. */
   title: { fontFamily: fonts.display.semibold, fontSize: fontSize['2xl'], lineHeight: 34 } as TextStyle,
-  /** Standard screen header title (matches the design Header). */
+  /** Screen header title. */
   screenTitle: {
     fontFamily: fonts.display.bold,
     fontSize: 22,

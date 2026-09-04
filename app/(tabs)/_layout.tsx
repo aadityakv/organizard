@@ -1,6 +1,6 @@
-// Bottom nav: Boxes · Capture (center, raised verb) · Find. The center button is a
-// VERB (free single-item capture → /capture picker), not a tab. Scan folds into Find;
-// Share lives in the Boxes header. (Claude Design "Nav Rethink" — Option A.)
+// Bottom nav for an open move: Boxes · Capture · Find. The raised center button is
+// an action (single-item capture into the most recent box), not a tab destination.
+// Scanning lives inside Find; sharing lives in the Boxes header.
 import { Tabs, router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

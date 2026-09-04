@@ -9,8 +9,8 @@ export const GROUP_OPTIONS: { value: GroupView; label: string }[] = [
   { value: GROUP_VIEW.value, label: 'Value' },
 ];
 
-// Status-order used when sorting boxes in the non-room views (in_transit first,
-// then packing, sealed, unpacked, anything custom last) — matches the design.
+// Sort order for boxes in the status and value views: in transit first, then
+// packing, sealed, unpacked, and any custom status last.
 export const STATUS_ORDER: Record<string, number> = {
   transit: 0,
   packing: 1,

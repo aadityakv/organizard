@@ -1,11 +1,11 @@
-// The capture screen (Claude Design "Streaming Mode Prototype"). Two views of ONE
-// screen, flipped in place (no extra navigation — one X closes everything):
-//   • capture (free): snap one item → name it in Add-item, one at a time. A
-//     "Switch to Stream" pill flips to stream (Pro; free users see the upsell).
-//   • stream (Pro): rapid session — Photos-on (snap → say one item) or Photos-off
-//     (talk a whole box in at once) → ledger (tap to fix) → Done commits via addItem.
-// Dictation is simulated for now (lib/dictation); the on-device mic swaps in later.
-// The pieces live in features/stream; this file is the layout + orchestration.
+// Capture screen: one route with two views that flip in place, so a single X
+// always closes everything.
+//   capture (free): snap one item, then name it in the add-item form.
+//   stream (Pro): a rapid session. With photos on, each snap is followed by saying
+//     the item; with photos off, a whole box is spoken in at once. Everything lands
+//     in a ledger (tap to fix) and Done commits the session through addItem.
+// Free users start in capture and reach stream only through the gated upsell.
+// The pieces live in features/stream; this file is the layout and orchestration.
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

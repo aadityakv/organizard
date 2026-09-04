@@ -1,12 +1,10 @@
-// Voice parsing for Streaming Mode — turns a spoken utterance into an item
-// { name, qty, value } with the three fields parsed in any order, plus a list
-// splitter for "talk a whole box in" voice-only mode. Ported 1:1 from the Claude
-// Design prototype ("Streaming Mode Prototype"); this is the parsing source of
-// truth shared by the simulated path now and the on-device speech path later.
+// Voice parsing for Streaming Mode: turns a spoken utterance into an item
+// { name, qty, value } with the three fields recognised in any order, plus a list
+// splitter for speaking a whole box in at once. Shared by the simulated and the
+// on-device speech paths, so parsing behaves identically in both.
 //
-// `value` is in dollars (matches the client Item.value); the caller converts to
-// cents for the server. `iconFor` returns a kebab Lucide name the Icon component
-// resolves (falling back to "package").
+// `value` is in dollars, matching the client Item; the caller converts to cents for
+// the server. `iconFor` picks a Lucide icon name for an item, falling back to "package".
 
 const WORD_NUMS: Record<string, number> = {
   zero: 0,

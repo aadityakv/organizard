@@ -1,6 +1,6 @@
-// Scan a box — QR viewfinder + the four result states (this move / another
-// move / no access / unknown). Works for viewers too. Translated from the
-// design prototype (ui_kits/packing/Scan.jsx) into Expo / React Native.
+// Scan a box label: QR viewfinder plus the four result states (a box in this move,
+// a box in another move on this device, a code we cannot see, not a Tuck code).
+// Read-only, so every role can use it.
 import { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';

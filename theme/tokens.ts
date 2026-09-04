@@ -1,5 +1,5 @@
-// Organizard — design tokens (translated from the design-system CSS)
-// Warm cream base, fresh green primary, vivid 12-hue box palette.
+// Design tokens: warm cream surfaces, a fresh green brand, and the 12-hue box palette
+// that colour-codes boxes and rooms throughout the app.
 
 /** A palette color with an alpha channel, as an rgba() string. */
 export const alpha = (hex: string, a: number): string => {

@@ -1,6 +1,5 @@
-// Pro upsell for Streaming Mode (Claude Design "Streaming Mode Prototype").
-// Shown when a free user taps a Stream/Capture entry. "Try Pro" starts the local
-// trial (gate-UI-now); real RevenueCat billing wires in later.
+// Pro upsell sheet for Streaming Mode, shown when a free user taps a Stream entry.
+// "Try Pro" starts the local trial; real billing replaces that later.
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from './Button';
