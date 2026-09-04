@@ -33,3 +33,35 @@ id = "a5c68a99c85e428b863f10ee2df03eaa"
 # dashboard and via `wrangler tail`. No code needed beyond the request-log middleware.
 [observability]
 enabled = true
+
+# ---------------------------------------------------------------------------
+# Staging: a separate Worker with its own data, targeted by the "preview" EAS
+# profile (APP_ENV=staging) and by `wrangler deploy --env staging`. Create the
+# resources once and paste the ids:
+#   wrangler d1 create organizard-staging
+#   wrangler kv namespace create SESSIONS --env staging
+#   wrangler r2 bucket create organizard-photos-staging
+# ---------------------------------------------------------------------------
+[env.staging]
+name = "organizard-api-staging"
+
+[env.staging.vars]
+BILLING_ENABLED = "false"
+APPLE_BUNDLE_ID = "com.organizard.app"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "organizard-staging"
+database_id = "REPLACE_WITH_STAGING_D1_ID"
+migrations_dir = "drizzle"
+
+[[env.staging.r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "organizard-photos-staging"
+
+[[env.staging.kv_namespaces]]
+binding = "SESSIONS"
+id = "REPLACE_WITH_STAGING_KV_ID"
+
+[env.staging.observability]
+enabled = true

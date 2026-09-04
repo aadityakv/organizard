@@ -49,7 +49,6 @@
       "typedRoutes": false
     },
     "extra": {
-      "apiUrl": "https://organizard-api.aaditya-kv.workers.dev",
       "revenueCatKey": "",
       "router": {
         "origin": false

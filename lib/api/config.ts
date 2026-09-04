@@ -1,4 +1,4 @@
-// Backend base URL — set per-environment in app.json `extra.apiUrl`.
+// Backend base URL, chosen per build profile in app.config.ts (extra.apiUrl).
 import Constants from 'expo-constants';
 
 export const API_URL: string =
