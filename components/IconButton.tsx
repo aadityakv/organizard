@@ -61,6 +61,7 @@ const VARIANT_MAP: Record<NonNullable<IconButtonProps['variant']>, VariantTokens
     iconColor: colors.danger,
   },
 };
+/** Icon-only button with a 44pt hit target. */
 export function IconButton({
   icon,
   onPress,

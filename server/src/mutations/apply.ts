@@ -1,3 +1,4 @@
+// The server half of the sync contract: apply a batch of client mutations to a move.
 import type { Mutation } from '@shared/index';
 import { and, eq } from 'drizzle-orm';
 

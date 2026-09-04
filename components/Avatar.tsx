@@ -36,6 +36,7 @@ function hueForName(name: string): string {
   }
   return BOX_COLORS[h % BOX_COLORS.length];
 }
+/** Member avatar: photo when available, otherwise initials on a deterministic color. */
 export function Avatar({ name, size = 40, uri, color, style }: AvatarProps) {
   const hue = color ?? hueForName(name);
   const bgColor = boxTint(hue);

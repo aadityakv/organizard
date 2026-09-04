@@ -16,6 +16,7 @@ const TONES: Record<NonNullable<BadgeProps['tone']>, { bg: string; text: string 
   danger: { bg: colors.dangerWash, text: palette.red600 },
   info: { bg: colors.infoWash, text: palette.blue600 },
 };
+/** Small tonal label pill. */
 export function Badge({ label, tone = 'neutral', size = 'md', style }: BadgeProps): React.JSX.Element {
   const toneStyle = TONES[tone] ?? TONES.neutral;
   const sizeStyle = size === 'sm' ? styles.containerSm : styles.containerMd;

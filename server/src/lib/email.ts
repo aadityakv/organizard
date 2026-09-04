@@ -1,3 +1,4 @@
+// Transactional email via Resend.
 import type { Env } from '../types';
 
 /** Send a magic-link sign-in email via Resend. Injectable, so tests mock it. */

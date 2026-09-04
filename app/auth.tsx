@@ -1,3 +1,4 @@
+// Handles the magic-link deep link: organizard://auth?token=…
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -5,7 +6,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { completeEmailSignIn } from '@/services/auth';
 import { colors, fonts } from '@/theme';
 
-// Handles the magic-link deep link: organizard://auth?token=…
 export default function AuthVerify() {
   const { token } = useLocalSearchParams<{ token?: string }>();
   const [failed, setFailed] = useState(false);
