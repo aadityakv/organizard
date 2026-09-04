@@ -57,9 +57,7 @@ aren't shipped; cross-platform code should degrade gracefully on Android, not br
   fixed by `react-native-screens`, not by disabling New Arch.)
 - **`ios/` and `android/` are generated** by `expo prebuild` (gitignored). Native
   tweaks go through **config plugins** in `plugins/` (re-applied every prebuild), never
-  by hand-editing the native projects. There are plugins for an Xcode-26 `fmt` compile
-  fix and for disabling the debug-dylib split (which otherwise hits a SwiftUICore
-  linker error once first-party Swift is present).
+  by hand-editing the native projects.
 - **Custom native modules** live in `modules/<name>/` (autolinked local Expo modules:
   `expo-module.config.json` + a podspec + a Swift `Module` + a TS `index.ts`). Import
   `requireOptionalNativeModule` from `'expo'`. Example: the Apple Maps address
@@ -78,10 +76,8 @@ aren't shipped; cross-platform code should degrade gracefully on Android, not br
   whole thing (slices, delta merge, sign-out, persist migration) is unit-tested in node
   (`store/createStore.test.ts`). **Screens** are still verified on the **simulator**.
 - **Simulator driving** uses XcodeBuildMCP `snapshot_ui` (screen hash + element tree)
-  + `screenshot`. The MCP tap tool is NOT enabled here, so taps go through **`cliclick`
-  with a deliberate press** (`dd:x,y w:150 du:x,y` — quick clicks don't register on the
-  iOS-26 sim). Tapping is flaky and coordinate-based; don't rabbit-hole on it. When the
-  UI is hard to drive, prefer **seeding AsyncStorage / deep-linking / temporary
+  + `screenshot`. Tapping is flaky and coordinate-based; don't rabbit-hole on it. When
+  the UI is hard to drive, prefer **seeding AsyncStorage / deep-linking / temporary
   in-app diagnostic logs read back through Metro** to get ground truth.
 
 ### Working principle that matters most here
