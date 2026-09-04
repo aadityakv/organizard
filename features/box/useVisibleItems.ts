@@ -6,7 +6,7 @@ import type { Item, Marker } from '@/data/types';
 
 // "Added" keeps the stored insertion order (today's default); the others are
 // display-only re-orderings derived with useMemo.
-export const SORT_MODE = { added: 'added', recent: 'recent', az: 'az', value: 'value' } as const;
+const SORT_MODE = { added: 'added', recent: 'recent', az: 'az', value: 'value' } as const;
 export type SortMode = (typeof SORT_MODE)[keyof typeof SORT_MODE];
 
 export const SORT_OPTIONS: { value: SortMode; label: string }[] = [
