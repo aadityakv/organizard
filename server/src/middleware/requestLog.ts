@@ -7,16 +7,20 @@ import type { AuthVars } from './auth';
 /**
  * One structured JSON line per request → Workers Logs (`[observability]` in
  * wrangler.toml). Logs method/path/status/duration/userId only — never bodies
- * or query strings (invite codes and tokens can appear there). Thrown errors
- * are logged with their stack before being rethrown, so Hono's default error
- * handler still produces the 500 response.
+ * or query strings (invite codes and tokens can appear there), and invite
+ * tokens embedded in the path are redacted. Thrown errors are logged with
+ * their stack before being rethrown, so Hono's default error handler still
+ * produces the 500 response.
  *
  * `user` is read AFTER `next()` resolves (auth middleware sets it on the way
  * in), so it is populated for authed routes and undefined for public ones.
  */
+const REDACT_INVITE = /^(\/v1\/invites\/)[^/]+/;
+
 export function requestLogMiddleware(deps: Deps) {
   return createMiddleware<{ Bindings: Env; Variables: AuthVars }>(async (c, next) => {
     const start = Date.now();
+    const path = c.req.path.replace(REDACT_INVITE, '$1[redacted]');
     try {
       await next();
     } catch (e) {
@@ -25,7 +29,7 @@ export function requestLogMiddleware(deps: Deps) {
         JSON.stringify({
           evt: 'http',
           method: c.req.method,
-          path: c.req.path,
+          path,
           status: 500,
           ms: Date.now() - start,
           userId: c.get('user')?.id,
@@ -40,7 +44,7 @@ export function requestLogMiddleware(deps: Deps) {
       JSON.stringify({
         evt: 'http',
         method: c.req.method,
-        path: c.req.path,
+        path,
         status: c.res.status,
         ms: Date.now() - start,
         userId: c.get('user')?.id,

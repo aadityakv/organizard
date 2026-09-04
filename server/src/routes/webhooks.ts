@@ -3,6 +3,7 @@
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
+import { timingSafeEqualStr } from '../lib/bytes';
 import { setEntitlement } from '../repos/users';
 import type { Env } from '../types';
 import { parseBody, webhookBody } from '../validation';
@@ -17,13 +18,6 @@ const GRANT = new Set([
 ]);
 const REVOKE = new Set(['EXPIRATION', 'BILLING_ISSUE', 'SUBSCRIPTION_PAUSED']);
 
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
 /** RevenueCat webhook that maintains the owner entitlement. */
 export function webhookRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env }>();
@@ -31,7 +25,7 @@ export function webhookRoutes(deps: Deps) {
   r.post('/revenuecat', async (c) => {
     // Fail closed: if no secret is configured, reject (never an open entitlement endpoint).
     const secret = c.env.REVENUECAT_WEBHOOK_SECRET;
-    if (!secret || !timingSafeEqual(c.req.header('authorization') ?? '', `Bearer ${secret}`)) {
+    if (!secret || !timingSafeEqualStr(c.req.header('authorization') ?? '', `Bearer ${secret}`)) {
       return c.json({ error: 'UNAUTHORIZED' }, 401);
     }
 

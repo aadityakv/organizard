@@ -7,18 +7,12 @@ import { Hono } from 'hono';
 import type { Deps } from '../deps';
 import { authMiddleware } from '../middleware/auth';
 import { membershipMiddleware, type MemberVars } from '../middleware/membership';
-import { billingEnabled } from '../lib/flags';
+import { billingEnabled, ownerEntitledOrResponse } from '../lib/flags';
 import { applyMutations } from '../mutations/apply';
-import { createMove, deleteMove, getChangesSince, getMoveSnapshot } from '../repos/moves';
+import { createMove, deleteMove, getChangesSince, getMembership, getMoveSnapshot } from '../repos/moves';
 import { createPhotoRecord } from '../repos/photos';
 import { boxInMove, itemInMove } from '../repos/scope';
-import {
-  changeMemberRole,
-  createInvite,
-  getMoveOwnerId,
-  isOwnerEntitled,
-  removeMember,
-} from '../repos/sharing';
+import { changeMemberRole, createInvite, getMoveOwnerId, removeMember } from '../repos/sharing';
 import { isEntitledNow } from '../repos/users';
 import type { Env } from '../types';
 import {
@@ -31,6 +25,14 @@ import {
 } from '../validation';
 import { ROLES } from '@shared/index';
 
+/** Error code for an invalid createMove body, by offending field. */
+const CREATE_FIELD_CODE: Record<string, string> = {
+  name: 'INVALID_NAME',
+  from: 'INVALID_ADDRESS',
+  to: 'INVALID_ADDRESS',
+  targetDate: 'INVALID_DATE',
+};
+
 /** Move routes: create, snapshot, changes, mutations, members, invites and photos. */
 export function moveRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: MemberVars }>();
@@ -42,7 +44,8 @@ export function moveRoutes(deps: Deps) {
     if (billingEnabled(c.env) && !isEntitledNow(c.get('user'), deps.now()))
       return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
     const parsed = await parseBody(c, createMoveBody);
-    if (!parsed.ok) return c.json({ error: 'INVALID_NAME' }, 400);
+    if (!parsed.ok)
+      return c.json({ error: CREATE_FIELD_CODE[parsed.field ?? 'name'] ?? 'INVALID_NAME' }, 400);
     const body = parsed.data;
 
     const db = deps.getDb(c.env);
@@ -53,6 +56,7 @@ export function moveRoutes(deps: Deps) {
       targetDate: body.targetDate,
       ownerId: c.get('user').id,
       seed: body.seed,
+      clientId: body.clientId,
     });
     return c.json(await getMoveSnapshot(db, moveId), 201);
   });
@@ -84,26 +88,26 @@ export function moveRoutes(deps: Deps) {
     }
 
     // Lapsed owner subscription -> the shared move is read-only (data retained).
-    if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now()))) {
-      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
-    }
+    const entitled = await ownerEntitledOrResponse(deps, c, c.req.param('id'));
+    if (entitled) return entitled;
 
     const res = await applyMutations(deps.getDb(c.env), deps, c.req.param('id'), mutations);
     return c.json(res);
   });
 
-  // Owner-only: hard-delete the move and all its data. membershipMiddleware
-  // returns 404 for non-members so move existence isn't leaked.
+  // Owner-only: hard-delete the move and all its data (DB rows and R2 photo blobs).
+  // membershipMiddleware returns 404 for non-members so move existence isn't leaked.
   r.delete('/:id', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
-    await deleteMove(deps.getDb(c.env), c.req.param('id'));
+    const moveId = c.req.param('id');
+    await deleteMove(deps.getDb(c.env), moveId, (keys) => c.env.PHOTOS.delete(keys));
     return c.json({ ok: true });
   });
 
   r.post('/:id/invites', membershipMiddleware(deps), async (c) => {
     if (c.get('member').role !== ROLES.owner) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
-    if (billingEnabled(c.env) && !(await isOwnerEntitled(deps.getDb(c.env), c.req.param('id'), deps.now())))
-      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    const entitled = await ownerEntitledOrResponse(deps, c, c.req.param('id'));
+    if (entitled) return entitled;
     const body = await parseBody(c, inviteBody);
     if (!body.ok) return c.json({ error: 'INVALID_ROLE' }, 400);
     const role: Role = body.data.role;
@@ -123,6 +127,8 @@ export function moveRoutes(deps: Deps) {
     const body = await parseBody(c, memberRoleBody);
     if (!body.ok) return c.json({ error: 'INVALID_ROLE' }, 400);
     if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_CHANGE_OWNER' }, 400);
+    // 404 when the target isn't a member (a silent ok would hide typos/staleness).
+    if (!(await getMembership(db, moveId, userId))) return c.json({ error: 'NOT_FOUND' }, 404);
     await changeMemberRole(db, { moveId, userId, role: body.data.role });
     return c.json({ ok: true });
   });
@@ -133,6 +139,7 @@ export function moveRoutes(deps: Deps) {
     const moveId = c.req.param('id');
     const userId = c.req.param('userId');
     if (userId === (await getMoveOwnerId(db, moveId))) return c.json({ error: 'CANNOT_REMOVE_OWNER' }, 400);
+    if (!(await getMembership(db, moveId, userId))) return c.json({ error: 'NOT_FOUND' }, 404);
     await removeMember(db, { moveId, userId });
     return c.json({ ok: true });
   });
@@ -141,8 +148,8 @@ export function moveRoutes(deps: Deps) {
     if (c.get('member').role === ROLES.viewer) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
     const db = deps.getDb(c.env);
     const moveId = c.req.param('id');
-    if (billingEnabled(c.env) && !(await isOwnerEntitled(db, moveId, deps.now())))
-      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    const entitled = await ownerEntitledOrResponse(deps, c, moveId);
+    if (entitled) return entitled;
     const parsed = await parseBody(c, photoLinkBody);
     if (!parsed.ok) return c.json({ error: 'INVALID_BODY' }, 400);
     const body = parsed.data;

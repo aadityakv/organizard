@@ -74,6 +74,16 @@ describe('sharing — invite + accept', () => {
     const res = await invite(h, ed.session, moveId, 'viewer');
     expect(res.status).toBe(403);
   });
+
+  // Ownership is never transferable via invite — an owner-role member could
+  // otherwise hard-delete the move and mint more owners.
+  it('rejects an invite at role owner (only editor/viewer are grantable)', async () => {
+    const h = await makeHarness();
+    const { owner, moveId } = await ownerWithMove(h);
+    const res = await invite(h, owner.session, moveId, 'owner');
+    expect(res.status).toBe(400);
+    expect((res.body as unknown as { error?: string }).error).toBe('INVALID_ROLE');
+  });
 });
 
 describe('sharing — member management (owner only)', () => {
@@ -124,5 +134,25 @@ describe('sharing — member management (owner only)', () => {
     });
     expect(del.status).toBe(200);
     expect((await h.request(`/v1/moves/${moveId}`, auth(v.session))).status).toBe(404);
+  });
+
+  // A silent ok:true for a non-member target would hide typos and stale UI.
+  it('role-change and removal of a non-member 404 instead of ok', async () => {
+    const h = await makeHarness();
+    const { owner, moveId } = await ownerWithMove(h);
+    const stranger = await h.login('stranger', 's@x.com');
+
+    const patch = await h.request(`/v1/moves/${moveId}/members/${stranger.user.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: 'editor' }),
+      headers: { 'content-type': 'application/json', ...auth(owner.session).headers },
+    });
+    expect(patch.status).toBe(404);
+
+    const del = await h.request(`/v1/moves/${moveId}/members/${stranger.user.id}`, {
+      method: 'DELETE',
+      headers: auth(owner.session).headers,
+    });
+    expect(del.status).toBe(404);
   });
 });

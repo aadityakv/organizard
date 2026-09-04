@@ -145,8 +145,10 @@ const privacyBody = `
   <h2>What we don't do</h2>
   <ul>
     <li>No advertising and no ad networks.</li>
-    <li>No third-party analytics or tracking SDKs, and no tracking you across other
-      apps or websites.</li>
+    <li>No analytics or tracking SDKs, and no tracking you across other apps or
+      websites. (If crash reporting is enabled in your build, it sends crash
+      diagnostics and basic breadcrumbs to <strong>Sentry</strong> to fix bugs &mdash;
+      never your data, notes, or photos.)</li>
     <li>We never sell or rent your personal data.</li>
   </ul>
 
@@ -158,8 +160,9 @@ const privacyBody = `
   <h2>Keeping and deleting your data</h2>
   <p>Local data lives on your device until you delete the move or the app.
   Shared-move data remains on our servers until the move's <strong>owner deletes
-  the move</strong>, which removes it and its photos. To delete your account or
-  request removal of data associated with you, email us at
+  the move</strong>, which removes it and its photos. You can delete your account
+  (and everything it owns) directly in the app: Moves &rarr; your profile &rarr;
+  Delete account. You can also email us at
   <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> and we'll take care of it.</p>
 
   <h2>Children</h2>
@@ -206,8 +209,9 @@ const supportBody = `
 
   <p><strong>How do I delete my data?</strong><br/>
   Deleting a local move or deleting the app removes its data from your device. For a
-  shared move, the move's owner can delete it to remove it from our servers. To
-  delete your account or any data associated with you, just email us.</p>
+  shared move, the move's owner can delete it to remove it from our servers. You
+  can also delete your whole account in the app (Moves &rarr; your profile &rarr;
+  Delete account), or email us and we'll do it for you.</p>
 
   <h2>Privacy</h2>
   <p>See our <a href="/privacy">Privacy Policy</a> for how Tuck handles your data.</p>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { hashPassword, verifyPassword } from '../src/lib/password';
+import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from '../src/lib/password';
 
 describe('password hashing', () => {
   it('verifies the correct password and rejects a wrong one', async () => {
@@ -23,5 +23,19 @@ describe('password hashing', () => {
     expect(await verifyPassword('x', '')).toBe(false);
     expect(await verifyPassword('x', 'not-a-hash')).toBe(false);
     expect(await verifyPassword('x', 'pbkdf2$abc$def')).toBe(false);
+  });
+
+  it('the dummy hash is well-formed (login timing equalizer actually derives)', async () => {
+    // If this shape breaks (e.g. a missing iterations segment), verifyPassword
+    // short-circuits without any PBKDF2 work and unknown-email logins answer
+    // instantly again — the account-enumeration oracle returns.
+    const parts = DUMMY_PASSWORD_HASH.split('$');
+    expect(parts).toHaveLength(4);
+    expect(parts[0]).toBe('pbkdf2');
+    expect(parts[1]).toBe('100000'); // matches the production iteration count
+    expect(parts[2].length).toBeGreaterThan(0);
+    expect(parts[3].length).toBeGreaterThan(0);
+    // It must verify (i.e. run the full derive) and always fail.
+    expect(await verifyPassword('anything', DUMMY_PASSWORD_HASH)).toBe(false);
   });
 });

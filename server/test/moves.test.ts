@@ -36,6 +36,29 @@ describe('moves — create + snapshot', () => {
     expect(snap.members[0].role).toBe('owner');
     expect(snap.boxes).toHaveLength(0);
   });
+
+  // The share flow's crash-recovery path: a retried create with the same clientId
+  // (the local move id) must reuse the existing server move, not mint a duplicate.
+  it('create with the same clientId returns the same move (idempotent share)', async () => {
+    const h = await makeHarness();
+    const { session } = await h.login('owner', 'o@x.com');
+    const first = await h.json('/v1/moves', { name: 'A', clientId: 'local_1' }, auth(session));
+    expect(first.status).toBe(201);
+    const second = await h.json('/v1/moves', { name: 'A', clientId: 'local_1' }, auth(session));
+    expect(second.status).toBe(201);
+    const a = (await first.json()) as Snapshot;
+    const b = (await second.json()) as Snapshot;
+    expect(b.move.id).toBe(a.move.id);
+    // Reuse must not re-seed statuses/markers or duplicate the owner membership.
+    expect(b.statuses).toHaveLength(4);
+    expect(b.markers).toHaveLength(5);
+    expect(b.members).toHaveLength(1);
+
+    // A different clientId (a different local move) still creates a fresh move.
+    const third = await h.json('/v1/moves', { name: 'B', clientId: 'local_2' }, auth(session));
+    const c = (await third.json()) as Snapshot;
+    expect(c.move.id).not.toBe(a.move.id);
+  });
 });
 
 describe('moves — mutation batch', () => {

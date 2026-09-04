@@ -34,6 +34,8 @@ export type Changes = {
   /** Opaque cursor — pass back as `since`. (Unbounded delta; hasMore is always false for now.) */
   cursor: number;
   hasMore: boolean;
+  /** The move row itself when it changed since the cursor (rename, address/date edit); else null. */
+  move: Move | null;
   rooms: Room[];
   statuses: Status[];
   markers: Marker[];
@@ -54,7 +56,13 @@ export async function getMembership(db: AppDb, moveId: string, userId: string): 
   return row ? { role: row.role } : null;
 }
 
-/** Create a shared move with its owner membership, seeding default statuses/markers unless `seed: false`. */
+/** Create a shared move with its owner membership, seeding default statuses/markers unless `seed: false`.
+ *
+ * `clientId` (the local move's id) makes creation idempotent: if this owner already
+ * created a server move for that clientId — e.g. the app died between create and
+ * persisting the serverMoveId, then the user retried — the existing move is reused
+ * instead of minting a duplicate.
+ */
 export async function createMove(
   db: AppDb,
   deps: Deps,
@@ -65,26 +73,60 @@ export async function createMove(
     targetDate?: string | null;
     ownerId: string;
     seed?: boolean;
+    clientId?: string;
   },
 ): Promise<string> {
-  const now = deps.now();
-  const moveId = deps.newId();
+  const findByClientId = async (): Promise<string | undefined> =>
+    (
+      await db
+        .select({ id: s.moves.id })
+        .from(s.moves)
+        .where(and(eq(s.moves.ownerId, args.ownerId), eq(s.moves.clientId, args.clientId as string)))
+        .limit(1)
+    )[0]?.id;
 
-  await db.insert(s.moves).values({
-    id: moveId,
-    name: args.name,
-    fromAddr: args.from ?? null,
-    toAddr: args.to ?? null,
-    targetDate: args.targetDate ?? null,
-    ownerId: args.ownerId,
-    createdAt: now,
-    updatedAt: now,
-  });
+  let moveId = args.clientId ? await findByClientId() : undefined;
+  let created = false;
+
+  if (!moveId) {
+    const now = deps.now();
+    const id = deps.newId();
+    try {
+      await db.insert(s.moves).values({
+        id,
+        name: args.name,
+        fromAddr: args.from ?? null,
+        toAddr: args.to ?? null,
+        targetDate: args.targetDate ?? null,
+        ownerId: args.ownerId,
+        clientId: args.clientId ?? null,
+        createdAt: now,
+        updatedAt: now,
+      });
+      moveId = id;
+      created = true;
+    } catch (e) {
+      // Only the (owner_id, client_id) unique-index race is recoverable by reusing
+      // the winner; without a clientId nothing can be recovered — rethrow as-is.
+      if (!args.clientId) throw e;
+      moveId = await findByClientId();
+      if (!moveId) throw e;
+    }
+  }
+
+  // The owner membership is a separate insert from the move row. Always upsert it:
+  // a worker crash between the two would otherwise leave a membership-less move
+  // that the clientId fast-path above would return on every retry — locking the
+  // owner out of their own move (membership checks 404 for non-members).
   await db
     .insert(s.members)
-    .values({ id: deps.newId(), moveId, userId: args.ownerId, role: ROLES.owner, createdAt: now });
+    .values({ id: deps.newId(), moveId, userId: args.ownerId, role: ROLES.owner, createdAt: deps.now() })
+    .onConflictDoNothing();
 
-  if (args.seed !== false) {
+  // Seed only a freshly created move: a reused one already seeded (or intentionally
+  // skipped) on its first create, and fresh ids would duplicate the rows.
+  if (created && args.seed !== false) {
+    const now = deps.now();
     for (const st of DEFAULT_STATUSES) {
       await db.insert(s.statuses).values({
         id: deps.newId(),
@@ -125,6 +167,17 @@ async function getMembers(db: AppDb, moveId: string): Promise<Member[]> {
     name: nameById.get(m.userId) ?? 'Friend',
   }));
 }
+
+const toMove = (m: typeof s.moves.$inferSelect): Move => ({
+  id: m.id,
+  name: m.name,
+  from: m.fromAddr,
+  to: m.toAddr,
+  targetDate: m.targetDate,
+  ownerId: m.ownerId,
+  clientId: m.clientId,
+  updatedAt: m.updatedAt,
+});
 
 const toRoom = (r: typeof s.rooms.$inferSelect): Room => ({
   id: r.id,
@@ -219,17 +272,7 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
   const move = (await db.select().from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
   if (!move) return null;
 
-  const memberRows = await db.select().from(s.members).where(eq(s.members.moveId, moveId));
-  const userIds = memberRows.map((m) => m.userId);
-  const userRows = userIds.length ? await db.select().from(s.users).where(inArray(s.users.id, userIds)) : [];
-  const nameById = new Map(userRows.map((u) => [u.id, u.name]));
-  const members: Member[] = memberRows.map((m) => ({
-    id: m.id,
-    moveId: m.moveId,
-    userId: m.userId,
-    role: m.role,
-    name: nameById.get(m.userId) ?? 'Friend',
-  }));
+  const members = await getMembers(db, moveId);
 
   const rooms = (
     await db
@@ -272,15 +315,7 @@ export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapsh
   );
 
   return {
-    move: {
-      id: move.id,
-      name: move.name,
-      from: move.fromAddr,
-      to: move.toAddr,
-      targetDate: move.targetDate,
-      ownerId: move.ownerId,
-      updatedAt: move.updatedAt,
-    },
+    move: toMove(move),
     members,
     rooms,
     statuses,
@@ -298,6 +333,15 @@ export async function getChangesSince(
   since: number,
 ): Promise<Changes> {
   const serverTime = deps.now();
+
+  // The move row itself rides the delta only when it changed (rename/address/date).
+  const moveRow = (
+    await db
+      .select()
+      .from(s.moves)
+      .where(and(eq(s.moves.id, moveId), gt(s.moves.updatedAt, since)))
+      .limit(1)
+  )[0];
 
   const rooms = (
     await db
@@ -345,6 +389,7 @@ export async function getChangesSince(
     // next poll (healed by the regular 15s poll, not only the foreground full-resync).
     cursor: serverTime - 1,
     hasMore: false,
+    move: moveRow ? toMove(moveRow) : null,
     rooms,
     statuses,
     markers,
@@ -354,8 +399,19 @@ export async function getChangesSince(
   };
 }
 
-/** Hard-delete a move and its children in FK-safe order (there are no cascade FKs). */
-export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
+/** Hard-delete a move and its children in FK-safe order (there are no cascade FKs).
+ *
+ * `deleteBlobs` (wired to R2 by the routes) removes the photo objects — the DB rows
+ * alone don't free the blobs, and the privacy policy promises both go away.
+ */
+export async function deleteMove(
+  db: AppDb,
+  moveId: string,
+  deleteBlobs?: (keys: string[]) => Promise<void>,
+): Promise<void> {
+  const r2Keys = (
+    await db.select({ r2Key: s.photos.r2Key }).from(s.photos).where(eq(s.photos.moveId, moveId))
+  ).map((r) => r.r2Key);
   const boxIds = (await db.select({ id: s.boxes.id }).from(s.boxes).where(eq(s.boxes.moveId, moveId))).map(
     (r) => r.id,
   );
@@ -374,6 +430,7 @@ export async function deleteMove(db: AppDb, moveId: string): Promise<void> {
   await db.delete(s.members).where(eq(s.members.moveId, moveId));
   await db.delete(s.mutationLog).where(eq(s.mutationLog.moveId, moveId));
   await db.delete(s.moves).where(eq(s.moves.id, moveId));
+  if (deleteBlobs && r2Keys.length) await deleteBlobs(r2Keys);
 }
 
 /** Moves the user belongs to, with their role. */
@@ -390,14 +447,5 @@ export async function getUserMoves(db: AppDb, userId: string): Promise<(Move & {
       ),
     );
   const roleByMove = new Map(memberRows.map((m) => [m.moveId, m.role]));
-  return moveRows.map((m) => ({
-    id: m.id,
-    name: m.name,
-    from: m.fromAddr,
-    to: m.toAddr,
-    targetDate: m.targetDate,
-    ownerId: m.ownerId,
-    updatedAt: m.updatedAt,
-    role: roleByMove.get(m.id) ?? ROLES.viewer,
-  }));
+  return moveRows.map((m) => ({ ...toMove(m), role: roleByMove.get(m.id) ?? ROLES.viewer }));
 }

@@ -99,9 +99,13 @@ export async function createPasswordUser(
 }
 
 /** Delete a user, the moves they own and their memberships (App Store 5.1.1(v)). */
-export async function deleteUserAndData(db: AppDb, userId: string): Promise<void> {
+export async function deleteUserAndData(
+  db: AppDb,
+  userId: string,
+  deleteBlobs?: (keys: string[]) => Promise<void>,
+): Promise<void> {
   const owned = await db.select({ id: moves.id }).from(moves).where(eq(moves.ownerId, userId));
-  for (const m of owned) await deleteMove(db, m.id);
+  for (const m of owned) await deleteMove(db, m.id, deleteBlobs);
   await db.delete(members).where(eq(members.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
 }

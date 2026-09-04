@@ -17,18 +17,24 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at').notNull(),
 });
 
-export const moves = sqliteTable('moves', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  fromAddr: text('from_addr'),
-  toAddr: text('to_addr'),
-  targetDate: text('target_date'),
-  ownerId: text('owner_id')
-    .notNull()
-    .references(() => users.id),
-  createdAt: integer('created_at').notNull(),
-  updatedAt: integer('updated_at').notNull(),
-});
+export const moves = sqliteTable(
+  'moves',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    fromAddr: text('from_addr'),
+    toAddr: text('to_addr'),
+    targetDate: text('target_date'),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id),
+    /** The creating client's local move id — makes share/create idempotent per owner. */
+    clientId: text('client_id'),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (t) => ({ ownerClient: uniqueIndex('moves_owner_client').on(t.ownerId, t.clientId) }),
+);
 
 /** Move membership with role; one row per (move, user). */
 export const members = sqliteTable(

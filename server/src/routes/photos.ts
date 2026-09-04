@@ -3,11 +3,10 @@
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
-import { billingEnabled } from '../lib/flags';
+import { ownerEntitledOrResponse } from '../lib/flags';
 import { authMiddleware, type AuthVars } from '../middleware/auth';
 import { getMembership } from '../repos/moves';
 import { getPhoto, markPhotoUploaded } from '../repos/photos';
-import { isOwnerEntitled } from '../repos/sharing';
 import type { Env } from '../types';
 import { ROLES } from '@shared/index';
 
@@ -26,8 +25,8 @@ export function photoBlobRoutes(deps: Deps) {
     const member = await getMembership(db, photo.moveId, c.get('user').id);
     if (!member) return c.json({ error: 'NOT_FOUND' }, 404);
     if (member.role === ROLES.viewer) return c.json({ error: 'FORBIDDEN_ROLE' }, 403);
-    if (billingEnabled(c.env) && !(await isOwnerEntitled(db, photo.moveId, deps.now())))
-      return c.json({ error: 'ENTITLEMENT_REQUIRED' }, 402);
+    const entitled = await ownerEntitledOrResponse(deps, c, photo.moveId);
+    if (entitled) return entitled;
 
     const declared = Number(c.req.header('content-length') ?? '0');
     if (declared > MAX_PHOTO_BYTES) return c.json({ error: 'TOO_LARGE' }, 413);

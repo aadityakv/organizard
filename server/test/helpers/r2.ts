@@ -23,8 +23,8 @@ export function makeMemoryR2(): R2Bucket {
         httpMetadata: { contentType: e.contentType },
       };
     },
-    delete: async (key: string) => {
-      store.delete(key);
+    delete: async (key: string | string[]) => {
+      for (const k of Array.isArray(key) ? key : [key]) store.delete(k);
     },
   } as unknown as R2Bucket;
 }

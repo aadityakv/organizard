@@ -1,6 +1,8 @@
 // Password hashing for email/password sign-in. PBKDF2 via WebCrypto — no native
 // deps, runs the same in the Workers runtime and in Node 20+ (tests). Stored as a
 // self-describing string: `pbkdf2$<iterations>$<saltB64>$<hashB64>`.
+import { timingSafeEqualBytes } from './bytes';
+
 const ITERATIONS = 100_000;
 const KEY_BYTES = 32;
 const SALT_BYTES = 16;
@@ -29,13 +31,6 @@ async function derive(password: string, salt: Uint8Array, iterations: number): P
   return new Uint8Array(bits);
 }
 
-function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-  return diff === 0;
-}
-
 /** Hash a password with a fresh salt; the result is self-describing for verification. */
 export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
@@ -59,5 +54,13 @@ export async function verifyPassword(password: string, stored: string | null | u
     return false;
   }
   const actual = await derive(password, salt, iterations);
-  return timingSafeEqual(actual, expected);
+  return timingSafeEqualBytes(actual, expected);
 }
+
+/**
+ * A hash of an unguessable throwaway password. Login verifies against this when
+ * the email has no account, so an unknown email costs the same ~100k-iteration
+ * derive as a wrong password and response timing can't reveal account existence.
+ */
+export const DUMMY_PASSWORD_HASH =
+  'pbkdf2$100000$ASNFZ4mrze8BI0VniavN7w==$/LmaGyf9rqRo0+FUFYGZqCp4X4RM8oMHl/rqDJUr9lY=';

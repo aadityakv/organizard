@@ -1,7 +1,7 @@
 // Move-scope guards: confirm a payload-supplied id actually belongs to the move
 // before it's written/linked. Prevents cross-move (IDOR) writes — an editor of
 // move A must not be able to reference move B's rooms/boxes/statuses/markers/items.
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
@@ -83,4 +83,14 @@ export async function markersInMove(db: AppDb, moveId: string, ids: string[]): P
   const out: string[] = [];
   for (const id of ids) if (await markerInMove(db, moveId, id)) out.push(id);
   return out;
+}
+
+/** Keep only photo ids that belong to the move. */
+export async function photosInMove(db: AppDb, moveId: string, ids: string[]): Promise<string[]> {
+  if (!ids.length) return [];
+  const rows = await db
+    .select({ id: s.photos.id })
+    .from(s.photos)
+    .where(and(eq(s.photos.moveId, moveId), inArray(s.photos.id, ids)));
+  return rows.map((r) => r.id);
 }

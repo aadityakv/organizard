@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
 import { authMiddleware, type AuthVars } from '../middleware/auth';
-import { hashPassword, verifyPassword } from '../lib/password';
+import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from '../lib/password';
 import { rateLimit } from '../lib/ratelimit';
 import { createSession, deleteAllSessions, deleteSession } from '../lib/session';
 import {
@@ -25,6 +25,11 @@ export function authRoutes(deps: Deps) {
     const body = await parseBody(c, appleLoginBody);
     if (!body.ok) return c.json({ error: 'MISSING_TOKEN' }, 400);
     const { identityToken } = body.data;
+
+    // Throttle abuse like the other sign-in endpoints (per IP, 15-min window).
+    const ip = c.req.header('cf-connecting-ip') ?? 'unknown';
+    if (!(await rateLimit(c.env.SESSIONS, `apple:${ip}`, 50, 900)))
+      return c.json({ error: 'RATE_LIMITED' }, 429);
 
     let identity;
     try {
@@ -87,8 +92,10 @@ export function authRoutes(deps: Deps) {
 
     const db = deps.getDb(c.env);
     const user = await getUserByEmail(db, normalized);
-    if (!user || !(await verifyPassword(password, user.passwordHash)))
-      return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
+    // Always run one PBKDF2 derive (against a dummy hash when there is no
+    // account) so response timing can't reveal whether the email exists.
+    const ok = await verifyPassword(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
+    if (!user || !ok) return c.json({ error: 'INVALID_CREDENTIALS' }, 401);
 
     const session = deps.newToken();
     await createSession(c.env, session, user.id, deps.now());
@@ -99,7 +106,7 @@ export function authRoutes(deps: Deps) {
   // data, their memberships, and revokes every session.
   r.delete('/account', authMiddleware(deps), async (c) => {
     const userId = c.get('user').id;
-    await deleteUserAndData(deps.getDb(c.env), userId);
+    await deleteUserAndData(deps.getDb(c.env), userId, (keys) => c.env.PHOTOS.delete(keys));
     await deleteAllSessions(c.env, userId);
     return c.json({ ok: true });
   });

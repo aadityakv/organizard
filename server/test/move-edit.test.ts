@@ -96,3 +96,34 @@ describe('updateMove — edits the move row', () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe('updateMove — delta down-sync', () => {
+  it('the move row rides the changes delta after an edit, carrying the new values', async () => {
+    const h = await makeHarness();
+    const { session } = await h.login('owner', 'o@x.com');
+    const snap0 = await createMove(h, session);
+    const moveId = snap0.move.id;
+
+    type Changes = {
+      move: { name: string; from: string | null; to: string | null; targetDate: string | null } | null;
+    };
+    const before = (await (
+      await h.request(`/v1/moves/${moveId}/changes?since=0`, auth(session))
+    ).json()) as Changes;
+    expect(before.move?.name).toBe('NYC Move');
+
+    await h.json(
+      `/v1/moves/${moveId}/mutations`,
+      {
+        mutations: [m('updateMove', { name: 'Renamed', to: '2 New Ave' }, 'c1')],
+      },
+      auth(session),
+    );
+
+    const after = (await (
+      await h.request(`/v1/moves/${moveId}/changes?since=0`, auth(session))
+    ).json()) as Changes;
+    expect(after.move?.name).toBe('Renamed');
+    expect(after.move?.to).toBe('2 New Ave');
+  });
+});

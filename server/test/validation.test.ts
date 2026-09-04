@@ -49,4 +49,49 @@ describe('request body validation', () => {
     expect(res.status).toBe(400);
     expect(((await res.json()) as { error: string }).error).toBe('INVALID_NAME');
   });
+
+  it('mutations: oversized strings and arrays are rejected before anything is applied', async () => {
+    const h = await makeHarness();
+    const owner = await h.login('own', 'own@x.com');
+    const created = await h.json('/v1/moves', { name: 'M' }, auth(owner.session));
+    const { move } = (await created.json()) as { move: { id: string } };
+
+    const bigName = 'x'.repeat(5000);
+    const res = await h.json(
+      `/v1/moves/${move.id}/mutations`,
+      {
+        mutations: [
+          { type: 'addRoom', clientId: 'c1', ts: 1, payload: { id: 'r1', name: bigName, icon: 'box' } },
+        ],
+      },
+      auth(owner.session),
+    );
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: string }).error).toBe('BAD_MUTATION');
+
+    const bigArray = Array.from({ length: 100 }, (_, i) => `m${i}`);
+    const res2 = await h.json(
+      `/v1/moves/${move.id}/mutations`,
+      {
+        mutations: [
+          {
+            type: 'addItem',
+            clientId: 'c2',
+            ts: 1,
+            payload: { id: 'i1', boxId: 'b1', name: 'Ok', qty: 1, valueCents: 0, markerIds: bigArray },
+          },
+        ],
+      },
+      auth(owner.session),
+    );
+    expect(res2.status).toBe(400);
+  });
+
+  it('create move: an oversized name is INVALID_NAME', async () => {
+    const h = await makeHarness();
+    const owner = await h.login('own', 'own@x.com');
+    const res = await h.json('/v1/moves', { name: 'y'.repeat(5000) }, auth(owner.session));
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: string }).error).toBe('INVALID_NAME');
+  });
 });

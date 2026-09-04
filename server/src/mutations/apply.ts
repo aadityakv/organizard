@@ -1,6 +1,6 @@
 // The server half of the sync contract: apply a batch of client mutations to a move.
 import type { Mutation } from '@shared/index';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
 import * as s from '../db/schema';
@@ -11,11 +11,18 @@ import {
   markersInMove,
   markerInMove,
   photoInMove,
+  photosInMove,
   roomInMove,
   statusInMove,
 } from '../repos/scope';
 
-/** Apply a mutation batch in order (last write wins); a clientId already in mutation_log is skipped, so retries are safe. */
+/** Apply a mutation batch in order; a clientId already in mutation_log is skipped, so retries are safe.
+ *
+ * Idempotency is check-then-act: two concurrent retries of the same clientId could both pass the
+ * check. That is acceptable because every operation is itself idempotent (inserts are
+ * onConflictDoNothing, updates set full columns, setBoxMarker is intent-based) — the worst case is
+ * the same logical change applied twice with the same result.
+ */
 export async function applyMutations(
   db: AppDb,
   deps: Deps,
@@ -85,12 +92,32 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
         .where(and(eq(s.rooms.id, p.id), eq(s.rooms.moveId, moveId)));
       return;
     }
-    case 'deleteRoom':
+    case 'deleteRoom': {
+      // Like deleteBox, tombstone the children too: a deleted room's boxes (and
+      // their items) must not linger as live orphans in snapshots/deltas.
+      const roomId = m.payload.id;
       await db
         .update(s.rooms)
         .set({ deletedAt: now, updatedAt: now })
-        .where(and(eq(s.rooms.id, m.payload.id), eq(s.rooms.moveId, moveId)));
+        .where(and(eq(s.rooms.id, roomId), eq(s.rooms.moveId, moveId)));
+      const boxIds = (
+        await db
+          .select({ id: s.boxes.id })
+          .from(s.boxes)
+          .where(and(eq(s.boxes.roomId, roomId), eq(s.boxes.moveId, moveId), isNull(s.boxes.deletedAt)))
+      ).map((r) => r.id);
+      if (boxIds.length) {
+        await db
+          .update(s.boxes)
+          .set({ deletedAt: now, updatedAt: now })
+          .where(and(eq(s.boxes.moveId, moveId), inArray(s.boxes.id, boxIds)));
+        await db
+          .update(s.items)
+          .set({ deletedAt: now, updatedAt: now })
+          .where(and(eq(s.items.moveId, moveId), inArray(s.items.boxId, boxIds)));
+      }
       return;
+    }
 
     case 'addBox': {
       const p = m.payload;
@@ -245,6 +272,19 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
         for (const markerId of await markersInMove(db, moveId, p.markerIds)) {
           await db.insert(s.itemMarkers).values({ itemId: p.id, markerId }).onConflictDoNothing();
         }
+      }
+      if (p.photoIds !== undefined) {
+        // Replace the item's photo links with the given set (cross-move ids dropped).
+        const wanted = new Set(await photosInMove(db, moveId, p.photoIds));
+        const linked = await db.select({ id: s.photos.id }).from(s.photos).where(eq(s.photos.itemId, p.id));
+        const unlink = linked.map((r) => r.id).filter((id) => !wanted.has(id));
+        if (unlink.length)
+          await db.update(s.photos).set({ itemId: null }).where(inArray(s.photos.id, unlink));
+        if (wanted.size)
+          await db
+            .update(s.photos)
+            .set({ itemId: p.id })
+            .where(inArray(s.photos.id, [...wanted]));
       }
       return;
     }

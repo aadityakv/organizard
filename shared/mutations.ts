@@ -1,6 +1,10 @@
 // The mutation contract — the heart of the sync engine. The client applies a
-// mutation optimistically + queues it; the Worker re-applies it (role-checked,
-// last-write-wins) when the outbox flushes. clientId makes retries idempotent.
+// mutation optimistically + queues it; the Worker re-applies it (role-checked)
+// when the outbox flushes. clientId makes retries idempotent.
+//
+// Conflict resolution is ARRIVAL ORDER (the server applies whatever flushes last;
+// `ts` is debug/ordering metadata, not compared against stored rows). Concurrent
+// edits on two devices resolve to whichever device flushes later.
 import { ROLES } from './models';
 
 export type Mutation =

@@ -1,11 +1,17 @@
 // Runtime validation for every request body. The mutation batch is the main
 // untrusted surface: a discriminated union mirroring shared/mutations.ts rejects
 // unknown types, missing fields and out-of-range numbers before anything is applied.
-import { ROLE_LIST, ROLES } from '@shared/index';
+import { ROLES } from '@shared/index';
 import { z } from 'zod';
 
-const str = z.string().min(1);
-const nstr = z.string().nullable();
+// Every untrusted string is length-capped so one request can't push megabytes
+// into D1 (and from there into every snapshot/delta). Ids are ~21 chars, names
+// and labels are short; notes/dest get the generous cap.
+const str = z.string().min(1).max(200);
+const nstr = z.string().max(4000).nullable();
+// Apple identity tokens are signed JWTs — much longer than a normal field.
+const tokenStr = z.string().min(1).max(8192);
+const ids = z.array(str).max(50);
 
 const mutationSchema = z.discriminatedUnion('type', [
   z.object({
@@ -34,7 +40,7 @@ const mutationSchema = z.discriminatedUnion('type', [
     payload: z.object({
       id: str,
       roomId: str,
-      number: z.number().int().nonnegative(),
+      number: z.number().int().nonnegative().max(1_000_000),
       name: str,
       color: str,
       statusId: str,
@@ -85,12 +91,12 @@ const mutationSchema = z.discriminatedUnion('type', [
       id: str,
       boxId: str,
       name: str,
-      qty: z.number().int().min(1),
-      valueCents: z.number().int().min(0),
+      qty: z.number().int().min(1).max(1_000_000),
+      valueCents: z.number().int().min(0).max(1_000_000_000),
       note: nstr.optional(),
       icon: nstr.optional(),
-      markerIds: z.array(str).optional(),
-      photoIds: z.array(str).optional(),
+      markerIds: ids.optional(),
+      photoIds: ids.optional(),
     }),
   }),
   z.object({
@@ -101,11 +107,11 @@ const mutationSchema = z.discriminatedUnion('type', [
       id: str,
       boxId: str,
       name: str.optional(),
-      qty: z.number().int().min(1).optional(),
-      valueCents: z.number().int().min(0).optional(),
+      qty: z.number().int().min(1).max(1_000_000).optional(),
+      valueCents: z.number().int().min(0).max(1_000_000_000).optional(),
       note: nstr.optional(),
-      markerIds: z.array(str).optional(),
-      photoIds: z.array(str).optional(),
+      markerIds: ids.optional(),
+      photoIds: ids.optional(),
     }),
   }),
   z.object({
@@ -126,10 +132,11 @@ const mutationSchema = z.discriminatedUnion('type', [
     clientId: str,
     ts: z.number(),
     payload: z.object({
-      name: z.string().optional(),
-      from: z.string().optional(),
-      to: z.string().optional(),
-      target: z.string().optional(),
+      // 120 to match createMoveBody — a name legal at update must stay legal at share-time.
+      name: z.string().min(1).max(120).optional(),
+      from: z.string().max(200).optional(),
+      to: z.string().max(200).optional(),
+      target: z.string().max(200).optional(),
     }),
   }),
 ]);
@@ -145,7 +152,7 @@ const PASSWORD_MAX = 200;
 
 const email = z.string().trim().toLowerCase().max(254).regex(EMAIL_RE);
 
-export const appleLoginBody = z.object({ identityToken: str });
+export const appleLoginBody = z.object({ identityToken: tokenStr });
 export const registerBody = z.object({ email, password: z.string().min(PASSWORD_MIN).max(PASSWORD_MAX) });
 export const loginBody = z.object({ email, password: str });
 export const createMoveBody = z.object({
@@ -154,11 +161,17 @@ export const createMoveBody = z.object({
   to: nstr.optional(),
   targetDate: nstr.optional(),
   seed: z.boolean().optional(),
+  /** Stable id (the local move's id) so a retried share reuses the server move. */
+  clientId: str.optional(),
 });
-export const inviteBody = z.object({ role: z.enum(ROLE_LIST).default(ROLES.viewer) });
+/** Invites can only grant editor/viewer — ownership is never transferable via invite. */
+export const inviteBody = z.object({ role: z.enum([ROLES.editor, ROLES.viewer]).default(ROLES.viewer) });
 /** Only editor/viewer are assignable; ownership transfer is not a role change. */
 export const memberRoleBody = z.object({ role: z.enum([ROLES.editor, ROLES.viewer]) });
-export const photoLinkBody = z.object({ itemId: str.optional(), boxId: str.optional() });
+/** A photo must link to an item or a box — otherwise it is unreachable and orphaned forever. */
+export const photoLinkBody = z
+  .object({ itemId: str.optional(), boxId: str.optional() })
+  .refine((d) => Boolean(d.itemId || d.boxId), { message: 'itemId or boxId required' });
 export const webhookBody = z.object({
   event: z.object({ type: str, app_user_id: str, expiration_at_ms: z.number().nullish() }),
 });

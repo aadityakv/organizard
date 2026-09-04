@@ -13,6 +13,8 @@ export interface Move {
   to?: string | null;
   targetDate?: string | null;
   ownerId: string;
+  /** The creating client's local move id; lets a retried share adopt the server move. */
+  clientId?: string | null;
   updatedAt: number;
 }
 
@@ -83,5 +85,4 @@ export interface Member {
   userId: string;
   role: Role;
   name: string;
-  you?: boolean;
 }
