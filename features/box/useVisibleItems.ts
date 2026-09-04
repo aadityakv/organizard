@@ -27,7 +27,6 @@ export function useVisibleItems(items: Item[], allMarkers: Marker[]) {
       return !prev;
     });
 
-  // The list actually rendered: filter by name + marker label, then sort.
   const visibleItems = useMemo<Item[]>(() => {
     const q = query.trim().toLowerCase();
     const filtered = q

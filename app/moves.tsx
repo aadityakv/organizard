@@ -71,7 +71,7 @@ export default function Moves() {
   };
 
   const confirmDelete = (move: MoveSummary) => {
-    setMenuFor(null); // close the sheet first
+    setMenuFor(null);
     Alert.alert('Delete move?', `“${move.name}” and its boxes will be permanently deleted.`, [
       { text: 'Cancel', style: 'cancel' },
       {

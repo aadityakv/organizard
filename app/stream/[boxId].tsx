@@ -203,7 +203,6 @@ export default function StreamSession() {
           <CaptureView isPro={isPro} onSwitchToStream={onSwitchToStream} onCapture={captureSingle} />
         ) : (
           <>
-            {/* back to single capture · photos switch */}
             <ModeSwitchRow
               voiceMode={voiceMode}
               listening={dictation.mic === 'listening'}
@@ -211,7 +210,6 @@ export default function StreamSession() {
               onToggleVoiceMode={() => setVoiceMode((v) => !v)}
             />
 
-            {/* viewfinder */}
             <Viewfinder
               mode={photoMode ? 'frame' : 'voice'}
               hint={
@@ -232,7 +230,6 @@ export default function StreamSession() {
               onFixLast={() => session.lastId && session.setEditId(session.lastId)}
             />
 
-            {/* last captured card */}
             {lastIt && !flash ? (
               <LastCapturedCard
                 item={lastIt}
@@ -292,7 +289,6 @@ export default function StreamSession() {
         onClose={() => session.setEditId(null)}
       />
 
-      {/* session summary */}
       {summaryOpen ? (
         <View style={styles.summaryScrim}>
           <View style={styles.summaryCard}>

@@ -53,7 +53,6 @@ describe('updateMove — edits the move row', () => {
     const snap0 = await createMove(h, session);
     const moveId = snap0.move.id;
 
-    // Seed all fields first.
     await h.json(
       `/v1/moves/${moveId}/mutations`,
       {
@@ -62,7 +61,6 @@ describe('updateMove — edits the move row', () => {
       auth(session),
     );
 
-    // Patch only the target date.
     const res = await h.json(
       `/v1/moves/${moveId}/mutations`,
       {

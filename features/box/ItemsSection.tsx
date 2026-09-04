@@ -49,7 +49,6 @@ export function ItemsSection({
         )}
       </View>
 
-      {/* Sort + search controls — only when there are items to act on. */}
       {items.length > 0 && (
         <View style={styles.itemControls}>
           {searching && (

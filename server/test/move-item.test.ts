@@ -27,7 +27,6 @@ describe('moveItem — moves an item between boxes', () => {
     const moveId = snap0.move.id;
     const statusId = snap0.statuses[0].id;
 
-    // room + two boxes (A, B) + an item in box A
     await h.json(
       `/v1/moves/${moveId}/mutations`,
       {
@@ -41,7 +40,6 @@ describe('moveItem — moves an item between boxes', () => {
       auth(session),
     );
 
-    // move the item from A -> B
     const res = await h.json(
       `/v1/moves/${moveId}/mutations`,
       {
@@ -76,7 +74,6 @@ describe('moveItem — moves an item between boxes', () => {
       auth(session),
     );
 
-    // toBoxId is a foreign/non-existent box -> must be a no-op
     const res = await h.json(
       `/v1/moves/${moveId}/mutations`,
       {

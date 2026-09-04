@@ -37,7 +37,6 @@ export default function GalleryScreen() {
 
   const { width } = useWindowDimensions();
 
-  // Clamp the requested start index into range.
   const startIndex = useMemo(() => {
     const n = Number(start);
     if (!Number.isFinite(n)) return 0;
@@ -62,7 +61,6 @@ export default function GalleryScreen() {
     scrollRef.current?.scrollTo({ x: startIndex * width, y: 0, animated: false });
   };
 
-  // Nothing to show — bail back out.
   if (photos.length === 0) {
     return <SafeAreaView style={styles.screen} />;
   }
@@ -99,7 +97,6 @@ export default function GalleryScreen() {
         })}
       </ScrollView>
 
-      {/* Top bar — close + position indicator */}
       <View style={styles.topBar} pointerEvents="box-none">
         <Pressable
           accessibilityRole="button"
@@ -117,7 +114,6 @@ export default function GalleryScreen() {
         </View>
       </View>
 
-      {/* Bottom label — box photo, or a tappable link to the source item */}
       <View style={styles.bottomBar} pointerEvents="box-none">
         {current.kind === 'box' ? (
           <View style={styles.labelPill}>

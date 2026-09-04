@@ -53,7 +53,6 @@ export function BoxHero({
         }
       />
 
-      {/* Status + value strip */}
       <View style={styles.heroStrip}>
         <View style={[styles.heroDot, { backgroundColor: hue }]} />
         {canEdit ? (

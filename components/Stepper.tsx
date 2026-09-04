@@ -53,7 +53,6 @@ export function Stepper({
 
   return (
     <View style={styles.row}>
-      {/* Decrement button */}
       <Pressable
         onPress={() => set(value - step)}
         disabled={atMin}
@@ -70,7 +69,6 @@ export function Stepper({
         <Text style={[styles.btnLabel, atMin ? styles.btnLabelDisabled : styles.btnLabelEnabled]}>{'−'}</Text>
       </Pressable>
 
-      {/* Editable value — type a number directly, or use the buttons */}
       <TextInput
         value={text}
         onChangeText={onText}
@@ -83,7 +81,6 @@ export function Stepper({
         style={styles.valueInput}
       />
 
-      {/* Increment button */}
       <Pressable
         onPress={() => set(value + step)}
         disabled={atMax}

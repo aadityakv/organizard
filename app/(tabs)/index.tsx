@@ -105,7 +105,6 @@ export default function Dashboard() {
         }
       />
 
-      {/* Move progress bar */}
       <View style={styles.progressTrack}>
         <View style={[styles.progressFill, { width: `${pct}%` }]} />
       </View>
@@ -122,7 +121,6 @@ export default function Dashboard() {
           <FindResults query={query} />
         ) : (
           <>
-            {/* Totals */}
             <View style={styles.totalsCard}>
               <ValueStat value={money(totals.value)} label="Estimated value" tone="brand" />
               <View style={styles.totalsDivider} />
@@ -130,7 +128,6 @@ export default function Dashboard() {
               <ValueStat value={totals.items} label="Items" />
             </View>
 
-            {/* Group control */}
             <View style={styles.controlRow}>
               <Segmented
                 options={GROUP_OPTIONS}
@@ -154,7 +151,6 @@ export default function Dashboard() {
                   />
                 ))}
 
-                {/* Create affordances — Owner/Editor only; Viewer gets a LockNote. */}
                 {canEdit ? (
                   <View style={styles.addRow}>
                     {/* Boxes are added per-room (the "+ Add box" tile in each room).
