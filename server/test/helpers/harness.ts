@@ -35,6 +35,7 @@ export async function makeHarness(opts: { now?: number; billing?: boolean } = {}
     now: () => opts.now ?? 1_700_000_000_000,
     newId: () => `id_${idN++}`,
     newToken: () => `tok_${tokN++}`,
+    log: () => {}, // keep test output to the test runner's own lines
     verifyApple: async () => {
       if (!appleNext) throw new Error('invalid apple token');
       return appleNext;

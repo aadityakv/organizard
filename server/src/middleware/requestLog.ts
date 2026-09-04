@@ -1,5 +1,6 @@
 import { createMiddleware } from 'hono/factory';
 
+import type { Deps } from '../deps';
 import type { Env } from '../types';
 import type { AuthVars } from './auth';
 
@@ -13,13 +14,14 @@ import type { AuthVars } from './auth';
  * `user` is read AFTER `next()` resolves (auth middleware sets it on the way
  * in), so it is populated for authed routes and undefined for public ones.
  */
-export function requestLogMiddleware() {
+export function requestLogMiddleware(deps: Deps) {
   return createMiddleware<{ Bindings: Env; Variables: AuthVars }>(async (c, next) => {
     const start = Date.now();
     try {
       await next();
     } catch (e) {
-      console.error(
+      deps.log(
+        'error',
         JSON.stringify({
           evt: 'http',
           method: c.req.method,
@@ -33,9 +35,8 @@ export function requestLogMiddleware() {
       );
       throw e;
     }
-    // Keep vitest output readable; logging is behavior-neutral so nothing is lost.
-    if (process.env.VITEST) return;
-    console.log(
+    deps.log(
+      'info',
       JSON.stringify({
         evt: 'http',
         method: c.req.method,

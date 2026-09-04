@@ -1,6 +1,6 @@
-// JS surface for the native on-device speech recognizer (iOS only). On Android the
-// module is absent (requireOptionalNativeModule → null) and callers fall back to
-// simulated dictation.
+// JS surface for the native on-device speech recognizer (iOS only). Where the module
+// is absent (Android, or a build without it) every function reports unavailable and
+// lib/voice/dictation surfaces that to the user.
 import { requireOptionalNativeModule } from 'expo';
 
 type Sub = { remove: () => void };

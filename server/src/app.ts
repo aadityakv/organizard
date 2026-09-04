@@ -30,7 +30,7 @@ export function createApp(overrides: Partial<Deps> = {}) {
   });
 
   // Registered first so it wraps every route (incl. legal pages and 404s).
-  app.use('*', requestLogMiddleware());
+  app.use('*', requestLogMiddleware(deps));
 
   app.get('/v1/health', (c) => c.json({ ok: true, time: deps.now() }));
 

@@ -11,6 +11,8 @@ export type Deps = {
   newId: () => string;
   newToken: () => string;
   verifyApple: (identityToken: string, bundleId: string | undefined) => Promise<AppleIdentity>;
+  /** Structured log sink (one JSON line per call). Tests replace it with a no-op. */
+  log: (level: 'info' | 'error', line: string) => void;
 };
 
 export const defaultDeps: Deps = {
@@ -19,4 +21,5 @@ export const defaultDeps: Deps = {
   newId,
   newToken,
   verifyApple: verifyAppleToken,
+  log: (level, line) => (level === 'error' ? console.error(line) : console.log(line)),
 };
