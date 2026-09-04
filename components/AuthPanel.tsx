@@ -25,6 +25,7 @@ function friendly(e: unknown): string {
   return e instanceof Error ? e.message : 'Something went wrong.';
 }
 
+/** Sign-in form: Sign in with Apple plus email/password login or registration. */
 export function AuthPanel({
   title = 'Sign in',
   subtitle,

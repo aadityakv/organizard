@@ -11,6 +11,7 @@ import type { LibraryActions, Store } from '../types';
 
 export type LibrarySlice = StateCreator<Store, [['zustand/persist', unknown]], [], LibraryActions>;
 
+/** Actions that manage the library of moves. */
 export const createLibrarySlice: LibrarySlice = (set) => ({
   createMove: ({ name, from = '', to = '', target = '' }) => {
     const id = uid('mv');

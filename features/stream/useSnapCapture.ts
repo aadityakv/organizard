@@ -8,6 +8,7 @@ import { persistCapture } from '@/lib/photos';
 
 const FLASH_MS = 200;
 
+/** Camera ref and snap-to-persisted-ref for the streaming session. */
 export function useSnapCapture() {
   const cameraRef = useRef<CameraView>(null);
   const [camPerm, requestCamPerm] = useCameraPermissions();

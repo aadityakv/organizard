@@ -15,6 +15,7 @@ import { printLabels } from '@/services/print';
 import { useStore } from '@/store/useStore';
 import type { Box } from '@/data/types';
 
+/** Print labels: pick boxes and share a PDF sheet of their QR labels. */
 export default function PrintLabels() {
   const boxes = useStore((s) => s.boxes);
   const rooms = useStore((s) => s.rooms);

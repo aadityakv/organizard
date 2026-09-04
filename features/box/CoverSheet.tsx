@@ -10,6 +10,7 @@ import { palette, radius } from '@/theme';
 
 import { shared } from './styles';
 
+/** Sheet to capture a new cover photo or remove the current one. */
 export function CoverSheet({
   visible,
   hasCover,

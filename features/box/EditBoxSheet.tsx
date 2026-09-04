@@ -9,6 +9,7 @@ import { BOX_COLORS, colors, fonts, fontSize, palette, radius } from '@/theme';
 
 import { shared } from './styles';
 
+/** Sheet to rename a box, change its color or move it to another room. */
 export function EditBoxSheet({
   visible,
   box,

@@ -7,6 +7,7 @@ import { colors, fonts, fontSize, gutter, palette, space } from '@/theme';
 
 import { KBD_ACCESSORY_ID } from './constants';
 
+/** iOS keyboard accessory with a Done button for fields that have no return key. */
 export function KeyboardDoneBar() {
   if (Platform.OS !== 'ios') return null;
   return (

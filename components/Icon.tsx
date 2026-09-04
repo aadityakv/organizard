@@ -19,6 +19,7 @@ export type IconProps = {
   strokeWidth?: number;
 };
 
+/** Lucide icon by kebab-case name, falling back to a generic glyph for unknown names. */
 export function Icon({ name, size = 22, color = colors.textBody, strokeWidth = 2 }: IconProps) {
   const map = icons as unknown as Record<
     string,

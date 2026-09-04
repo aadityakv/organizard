@@ -7,6 +7,7 @@ import { Badge, IconButton } from '@/components';
 import type { MoveSummary } from '@/store/library';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
+/** One move in the library list with its summary and menu button. */
 export function MoveRow({
   move,
   onOpen,

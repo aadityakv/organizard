@@ -10,6 +10,7 @@ import type {
 } from '@/shared';
 import type { Box, Item, Marker, Member, Room, Status } from '@/data/types';
 
+/** Server room → client room. */
 export const toClientRoom = (r: SRoom): Room => ({
   id: r.id,
   name: r.name,
@@ -18,6 +19,7 @@ export const toClientRoom = (r: SRoom): Room => ({
   color: r.color ?? 'slate',
 });
 
+/** Server status → client status. */
 export const toClientStatus = (r: SStatus): Status => ({
   id: r.id,
   label: r.label,
@@ -25,6 +27,7 @@ export const toClientStatus = (r: SStatus): Status => ({
   custom: r.custom,
 });
 
+/** Server marker → client marker. */
 export const toClientMarker = (r: SMarker): Marker => ({
   id: r.id,
   label: r.label,
@@ -33,6 +36,7 @@ export const toClientMarker = (r: SMarker): Marker => ({
   custom: r.custom,
 });
 
+/** Server box → client box (statusId → status, markerIds → markers). */
 export const toClientBox = (b: SBox): Box => ({
   id: b.id,
   number: b.number,
@@ -44,6 +48,7 @@ export const toClientBox = (b: SBox): Box => ({
   cover: b.coverPhotoId ?? null,
 });
 
+/** Server item → client item (cents → dollars). */
 export const toClientItem = (i: SItem): Item => ({
   id: i.id,
   boxId: i.boxId,
@@ -56,4 +61,5 @@ export const toClientItem = (i: SItem): Item => ({
   photos: i.photoIds, // server photo ids; resolve to URLs via photoSource()
 });
 
+/** Server member → client member (keyed by user id). */
 export const toClientMember = (m: SMember): Member => ({ id: m.userId, name: m.name, role: m.role });

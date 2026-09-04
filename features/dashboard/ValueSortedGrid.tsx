@@ -9,6 +9,7 @@ import { useStore } from '@/store/useStore';
 import { DashboardBoxCard } from './DashboardBoxCard';
 import { shared } from './styles';
 
+/** Box grid ordered by estimated value, highest first. */
 export function ValueSortedGrid({ boxes }: { boxes: Box[] }) {
   const itemsByBox = useStore((s) => s.itemsByBox);
   const sorted = useMemo<Box[]>(() => {

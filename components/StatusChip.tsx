@@ -1,3 +1,4 @@
+// Box status pill.
 import React from 'react';
 import { StyleSheet, View, Text, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, boxTint, colors, radius, fonts, fontSize } from '@/theme';
@@ -9,6 +10,7 @@ export type StatusChipProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** Colored pill showing a box status label. */
 export function StatusChip({ label, color, size = 'md', style }: StatusChipProps) {
   const isSm = size === 'sm';
 

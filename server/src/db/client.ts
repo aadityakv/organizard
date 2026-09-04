@@ -1,3 +1,4 @@
+// Drizzle client over the D1 binding.
 import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1';
 
 import type { Env } from '../types';

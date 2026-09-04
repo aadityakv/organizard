@@ -1,3 +1,4 @@
+// Move persistence: create, snapshot, changes-since, delete, and the user's move list.
 import type { Box, Item, Marker, Member, Move, Role, Room, Status } from '@shared/index';
 import { and, eq, gt, inArray, isNull } from 'drizzle-orm';
 
@@ -29,6 +30,7 @@ export type Changes = {
   members: Member[];
 };
 
+/** The user's membership in a move, or null if they are not a member. */
 export async function getMembership(db: AppDb, moveId: string, userId: string): Promise<Membership | null> {
   const row = (
     await db
@@ -202,6 +204,7 @@ async function itemPhotoMap(db: AppDb, itemIds: string[]): Promise<Map<string, s
   return groupJoin(rows.filter((r) => r.itemId).map((r) => ({ left: r.itemId as string, right: r.id })));
 }
 
+/** Everything a client needs to open a move, or null if it does not exist. */
 export async function getMoveSnapshot(db: AppDb, moveId: string): Promise<Snapshot | null> {
   const move = (await db.select().from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
   if (!move) return null;

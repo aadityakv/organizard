@@ -1,3 +1,4 @@
+// Users: Apple and email upserts, password accounts, entitlement, deletion.
 import { eq } from 'drizzle-orm';
 
 import type { AppDb } from '../db/client';
@@ -36,6 +37,7 @@ function deriveName(email?: string | null): string {
   return cleaned ? cleaned.replace(/\b\w/g, (c) => c.toUpperCase()) : 'Friend';
 }
 
+/** User row by id. */
 export async function getUserById(db: AppDb, id: string): Promise<UserRow | undefined> {
   return (await db.select().from(users).where(eq(users.id, id)).limit(1))[0];
 }
@@ -94,6 +96,7 @@ export async function upsertEmailUser(
   return row;
 }
 
+/** User row by (normalised) email. */
 export async function getUserByEmail(db: AppDb, email: string): Promise<UserRow | undefined> {
   return (await db.select().from(users).where(eq(users.email, email)).limit(1))[0];
 }

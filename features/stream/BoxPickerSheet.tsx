@@ -15,6 +15,7 @@ type Props = {
   onClose: () => void;
 };
 
+/** Sheet to choose which box the session is capturing into. */
 export function BoxPickerSheet({ visible, view, boxes, selectedId, onSelect, onClose }: Props) {
   return (
     <Sheet

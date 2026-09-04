@@ -9,6 +9,7 @@ import { boxColor, boxTint, fonts, palette, radius } from '@/theme';
 
 import { shared } from './styles';
 
+/** Cover photo card with an edit affordance for editors. */
 export function CoverCard({
   box,
   session,

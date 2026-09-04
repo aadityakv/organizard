@@ -11,6 +11,7 @@ import { colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { shared } from './styles';
 
+/** One item in the box list: thumbnail, name, quantity, value and markers. */
 export function ItemRow({
   item,
   boxColor: hueName,

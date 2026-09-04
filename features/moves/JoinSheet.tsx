@@ -5,6 +5,7 @@ import { StyleSheet, Text } from 'react-native';
 import { Button, Input, Sheet } from '@/components';
 import { fonts, palette } from '@/theme';
 
+/** Sheet to paste an invite link and join a shared move. */
 export function JoinSheet({
   visible,
   onClose,

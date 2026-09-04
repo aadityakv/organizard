@@ -1,3 +1,4 @@
+// The design-system button: variants, sizes, icons and press feedback.
 import React from 'react';
 import {
   Pressable,
@@ -83,6 +84,7 @@ const variants: Record<NonNullable<ButtonProps['variant']>, VariantConfig> = {
   },
 };
 
+/** Primary action button with variants, sizes, optional icons and press feedback. */
 export function Button({
   variant = 'primary',
   size = 'md',

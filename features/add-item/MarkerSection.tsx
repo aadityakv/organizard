@@ -7,6 +7,7 @@ import type { Marker } from '@/data/types';
 
 import { sharedStyles } from './styles';
 
+/** Toggleable marker chips for the item. */
 export function MarkerSection({
   choices,
   selected,

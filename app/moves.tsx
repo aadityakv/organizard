@@ -23,6 +23,7 @@ import { colors, fonts, palette, space } from '@/theme';
 
 const EMPTY_MOVE: Move = { name: '', from: '', to: '', target: '' };
 
+/** Moves library: active and archived moves, account sheet, per-move menu and join-by-link. */
 export default function Moves() {
   const { summaries, active, archived, account, currentMoveId } = useMoveLibrary();
 
@@ -94,8 +95,6 @@ export default function Moves() {
     />
   );
   const accountSheet = <AccountSheet visible={accountOpen} onClose={() => setAccountOpen(false)} />;
-
-  // ── Empty state ───────────────────────────────────────────
   if (summaries.length === 0) {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -124,8 +123,6 @@ export default function Moves() {
       </SafeAreaView>
     );
   }
-
-  // ── Populated library ─────────────────────────────────────
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header
@@ -208,13 +205,9 @@ const styles = StyleSheet.create({
   },
 
   joinCta: { marginTop: 4 },
-
-  // ── Archived ──
   archivedBlock: { marginTop: 8, gap: 12 },
   archivedHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingLeft: 2 },
   archivedTitle: { fontFamily: fonts.body.extra, fontSize: 14, color: palette.ink700 },
-
-  // ── Empty state ──
   emptyShell: { flex: 1, paddingHorizontal: space[6] },
   hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   markGlow: {

@@ -1,3 +1,4 @@
+// Big-number stat with caption.
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
@@ -18,6 +19,7 @@ export type ValueStatProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** Big-number stat with a caption, used for totals and estimated value. */
 export function ValueStat({ value, label, icon, tone = 'default', align = 'left', style }: ValueStatProps) {
   const isBrand = tone === 'brand';
   const valueColor = isBrand ? colors.success : colors.textStrong;

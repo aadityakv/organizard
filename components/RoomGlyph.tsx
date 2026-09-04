@@ -14,6 +14,7 @@ export type RoomGlyphProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** Room icon on a tinted rounded square, keyed by the room color. */
 export function RoomGlyph({ icon, color, size = 32, style }: RoomGlyphProps) {
   const hue = color ?? 'slate';
   const iconSize = Math.round(size * 0.56);

@@ -41,9 +41,13 @@ export const moveTotals = (s: State): { boxes: number; items: number; value: num
   return { boxes: s.boxes.length, items, value };
 };
 
+/** Status lookup by id. */
 export const statusById = (s: State, id: string): Status | undefined => s.statuses.find((x) => x.id === id);
+/** Marker lookup by id. */
 export const markerById = (s: State, id: string): Marker | undefined => s.markers.find((x) => x.id === id);
+/** Room lookup by id. */
 export const roomById = (s: State, id: string): Room | undefined => s.rooms.find((x) => x.id === id);
+/** Box lookup by id. */
 export const boxById = (s: State, id: string): Box | undefined => s.boxes.find((x) => x.id === id);
 
 /** Resolve an item by id across all boxes, returning it with its owning box. Fresh object: useMemo. */
@@ -129,6 +133,7 @@ export const moveSummaries = (s: MoveSummaryInputs): MoveSummary[] => {
   return out.sort((a, z) => z.lastOpenedAt - a.lastOpenedAt);
 };
 
+/** The signed-in user's role in the open move (owner for local moves). */
 export const currentRole = (s: State): Role => roleFor(s.activeMode, s.members, s.account?.id ?? null);
 
 /** The data of any move: the live slice for the open one, the bundle otherwise. */

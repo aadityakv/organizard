@@ -1,11 +1,9 @@
+// Member avatar: photo when available, otherwise initials on a deterministic color.
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 
 import { boxColor, boxTint, BOX_COLORS, fonts } from '@/theme';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export type AvatarProps = {
   /** Member's display name — used for initials and deterministic color fallback. */
   name: string;
@@ -21,9 +19,6 @@ export type AvatarProps = {
   color?: string;
   style?: StyleProp<ViewStyle>;
 };
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 /** Derive initials from a display name (up to 2 words → 2 chars). */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).slice(0, 2);
@@ -41,9 +36,6 @@ function hueForName(name: string): string {
   }
   return BOX_COLORS[h % BOX_COLORS.length];
 }
-
-// ─── Component ───────────────────────────────────────────────────────────────
-
 export function Avatar({ name, size = 40, uri, color, style }: AvatarProps) {
   const hue = color ?? hueForName(name);
   const bgColor = boxTint(hue);
@@ -70,9 +62,6 @@ export function Avatar({ name, size = 40, uri, color, style }: AvatarProps) {
     </View>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',

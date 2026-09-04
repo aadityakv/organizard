@@ -27,6 +27,7 @@ import { colors, fonts, palette } from '@/theme';
 
 type SheetKind = 'status' | 'markers' | 'cover' | 'edit';
 
+/** Box detail: hero, cover, QR label, items with search/sort, and the status/markers/cover/edit sheets. */
 export default function BoxDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const boxId = id ?? '';

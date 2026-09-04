@@ -1,3 +1,4 @@
+// Members & sharing screen for the open move.
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,6 +28,7 @@ function friendlyError(e: unknown): string {
   return e instanceof Error ? e.message : 'Something went wrong.';
 }
 
+/** Members & sharing for the open move: roster, role changes, invite links, and the share upgrade. */
 export default function Members() {
   const account = useStore((s) => s.account);
   const session = useStore((s) => s.session);

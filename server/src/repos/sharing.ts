@@ -1,3 +1,4 @@
+// Invites and memberships.
 import type { Role } from '@shared/index';
 import { and, eq } from 'drizzle-orm';
 
@@ -8,6 +9,7 @@ import { isEntitledNow } from './users';
 
 const INVITE_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
+/** Mint a single-use invite token for a move at the given role. */
 export async function createInvite(
   db: AppDb,
   deps: Deps,
@@ -30,6 +32,7 @@ export async function createInvite(
 export type AcceptResult =
   { moveId: string } | { error: 'INVITE_INVALID' | 'INVITE_USED' | 'INVITE_EXPIRED' };
 
+/** Redeem an invite: validates, adds the membership and marks the token used. */
 export async function acceptInvite(
   db: AppDb,
   deps: Deps,
@@ -60,6 +63,7 @@ export async function acceptInvite(
   return { moveId: inv.moveId };
 }
 
+/** Owner user id of a move. */
 export async function getMoveOwnerId(db: AppDb, moveId: string): Promise<string | undefined> {
   const move = (await db.select().from(s.moves).where(eq(s.moves.id, moveId)).limit(1))[0];
   return move?.ownerId;
@@ -73,6 +77,7 @@ export async function isOwnerEntitled(db: AppDb, moveId: string, now: number): P
   return owner ? isEntitledNow(owner, now) : false;
 }
 
+/** Set a member's role in a move. */
 export async function changeMemberRole(
   db: AppDb,
   args: { moveId: string; userId: string; role: Role },
@@ -83,6 +88,7 @@ export async function changeMemberRole(
     .where(and(eq(s.members.moveId, args.moveId), eq(s.members.userId, args.userId)));
 }
 
+/** Remove a member from a move. */
 export async function removeMember(db: AppDb, args: { moveId: string; userId: string }): Promise<void> {
   await db.delete(s.members).where(and(eq(s.members.moveId, args.moveId), eq(s.members.userId, args.userId)));
 }

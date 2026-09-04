@@ -19,6 +19,7 @@ type Props = {
   onResay: () => void;
 };
 
+/** Bottom bar for the session: ledger, the big capture button, resay and finish. */
 export function StreamBottomBar({
   session,
   mic,

@@ -11,6 +11,7 @@ import { boxColor, colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { openBox } from './openBox';
 
+/** Search results for the dashboard: matching items and boxes with breadcrumbs. */
 export function FindResults({ query }: { query: string }) {
   const boxes = useStore((s) => s.boxes);
   const rooms = useStore((s) => s.rooms);
@@ -192,8 +193,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textOnBrand,
   },
-
-  // ── Find empty ──
   empty: {
     alignItems: 'center',
     paddingVertical: 40,

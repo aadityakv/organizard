@@ -8,6 +8,7 @@ import { boxColor, colors, fonts, fontSize, palette, radius } from '@/theme';
 
 import { sharedStyles } from './styles';
 
+/** Edit-mode picker to move the item to another box. */
 export function MoveToBoxPicker({
   boxes,
   targetBoxId,

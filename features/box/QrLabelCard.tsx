@@ -10,6 +10,7 @@ import { encodeBoxQR } from '@/lib/qr';
 import { printLabels } from '@/services/print';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
+/** Card with the box's QR code and actions to view or print the label. */
 export function QrLabelCard({ box, roomName }: { box: Box; roomName?: string }) {
   return (
     <View style={styles.qrCard}>

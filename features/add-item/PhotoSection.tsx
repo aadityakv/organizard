@@ -11,6 +11,7 @@ import { PhotoThumb } from './PhotoThumb';
 import { sharedStyles } from './styles';
 import { useCapture } from './useCapture';
 
+/** Photo strip plus the inline camera or "Add photo" affordance. */
 export function PhotoSection({
   photos,
   session,

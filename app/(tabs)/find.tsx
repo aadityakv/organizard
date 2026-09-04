@@ -12,6 +12,7 @@ import { fonts, palette, radius } from '@/theme';
 
 const SUGGESTIONS = ['Cast iron skillet', 'Monitor', 'Fragile'];
 
+/** Find tab: search every item and box in the move, or scan a label to jump to a box. */
 export default function Find() {
   const boxes = useStore((s) => s.boxes);
   const rooms = useStore((s) => s.rooms);

@@ -10,6 +10,7 @@ import { boxColor, boxTint, fonts, palette, space } from '@/theme';
 
 import { shared } from './styles';
 
+/** Tinted header for the box: number, name, room, status and the more menu. */
 export function BoxHero({
   box,
   room,

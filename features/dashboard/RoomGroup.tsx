@@ -10,6 +10,7 @@ import { fonts, fontSize, palette, radius } from '@/theme';
 import { DashboardBoxCard } from './DashboardBoxCard';
 import { shared } from './styles';
 
+/** One room on the dashboard: header with edit action and its box grid or empty prompt. */
 export function RoomGroup({
   room,
   boxes,

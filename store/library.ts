@@ -90,6 +90,7 @@ export function snapshotInto(meta: MoveBundle, slice: SliceData, now: number): M
   return { ...meta, ...slice, lastOpenedAt: now };
 }
 
+/** One library row for a bundle: counts, role and lifecycle fields. */
 export function summarize(b: MoveBundle, accountId: string | null = null): MoveSummary {
   let itemCount = 0;
   for (const items of Object.values(b.itemsByBox)) for (const it of items) itemCount += it.qty || 1;

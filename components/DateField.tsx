@@ -46,6 +46,7 @@ const MONTHS = [
 const sameDay = (a: Date, b: Date): boolean =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
+/** Date picker field with a self-contained calendar sheet (no native picker dependency). */
 export function DateField({ label, value, onChange, placeholder = 'Pick a date' }: DateFieldProps) {
   const [open, setOpen] = useState(false);
   // The month currently shown in the grid (defaults to the selection or today).

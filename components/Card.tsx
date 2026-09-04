@@ -4,6 +4,7 @@ import { StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 
 import { colors, radius, shadow } from '@/theme';
 
+/** Elevated white surface used for grouped content. */
 export function Card({ style, children, ...rest }: ViewProps & { children?: React.ReactNode }) {
   return (
     <View style={[styles.card, style as ViewStyle]} {...rest}>

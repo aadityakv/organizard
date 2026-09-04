@@ -24,6 +24,7 @@ import { EditMoveSheet } from '@/features/moves';
 import { money } from '@/lib/money';
 import { colors, fonts, fontSize, palette, radius, shadow, space } from '@/theme';
 
+/** Boxes tab: the open move at a glance, grouped by room, status or value, with add/edit sheets. */
 export default function Dashboard() {
   const [view, setView] = useState<GroupView>('room');
   const { move, rooms, boxes, progress, totals, canEdit, pct, sortedBoxes } = useDashboard(view);
@@ -238,8 +239,6 @@ const styles = StyleSheet.create({
     paddingTop: space[2],
     paddingBottom: 120,
   },
-
-  // ── Totals ──
   totalsCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -256,16 +255,12 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     backgroundColor: palette.sand300,
   },
-
-  // ── Group control ──
   controlRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 14,
   },
-
-  // ── Add affordances ──
   addRow: {
     flexDirection: 'row',
     gap: 10,

@@ -1,3 +1,4 @@
+// Segmented control.
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { colors, palette, radius, shadow, space, fonts, fontSize } from '@/theme';
@@ -10,6 +11,7 @@ export type SegmentedProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** Segmented control for a small set of mutually exclusive options. */
 export function Segmented({ options, value, onChange, size = 'md', style }: SegmentedProps) {
   const segmentHeight = size === 'sm' ? 32 : 38;
   const labelSize = size === 'sm' ? fontSize.sm : 14;

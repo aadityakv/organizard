@@ -35,6 +35,7 @@ import { uid } from '@/lib/uid';
 import { isProNow, useStore } from '@/store/useStore';
 import { colors, fonts, palette } from '@/theme';
 
+/** Capture screen: free single-item capture and the Pro streaming session, flipped in place. */
 export default function StreamSession() {
   const { boxId: initialBoxId, view: initialView } = useLocalSearchParams<{ boxId: string; view?: string }>();
   const boxes = useStore((s) => s.boxes);

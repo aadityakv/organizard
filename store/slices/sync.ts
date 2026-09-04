@@ -24,6 +24,7 @@ export type SyncSlice = StateCreator<Store, [['zustand/persist', unknown]], [], 
 
 const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Session, outbox and server-data ingestion actions. */
 export const createSyncSlice: SyncSlice = (set, get) => ({
   setOnboarded: (v) => set({ onboarded: v }),
   startProTrial: () => set({ proTrialUntil: Date.now() + TRIAL_MS }),

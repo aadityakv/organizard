@@ -20,6 +20,7 @@ import { useSheetForm } from '@/hooks/useSheetForm';
 import { useStore } from '@/store/useStore';
 import { fonts, palette } from '@/theme';
 
+/** Sheet to edit the open move's name, addresses and target date. */
 export function EditMoveSheet({
   visible,
   move,

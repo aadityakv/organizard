@@ -1,18 +1,13 @@
+// Small tonal label pill.
 import React from 'react';
 import { StyleSheet, Text, View, StyleProp, ViewStyle } from 'react-native';
 import { colors, palette, radius, fonts, fontSize } from '@/theme';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export type BadgeProps = {
   label: string;
   tone?: 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info';
   size?: 'sm' | 'md';
   style?: StyleProp<ViewStyle>;
 };
-
-// ─── Tone map ─────────────────────────────────────────────────────────────────
-
 const TONES: Record<NonNullable<BadgeProps['tone']>, { bg: string; text: string }> = {
   neutral: { bg: palette.cream200, text: palette.ink700 },
   brand: { bg: colors.brandWash, text: palette.green700 },
@@ -21,9 +16,6 @@ const TONES: Record<NonNullable<BadgeProps['tone']>, { bg: string; text: string 
   danger: { bg: colors.dangerWash, text: palette.red600 },
   info: { bg: colors.infoWash, text: palette.blue600 },
 };
-
-// ─── Component ───────────────────────────────────────────────────────────────
-
 export function Badge({ label, tone = 'neutral', size = 'md', style }: BadgeProps): React.JSX.Element {
   const toneStyle = TONES[tone] ?? TONES.neutral;
   const sizeStyle = size === 'sm' ? styles.containerSm : styles.containerMd;
@@ -37,9 +29,6 @@ export function Badge({ label, tone = 'neutral', size = 'md', style }: BadgeProp
     </View>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   base: {
     borderRadius: radius.pill,

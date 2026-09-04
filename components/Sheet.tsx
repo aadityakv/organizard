@@ -22,6 +22,7 @@ export type SheetProps = {
   children: React.ReactNode;
 };
 
+/** Bottom sheet modal: scrim, grabber, optional title and keyboard-aware scrolling content. */
 export function Sheet({ visible, onClose, title, children }: SheetProps) {
   const insets = useSafeAreaInsets();
   return (

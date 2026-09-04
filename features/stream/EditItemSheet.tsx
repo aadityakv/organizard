@@ -14,6 +14,7 @@ type Props = {
   onClose: () => void;
 };
 
+/** Sheet to fix a captured item's name, quantity or value, or remove it. */
 export function EditItemSheet({ item, onPatch, onRemove, onClose }: Props) {
   return (
     <Sheet visible={!!item} onClose={onClose} title="Fix this item">

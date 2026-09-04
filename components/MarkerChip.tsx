@@ -1,3 +1,4 @@
+// Handling-marker pill, display-only or toggleable.
 import React from 'react';
 import { Pressable, View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { boxColor, boxTint, colors, radius, fonts, fontSize } from '@/theme';
@@ -13,6 +14,7 @@ export type MarkerChipProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** Handling-marker pill (Fragile, Open first, …) that can be display-only or a toggle. */
 export function MarkerChip({
   label,
   color,

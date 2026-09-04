@@ -9,6 +9,7 @@ import { Icon } from '@/components';
 import { photoSource } from '@/lib/photos';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
+/** One captured photo in the strip, with cover badge and remove button. */
 export function PhotoThumb({
   photoRef,
   session,

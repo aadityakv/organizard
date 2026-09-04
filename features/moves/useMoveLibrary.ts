@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { moveSummaries, useStore } from '@/store/useStore';
 
+/** Move summaries for the library screen, derived from stable store slices. */
 export function useMoveLibrary() {
   // moveSummaries builds a fresh array of fresh objects every call, so feeding it to
   // useShallow infinite-loops (useShallow's one-level compare can't stabilize nested

@@ -17,6 +17,7 @@ export type ThumbProps = {
   headers?: Record<string, string>;
 };
 
+/** Square thumbnail: a photo when a URI is given, else a tinted icon placeholder. */
 export function Thumb({
   color = 'green',
   icon = 'image',

@@ -1,3 +1,4 @@
+// Labelled text input with an animated focus ring.
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, StyleProp, ViewStyle, Animated } from 'react-native';
 import { colors, radius, space, fonts, fontSize } from '@/theme';
@@ -20,6 +21,7 @@ export type InputProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** Labelled text input with focus ring, optional prefix and multiline support. */
 export function Input({
   value,
   onChangeText,

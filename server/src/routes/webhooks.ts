@@ -1,3 +1,4 @@
+// /v1/webhooks: RevenueCat entitlement events.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
@@ -21,6 +22,7 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+/** RevenueCat webhook that maintains the owner entitlement. */
 export function webhookRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env }>();
 

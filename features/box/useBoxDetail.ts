@@ -21,6 +21,7 @@ import {
   useStore,
 } from '@/store/useStore';
 
+/** Store subscriptions and derived data for the box detail screen. */
 export function useBoxDetail(boxId: string) {
   const role = useStore(currentRole);
   const box = useStore((s) => boxById(s, boxId));

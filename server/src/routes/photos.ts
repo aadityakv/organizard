@@ -1,3 +1,4 @@
+// /v1/photos: upload and serve photo bytes from R2.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';

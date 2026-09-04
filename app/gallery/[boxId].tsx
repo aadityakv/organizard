@@ -22,6 +22,7 @@ import { photoSource } from '@/lib/photos';
 import { boxPhotos, useStore } from '@/store/useStore';
 import { fonts, fontSize, palette, radius, space, tap } from '@/theme';
 
+/** Full-screen photo viewer for a box: the cover and every item photo, swipeable. */
 export default function GalleryScreen() {
   const { boxId, start } = useLocalSearchParams<{ boxId: string; start?: string }>();
   const id = boxId ?? '';

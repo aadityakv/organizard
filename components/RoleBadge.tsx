@@ -45,8 +45,6 @@ const ROLE_TOKENS: Record<Role, RoleTokens> = {
     blurbColor: palette.ink400,
   },
 };
-
-// ─── component ────────────────────────────────────────────────────────────────
 export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleBadgeProps) {
   const tokens = ROLE_TOKENS[role] ?? ROLE_TOKENS.viewer;
   const label = ROLE_LABEL[role];
@@ -123,8 +121,6 @@ export function RoleBadge({ role, size = 'md', withBlurb = false, style }: RoleB
     </View>
   );
 }
-
-// ─── styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',

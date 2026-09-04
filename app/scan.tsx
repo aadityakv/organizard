@@ -106,6 +106,7 @@ function PermissionGate({ denied, onRequest }: { denied: boolean; onRequest: () 
   );
 }
 
+/** QR scanner with the four result states: this move, another move, no access, unknown code. */
 export default function Scan() {
   const boxes = useStore((s) => s.boxes);
   const library = useStore((s) => s.library);
@@ -160,16 +161,12 @@ export default function Scan() {
   // Build the view for the active result. The result is a snapshot of one scan, so
   // reading the store once here (rather than subscribing to all of it) is enough.
   const view = result ? buildView(result, useStore.getState(), rescan, jumpToMove) : null;
-
-  // ── Permission states ──────────────────────────────────────
   if (!permission) {
     return <SafeAreaView style={styles.loading} edges={['top', 'bottom']} />;
   }
   if (!permission.granted) {
     return <PermissionGate denied={!permission.canAskAgain} onRequest={requestPermission} />;
   }
-
-  // ── Scanning ───────────────────────────────────────────────
   return (
     <View style={styles.root}>
       <CameraView

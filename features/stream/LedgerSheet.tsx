@@ -18,6 +18,7 @@ type Props = {
   onClose: () => void;
 };
 
+/** Sheet listing everything captured this session, with tap-to-fix. */
 export function LedgerSheet({ visible, session, sessionValue, fixCount, colorOf, onEdit, onClose }: Props) {
   return (
     <Sheet visible={visible} onClose={onClose} title="This session">

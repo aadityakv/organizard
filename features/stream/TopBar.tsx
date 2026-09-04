@@ -15,6 +15,7 @@ type Props = {
   onToggleTorch: () => void;
 };
 
+/** Top bar: close, current box picker and torch toggle. */
 export function TopBar({ box, cameraOn, torch, onClose, onPickBox, onToggleTorch }: Props) {
   return (
     <View style={styles.topBar}>

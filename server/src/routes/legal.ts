@@ -214,6 +214,7 @@ const supportBody = `
   </div>
 `;
 
+/** Public Privacy Policy and Support pages. */
 export function legalRoutes() {
   const r = new Hono();
   r.get('/privacy', (c) => c.html(page('Privacy Policy', privacyBody)));

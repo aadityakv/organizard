@@ -1,3 +1,4 @@
+// /v1/auth: Apple, email/password, magic-link verify, logout and account deletion.
 import { Hono } from 'hono';
 
 import type { Deps } from '../deps';
@@ -21,6 +22,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 200;
 
+/** Sign-in, sign-out and account-deletion routes. */
 export function authRoutes(deps: Deps) {
   const r = new Hono<{ Bindings: Env; Variables: AuthVars }>();
 

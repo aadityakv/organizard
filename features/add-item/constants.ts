@@ -1,3 +1,4 @@
+// Constants shared by the add-item feature: keyboard accessory id, layout animation, camera card height.
 import { LayoutAnimation, Platform, UIManager, type LayoutAnimationConfig } from 'react-native';
 
 // iOS keyboard "Done" bar — lets you dismiss the keyboard (which otherwise covers
