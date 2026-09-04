@@ -1,6 +1,12 @@
 {
   "name": "@organizard/server",
   "version": "1.0.0",
+  "description": "Tuck API: Cloudflare Worker (Hono + Drizzle on D1, R2, KV) behind the sync engine.",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aadityakv/organizard.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {

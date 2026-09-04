@@ -16,9 +16,9 @@ Data hierarchy: **Move › Room › Box › Item**.
 A move's nav (build 17) is **Boxes · Capture · Find** (`app/(tabs)/_layout.tsx`):
 Capture is a free single-item verb (→ box picker → Add item), Find is item/box search
 + scan-to-find, Scan/Share are no longer tabs. **Streaming Mode** (Pro) is rapid capture
-— snap/speak items, parsed by `lib/streamParse.ts`; speech is on-device via
-`modules/speech-recognizer` (SFSpeechRecognizer) with a simulated fallback on the
-simulator (`lib/dictation.ts`). See the streaming-mode auto-memory.
+— snap/speak items, parsed by `lib/voice/streamParse.ts`; speech is on-device via
+`modules/speech-recognizer` (SFSpeechRecognizer); development builds fall back to a
+simulator (`lib/voice/dictation.simulated.ts`), production reports unavailable.
 
 **Product model (as of build 16):** account-based sync, Spotify-style. First launch
 shows onboarding: **log in / sign up**, or **continue as guest**.
@@ -33,7 +33,7 @@ shows onboarding: **log in / sign up**, or **continue as guest**.
   5.1.1(v)). Billing is **OFF** (everything free for now). Account UI lives on the
   Moves library (profile button → account sheet). Key code: `services/share.ts`
   (`shareMove`/`syncLocalMovesUp`/`flushAndSignOut`), `services/sync.ts` (`pullServerMoves`),
-  store `signOut` (drops synced moves). See the email-auth auto-memory.
+  store `signOut` (drops synced moves).
 
 Currently iOS-only (shipped via TestFlight). Android targets exist in config but
 aren't shipped; cross-platform code should degrade gracefully on Android, not break.
@@ -92,7 +92,7 @@ the user's device can confirm. Use the systematic-debugging discipline; don't gu
 
 ## Shipping to TestFlight
 
-The full pipeline is documented in the auto-memory; the shape:
+The shape:
 
 1. Bump `ios.buildNumber` in `app.json`.
 2. **Build locally** (NOT EAS cloud — cloud is rejected by Apple, wrong SDK):
@@ -130,10 +130,3 @@ GitHub remote. Commit/push when the work is real and verified.
   cache paths die on relaunch/reinstall.
 - Don't commit `node_modules` symlinks (they slip past a trailing-slash gitignore and
   can clobber the main checkout on merge).
-
-## Memory
-
-Durable, non-obvious project facts (Apple/credential IDs, the TestFlight pipeline
-details, billing/auth decisions, the SDK-56 migration story, native-build gotchas)
-live in the auto-memory index and are loaded each session. Add to it rather than
-re-discovering.

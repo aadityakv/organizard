@@ -9,11 +9,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { Button, Icon } from '@/components';
-import { boxColor, colors, fonts, fontSize, palette, radius, shadow, space, pressed } from '@/theme';
+import { BoxRow } from '@/features/labels';
+import { colors, fonts, fontSize, palette, radius, space, pressed } from '@/theme';
 import type { LabelInput } from '@/lib/qr/labels';
 import { printLabels } from '@/services/print';
 import { useStore } from '@/store/useStore';
-import type { Box } from '@/data/types';
 import { countOf } from '@/lib/text';
 import { copy } from '@/copy/labels';
 
@@ -132,53 +132,11 @@ export default function PrintLabels() {
   );
 }
 
-function BoxRow({
-  box,
-  room,
-  checked,
-  onToggle,
-}: {
-  box: Box;
-  room?: string;
-  checked: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
-      accessibilityLabel={`Box ${box.number}, ${box.name}`}
-      onPress={onToggle}
-      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-    >
-      <View style={[styles.box, checked ? styles.boxOn : styles.boxOff]}>
-        {checked ? <Icon name="check" size={16} color={palette.white} /> : null}
-      </View>
-
-      <View style={[styles.badge, { backgroundColor: boxColor(box.color) }]}>
-        <Text style={styles.badgeText}>#{box.number}</Text>
-      </View>
-
-      <View style={styles.rowBody}>
-        <Text style={styles.rowName} numberOfLines={1}>
-          {box.name}
-        </Text>
-        {room ? (
-          <Text style={styles.rowMeta} numberOfLines={1}>
-            {room}
-          </Text>
-        ) : null}
-      </View>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.surfaceApp,
   },
-
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -215,7 +173,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: palette.green700,
   },
-
   list: { flex: 1 },
   listContent: {
     paddingHorizontal: 16,
@@ -230,59 +187,6 @@ const styles = StyleSheet.create({
     color: palette.ink500,
     marginBottom: space[2],
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    minHeight: 56,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: colors.surfaceCard,
-    borderRadius: radius.md,
-    ...shadow.xs,
-  },
-  rowPressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
-  box: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  boxOn: {
-    backgroundColor: colors.brand,
-  },
-  boxOff: {
-    borderWidth: 2,
-    borderColor: palette.sand400,
-    backgroundColor: palette.white,
-  },
-  badge: {
-    minWidth: 38,
-    height: 34,
-    paddingHorizontal: 8,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    fontFamily: fonts.display.bold,
-    fontSize: 14,
-    color: colors.textOnBrand,
-  },
-  rowBody: { flex: 1, minWidth: 0 },
-  rowName: {
-    fontFamily: fonts.body.bold,
-    fontSize: 15.5,
-    color: palette.ink900,
-  },
-  rowMeta: {
-    fontFamily: fonts.body.bold,
-    fontSize: 12.5,
-    color: palette.ink500,
-    marginTop: 2,
-  },
-
   empty: {
     flex: 1,
     alignItems: 'center',
@@ -302,7 +206,6 @@ const styles = StyleSheet.create({
     color: palette.ink500,
     textAlign: 'center',
   },
-
   footer: {
     paddingHorizontal: 16,
     paddingTop: space[3],
@@ -311,6 +214,5 @@ const styles = StyleSheet.create({
     borderTopColor: palette.sand300,
     backgroundColor: colors.surfaceApp,
   },
-
   pressed,
 });

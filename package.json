@@ -1,8 +1,14 @@
 {
   "name": "organizard",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "description": "Tuck: an iOS app for organizing a physical move (Expo + React Native + Zustand).",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aadityakv/organizard.git"
+  },
   "private": true,
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "ios": "expo run:ios",

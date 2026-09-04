@@ -1,8 +1,6 @@
 # Tuck API (Cloudflare Worker)
 
-The backend for **synced** moves. Local moves never touch this. The original design
-notes are archived in `../docs/archive/2026-06-07-organizard-backend-design.md`; the
-current overview is `../docs/ARCHITECTURE.md`.
+The backend for **synced** moves. Local moves never touch this. The sync model is described in the root README.
 
 **Stack:** Hono + Drizzle on Cloudflare Workers, over D1 (data), R2 (photos), KV (sessions).
 
@@ -33,14 +31,16 @@ npm run db:migrate:local  # apply migrations to the local D1
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/v1/auth/apple` · `/v1/auth/email/register` · `/v1/auth/email/login` | sign in |
+| POST · DELETE | `/v1/auth/logout` · `/v1/auth/logout-all` · `DELETE /v1/auth/account` | sign out (one / all sessions) · delete account |
 | GET | `/v1/me` | user + their moves |
 | POST | `/v1/moves` | create shared move (**entitlement required**) |
-| GET | `/v1/moves/:id` · `/v1/moves/:id/changes?since=` | snapshot · delta |
+| GET · DELETE | `/v1/moves/:id` · `/v1/moves/:id/changes?since=` | snapshot · delta · owner deletes the move |
 | POST | `/v1/moves/:id/mutations` | batch apply (role-checked, LWW, idempotent, owner-entitlement) |
 | POST | `/v1/moves/:id/invites` · `POST /v1/invites/:token/accept` | sharing |
 | PATCH·DELETE | `/v1/moves/:id/members/:userId` | owner only |
 | POST | `/v1/moves/:id/photos` · `PUT·GET /v1/photos/:id` | R2 photos |
 | POST | `/v1/webhooks/revenuecat` | entitlement sync |
+| GET | `/privacy` · `/support` | public pages for the App Store listing |
 
 ## Deploy
 
