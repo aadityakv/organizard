@@ -51,9 +51,11 @@ they come out, and the box flips to Unpacked on its own when the last item is ti
 
 ## Shipping note
 
-The Worker must deploy before a client with this build reaches users: an old Worker
-rejects the unknown mutation type and breaks the outbox for every shared move. The
-deploy workflow runs on a push to `main` touching `server/` or `shared/`.
+The Worker must deploy before a client with this build reaches users. An old Worker
+rejects the unknown mutation type with a 400; the sync engine then retries the batch one
+mutation at a time and drops the ones still rejected, so ticks on shared moves would be
+silently lost (the box status change would still land). The deploy workflow runs on a
+push to `main` touching `server/` or `shared/`; staging is migrated and deployed by hand.
 
 ## Out of scope
 

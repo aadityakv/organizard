@@ -10,6 +10,7 @@ import { Badge, Button, Header, Icon, LockNote, RoomGlyph } from '@/components';
 import { MissingBox } from '@/features/box';
 import { UnpackRow, useUnpack } from '@/features/unpack';
 import { goBack } from '@/lib/navigation';
+import { roomLabel } from '@/lib/text';
 import { boxColor, boxTint, colors, fonts, palette, radius, shadow, space } from '@/theme';
 import { copy } from '@/copy/unpack';
 
@@ -20,7 +21,17 @@ export default function Unpack() {
   const { box, room, items, progress, canEdit, isDone, session, actions } = d;
   if (!box) return <MissingBox />;
 
-  const subtitle = room ? (room.dest ? `${room.name} → ${room.dest}` : room.name) : '';
+  // One view state, derived from both the status and the ticks, so the banner, the
+  // empty card and the footer never contradict each other: a box set to Unpacked by
+  // hand with items still un-ticked keeps its "mark all" button, and an empty box
+  // closed out shows only the done banner.
+  const { done, total } = progress;
+  const allTicked = total > 0 && done === total;
+  const showDone = isDone && (total === 0 || allTicked);
+  const showEmpty = total === 0 && !isDone;
+  const canMarkAll = canEdit && !(isDone && (total === 0 || allTicked));
+  const pct = total > 0 ? Math.round((done / total) * 100) : isDone ? 100 : 0;
+
   const toggle = (itemId: string, on: boolean) => {
     actions.setItemUnpacked(box.id, itemId, on);
     if (on) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -29,19 +40,18 @@ export default function Unpack() {
     actions.unpackBox(box.id);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
   };
-  const pct = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : isDone ? 100 : 0;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <View style={[styles.hero, { backgroundColor: boxTint(box.color) }]}>
         <Header
           title={`#${box.number} · ${box.name}`}
-          subtitle={subtitle}
+          subtitle={roomLabel(room)}
           onBack={goBack}
           leading={room ? <RoomGlyph icon={room.icon} color={room.color} size={28} /> : undefined}
         />
         <View style={styles.progressRow}>
-          <Text style={styles.progressText}>{copy.progressLabel(progress.done, progress.total)}</Text>
+          <Text style={styles.progressText}>{copy.progressLabel(done, total)}</Text>
           {isDone ? <Badge label={copy.cardDone} tone="success" /> : null}
         </View>
         <View style={styles.track}>
@@ -50,7 +60,7 @@ export default function Unpack() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {isDone ? (
+        {showDone ? (
           <View style={styles.done}>
             <Icon name="package-check" size={22} color={colors.success} />
             <View style={{ flex: 1 }}>
@@ -60,7 +70,7 @@ export default function Unpack() {
           </View>
         ) : null}
 
-        {items.length === 0 ? (
+        {showEmpty ? (
           <View style={styles.empty}>
             <Icon name="package-open" size={32} color={palette.ink400} />
             <Text style={styles.emptyTitle}>{copy.emptyTitle}</Text>
@@ -83,13 +93,13 @@ export default function Unpack() {
         <View style={styles.bottom}>
           {!canEdit ? (
             <LockNote>{copy.viewerNote}</LockNote>
-          ) : isDone ? (
-            <Button variant="secondary" size="lg" fullWidth iconLeft="chevron-left" onPress={goBack}>
-              {copy.backToBoxButton}
-            </Button>
-          ) : (
+          ) : canMarkAll ? (
             <Button variant="primary" size="lg" fullWidth iconLeft="package-check" onPress={markAll}>
               {copy.markBoxButton}
+            </Button>
+          ) : (
+            <Button variant="secondary" size="lg" fullWidth iconLeft="chevron-left" onPress={goBack}>
+              {copy.backToBoxButton}
             </Button>
           )}
         </View>

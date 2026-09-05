@@ -5,22 +5,13 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { STATUS_ID } from '@/data/defaults';
 import { PERM } from '@/lib/permissions';
-import {
-  boxById,
-  currentRole,
-  roomById,
-  selectBoxItems,
-  statusById,
-  unpackProgress,
-  useStore,
-} from '@/store/useStore';
+import { boxById, currentRole, roomById, selectBoxItems, unpackProgress, useStore } from '@/store/useStore';
 
 /** Store subscriptions and derived data for unpacking one box. */
 export function useUnpack(boxId: string) {
   const role = useStore(currentRole);
   const box = useStore((s) => boxById(s, boxId));
   const room = useStore((s) => (box ? roomById(s, box.roomId) : undefined));
-  const status = useStore((s) => (box ? statusById(s, box.status) : undefined));
   const session = useStore((s) => s.session);
   const items = useStore((s) => selectBoxItems(s, boxId));
   const progress = useStore(useShallow((s) => unpackProgress(s, boxId)));
@@ -30,7 +21,6 @@ export function useUnpack(boxId: string) {
   return {
     box,
     room,
-    status,
     session,
     items,
     progress,

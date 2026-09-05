@@ -77,6 +77,9 @@ export interface Item {
   unpackedAt?: number | null;
 }
 
+/** Whether an item has been ticked off during unpacking (absent and null both mean packed). */
+export const isUnpacked = (it: Pick<Item, 'unpackedAt'>): boolean => it.unpackedAt != null;
+
 export interface Member {
   id: string;
   name: string;

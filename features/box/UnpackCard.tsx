@@ -17,11 +17,12 @@ import { copy } from '@/copy/unpack';
 export function UnpackCard({ box }: { box: Box }) {
   const { done, total } = useStore(useShallow((s) => unpackProgress(s, box.id)));
   const isDone = box.status === STATUS_ID.unpacked;
-  const body = isDone
-    ? copy.cardProgress(done, total)
-    : done === 0
-      ? copy.cardNotStarted
-      : copy.cardProgress(done, total);
+  const body =
+    total === 0
+      ? copy.emptyTitle
+      : done === 0 && !isDone
+        ? copy.cardNotStarted
+        : copy.progressLabel(done, total);
   return (
     <Pressable
       accessibilityRole="button"

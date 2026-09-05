@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { Icon, RoomGlyph, Thumb } from '@/components';
 import type { Box, Room } from '@/data/types';
-import { photoSource } from '@/lib/photos';
+import { firstPhotoSource } from '@/lib/photos';
 import {
   allIndexedItems,
   boxStats,
@@ -97,8 +97,7 @@ function Breadcrumb({ room, boxNumber }: { room?: Room; boxNumber: number }) {
 
 function ItemResultRow({ item, room }: { item: FindItemHit; room?: Room }) {
   const session = useStore((s) => s.session);
-  const first = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
-  const src = first ? photoSource(first, session) : undefined;
+  const src = firstPhotoSource(item, session);
   // Explain a hit the name alone doesn't: show the note when that's where the word was.
   const showNote = item.matchedOn.includes('note') && !item.matchedOn.includes('name') && !!item.note;
   return (

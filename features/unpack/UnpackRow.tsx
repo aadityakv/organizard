@@ -3,8 +3,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon, Thumb } from '@/components';
-import type { Item } from '@/data/types';
-import { photoSource } from '@/lib/photos';
+import { isUnpacked, type Item } from '@/data/types';
+import { firstPhotoSource } from '@/lib/photos';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { copy } from '@/copy/unpack';
@@ -21,9 +21,8 @@ export function UnpackRow({
   session: string | null;
   onToggle?: (on: boolean) => void;
 }) {
-  const done = item.unpackedAt != null;
-  const first = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
-  const src = first ? photoSource(first, session) : undefined;
+  const done = isUnpacked(item);
+  const src = firstPhotoSource(item, session);
 
   const inner = (
     <>

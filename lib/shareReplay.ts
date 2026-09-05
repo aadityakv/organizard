@@ -2,6 +2,7 @@
 // recreate a local move when it becomes shared (ids preserved). Not a database
 // migration: those live in server/drizzle. Pure so it is unit-tested in node; the
 // orchestration (creating the server move, queueing the batch) is services/share.ts.
+import { isUnpacked } from '@/data/types';
 import type { Mutation } from '@/shared';
 
 import { uid, ID_PREFIX } from '@/lib/uid';
@@ -69,7 +70,7 @@ export function buildShareReplayBatch(data: SliceData): Mutation[] {
           photoIds: [],
         },
       });
-      if (it.unpackedAt != null)
+      if (isUnpacked(it))
         out.push({ type: 'setItemUnpacked', clientId: cid(), ts, payload: { id: it.id, boxId, on: true } });
     }
   }

@@ -2,9 +2,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon, MarkerChip, Thumb } from '@/components';
-import type { Item, Marker } from '@/data/types';
+import { isUnpacked, type Item, type Marker } from '@/data/types';
 import { money } from '@/lib/money';
-import { photoSource } from '@/lib/photos';
+import { firstPhotoSource } from '@/lib/photos';
 import { useStore } from '@/store/useStore';
 import { colors, fonts, palette, radius, shadow } from '@/theme';
 
@@ -23,8 +23,7 @@ export function ItemRow({
   onPress?: () => void;
 }) {
   const session = useStore((s) => s.session);
-  const first = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
-  const src = first ? photoSource(first, session) : undefined;
+  const src = firstPhotoSource(item, session);
   const itemMarkers = (item.markers ?? [])
     .map((mid) => markers.find((m) => m.id === mid))
     .filter(Boolean) as Marker[];
@@ -43,7 +42,7 @@ export function ItemRow({
           ))}
         </View>
       </View>
-      {item.unpackedAt != null ? <Icon name="check-circle-2" size={18} color={colors.success} /> : null}
+      {isUnpacked(item) ? <Icon name="circle-check" size={18} color={colors.success} /> : null}
       <Text style={styles.itemValue}>{money(item.value)}</Text>
     </>
   );

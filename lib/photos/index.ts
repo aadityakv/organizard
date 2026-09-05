@@ -24,6 +24,15 @@ export async function persistCapture(srcUri: string): Promise<string> {
   return `${LOCAL_PREFIX}photos/${filename}`;
 }
 
+/** The <Image> source for an item's first photo, or undefined when it has none. */
+export function firstPhotoSource(
+  item: { photos?: string[] },
+  session: string | null,
+): { uri: string; headers?: Record<string, string> } | undefined {
+  const first = item.photos?.[0];
+  return first ? photoSource(first, session) : undefined;
+}
+
 /** Resolve a stored photo (local ref or server id) to an <Image> source. */
 export function photoSource(
   photo: string,

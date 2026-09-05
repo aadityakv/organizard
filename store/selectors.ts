@@ -2,7 +2,16 @@
 // object per call are marked; feed those to useMemo over stable slices (or wrap in
 // useShallow when the values are stable refs), never straight to useStore, or React
 // 19 loops with "Maximum update depth exceeded".
-import type { Box, IndexedItem, Item, Marker, Role, Room, Status } from '@/data/types';
+import {
+  isUnpacked,
+  type Box,
+  type IndexedItem,
+  type Item,
+  type Marker,
+  type Role,
+  type Room,
+  type Status,
+} from '@/data/types';
 import { searchDocs, type Field } from '@/lib/search';
 
 import { roleFor, summarize, type MoveSummary, type SliceData } from './library';
@@ -49,8 +58,12 @@ export const unpackProgress = (
   boxId: string,
 ): { done: number; total: number } => {
   const items = s.itemsByBox[boxId] ?? [];
-  return { done: items.filter((it) => it.unpackedAt != null).length, total: items.length };
+  return { done: items.filter(isUnpacked).length, total: items.length };
 };
+
+/** The auto-flip rule: a box counts as fully unpacked once it has items and every one is ticked. */
+export const allUnpacked = (items: readonly Pick<Item, 'unpackedAt'>[]): boolean =>
+  items.length > 0 && items.every(isUnpacked);
 
 /** Status lookup by id. */
 export const statusById = (s: State, id: string): Status | undefined => s.statuses.find((x) => x.id === id);

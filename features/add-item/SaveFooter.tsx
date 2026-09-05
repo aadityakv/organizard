@@ -25,7 +25,7 @@ export function SaveFooter({
     <View style={styles.footer}>
       {addedCount > 0 ? (
         <View style={styles.addedRow}>
-          <Icon name="check-circle-2" size={16} color={colors.success} />
+          <Icon name="circle-check" size={16} color={colors.success} />
           <Text style={styles.addedText}>Added {countOf(addedCount, 'item')} to this box</Text>
         </View>
       ) : null}
