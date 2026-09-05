@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { countOf, plural } from './text';
+import { countOf, plural, roomLabel } from './text';
 
 describe('plural', () => {
   it('keeps the singular for exactly one', () => {
@@ -16,5 +16,13 @@ describe('countOf', () => {
   it('prefixes the count', () => {
     expect(countOf(1, 'box')).toBe('1 box');
     expect(countOf(3, 'box')).toBe('3 boxes');
+  });
+});
+
+describe('roomLabel', () => {
+  it('joins the room and its destination, and is empty without a room', () => {
+    expect(roomLabel({ name: 'Kitchen', dest: 'NYC kitchen' })).toBe('Kitchen · NYC kitchen');
+    expect(roomLabel({ name: 'Kitchen', dest: null })).toBe('Kitchen');
+    expect(roomLabel(undefined)).toBe('');
   });
 });

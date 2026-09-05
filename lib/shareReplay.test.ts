@@ -79,6 +79,22 @@ describe('buildShareReplayBatch', () => {
     expect(room && 'payload' in room && room.payload).toMatchObject({ id: 'r1', color: 'amber' });
   });
 
+  it('re-ticks unpacked items right after their addItem', () => {
+    const batch = buildShareReplayBatch(
+      slice({
+        itemsByBox: {
+          b1: [
+            { id: 'i1', boxId: 'b1', name: 'Skillet', qty: 1, value: 0, unpackedAt: 1234 },
+            { id: 'i2', boxId: 'b1', name: 'Kettle', qty: 1, value: 0, unpackedAt: null },
+          ],
+        },
+      }),
+    );
+    const tail = batch.slice(-3);
+    expect(tail.map((m) => m.type)).toEqual(['addItem', 'setItemUnpacked', 'addItem']);
+    expect(tail[1].payload).toEqual({ id: 'i1', boxId: 'b1', on: true });
+  });
+
   it('handles an empty move and missing optional fields', () => {
     const empty = slice({
       rooms: [],

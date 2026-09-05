@@ -15,6 +15,7 @@ export const routes = {
   item: (id: string) => `/item/${id}`,
   qr: (boxId: string) => `/qr/${boxId}`,
   gallery: (boxId: string) => `/gallery/${boxId}`,
+  unpack: (boxId: string) => `/unpack/${boxId}`,
   stream: (boxId: string) => `/stream/${boxId}`,
   streamCapture: (boxId: string) => `/stream/${boxId}?view=capture`,
   invite: (token: string) => `/invite?token=${encodeURIComponent(token)}`,

@@ -303,6 +303,17 @@ async function applyOne(db: AppDb, moveId: string, m: Mutation, now: number): Pr
         .where(and(eq(s.items.id, p.id), eq(s.items.moveId, moveId)));
       return;
     }
+    case 'setItemUnpacked': {
+      // Intent-based like setBoxMarker: the stamp is the server clock, so two devices
+      // ticking the same item agree on one time and a retry changes nothing.
+      const p = m.payload;
+      if (!(await itemInMove(db, moveId, p.id))) return;
+      await db
+        .update(s.items)
+        .set({ unpackedAt: p.on ? now : null, updatedAt: now })
+        .where(and(eq(s.items.id, p.id), eq(s.items.moveId, moveId)));
+      return;
+    }
     case 'updateMove': {
       // One move per moveId — update its row in place. `target` maps to the
       // `targetDate` column; `from`/`to` to `fromAddr`/`toAddr`.

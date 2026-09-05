@@ -121,6 +121,8 @@ export const items = sqliteTable('items', {
   valueCents: integer('value_cents').notNull().default(0),
   note: text('note'),
   icon: text('icon'),
+  /** Set when the item was ticked off during unpacking; null while packed. */
+  unpackedAt: integer('unpacked_at'),
   updatedAt: integer('updated_at').notNull(),
   deletedAt: integer('deleted_at'),
 });

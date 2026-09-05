@@ -31,6 +31,17 @@ export function ResultSheet({ view, onRescan }: { view: ResultView; onRescan: ()
         >
           {view.actionLabel}
         </Button>
+        {view.secondary ? (
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            iconLeft={view.secondary.icon}
+            onPress={view.secondary.onPress}
+          >
+            {view.secondary.label}
+          </Button>
+        ) : null}
         {view.actionVariant === 'primary' && (
           <Pressable
             onPress={onRescan}

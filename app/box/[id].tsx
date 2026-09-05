@@ -21,6 +21,7 @@ import {
   PhotoGallery,
   QrLabelCard,
   StatusSheet,
+  UnpackCard,
   useBoxDetail,
   shared,
 } from '@/features/box';
@@ -140,6 +141,8 @@ export default function BoxDetail() {
             ))
           )}
         </View>
+
+        <UnpackCard box={box} />
 
         <ItemsSection items={d.items} allMarkers={d.allMarkers} boxColor={box.color} canEdit={canEdit} />
 

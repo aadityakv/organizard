@@ -27,6 +27,7 @@ describe('server → client mappers', () => {
       icon: undefined,
       markers: ['mk_fragile'],
       photos: ['ph_1'],
+      unpackedAt: null,
     });
   });
 

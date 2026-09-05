@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Header, Icon, IconButton, RoomGlyph, StatusChip } from '@/components';
 import type { Box, Room, Status } from '@/data/types';
 import { money } from '@/lib/money';
+import { roomLabel } from '@/lib/text';
 import { boxColor, boxTint, fonts, palette, space, NEUTRAL_HUE, alpha } from '@/theme';
 import { goBack } from '@/lib/navigation';
 
@@ -30,7 +31,7 @@ export function BoxHero({
   onChangeStatus: () => void;
 }) {
   const hue = boxColor(box.color);
-  const subtitle = room ? (room.dest ? `${room.name} · ${room.dest}` : room.name) : '';
+  const subtitle = roomLabel(room);
   const chip = <StatusChip label={status?.label ?? '—'} color={status?.color ?? NEUTRAL_HUE} />;
 
   return (

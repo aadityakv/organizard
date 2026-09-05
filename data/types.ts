@@ -73,7 +73,12 @@ export interface Item {
   markers?: string[]; // Marker ids
   /** Captured photo refs (local: uris before upload, server ids after). */
   photos?: string[];
+  /** When the item was ticked off while unpacking; null or absent while still packed. */
+  unpackedAt?: number | null;
 }
+
+/** Whether an item has been ticked off during unpacking (absent and null both mean packed). */
+export const isUnpacked = (it: Pick<Item, 'unpackedAt'>): boolean => it.unpackedAt != null;
 
 export interface Member {
   id: string;

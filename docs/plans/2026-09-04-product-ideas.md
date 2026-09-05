@@ -21,7 +21,7 @@ case-insensitive substring match on item name and marker label
 - **Photo-only items.** Streaming Mode already snaps photos. Let a user tap a photo
   later to name the item, or use on-device Vision text/object labels to suggest a name.
 
-## Unpacking is half the move — next (recommended first big feature)
+## Unpacking is half the move — Unpack mode done 2026-09-04 (see unpack-mode-design.md)
 
 The app stops at the "unpacked" status. Rooms already carry a `dest` field that is
 barely used.

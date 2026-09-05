@@ -81,6 +81,10 @@ export type InventoryActions = {
   updateItem: (boxId: string, itemId: string, patch: ItemPatch) => void;
   deleteItem: (boxId: string, itemId: string) => void;
   moveItem: (fromBoxId: string, toBoxId: string, itemId: string) => void;
+  /** Tick an item off (or back on) while unpacking; ticking the last one flips the box to Unpacked. */
+  setItemUnpacked: (boxId: string, itemId: string, on: boolean) => void;
+  /** Tick every remaining item and set the box to Unpacked. */
+  unpackBox: (boxId: string) => void;
   updateMove: (patch: { name?: string; from?: string; to?: string; target?: string }) => void;
 };
 

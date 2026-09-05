@@ -16,6 +16,7 @@ export const copy = {
   permissionTitle: 'Point your camera at a box',
   scanAgainButton: 'Scan again',
   screenTitle: 'Scan a box',
+  unpackButton: 'Unpack this box',
   unknownBody: "Double-check you're scanning a Tuck label, then try again.",
   unknownTitle: "That code isn't part of this move",
   viewfinderHint: "Line up a box's QR label",

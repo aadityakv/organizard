@@ -20,13 +20,17 @@ import { mergeList, moveFromSnapshot, snapItemsByBox } from '../snapshot';
 import type { Store, SyncActions } from '../types';
 import { MOVE_MODE, type MoveBundle } from '../library';
 import { isLocalRef } from '@/lib/photos/refs';
+import { PERM } from '@/lib/permissions';
+import { STATUS_ID } from '@/data/defaults';
+import { allUnpacked } from '../selectors';
+import { roleFor } from '../library';
 
 export type SyncSlice = StateCreator<Store, [['zustand/persist', unknown]], [], SyncActions>;
 
 const TRIAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Session, outbox and server-data ingestion actions. */
-export const createSyncSlice: SyncSlice = (set) => ({
+export const createSyncSlice: SyncSlice = (set, get) => ({
   setOnboarded: (v) => set({ onboarded: v }),
   startProTrial: () => set({ proTrialUntil: Date.now() + TRIAL_MS }),
   setSession: (session, account) => set({ session, account }),
@@ -64,7 +68,7 @@ export const createSyncSlice: SyncSlice = (set) => ({
       itemsByBox: snapItemsByBox(snap),
     }),
 
-  applyChanges: (ch) =>
+  applyChanges: (ch) => {
     set((s) => {
       const dirty = dirtyRows(s.outbox);
 
@@ -136,7 +140,19 @@ export const createSyncSlice: SyncSlice = (set) => ({
         members: ch.members.map(toClientMember),
         lastSyncTs: cursor,
       };
-    }),
+    });
+    // Ticks from other devices can complete a box's set; the auto-flip rule lives on the
+    // client, so re-check every box the delta touched. Viewers only watch: the server
+    // would refuse their setBoxStatus, and a local-only flip would never reconcile.
+    const s = get();
+    if (!PERM.canEdit(roleFor(s.activeMode, s.members, s.account?.id ?? null))) return;
+    for (const boxId of new Set(ch.items.map((it) => it.boxId))) {
+      const box = s.boxes.find((b) => b.id === boxId);
+      if (box && box.status !== STATUS_ID.unpacked && allUnpacked(s.itemsByBox[boxId] ?? [])) {
+        s.setBoxStatus(boxId, STATUS_ID.unpacked);
+      }
+    }
+  },
 
   parkServerMove: () =>
     set((s) =>
@@ -201,6 +217,7 @@ function dirtyRows(outbox: Store['outbox']) {
       case 'updateItem':
       case 'deleteItem':
       case 'moveItem':
+      case 'setItemUnpacked':
         if (p.id) items.add(p.id);
         break;
       case 'updateMove':
