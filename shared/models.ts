@@ -75,6 +75,8 @@ export interface Item {
   icon?: string | null;
   markerIds: string[];
   photoIds: string[];
+  /** When the item was ticked off during unpacking; null while still packed. */
+  unpackedAt?: number | null;
   updatedAt: number;
   deletedAt?: number | null;
 }

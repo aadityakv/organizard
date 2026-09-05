@@ -7,6 +7,7 @@ export { MarkersSheet } from './MarkersSheet';
 export { MissingBox } from './MissingBox';
 export { PhotoGallery } from './PhotoGallery';
 export { QrLabelCard } from './QrLabelCard';
+export { UnpackCard } from './UnpackCard';
 export { StatusSheet } from './StatusSheet';
 export { useBoxDetail } from './useBoxDetail';
 export { shared } from './styles';

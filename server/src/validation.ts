@@ -126,6 +126,12 @@ const mutationSchema = z.discriminatedUnion('type', [
     ts: z.number(),
     payload: z.object({ id: str, fromBoxId: str, toBoxId: str }),
   }),
+  z.object({
+    type: z.literal('setItemUnpacked'),
+    clientId: str,
+    ts: z.number(),
+    payload: z.object({ id: str, boxId: str, on: z.boolean() }),
+  }),
   // updateMove: all fields optional. Allow empty strings so the user can clear a field (e.g. unset the target date).
   z.object({
     type: z.literal('updateMove'),

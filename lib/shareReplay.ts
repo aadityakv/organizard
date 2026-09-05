@@ -69,6 +69,8 @@ export function buildShareReplayBatch(data: SliceData): Mutation[] {
           photoIds: [],
         },
       });
+      if (it.unpackedAt != null)
+        out.push({ type: 'setItemUnpacked', clientId: cid(), ts, payload: { id: it.id, boxId, on: true } });
     }
   }
   return out;

@@ -38,6 +38,12 @@ export function buildResultView(
       actionIcon: 'box',
       actionVariant: 'primary',
       onAction: open,
+      // At the new place the scan is usually the start of unpacking, so offer it right here.
+      secondary: {
+        label: copy.unpackButton,
+        icon: 'package-open',
+        onPress: () => router.push(routes.unpack(result.boxId)),
+      },
     };
   }
 

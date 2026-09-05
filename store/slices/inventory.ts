@@ -183,6 +183,34 @@ export const createInventorySlice: InventorySlice = (set, get) => ({
     get().enqueue(mutation('moveItem', { id: itemId, fromBoxId, toBoxId }));
   },
 
+  setItemUnpacked: (boxId, itemId, on) => {
+    const stamp = on ? Date.now() : null;
+    set((s) => ({
+      itemsByBox: {
+        ...s.itemsByBox,
+        [boxId]: (s.itemsByBox[boxId] ?? []).map((it) =>
+          it.id === itemId ? { ...it, unpackedAt: stamp } : it,
+        ),
+      },
+    }));
+    get().enqueue(mutation('setItemUnpacked', { id: itemId, boxId, on }));
+    // Forward-only auto-flip: the last tick closes the box out; un-ticking never reopens it.
+    const { boxes, itemsByBox } = get();
+    const box = boxes.find((b) => b.id === boxId);
+    const allDone = (itemsByBox[boxId] ?? []).every((it) => it.unpackedAt != null);
+    if (on && box && allDone && box.status !== STATUS_ID.unpacked) {
+      get().setBoxStatus(boxId, STATUS_ID.unpacked);
+    }
+  },
+
+  unpackBox: (boxId) => {
+    for (const it of get().itemsByBox[boxId] ?? []) {
+      if (it.unpackedAt == null) get().setItemUnpacked(boxId, it.id, true);
+    }
+    const box = get().boxes.find((b) => b.id === boxId);
+    if (box && box.status !== STATUS_ID.unpacked) get().setBoxStatus(boxId, STATUS_ID.unpacked);
+  },
+
   updateMove: (patch) => {
     set((s) => ({ move: { ...s.move, ...patch } }));
     get().enqueue(mutation('updateMove', { ...patch }));

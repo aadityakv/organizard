@@ -93,6 +93,13 @@ export type Mutation =
       payload: { id: string; fromBoxId: string; toBoxId: string };
     }
   | {
+      /** Tick an item off (or back on) while unpacking. Intent-based, so a retry is a no-op. */
+      type: 'setItemUnpacked';
+      clientId: string;
+      ts: number;
+      payload: { id: string; boxId: string; on: boolean };
+    }
+  | {
       type: 'updateMove';
       clientId: string;
       ts: number;
@@ -120,5 +127,6 @@ export const ROLE_REQUIRED: Record<MutationType, RoleRequirement> = {
   updateItem: 'canEdit',
   deleteItem: 'canEdit',
   moveItem: 'canEdit',
+  setItemUnpacked: 'canEdit',
   updateMove: 'canEdit',
 };

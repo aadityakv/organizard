@@ -232,6 +232,7 @@ const toItem = (r: typeof s.items.$inferSelect, markerIds: string[], photoIds: s
   icon: r.icon,
   markerIds,
   photoIds,
+  unpackedAt: r.unpackedAt,
   updatedAt: r.updatedAt,
   deletedAt: r.deletedAt,
 });

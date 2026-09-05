@@ -60,6 +60,7 @@ export const toClientItem = (i: SItem): Item => ({
   icon: i.icon ?? undefined,
   markers: i.markerIds,
   photos: i.photoIds, // server photo ids; resolve to URLs via photoSource()
+  unpackedAt: i.unpackedAt ?? null,
 });
 
 /** Server member → client member (keyed by user id). */

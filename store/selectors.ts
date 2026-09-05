@@ -43,6 +43,15 @@ export const moveTotals = (s: State): { boxes: number; items: number; value: num
   return { boxes: s.boxes.length, items, value };
 };
 
+/** How far a box's unpacking has got: ticked items over all items. Fresh object: useShallow. */
+export const unpackProgress = (
+  s: Pick<State, 'itemsByBox'>,
+  boxId: string,
+): { done: number; total: number } => {
+  const items = s.itemsByBox[boxId] ?? [];
+  return { done: items.filter((it) => it.unpackedAt != null).length, total: items.length };
+};
+
 /** Status lookup by id. */
 export const statusById = (s: State, id: string): Status | undefined => s.statuses.find((x) => x.id === id);
 /** Marker lookup by id. */

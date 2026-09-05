@@ -1,7 +1,7 @@
 // One packed item in the box list: thumb, name, qty + first marker, value.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { MarkerChip, Thumb } from '@/components';
+import { Icon, MarkerChip, Thumb } from '@/components';
 import type { Item, Marker } from '@/data/types';
 import { money } from '@/lib/money';
 import { photoSource } from '@/lib/photos';
@@ -43,6 +43,7 @@ export function ItemRow({
           ))}
         </View>
       </View>
+      {item.unpackedAt != null ? <Icon name="check-circle-2" size={18} color={colors.success} /> : null}
       <Text style={styles.itemValue}>{money(item.value)}</Text>
     </>
   );

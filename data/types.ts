@@ -73,6 +73,8 @@ export interface Item {
   markers?: string[]; // Marker ids
   /** Captured photo refs (local: uris before upload, server ids after). */
   photos?: string[];
+  /** When the item was ticked off while unpacking; null or absent while still packed. */
+  unpackedAt?: number | null;
 }
 
 export interface Member {

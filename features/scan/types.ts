@@ -9,4 +9,6 @@ export type ResultView = {
   actionIcon: string;
   actionVariant: 'primary' | 'secondary';
   onAction: () => void;
+  /** An optional second, quieter action (e.g. Unpack next to Open box). */
+  secondary?: { label: string; icon: string; onPress: () => void };
 };
