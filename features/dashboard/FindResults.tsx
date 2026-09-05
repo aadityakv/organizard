@@ -1,12 +1,21 @@
-// Find — searches items + boxes across the whole move, with a Room › Box crumb.
+// Find — searches items + boxes across the whole move, with a Room › Box crumb. Shared
+// by the Find tab (with filters) and the dashboard's inline search (query only).
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Icon, RoomGlyph, Thumb } from '@/components';
-import type { Box, IndexedItem, Room } from '@/data/types';
-import { allIndexedItems, boxStats, searchMove, useStore } from '@/store/useStore';
+import type { Box, Room } from '@/data/types';
+import { photoSource } from '@/lib/photos';
+import {
+  allIndexedItems,
+  boxStats,
+  searchMove,
+  useStore,
+  type FindFilters,
+  type FindItemHit,
+} from '@/store/useStore';
 import { boxColor, colors, fonts, palette, radius, shadow } from '@/theme';
 
 import { openBox } from './openBox';
@@ -14,8 +23,10 @@ import { routes } from '@/lib/routes';
 import { countOf } from '@/lib/text';
 import { copy } from '@/copy/dashboard';
 
-/** Search results for the dashboard: matching items and boxes with breadcrumbs. */
-export function FindResults({ query }: { query: string }) {
+const NO_FILTERS: FindFilters = {};
+
+/** Search results: matching items and boxes with breadcrumbs, narrowed by optional filters. */
+export function FindResults({ query, filters = NO_FILTERS }: { query: string; filters?: FindFilters }) {
   const boxes = useStore((s) => s.boxes);
   const rooms = useStore((s) => s.rooms);
   const markers = useStore((s) => s.markers);
@@ -24,8 +35,8 @@ export function FindResults({ query }: { query: string }) {
   const indexed = useMemo(() => allIndexedItems({ boxes, rooms, itemsByBox }), [boxes, rooms, itemsByBox]);
 
   const { items, boxes: matchedBoxes } = useMemo(
-    () => searchMove({ boxes, markers }, indexed, query),
-    [boxes, markers, indexed, query],
+    () => searchMove({ boxes, markers, rooms }, indexed, query, filters),
+    [boxes, markers, rooms, indexed, query, filters],
   );
   const roomFor = (id: string): Room | undefined => rooms.find((r) => r.id === id);
 
@@ -34,7 +45,9 @@ export function FindResults({ query }: { query: string }) {
       <View style={styles.empty}>
         <Icon name="search-x" size={32} color={palette.ink400} />
         <Text style={styles.emptyTitle}>{copy.noResults}</Text>
-        <Text style={styles.emptyBody}>No items or boxes match “{query}”.</Text>
+        <Text style={styles.emptyBody}>
+          {query.trim() ? `No items or boxes match “${query.trim()}”.` : copy.noResultsFiltered}
+        </Text>
       </View>
     );
   }
@@ -82,7 +95,12 @@ function Breadcrumb({ room, boxNumber }: { room?: Room; boxNumber: number }) {
   );
 }
 
-function ItemResultRow({ item, room }: { item: IndexedItem; room?: Room }) {
+function ItemResultRow({ item, room }: { item: FindItemHit; room?: Room }) {
+  const session = useStore((s) => s.session);
+  const first = item.photos && item.photos.length > 0 ? item.photos[0] : undefined;
+  const src = first ? photoSource(first, session) : undefined;
+  // Explain a hit the name alone doesn't: show the note when that's where the word was.
+  const showNote = item.matchedOn.includes('note') && !item.matchedOn.includes('name') && !!item.note;
   return (
     <Pressable
       accessibilityRole="button"
@@ -90,12 +108,24 @@ function ItemResultRow({ item, room }: { item: IndexedItem; room?: Room }) {
       onPress={() => router.push(routes.item(item.id))}
       style={({ pressed }) => [styles.resultRow, pressed && styles.resultRowPressed]}
     >
-      <Thumb color={item.boxColor} icon={item.icon ?? 'image'} size={48} />
+      <Thumb
+        color={item.boxColor}
+        icon={item.icon ?? 'image'}
+        size={48}
+        uri={src?.uri}
+        headers={src?.headers}
+      />
       <View style={styles.resultBody}>
         <Text style={styles.resultName} numberOfLines={1}>
           {item.name}
         </Text>
         <Breadcrumb room={room} boxNumber={item.boxNumber} />
+        {showNote ? (
+          <Text style={styles.resultNote} numberOfLines={1}>
+            {copy.noteMatchPrefix}
+            {item.note}
+          </Text>
+        ) : null}
       </View>
       <Icon name="arrow-up-right" size={18} color={palette.ink400} />
     </Pressable>
@@ -165,6 +195,13 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: palette.ink500,
     marginTop: 2,
+  },
+  resultNote: {
+    fontFamily: fonts.body.semibold,
+    fontSize: 12.5,
+    color: palette.ink500,
+    fontStyle: 'italic',
+    marginTop: 3,
   },
   crumb: {
     flexDirection: 'row',

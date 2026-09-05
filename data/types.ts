@@ -86,6 +86,8 @@ export interface IndexedItem extends Item {
   boxName: string;
   boxNumber: number;
   boxColor: string;
+  /** Status id of the owning box, so Find can filter items by where the box is. */
+  boxStatus: string;
   roomId: string;
   roomName: string;
 }

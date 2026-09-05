@@ -3,6 +3,7 @@
 // useShallow when the values are stable refs), never straight to useStore, or React
 // 19 loops with "Maximum update depth exceeded".
 import type { Box, IndexedItem, Item, Marker, Role, Room, Status } from '@/data/types';
+import { searchDocs, type Field } from '@/lib/search';
 
 import { roleFor, summarize, type MoveSummary, type SliceData } from './library';
 import { extractSlice } from './shape';
@@ -88,6 +89,7 @@ export const allIndexedItems = (s: Pick<State, 'boxes' | 'rooms' | 'itemsByBox'>
         boxName: b.name,
         boxNumber: b.number,
         boxColor: b.color,
+        boxStatus: b.status,
         roomId: b.roomId,
         roomName: room?.name ?? '',
       });
@@ -96,25 +98,66 @@ export const allIndexedItems = (s: Pick<State, 'boxes' | 'rooms' | 'itemsByBox'>
   return out;
 };
 
+/** Which part of an item a Find hit came from, most specific first. */
+type MatchField = 'name' | 'marker' | 'note' | 'box' | 'room';
+
+/** An indexed item plus why it matched, so the UI can explain a hit from a note or a room. */
+export type FindItemHit = IndexedItem & { matchedOn: MatchField[] };
+
+/** Narrow Find to one room and/or one box status; null and undefined both mean "any". */
+export type FindFilters = { roomId?: string | null; statusId?: string | null };
+
+// A word in the item's own name is worth twice one in its box or note; a room name
+// counts least, since it matches every item in the room.
+const ITEM_WEIGHT = { name: 3, marker: 2, note: 1.5, box: 1.5, room: 1 } as const;
+const BOX_WEIGHT = { name: 3, room: 1 } as const;
+
 /**
- * The Find/search match: an item hits when its name OR one of its marker labels
- * contains the query; a box hits on its name. One implementation so the Find tab
+ * The Find/search match. Items hit on name, marker labels, note, box name or room
+ * name; boxes on name or room name. Every query word must match somewhere (typos,
+ * plurals and household synonyms allowed; see lib/search), and hits are ranked by
+ * where they matched. Filters narrow both lists; with a filter on and a blank query,
+ * the whole filtered set is listed in move order. One implementation so the Find tab
  * and the dashboard search can't disagree on what matches. Fresh arrays: useMemo.
  */
 export function searchMove(
-  s: Pick<State, 'boxes' | 'markers'>,
+  s: Pick<State, 'boxes' | 'markers' | 'rooms'>,
   indexed: IndexedItem[],
   query: string,
-): { items: IndexedItem[]; boxes: Box[] } {
-  const q = query.trim().toLowerCase();
-  if (!q) return { items: [], boxes: [] };
-  const markerLabel = (id: string): string => s.markers.find((m) => m.id === id)?.label.toLowerCase() ?? '';
+  filters: FindFilters = {},
+): { items: FindItemHit[]; boxes: Box[] } {
+  const roomId = filters.roomId ?? null;
+  const statusId = filters.statusId ?? null;
+  const hasFilter = roomId !== null || statusId !== null;
+  const q = query.trim();
+  if (!q && !hasFilter) return { items: [], boxes: [] };
+
+  const keepBox = (b: Pick<Box, 'roomId' | 'status'>): boolean =>
+    (roomId === null || b.roomId === roomId) && (statusId === null || b.status === statusId);
+  const items = indexed.filter((it) => keepBox({ roomId: it.roomId, status: it.boxStatus }));
+  const boxes = s.boxes.filter(keepBox);
+  if (!q) return { items: items.map((it) => ({ ...it, matchedOn: [] })), boxes };
+
+  const markerLabel = (id: string): string => s.markers.find((m) => m.id === id)?.label ?? '';
+  const roomName = (id: string): string => s.rooms.find((r) => r.id === id)?.name ?? '';
+  const itemFields = (it: IndexedItem): Field<MatchField>[] => [
+    { kind: 'name', text: it.name, weight: ITEM_WEIGHT.name },
+    ...(it.markers ?? []).map((mid) => ({
+      kind: 'marker' as const,
+      text: markerLabel(mid),
+      weight: ITEM_WEIGHT.marker,
+    })),
+    { kind: 'note', text: it.note ?? '', weight: ITEM_WEIGHT.note },
+    { kind: 'box', text: it.boxName, weight: ITEM_WEIGHT.box },
+    { kind: 'room', text: it.roomName, weight: ITEM_WEIGHT.room },
+  ];
+  const boxFields = (b: Box): Field<'name' | 'room'>[] => [
+    { kind: 'name', text: b.name, weight: BOX_WEIGHT.name },
+    { kind: 'room', text: roomName(b.roomId), weight: BOX_WEIGHT.room },
+  ];
   return {
-    items: indexed.filter(
-      (it) =>
-        it.name.toLowerCase().includes(q) || (it.markers ?? []).some((mid) => markerLabel(mid).includes(q)),
-    ),
-    boxes: s.boxes.filter((b) => b.name.toLowerCase().includes(q)),
+    items: searchDocs(q, items, itemFields).map((h) => ({ ...h.doc, matchedOn: h.matched })),
+    boxes: searchDocs(q, boxes, boxFields).map((h) => h.doc),
   };
 }
 
